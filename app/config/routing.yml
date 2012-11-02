@@ -1,0 +1,12 @@
+bpi_api:
+    resource: Bpi\ApiBundle\Controller\DefaultController
+    type: rest
+
+# Internal routing configuration to handle ESI
+#_internal:
+#    resource: "@FrameworkBundle/Resources/config/routing/internal.xml"
+#    prefix:   /_internal
+
+NelmioApiDocBundle:
+    resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
+    prefix:   /api/doc
