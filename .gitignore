@@ -11,3 +11,4 @@ web/bundles/*
 app/config/parameters.ini
 # IDE
 nbproject/*
+/*.lock
