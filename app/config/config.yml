@@ -34,6 +34,7 @@ framework:
 twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
+    exception_controller: 'FOS\RestBundle\Controller\ExceptionController::showAction'
 
 # Assetic Configuration
 assetic:
@@ -71,7 +72,9 @@ doctrine_mongodb:
     default_database: bpi
     document_managers:
         default:
-            auto_mapping: true
+            mappings:
+                BpiApiBundle: { type: yml, prefix: Bpi\ApiBundle\Domain }
+#            auto_mapping: true
 
 # Swiftmailer Configuration
 swiftmailer:
@@ -83,11 +86,9 @@ swiftmailer:
 
 nelmio_api_doc: ~
 
-#sensio_framework_extra:
-#    router:  { annotations: false }
-#    request: { converters: false }
-#    view:    { annotations: false }
-#    cache:   { annotations: false }
+sensio_framework_extra:
+    view:    { annotations: false }
+    router:  { annotations: true }
 
 fos_rest:
     service:
@@ -115,7 +116,8 @@ fos_rest:
                 
 jms_serializer:
     metadata:
-
+        debug: "%kernel.debug%"
+        
         # Using auto-detection, the mapping files for each bundle will be
         # expected in the Resources/config/serializer directory.
         #

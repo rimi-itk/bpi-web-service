@@ -1,0 +1,8 @@
+Bpi\ApiBundle\Domain\Entity\Profile:
+  type: embeddedDocument
+  fields:
+    taxonomy:
+      embedded: true
+      type: one
+      strategy: pushAll
+      targetDocument: Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy

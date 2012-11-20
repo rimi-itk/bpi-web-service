@@ -1,0 +1,16 @@
+Bpi\ApiBundle\Domain\Aggregate\Node:
+#  db: documents
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\Node
+  collection: Node
+  fields:
+    id:
+      id: true
+    ctime:
+      type: date
+    mtime:
+      type: date
+    profile:
+      embedded: true
+      type: one
+      strategy: pushAll
+      targetDocument: Bpi\ApiBundle\Domain\Entity\Profile

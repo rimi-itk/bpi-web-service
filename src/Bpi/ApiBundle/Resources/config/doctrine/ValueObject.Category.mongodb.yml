@@ -1,0 +1,5 @@
+Bpi\ApiBundle\Domain\ValueObject\Category:
+  type: embeddedDocument
+  fields:
+    name:
+      type: string
