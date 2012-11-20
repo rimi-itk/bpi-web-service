@@ -26,6 +26,12 @@ class Link
 	 */
 	protected $title;
 	
+	/**
+	 * 
+	 * @param string $rel relation name
+	 * @param string $href URI
+	 * @param string $title
+	 */
 	public function __construct($rel, $href, $title = null)
 	{
 		$this->rel = $rel;

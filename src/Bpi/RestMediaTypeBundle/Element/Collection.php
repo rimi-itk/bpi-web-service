@@ -13,11 +13,13 @@ class Collection implements HasLinks
 {
 	/**
 	 * @Serializer\XmlAttribute
+	 * @Serializer\Type("string")
 	 */
 	protected $name;
 	
 	/**
 	 * @Serializer\XmlList(entry="entity")
+	 * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\Entity>")
 	 */
 	protected $items;
 	
@@ -45,5 +47,10 @@ class Collection implements HasLinks
 	public function addLink(Link $link)
 	{
 		$this->links[] = $link;
+	}
+	
+	public function getItems()
+	{
+		return $this->items;
 	}
 }
