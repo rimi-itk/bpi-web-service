@@ -14,7 +14,7 @@ class ContentNegociationTest extends WebTestCase
 		
 		$client->request(
 			'GET', 
-			'/node/list'.$file_extension,
+			'/tools/echo'.$file_extension,
 			array(),
 			array(),
 			$accept
