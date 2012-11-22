@@ -6,6 +6,7 @@ use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
+use Bpi\ApiBundle\Transform\Comparator;
 
 class Node implements IPresentable
 {
@@ -39,6 +40,25 @@ class Node implements IPresentable
 		return $this->id;
 	}
 	
+	/**
+	 * 
+	 * @param \Bpi\ApiBundle\Domain\Aggregate\Node $node
+	 * @param string $field
+	 * @param int $order 1=asc, -1=desc
+	 * @return int see strcmp PHP function
+	 */
+	public function compare(Node $node, $field, $order = 1)
+	{
+		if (stristr($field, '.'))
+		{
+			list($local_field, $child_field) = explode(".", $field, 2);
+			return $this->$local_field->compare($node->$local_field, $child_field, $order);
+		}
+		
+		$cmp = new Comparator($this->$field, $node->$field, $order);
+		return $cmp->getResult();
+	}
+	
 //	public function hierarchy()
 //	{
 //	}
@@ -64,5 +84,7 @@ class Node implements IPresentable
 		$document->appendEntity($entity);
 		
 		$this->profile->transform($document);
+		$document->setCursorOnEntity($entity);
+		$this->resource->transform($document);
 	}
 }

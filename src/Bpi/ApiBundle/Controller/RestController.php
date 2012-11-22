@@ -17,13 +17,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RestController extends FOSRestController
 {
+	protected function getRepository($name)
+	{
+		$dm = $this->get('doctrine.odm.mongodb.document_manager');
+		return $dm->getRepository($name);
+	}
+
 	/**
 	 * @Rest\Get("/node/list")
 	 */
 	public function listAction()
 	{
-		$dm = $this->get('doctrine.odm.mongodb.document_manager');
-		$node_collection = $dm->getRepository('BpiApiBundle:Aggregate\Node')->findAll();
+		$node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findLatest();
 
 		$tr = new \Bpi\ApiBundle\Transform\Transform;
 		$document = $tr->transformMany($node_collection);
@@ -38,9 +43,6 @@ class RestController extends FOSRestController
 			$document = array('data' => array('output' => $document, 'input' => array('example' => $doc2, 'expected_entities' => array('nodes_query'))));
 		}		
 		
-//		$params = $this->container->get("fos_rest.request.param_fetcher");
-//		print_r($params->get("sort", true));
-//		print_r($params->get("filter", true));
 		$view = $this->view($document, 200)
 			->setTemplate("BpiApiBundle:Rest:list.html.twig")
 		;
@@ -51,10 +53,10 @@ class RestController extends FOSRestController
 	public function postNodeListAction()
 	{
 		$serializer = $this->get("serializer");
-		$dm = $this->get('doctrine.odm.mongodb.document_manager');
 		$document = $serializer->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
 		$tr = new \Bpi\ApiBundle\Transform\Transform;
-		$node_collection = $tr->presentationToNodesQuery($document, $dm->createQueryBuilder('BpiApiBundle:Aggregate\Node'));
+		$node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')
+			->findByNodesQuery($tr->presentationToNodesQuery($document));
 		
 //		if (false === $query = @simplexml_load_string($this->getRequest()->getContent()))
 //		{
@@ -82,8 +84,7 @@ class RestController extends FOSRestController
 	 */
 	public function nodeAction($id)
 	{
-		$dm = $this->get('doctrine.odm.mongodb.document_manager');
-		$_node = $dm->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
+		$_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
 		
 		$tr = new \Bpi\ApiBundle\Transform\Transform;
 		$document = $tr->domainToRepresentation($_node);
@@ -126,7 +127,7 @@ class RestController extends FOSRestController
 			$node_presentation = $transformer->domainToRepresentation($node_model);
 			
 			$view = $this->view($node_presentation, 201)
-				->setTemplate("BpiApiBundle:Default:index.html.twig");
+				->setTemplate("BpiApiBundle:Rest:push.html.twig");
 
 			return $this->handleView($view);
 		}
@@ -134,34 +135,6 @@ class RestController extends FOSRestController
 		{
 			echo $e;
 		}
-	}
-	
-	/**
-	 * @Rest\Get("/schema/{tree}/{subtree}")
-	 */
-	public function schemaAction($tree, $subtree)
-	{
-		if ($tree == 'entity')
-		{
-			if ($subtree == 'nodes_query')
-			{
-				if ($this->getRequest()->get('_format') == 'rng')
-					throw new \Exception('Not implemented');
-					
-				$doc = new Document();
-				$entity = $doc->createEntity('nodes_query');
-				$entity->addProperty($doc->createProperty('filter[field_name]', 'string', 'value'));
-				$entity->addProperty($doc->createProperty('sort[field_name]', 'string', 'value'));
-				$entity->addProperty($doc->createProperty('offset', 'number', '0'));
-				$entity->addProperty($doc->createProperty('amount', 'number', '10'));
-				$entity->addProperty($doc->createProperty('reduce', 'string', 'latest/initial'));
-				$doc->appendEntity($entity);
-				$view = $this->view($doc, 200);
-				return $this->handleView($view);
-			}
-		}
-		
-		throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 	}
 	
 	/**

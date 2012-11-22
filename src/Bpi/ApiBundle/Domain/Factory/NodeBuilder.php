@@ -12,24 +12,44 @@ class NodeBuilder
 	protected $profile;
 	protected $resource;
 	
+	/**
+	 * 
+	 * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $agency
+	 * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
+	 */
 	public function agency(Agency $agency)
 	{
 		$this->agency = $agency;
 		return $this;
 	}
 
+	/**
+	 * 
+	 * @param \Bpi\ApiBundle\Domain\Entity\Profile $profile
+	 * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
+	 */
 	public function profile(Profile $profile)
 	{
 		$this->profile = $profile;
 		return $this;
 	}
 	
+	/**
+	 * 
+	 * @param Resource $resource
+	 * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
+	 */
 	public function resource(Resource $resource)
 	{
 		$this->resource = $resource;
 		return $this;
 	}
 	
+	/**
+	 * 
+	 * @return \Bpi\ApiBundle\Domain\Aggregate\Node
+	 * @throws \RuntimeException
+	 */
 	public function build()
 	{
 		if (is_null($this->agency))

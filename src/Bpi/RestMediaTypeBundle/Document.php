@@ -5,7 +5,8 @@ use JMS\SerializerBundle\Annotation as Serializer;
 
 use Bpi\RestMediaTypeBundle\Element\Collection;
 use Bpi\RestMediaTypeBundle\Element\Entity;
-use Bpi\RestMediaTypeBundle\Element\Property;
+use Bpi\RestMediaTypeBundle\Element\Property as GenericProperty;
+use Bpi\RestMediaTypeBundle\Property;
 use Bpi\RestMediaTypeBundle\Element\Link;
 
 /**
@@ -108,7 +109,17 @@ class Document
 	 */
 	public function createProperty($name, $type, $value, $title = '')
 	{
-		return new Property($type, $name, $value, $title);
+		switch($type)
+		{
+			case 'dateTime':
+				return new Property\DateTime($type, $name, $value, $title);
+			break;
+			case 'number':
+				return new Property\Number($type, $name, $value, $title);
+			break;
+			default:
+				return new GenericProperty($type, $name, $value, $title);
+		}
 	}
 	
 	/**

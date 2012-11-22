@@ -2,6 +2,7 @@
 namespace Bpi\ApiBundle\Domain\ValueObject;
 
 use Bpi\ApiBundle\Domain\Repository\AudienceRepository;
+use Bpi\ApiBundle\Transform\Comparator;
 
 class Audience implements IValueObject
 {
@@ -15,6 +16,19 @@ class Audience implements IValueObject
 	public function name()
 	{
 		return $this->name;
+	}
+	
+	/**
+	 * 
+	 * @param \Bpi\ApiBundle\Domain\ValueObject\Audience $audience
+	 * @param string $field
+	 * @param int $order 1=asc, -1=desc
+	 * @return int see strcmp PHP function
+	 */
+	public function compare(Audience $category, $field, $order = 1)
+	{
+		$cmp = new Comparator($this->$field, $category->$field, $order);
+		return $cmp->getResult();
 	}
 	
 	/**

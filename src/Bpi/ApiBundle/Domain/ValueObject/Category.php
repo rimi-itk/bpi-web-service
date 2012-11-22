@@ -2,6 +2,7 @@
 namespace Bpi\ApiBundle\Domain\ValueObject;
 
 use Bpi\ApiBundle\Domain\Repository\CategoryRepository;
+use Bpi\ApiBundle\Transform\Comparator;
 
 class Category implements IValueObject
 {
@@ -17,6 +18,19 @@ class Category implements IValueObject
 	public function name()
 	{
 		return $this->name;
+	}
+	
+	/**
+	 * 
+	 * @param \Bpi\ApiBundle\Domain\ValueObject\Category $category
+	 * @param string $field
+	 * @param int $order 1=asc, -1=desc
+	 * @return int see strcmp PHP function
+	 */
+	public function compare(Category $category, $field, $order = 1)
+	{
+		$cmp = new Comparator($this->$field, $category->$field, $order);
+		return $cmp->getResult();
 	}
 	
 	/**

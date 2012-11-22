@@ -1,0 +1,13 @@
+Bpi\ApiBundle\Domain\Entity\Resource:
+  type: embeddedDocument
+  fields:
+    title:
+      type: string
+    body:
+      type: string
+    user_id:
+      type: string
+    teaser:
+      type: string
+    ctime:
+      type: date

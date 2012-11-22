@@ -11,7 +11,7 @@ use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\RestMediaTypeBundle\Element\Property;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
-use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
+use Bpi\ApiBundle\Domain\Entity\NodeQuery;
 
 class Transform
 {
@@ -40,32 +40,29 @@ class Transform
 		}
 	}
 	
-	public function presentationToNodesQuery(Document $document, QueryBuilder $query_builder)
+	public function presentationToNodesQuery(Document $document)
 	{
+		$node_query = new NodeQuery();
 		$query = $document->getEntity('nodes_query');
 		foreach ($query->matchProperties('~^filter\[(.+)\]$~') as $match => $property)
 		{
-			$query_builder->field($match)->equals($property->getValue());
-		}
-		
-		foreach ($query->matchProperties('~^sort\[(.+)\]$~') as $match => $property)
-		{
-			$query_builder->sort($match, $property->getValue());
+			$path = new Path($match);
+			$node_query->filter($path->toDomain(), $property->getValue());
 		}
 		
 		if ($query->hasProperty('offset', 'number'))
-		{
-			$query_builder->skip($query->property('offset')->getValue());
-		}
+			$node_query->offset($query->property('offset')->getValue());
 		
 		if ($query->hasProperty('amount', 'number'))
+			$node_query->amount($query->property('amount')->getValue());
+		
+		foreach ($query->matchProperties('~^sort\[(.+)]$~') as $match => $property)
 		{
-			$query_builder->limit($query->property('amount')->getValue());
+			$path = new Path($match);
+			$node_query->sort($path->toDomain(), $property->getValue());
 		}
 		
-		return $query_builder
-			->getQuery()
-			->execute();
+		return $node_query;
 	}
 	
 	public function presentationToPushCommand(Document $document)

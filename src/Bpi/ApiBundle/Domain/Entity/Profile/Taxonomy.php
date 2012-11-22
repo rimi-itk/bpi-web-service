@@ -24,6 +24,25 @@ class Taxonomy implements IPresentable
 //		$this->category = $category;
 //	}
 	
+	/**
+	 * 
+	 * @param \Bpi\ApiBundle\Entity\Profile\Taxonomy $taxonomy
+	 * @param string $field
+	 * @param int $order 1=asc, -1=desc
+	 * @return int see strcmp PHP function
+	 */
+	public function compare(Taxonomy $taxonomy, $field, $order = 1)
+	{
+		if (stristr($field, '.'))
+		{
+			list($local_field, $child_field) = explode(".", $field, 2);
+			return $this->$local_field->compare($taxonomy->$local_field, $child_field, $order);
+		}
+		
+		$cmp = new Comparator($this->$field, $taxonomy->$field, $order);
+		return $cmp->getResult();
+	}
+	
 	public function transform(Document $document)
 	{
 		$entity = $document->currentEntity();
