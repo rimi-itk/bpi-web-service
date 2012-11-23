@@ -107,4 +107,22 @@ class NodeListTest extends WebTestCase
 		$this->assertEquals('alpha_title', (string)$titles[0]);
 		$this->assertEquals('charlie_title', (string)$titles[1]);
 	}
+	
+	public function testSelfLink()
+	{
+		$doc = new Document;
+		$doc->appendEntity($query = $doc->createEntity('nodes_query'));
+		
+		$this->doRequest($doc);
+		$this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+		
+		$xml = simplexml_load_string($this->client->getResponse()->getContent());
+		$linlk = $xml->xpath('//entity[@name="node"]/links/link[@rel="self"]');
+		
+		$this->client->request('GET', $linlk[0]['href'].'.bpi');
+		$this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+		$xml = simplexml_load_string($this->client->getResponse()->getContent());
+		$this->assertEquals(1, $xml->entity->count());
+		$this->assertTrue(isset($xml->entity->properties));
+	}
 }

@@ -42,6 +42,11 @@ class Document
 		$this->version = '0.1';
 	}
 	
+	public function walkEntities($callback)
+	{
+		array_walk($this->entities, $callback);
+	}
+	
 	/**
 	 * 
 	 * @return array

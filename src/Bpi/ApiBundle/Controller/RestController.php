@@ -32,10 +32,10 @@ class RestController extends FOSRestController
 
 		$tr = new \Bpi\ApiBundle\Transform\Transform;
 		$document = $tr->transformMany($node_collection);
-//		$document->getEntity('node')
-//			->addLink($document->createLink('self', "asd"))
-//			->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)))
-//		;
+		$document->walkEntities(function($e) use ($document) {
+			$e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
+			$e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+		});
 		
 		if ($this->getRequest()->get('_format') == 'html')
 		{
@@ -65,6 +65,10 @@ class RestController extends FOSRestController
 //		}
 		
 		$document = $tr->transformMany($node_collection);
+		$document->walkEntities(function($e) use ($document) {
+			$e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
+			$e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+		});
 		
 		if ($this->getRequest()->get('_format') == 'html')
 		{
@@ -88,10 +92,9 @@ class RestController extends FOSRestController
 		
 		$tr = new \Bpi\ApiBundle\Transform\Transform;
 		$document = $tr->domainToRepresentation($_node);
-		$document->getEntity('node')
-			->addLink($document->createLink('self', "asd"))
-			->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)))
-		;
+		$node = $document->getEntity('node');
+		$node->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
+		$node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
 		
 		$view = $this->view($document, 200)
 			->setTemplate("BpiApiBundle:Default:index.html.twig");
