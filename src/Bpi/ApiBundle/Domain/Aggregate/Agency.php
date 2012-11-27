@@ -19,7 +19,7 @@ class Agency
 	public function push(Resource $resource, Profile $profile)
 	{
 		$builder = new NodeBuilder;
-		return $builder->agency($this)
+		return $builder
 			->profile($profile)
 			->resource($resource)
 			->build()

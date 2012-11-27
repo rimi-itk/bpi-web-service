@@ -1,0 +1,7 @@
+<bpi version="0.1">
+	<entity name="nodes_query">
+		<properties>
+			<property type="number" name="amount" >1</property>
+		</properties>
+	</entity>
+</bpi>

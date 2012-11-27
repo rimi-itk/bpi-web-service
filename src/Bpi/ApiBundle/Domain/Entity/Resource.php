@@ -49,6 +49,24 @@ class Resource implements IPresentable
 	}
 	
 	/**
+	 * Calculate similarity of resources by checking body contents
+	 * 
+	 * @param Resource $resource
+	 * @return boolean
+	 */
+	public function isSimilar(Resource $resource)
+	{
+		if ($this->body == $resource->body)
+			return true;
+		
+		similar_text(strip_tags($this->body), strip_tags($resource->body), $similarity);
+		if ($similarity > 50)
+			return true;
+		
+		return false;
+	}
+	
+	/**
 	 * @inheritDoc
 	 */
 	public function transform(Document $document)

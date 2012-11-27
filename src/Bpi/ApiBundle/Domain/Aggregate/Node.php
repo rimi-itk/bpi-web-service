@@ -14,16 +14,19 @@ class Node implements IPresentable
 	protected $ctime;
 	protected $mtime;
 	
+	protected $path;
+	protected $parent;
+	protected $level = 0;
+	protected $lock_time;
+	
 //	protected $comment;
-	protected $agency;
 	protected $resource;
 	protected $profile;
 
-	public function __construct(Agency $agency, Resource $resource, Profile $profile)
+	public function __construct(Resource $resource, Profile $profile)
 	{
 //		$this->id = $id;
 		
-		$this->agency = $agency;
 		$this->resource = $resource;
 		$this->profile = $profile;
 		
@@ -41,9 +44,10 @@ class Node implements IPresentable
 	}
 	
 	/**
+	 * Compare two instances by field. Need by sorting
 	 * 
 	 * @param \Bpi\ApiBundle\Domain\Aggregate\Node $node
-	 * @param string $field
+	 * @param string $field can be compound like profile.taxonomy.category
 	 * @param int $order 1=asc, -1=desc
 	 * @return int see strcmp PHP function
 	 */
@@ -59,10 +63,34 @@ class Node implements IPresentable
 		return $cmp->getResult();
 	}
 	
-//	public function hierarchy()
-//	{
-//	}
+	/**
+	 * Calculate similarity of resources
+	 * 
+	 * @param Resource $resource
+	 * @return boolean
+	 */
+	protected function isSimilarResource(Resource $resource)
+	{
+		return $this->resource->isSimilar($resource);
+	}
 	
+	/**
+	 * Create new revision of current node
+	 * 
+	 * @param Resource $resource
+	 * @return Node
+	 */
+	public function createRevision(Resource $resource)
+	{
+		$builder = new \Bpi\ApiBundle\Domain\Factory\NodeBuilder;
+		$builder->profile($this->profile);
+		$builder->resource($resource);
+		$node = $builder->build();
+		
+		$node->parent = $this;
+		return $node;
+	}
+
 	/**
 	 * @inheritDoc
 	 */

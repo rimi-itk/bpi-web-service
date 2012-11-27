@@ -1,0 +1,24 @@
+<bpi version="0.1">
+	<entity name="agency">
+		<properties>
+			<property type="string" name="agency_id" >11</property>
+		</properties>
+	</entity>
+	<entity name="resource">
+		<properties>
+			<property type="string" name="user_id" >22</property>
+			<property type="string" name="resource_id" >33</property>
+			<property type="string" name="ctime" ></property>
+			<property type="string" name="title" >test_title</property>
+			<property type="string" name="body" >Some Body</property>
+			<property type="string" name="teaser" >Teaser</property>
+		</properties>
+	</entity>
+	<entity name="profile">
+		<properties>
+			<property type="string" name="type" >article</property>
+			<property type="string" name="category" >Category A</property>
+			<property type="string" name="audience" >all</property>
+		</properties>
+	</entity>
+</bpi>

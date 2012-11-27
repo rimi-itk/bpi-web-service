@@ -1,0 +1,21 @@
+<bpi version="0.1">
+	<entity name="agency">
+		<properties>
+			<property type="string" name="agency_id" >11</property>
+		</properties>
+	</entity>
+	<entity name="resource">
+		<properties>
+			<property type="string" name="user_id" >22</property>
+			<property type="string" name="resource_id" >33</property>
+			<property type="string" name="ctime" ></property>
+			<property type="string" name="mtime" ></property>
+			<property type="string" name="title" >test_title</property>
+			<property type="string" name="body" >Some Body</property>
+			<property type="string" name="teaser" >Teaser</property>
+			<property type="relation" name="address" >Teaser</property>
+			<property type="relation.link" name="official" title="Official website">http://example.com</property>
+			<property type="relation.faust" name="book">636090966</property>
+		</properties>
+	</entity>
+</bpi>

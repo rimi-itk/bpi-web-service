@@ -2,13 +2,41 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
 #  db: documents
   repositoryClass: Bpi\ApiBundle\Domain\Repository\Node
   collection: Node
+  gedmo:
+    tree:
+      type: materializedPath
+      activateLocking: true
   fields:
     id:
       id: true
+      gedmo:
+        - treePathSource
     ctime:
       type: date
     mtime:
       type: date
+      
+    path:
+      type: string
+      gedmo:
+        - treePath
+    level:
+      type: int
+      gedmo:
+        - treeLevel
+    parent:
+      reference: true
+      type: one
+      targetDocument: Bpi\ApiBundle\Domain\Aggregate\Node
+      strategy: pushAll
+      cascade: all
+      gedmo:
+        - treeParent
+    lock_time:
+      type: date
+      gedmo:
+        - treeLockTime
+        
     profile:
       embedded: true
       type: one

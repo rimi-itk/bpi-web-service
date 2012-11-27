@@ -9,6 +9,11 @@ class RestControllerTest extends WebTestCase
 	protected $console;
 	protected $load_fixtures;
 
+	protected function loadFixture($name)
+	{
+		return file_get_contents(__DIR__.'/../Fixtures/'.$name.'.bpi');
+	}
+	
 	public function __construct()
 	{
 		$this->console = new \Symfony\Bundle\FrameworkBundle\Console\Application($this->createKernel());
@@ -24,15 +29,35 @@ class RestControllerTest extends WebTestCase
 	
 	public function testPublish()
 	{
-		$article = file_get_contents(__DIR__.'/../Fixtures/Article.bpi');
 		$client = static::createClient();
 		
-		$client->request(	'POST', '/node.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $article);
+		$client->request(	'POST', '/node.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('Push'));
 		$this->assertEquals(201, $client->getResponse()->getStatusCode());
 
 		$xml = simplexml_load_string($client->getResponse()->getContent());
 		$this->assertEquals('node', $xml->entity['name']);
-		$this->assertNotEmpty('id', $xml->entity->properties->property['title']);
+		
+		$this->console->run($this->load_fixtures);
+	}
+	
+	public function testPublishRevision()
+	{
+		$client = static::createClient();
+		
+		// find first node
+		$client->request('POST', '/node/list.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('NodesQuery/FindOne'));
+		$xml = simplexml_load_string($client->getResponse()->getContent());
+		$links = $xml->xpath('//entity[@name="node"]/links/link[@rel="self"]');
+		
+		$this->assertNotEmpty($links[0]['href']);
+	
+		// push revision
+		//TODO: modify resource from response
+		$client->request(	'POST', $links[0]['href'].'.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('PushRevision'));
+		$this->assertEquals(201, $client->getResponse()->getStatusCode());
+
+		$xml = simplexml_load_string($client->getResponse()->getContent());
+		$this->assertEquals('node', $xml->entity['name']);
 		
 		$this->console->run($this->load_fixtures);
 	}

@@ -56,19 +56,16 @@ class LoadNodes implements FixtureInterface
 		
 		$builder = new NodeBuilder();
 		$manager->persist($builder
-			->agency(new Agency(new AgencyId(1)))
 			->profile($profile_alpha)
 			->resource($alpha)
 			->build()
 		);
 		$manager->persist($builder
-			->agency(new Agency(new AgencyId(1)))
 			->profile($profile_bravo)
 			->resource($bravo)
 			->build()
 		);
 		$manager->persist($builder
-			->agency(new Agency(new AgencyId(1)))
 			->profile($profile_charlie)
 			->resource($charlie)
 			->build()

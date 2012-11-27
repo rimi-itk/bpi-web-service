@@ -73,6 +73,13 @@ class Transform
 		 return new \Bpi\ApiBundle\Domain\Command\PushCommand($agency, $profile, $resource);
 	}
 	
+	public function presentationToPushRevisionCommand(Document $document)
+	{
+		 $agency = $this->transformAgencyEntity($document->getEntity('agency'));
+		 $resource = $this->transformResourceEntity($document->getEntity('resource'));
+		 return new \Bpi\ApiBundle\Domain\Command\PushRevisionCommand($agency, $resource);
+	}
+	
 	/**
 	 * @return \Bpi\ApiBundle\Rest\Resource
 	 */
@@ -115,12 +122,5 @@ class Transform
 			->ctime(new \DateTime($entity->property('ctime')->getValue())) //TODO: transform that
 			->build()
 		;
-	}
-	
-	protected function transformNodeEntity($entity)
-	{
-		$builder = new NodeBuilder();
-		$builder->agency(new Agency(new AgencyId($entity->property('agency_id')->getValue())));
-		// etc
 	}
 }

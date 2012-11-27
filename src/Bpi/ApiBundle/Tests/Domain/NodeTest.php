@@ -12,15 +12,17 @@ use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 
 class NodeTest extends \PHPUnit_Framework_TestCase
 {
+	protected $resources;
 	protected $nodes;
 	
 	public function setUp()
 	{
 		//TODO: merge this into common domain fixtures
 		$this->nodes = new \stdClass();
+		$this->resources = new \stdClass();
 		
 		$resource_builder = new ResourceBuilder;
-		$alpha = $resource_builder
+		$this->resources->alpha = $resource_builder
 			->userId(1)
 			->body('alpha_body')
 			->teaser('alpha_teaser')
@@ -29,7 +31,7 @@ class NodeTest extends \PHPUnit_Framework_TestCase
 			->build()
 		;
 		
-		$bravo = $resource_builder
+		$this->resources->bravo = $resource_builder
 			->userId(2)
 			->body('bravo_body')
 			->teaser('bravo_teaser')
@@ -44,15 +46,13 @@ class NodeTest extends \PHPUnit_Framework_TestCase
 		$builder = new NodeBuilder();
 		
 		$this->nodes->alpha = $builder
-			->agency(new Agency(new AgencyId(1)))
 			->profile($profile_alpha)
-			->resource($alpha)
+			->resource($this->resources->alpha)
 			->build();
 		
 		$this->nodes->bravo = $builder
-			->agency(new Agency(new AgencyId(1)))
 			->profile($profile_bravo)
-			->resource($bravo)
+			->resource($this->resources->bravo)
 			->build();
 	}
 	
@@ -65,5 +65,10 @@ class NodeTest extends \PHPUnit_Framework_TestCase
 		$this->assertEquals(1, $this->nodes->alpha->compare($this->nodes->bravo, 'profile.taxonomy.category.name', -1));
 		
 		$this->assertEquals(0, $this->nodes->alpha->compare($this->nodes->bravo, 'profile.taxonomy.audience.name', 1));
+	}
+	
+	public function testRevisions()
+	{
+		$this->assertInstanceOf('\Bpi\ApiBundle\Domain\Aggregate\Node', $this->nodes->alpha->createRevision($this->resources->bravo));
 	}
 }

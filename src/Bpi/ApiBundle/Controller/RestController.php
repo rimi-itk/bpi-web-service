@@ -97,7 +97,30 @@ class RestController extends FOSRestController
 		$node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
 		
 		$view = $this->view($document, 200)
-			->setTemplate("BpiApiBundle:Default:index.html.twig");
+			->setTemplate("BpiApiBundle:Rest:item.html.twig");
+
+		return $this->handleView($view);
+	}
+	
+	/**
+	 * @Rest\Post("/node/item/{id}")
+	 */
+	public function postModifiedNodeAction($id)
+	{
+		$node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($this->getRequest()->get('id'));
+		$document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
+		
+		$tr = new \Bpi\ApiBundle\Transform\Transform;
+		$command = $tr->presentationToPushRevisionCommand($document);
+		$command->setParent($node);
+		$revision = $command->execute();
+		
+		$dm = $this->get('doctrine.odm.mongodb.document_manager');
+		$dm->persist($revision);
+		$dm->flush();
+		
+		$view = $this->view($tr->domainToRepresentation($revision), 201)
+			->setTemplate("BpiApiBundle:Rest:item.html.twig");
 
 		return $this->handleView($view);
 	}

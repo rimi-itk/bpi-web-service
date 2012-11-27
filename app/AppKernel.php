@@ -26,6 +26,7 @@ class AppKernel extends Kernel
             new Doctrine\Bundle\MongoDBBundle\DoctrineMongoDBBundle(),
             new Bpi\ApiBundle\BpiApiBundle(),
             new Bpi\RestMediaTypeBundle\BpiRestMediaTypeBundle(),
+            new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {
