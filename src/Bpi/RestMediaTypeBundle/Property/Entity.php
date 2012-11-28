@@ -13,22 +13,22 @@ use Bpi\RestMediaTypeBundle\DataType\Entity as EntityType;
  */
 class Entity extends Property
 {
-	/**
-	 * @Serializer\XmlAttribute
-	 */
-	protected $entityname;
-	
-	/**
-	 * @Serializer\XmlList(inline=true, entry="entity")
-	 */
-	protected $value;
-	
-	public function __construct(String $name, EntityType $value, String $title)
-	{
-		$this->setType(new TypeEnum('entity'));
-		$this->name = $name->value();
-		$this->value = $value->value();
-		$this->title = $title->value();
-		$this->entityname = $this->value[0]->getName();
-	}
+    /**
+     * @Serializer\XmlAttribute
+     */
+    protected $entityname;
+
+    /**
+     * @Serializer\XmlList(inline=true, entry="entity")
+     */
+    protected $value;
+
+    public function __construct(String $name, EntityType $value, String $title)
+    {
+        $this->setType(new TypeEnum('entity'));
+        $this->name = $name->value();
+        $this->value = $value->value();
+        $this->title = $title->value();
+        $this->entityname = $this->value[0]->getName();
+    }
 }

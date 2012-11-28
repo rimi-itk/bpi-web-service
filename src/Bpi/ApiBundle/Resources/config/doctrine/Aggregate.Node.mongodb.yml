@@ -15,7 +15,7 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
       type: date
     mtime:
       type: date
-      
+
     path:
       type: string
       gedmo:
@@ -36,7 +36,7 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
       type: date
       gedmo:
         - treeLockTime
-        
+
     profile:
       embedded: true
       type: one

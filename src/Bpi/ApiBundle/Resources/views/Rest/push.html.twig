@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>	
+<html>
 	<head>
 		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script type="text/javascript">
@@ -26,7 +26,7 @@
 						}
 					})
 				})
-				
+
 				/*
 				* Insert entity into submit body
 				*/
@@ -49,20 +49,20 @@
 		</script>
 	</head>
 	<body>
-		
+
 <section class="input">
 
 	<h2>Input</h2>
-	
+
 	<h3>Expected BPI entities</h3>
 	<ul>
 		<li class="entity"><strong>nodes_query</strong> <button class="insert">insert</button> <a href="{{ path("schema", {'tree': 'entity', 'subtree': 'nodes_query', _format: 'bpi'}) }}" class="bpi" title="Example in BPI">bpi</a>, <a href="{{ path("schema", {'tree': 'entity', 'subtree': 'nodes_query', _format: 'rng'}) }}" title="RelaxNG schema">rng</a></li>
 	</ul>
-	
+
 	<textarea style="width:100%; height: 300px" class="data">{{ data.input.example|serialize("xml") }}</textarea>
 	<button type="submit" class="send">Send</button>
 	<a href="{{ path("list", {_format: 'html'}) }}">Reset</a>
-	
+
 </section>
 
 <section class="output">
@@ -72,6 +72,6 @@
 	<textarea style="width:100%; height: 300px" class="response_body">{{ data.output | serialize("xml") }}</textarea>
 </div>
 </section>
-		
+
 	</body>
 </html>

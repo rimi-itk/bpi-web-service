@@ -9,22 +9,22 @@ use FOS\RestBundle\View\View,
 /**
  * Handle the .bpi file extension
  */
-class BpiViewHandler
+class BPIViewHandler
 {
-	/**
-	 * @param ViewHandler $viewHandler
-	 * @param View $view
-	 * @param Request $request
-	 * @param string $format
-	 *
-	 * @return Response
-	 */
-	public function handleExtension(ViewHandler $handler, View $view, Request $request, $format)
-	{
-		if (in_array("application/vnd.bpi.api+xml", $request->getAcceptableContentTypes()))
-			$view->setHeader("Content-Type", "application/vnd.bpi.api+xml");
-		
-		return $handler->createResponse($view, $request, "xml");
-	}
+    /**
+     * @param ViewHandler $viewHandler
+     * @param View $view
+     * @param Request $request
+     * @param string $format
+     *
+     * @return Response
+     */
+    public function handleExtension(ViewHandler $handler, View $view, Request $request, $format)
+    {
+        if (in_array("application/vnd.bpi.api+xml", $request->getAcceptableContentTypes()))
+            $view->setHeader("Content-Type", "application/vnd.bpi.api+xml");
+
+        return $handler->createResponse($view, $request, "xml");
+    }
 
 }

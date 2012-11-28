@@ -8,13 +8,13 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  */
 class Relation
 {
-	/**
-	 * @MongoDB\String
-	 */
-	protected $type;
-	
-	/**
-	 * @MongoDB\String
-	 */
-	protected $reference;
+    /**
+     * @MongoDB\String
+     */
+    protected $type;
+
+    /**
+     * @MongoDB\String
+     */
+    protected $reference;
 }

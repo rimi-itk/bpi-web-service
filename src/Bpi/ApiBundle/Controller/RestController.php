@@ -16,136 +16,134 @@ use Bpi\ApiBundle\Transform\Presentation;
  */
 class RestController extends FOSRestController
 {
-	protected function getRepository($name)
-	{
-		$dm = $this->get('doctrine.odm.mongodb.document_manager');
-		return $dm->getRepository($name);
-	}
+    protected function getRepository($name)
+    {
+        $dm = $this->get('doctrine.odm.mongodb.document_manager');
+        return $dm->getRepository($name);
+    }
 
-	/**
-	 * @Rest\Get("/node/list")
-	 */
-	public function listAction()
-	{
-		$node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findLatest();
+    /**
+     * @Rest\Get("/node/list")
+     */
+    public function listAction()
+    {
+        $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findLatest();
 
-		$document = Presentation::transformMany($node_collection);
-		$document->walkEntities(function($e) use ($document) {
-			$e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
-			$e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
-		});
-		
-		if ($this->getRequest()->get('_format') == 'html')
-		{
-			$doc2 = new Document();
-			$document = array('data' => array('output' => $document, 'input' => array('example' => $doc2, 'expected_entities' => array('nodes_query'))));
-		}		
-		
-		$view = $this->view($document, 200)
-			->setTemplate("BpiApiBundle:Rest:list.html.twig")
-		;
-		
-		return $this->handleView($view);
-	}
-	
-	public function postNodeListAction()
-	{
-		$document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
-		$extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
-		$node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')
-			->findByNodesQuery($extractor->extract('nodesQuery'));
-		
-		$document = Presentation::transformMany($node_collection);
-		$document->walkEntities(function($e) use ($document) {
-			$e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
-			$e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
-		});
-		
-		if ($this->getRequest()->get('_format') == 'html')
-		{
-			$doc2 = new Document();
-			$document = array('data' => array('output' => $document, 'input' => array('example' => $doc2, 'expected_entities' => array('nodes_query'))));
-		}
-		
-		$view = $this->view($document, 200)
-			->setTemplate("BpiApiBundle:Rest:list.html.twig")
-		;
-		
-		return $this->handleView($view);
-	}
-	
-	/**
-	 * @Rest\Get("/node/item/{id}")
-	 */
-	public function nodeAction($id)
-	{
-		$_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
-		
-		$document = Presentation::transform($_node);
-		$node = $document->getEntity('node');
-		$node->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
-		$node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
-		
-		$view = $this->view($document, 200)
-			->setTemplate("BpiApiBundle:Rest:item.html.twig");
+        $document = Presentation::transformMany($node_collection);
+        $document->walkEntities(function($e) use ($document) {
+            $e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
+            $e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+        });
 
-		return $this->handleView($view);
-	}
-	
-	/**
-	 * @Rest\Post("/node/item/{id}")
-	 */
-	public function postNodeRevisionAction($id)
-	{
-		$document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
-		
-		$extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
+        if ($this->getRequest()->get('_format') == 'html') {
+            $doc2 = new Document();
+            $document = array('data' => array('output' => $document, 'input' => array('example' => $doc2, 'expected_entities' => array('nodes_query'))));
+        }
 
-		$revision = $this->get('domain.push_service')->pushRevision(
-			new \Bpi\ApiBundle\Domain\ValueObject\NodeId($id), 
-			$extractor->extract('agency.author'), 
-			$extractor->extract('resource')
-		);
-		
-		$view = $this->view(\Bpi\ApiBundle\Transform\Presentation::transform($revision), 201)
-			->setTemplate("BpiApiBundle:Rest:item.html.twig");
+        $view = $this->view($document, 200)
+            ->setTemplate("BpiApiBundle:Rest:list.html.twig")
+        ;
 
-		return $this->handleView($view);
-	}
-	
-	/**
-	 * @Rest\Post("/node")
-	 * @Rest\View(statusCode=201)
-	 * Rest\RequestParam(name="test", requirements=".+", description="Firstname")
-	 * @ApiDoc()
-	 */
-	public function createNodeAction()
-	{
-		$document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
+        return $this->handleView($view);
+    }
 
-		$extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
+    public function postNodeListAction()
+    {
+        $document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
+        $extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
+        $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')
+            ->findByNodesQuery($extractor->extract('nodesQuery'));
 
-		$node = $this->get('domain.push_service')->push(
-			$extractor->extract('agency.author'), 
-			$extractor->extract('resource'), 
-			$extractor->extract('profile')
-		);
+        $document = Presentation::transformMany($node_collection);
+        $document->walkEntities(function($e) use ($document) {
+            $e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
+            $e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+        });
 
-		$view = $this->view(\Bpi\ApiBundle\Transform\Presentation::transform($node), 201)
-			->setTemplate("BpiApiBundle:Rest:push.html.twig");
+        if ($this->getRequest()->get('_format') == 'html') {
+            $doc2 = new Document();
+            $document = array('data' => array('output' => $document, 'input' => array('example' => $doc2, 'expected_entities' => array('nodes_query'))));
+        }
 
-		return $this->handleView($view);
-	}
-	
-	/**
-	 * For testing purposes. Simply echoes back sent request
-	 * 
-	 * @Rest\Get("/tools/echo")
-	 * @ApiDoc()
-	 */
-	public function echoAction()
-	{
-		$view = $this->view($this->get('request')->getContent(), 200);		
-		return $this->handleView($view);
-	}
+        $view = $this->view($document, 200)
+            ->setTemplate("BpiApiBundle:Rest:list.html.twig")
+        ;
+
+        return $this->handleView($view);
+    }
+
+    /**
+     * @Rest\Get("/node/item/{id}")
+     */
+    public function nodeAction($id)
+    {
+        $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
+
+        $document = Presentation::transform($_node);
+        $node = $document->getEntity('node');
+        $node->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
+        $node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+
+        $view = $this->view($document, 200)
+            ->setTemplate("BpiApiBundle:Rest:item.html.twig");
+
+        return $this->handleView($view);
+    }
+
+    /**
+     * @Rest\Post("/node/item/{id}")
+     */
+    public function postNodeRevisionAction($id)
+    {
+        $document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
+
+        $extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
+
+        $revision = $this->get('domain.push_service')->pushRevision(
+            new \Bpi\ApiBundle\Domain\ValueObject\NodeId($id),
+            $extractor->extract('agency.author'),
+            $extractor->extract('resource')
+        );
+
+        $view = $this->view(\Bpi\ApiBundle\Transform\Presentation::transform($revision), 201)
+            ->setTemplate("BpiApiBundle:Rest:item.html.twig");
+
+        return $this->handleView($view);
+    }
+
+    /**
+     * @Rest\Post("/node")
+     * @Rest\View(statusCode=201)
+     * Rest\RequestParam(name="test", requirements=".+", description="Firstname")
+     * @ApiDoc()
+     */
+    public function createNodeAction()
+    {
+        $document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
+
+        $extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
+
+        $node = $this->get('domain.push_service')->push(
+            $extractor->extract('agency.author'),
+            $extractor->extract('resource'),
+            $extractor->extract('profile')
+        );
+
+        $view = $this->view(\Bpi\ApiBundle\Transform\Presentation::transform($node), 201)
+            ->setTemplate("BpiApiBundle:Rest:push.html.twig");
+
+        return $this->handleView($view);
+    }
+
+    /**
+     * For testing purposes. Simply echoes back sent request
+     *
+     * @Rest\Get("/tools/echo")
+     * @ApiDoc()
+     */
+    public function echoAction()
+    {
+        $view = $this->view($this->get('request')->getContent(), 200);
+        return $this->handleView($view);
+    }
 }

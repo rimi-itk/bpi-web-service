@@ -6,5 +6,5 @@ use Bpi\ApiBundle\Domain\Repository\ICategory;
 
 class CategoryRepository extends DocumentRepository implements ICategory
 {
-	
+
 }

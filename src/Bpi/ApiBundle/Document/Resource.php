@@ -8,40 +8,40 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
  */
 class Resource
 {
-	/**
-	 * @MongoDB\Timestamp
-	 */
-	protected $ctime;
+    /**
+     * @MongoDB\Timestamp
+     */
+    protected $ctime;
 
-	/**
-	 * @MongoDB\String
-	 */
-	protected $title;
-	
-	/**
-	 * @MongoDB\String
-	 */
-	protected  $teaser;
-	
-	/**
-	 * @MongoDB\String
-	 */
-	protected  $body;
-	
-	/**
-	 * @MongoDB\String
-	 */
-	protected $author;
-	
-	/**
-	 * @MongoDB\Int
-	 */
-	protected $user_id;
-	
-	/**
-	 * @MongoDB\EmbedMany(targetDocument="Bpi\ApiBundle\Document\Relation")
-	 */
-	protected $relations;
+    /**
+     * @MongoDB\String
+     */
+    protected $title;
+
+    /**
+     * @MongoDB\String
+     */
+    protected $teaser;
+
+    /**
+     * @MongoDB\String
+     */
+    protected $body;
+
+    /**
+     * @MongoDB\String
+     */
+    protected $author;
+
+    /**
+     * @MongoDB\Int
+     */
+    protected $user_id;
+
+    /**
+     * @MongoDB\EmbedMany(targetDocument="Bpi\ApiBundle\Document\Relation")
+     */
+    protected $relations;
 
 
 //		"attachments": [
@@ -49,7 +49,7 @@ class Resource
 //				"_ref_id": "GridFS.ObjectId()"
 //			}
 //		],
-	
+
 
     /**
      * Set ctime

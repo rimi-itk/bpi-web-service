@@ -9,22 +9,22 @@ use Bpi\ApiBundle\Domain\ValueObject\Category;
 
 class Profile implements IExtractor
 {
-	/**
-	 * @var Document
-	 */
-	protected $doc;
-	
-	public function __construct(Document $doc)
-	{
-		$this->doc = $doc;
-	}
-	
-	public function extract()
-	{
-		$entity = $this->doc->getEntity('profile');
-		return new DomainProfile(new Taxonomy(
-			new Audience($entity->property('audience')->getValue()), 
-			new Category($entity->property('category')->getValue())
-		));
-	}
+    /**
+     * @var Document
+     */
+    protected $doc;
+
+    public function __construct(Document $doc)
+    {
+        $this->doc = $doc;
+    }
+
+    public function extract()
+    {
+        $entity = $this->doc->getEntity('profile');
+        return new DomainProfile(new Taxonomy(
+            new Audience($entity->property('audience')->getValue()),
+            new Category($entity->property('category')->getValue())
+        ));
+    }
 }

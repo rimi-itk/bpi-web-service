@@ -9,9 +9,9 @@ use Bpi\RestMediaTypeBundle\Element\Property;
  */
 class DateTime extends Property
 {
-	/**
-	 * @Serializer\XmlValue
-	 * @Serializer\Type("DateTime")
-	 */
-	protected $value;
+    /**
+     * @Serializer\XmlValue
+     * @Serializer\Type("DateTime")
+     */
+    protected $value;
 }

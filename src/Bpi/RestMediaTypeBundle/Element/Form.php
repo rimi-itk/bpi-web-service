@@ -8,15 +8,15 @@ use JMS\SerializerBundle\Annotation as Serializer;
  */
 class Form
 {
-	protected $action;
-	
-	protected $method = 'get';
-	
-	protected $id;
-	
-	public function __construct($action, $method)
-	{
-		$this->action = $action;
-		$this->method = $method;
-	}
+    protected $action;
+
+    protected $method = 'get';
+
+    protected $id;
+
+    public function __construct($action, $method)
+    {
+        $this->action = $action;
+        $this->method = $method;
+    }
 }

@@ -9,9 +9,9 @@ use Bpi\RestMediaTypeBundle\Element\Property;
  */
 class Number extends Property
 {
-	/**
-	 * @Serializer\XmlValue
-	 * @Serializer\Type("double")
-	 */
-	protected $value;
+    /**
+     * @Serializer\XmlValue
+     * @Serializer\Type("double")
+     */
+    protected $value;
 }

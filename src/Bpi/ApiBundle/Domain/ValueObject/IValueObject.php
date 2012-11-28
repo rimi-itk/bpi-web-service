@@ -3,5 +3,5 @@ namespace Bpi\ApiBundle\Domain\ValueObject;
 
 interface IValueObject
 {
-	public function equals(IValueObject $vo);
+    public function equals(IValueObject $vo);
 }
