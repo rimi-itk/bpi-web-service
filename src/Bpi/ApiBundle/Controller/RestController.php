@@ -5,13 +5,15 @@ namespace Bpi\ApiBundle\Controller;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc; // @ApiDoc(resource=true, description="Filter",filters={{"name"="a-filter", "dataType"="string", "pattern"="(foo|bar) ASC|DESC"}})
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\Request\ParamFetcherInterface;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Response;
 
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Presentation;
 
+/**
+ * Main entry point for REST requests
+ */
 class RestController extends FOSRestController
 {
 	protected function getRepository($name)
@@ -52,12 +54,6 @@ class RestController extends FOSRestController
 		$extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
 		$node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')
 			->findByNodesQuery($extractor->extract('nodesQuery'));
-		
-//		if (false === $query = @simplexml_load_string($this->getRequest()->getContent()))
-//		{
-//			//TODO: link to NodesQuery entity schema
-//			throw new HttpException(400, "Expected 'NodesQuery' BPI entity");
-//		}
 		
 		$document = Presentation::transformMany($node_collection);
 		$document->walkEntities(function($e) use ($document) {

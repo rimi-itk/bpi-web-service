@@ -10,6 +10,13 @@ class Author
 	protected $firstname;
 	protected $lastname;
 
+	/**
+	 * 
+	 * @param \Bpi\ApiBundle\Domain\ValueObject\AgencyId $agency_id
+	 * @param string $client_id
+	 * @param string $lastname
+	 * @param string|null $firstname
+	 */
 	public function __construct(AgencyId $agency_id, $client_id, $lastname, $firstname = null)
 	{
 		$this->agency_id = $agency_id;
@@ -18,12 +25,20 @@ class Author
 		$this->lastname = $lastname;
 	}
 	
+	/**
+	 * 
+	 * @return \Bpi\ApiBundle\Domain\ValueObject\AgencyId $agency_id
+	 */
 	public function getAgencyId()
 	{
 		return $this->agency_id;
 	}
 	
-	public function credintials()
+	/**
+	 * 
+	 * @return string
+	 */
+	public function getFullName()
 	{
 		return ($this->firstname ? $this->firstname.' ' : '') . $this->lastname;
 	}

@@ -19,7 +19,7 @@ class NodeTest extends \PHPUnit_Framework_TestCase
 
 	public function setUp()
 	{
-		//TODO: merge this into common domain fixtures
+		/** @todo merge this into common domain fixtures */
 		$this->nodes = new \stdClass();
 		$this->resources = new \stdClass();
 		$this->authors = new \stdClass();

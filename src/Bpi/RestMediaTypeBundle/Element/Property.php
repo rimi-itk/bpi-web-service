@@ -52,6 +52,8 @@ class Property
 	}
 	
 	/**
+	 * Set PHP value type to correspond formal type
+	 * 
 	 * @Serializer\PostDeserialize
 	 */
 	protected function normalizeValue()
@@ -60,32 +62,52 @@ class Property
 			@settype($this->value, $this->type);
 	}
 	
+	/**
+	 * 
+	 * @param \Bpi\RestMediaTypeBundle\Property\TypeEnum $enum
+	 */
 	protected function setType(TypeEnum $enum)
 	{
 		$this->type = $enum->toString();
 	}
 	
+	/**
+	 * @return string
+	 */
 	public function getType()
 	{
 		return $this->type;
 	}
 	
+	/**
+	 * @param string $type
+	 * @return bool
+	 */
 	public function typeOf($type)
 	{
-		//TODO: process the value
+		/** @todo value may not correspond to the type */
 		return $this->type == $type;
 	}
 	
+	/**
+	 * @return string
+	 */
 	public function getName()
 	{
 		return $this->name;
 	}
 	
+	/**
+	 * @return mixed
+	 */
 	public function getValue()
 	{
 		return $this->value;
 	}
 	
+	/**
+	 * @return string
+	 */
 	public function getTitle()
 	{
 		return $this->title;

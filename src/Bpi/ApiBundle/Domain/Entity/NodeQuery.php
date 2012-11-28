@@ -51,7 +51,7 @@ class NodeQuery
 			break;
 			case 'latest':
 			case 'revised':
-				//TODO
+				/** @todo custom query */
 			break;
 		}
 		

@@ -44,7 +44,7 @@ class RestControllerTest extends WebTestCase
 	{
 		$client = static::createClient();
 		
-		// find first node
+		// find first node 
 		$client->request('POST', '/node/list.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('NodesQuery/FindOne'));
 		$xml = simplexml_load_string($client->getResponse()->getContent());
 		$links = $xml->xpath('//entity[@name="node"]/links/link[@rel="self"]');
@@ -52,7 +52,7 @@ class RestControllerTest extends WebTestCase
 		$this->assertNotEmpty($links[0]['href']);
 	
 		// push revision
-		//TODO: modify resource from response
+		/** @todo modify resource from response */
 		$client->request(	'POST', $links[0]['href'].'.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('PushRevision'));
 		$this->assertEquals(201, $client->getResponse()->getStatusCode());
 
