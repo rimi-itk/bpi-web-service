@@ -1,13 +1,20 @@
 <bpi version="0.1">
 	<entity name="agency">
 		<properties>
-			<property type="string" name="agency_id" >11</property>
+			<property type="string" name="id" >11</property>
 		</properties>
+		<entity name="author">
+			<properties>
+				<property type="string" name="id" >123</property>
+				<property type="string" name="firstname" >George</property>
+				<property type="string" name="lastname" >Mihailov</property>
+			</properties>
+		</entity>
 	</entity>
 	<entity name="resource">
 		<properties>
 			<property type="string" name="user_id" >22</property>
-			<property type="string" name="resource_id" >33</property>
+			<property type="string" name="id" >33</property>
 			<property type="string" name="ctime" ></property>
 			<property type="string" name="title" >test_title</property>
 			<property type="string" name="body" >Some Body</property>

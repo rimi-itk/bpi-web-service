@@ -9,6 +9,9 @@ services:
         parent: fos_rest.view_handler.default
         calls: 
           - ['registerHandler', [ 'bpi', ["@bpi.apibundle.rest.view_extension_handler", 'handleExtension'] ] ]
+    domain.push_service:
+        class: Bpi\ApiBundle\Domain\Service\PushService
+        arguments: ["@doctrine_mongodb.odm.document_manager"]
           
 #    bpi.apibundle.listener.request:
 #        class: Bpi\ApiBundle\RequestListener

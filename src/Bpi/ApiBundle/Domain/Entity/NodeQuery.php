@@ -9,6 +9,7 @@ class NodeQuery
 	protected $sorts = array();
 	protected $offset = 0;
 	protected $amount = 20;
+	protected $reduce_strategy;
 
 	public function filter($field, $value)
 	{
@@ -30,6 +31,11 @@ class NodeQuery
 		$this->sorts[$field] = strtolower($order) == 'asc' ? 1 : -1;
 	}
 	
+	public function reduce($strategy)
+	{
+		$this->reduce_strategy = $strategy;
+	}
+	
 	public function executeByDoctrineQuery(QueryBuilder $query)
 	{
 		foreach($this->filters as $field => $value)
@@ -37,6 +43,17 @@ class NodeQuery
 		
 		$query->skip($this->offset);
 		$query->limit($this->amount);
+		
+		switch ($this->reduce_strategy)
+		{
+			case 'initial':
+				$query->field('level')->equals(1);
+			break;
+			case 'latest':
+			case 'revised':
+				//TODO
+			break;
+		}
 		
 		$collection = $query->getQuery()->execute();
 		

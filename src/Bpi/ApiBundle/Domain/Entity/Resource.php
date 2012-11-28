@@ -15,35 +15,21 @@ class Resource implements IPresentable
 	
 	protected $body;
 	
-	protected $user_id;
-	
 	protected $teaser;
 	
 	protected $ctime;
 	
-	/**
-	 * @var Author
-	 */
-	protected $author; //?
-	
-	protected $id; // !!
-	
-	/**
-	 * @var \Bpi\ApiBundle\Domain\Aggregate\Resource\Types\Type
-	 */
-	protected $type;
+	protected $type = 'article';
 	
 	public function __construct(
 		$title,
 		$body,
-		$user_id, 
 		$teaser,
 		\DateTime $ctime
 	)
 	{
 		$this->title = $title;
 		$this->body = $body;
-		$this->user_id = $user_id;
 		$this->teaser = $teaser;
 		$this->ctime = $ctime;
 	}
@@ -77,9 +63,9 @@ class Resource implements IPresentable
 		
 		$entity->addProperty($document->createProperty('title', 'string', $this->title));
 		$entity->addProperty($document->createProperty('body', 'string', $this->body));
-		$entity->addProperty($document->createProperty('user_id', 'string', $this->user_id));
 		$entity->addProperty($document->createProperty('teaser', 'string', $this->teaser));
 		$entity->addProperty($document->createProperty('ctime', 'dateTime', $this->ctime));
+		$entity->addProperty($document->createProperty('type', 'string', $this->type));
 	}
 	
 	/**

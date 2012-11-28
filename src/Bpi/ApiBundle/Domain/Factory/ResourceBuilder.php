@@ -5,7 +5,7 @@ use Bpi\ApiBundle\Domain\Entity\Resource;
 
 class ResourceBuilder
 {
-	protected $title, $body, $userId, $teaser, $ctime;
+	protected $title, $body, $teaser, $ctime;
 	
 	/**
 	 * 
@@ -26,17 +26,6 @@ class ResourceBuilder
 	public function body($body)
 	{
 		$this->body = $body;
-		return $this;
-	}
-	
-	/**
-	 * 
-	 * @param string $id
-	 * @return \Bpi\ApiBundle\Domain\Factory\ResourceBuilder
-	 */
-	public function userId($id)
-	{
-		$this->userId = $id;
 		return $this;
 	}
 	
@@ -70,7 +59,6 @@ class ResourceBuilder
 	{
 		return !(is_null($this->title)
 			|| is_null($this->body)
-			|| is_null($this->userId)
 			|| is_null($this->teaser)
 			|| is_null($this->ctime)
 		);
@@ -86,6 +74,6 @@ class ResourceBuilder
 		if (!$this->isValidForBuild())
 			throw new \RuntimeException('Invalid state: can not build');
 		
-		return new Resource($this->title, $this->body, $this->userId, $this->teaser, $this->ctime);
+		return new Resource($this->title, $this->body, $this->teaser, $this->ctime);
 	}
 }

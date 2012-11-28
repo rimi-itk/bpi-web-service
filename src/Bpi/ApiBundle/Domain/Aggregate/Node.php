@@ -3,7 +3,7 @@ namespace Bpi\ApiBundle\Domain\Aggregate;
 
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Resource;
-use Bpi\ApiBundle\Domain\Aggregate\Agency;
+use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -20,13 +20,13 @@ class Node implements IPresentable
 	protected $lock_time;
 	
 //	protected $comment;
+	protected $author;
 	protected $resource;
 	protected $profile;
 
-	public function __construct(Resource $resource, Profile $profile)
+	public function __construct(Author $author, Resource $resource, Profile $profile)
 	{
-//		$this->id = $id;
-		
+		$this->author = $author;
 		$this->resource = $resource;
 		$this->profile = $profile;
 		
@@ -80,12 +80,15 @@ class Node implements IPresentable
 	 * @param Resource $resource
 	 * @return Node
 	 */
-	public function createRevision(Resource $resource)
+	public function createRevision(Author $author, Resource $resource)
 	{
 		$builder = new \Bpi\ApiBundle\Domain\Factory\NodeBuilder;
-		$builder->profile($this->profile);
-		$builder->resource($resource);
-		$node = $builder->build();
+		$node = $builder
+			->author($author)
+			->profile($this->profile)
+			->resource($resource)
+			->build()
+		;
 		
 		$node->parent = $this;
 		return $node;
@@ -100,8 +103,14 @@ class Node implements IPresentable
 		
 		$entity->addProperty($document->createProperty(
 			'ctime',
-			'date',
-			$this->ctime->format('Y')
+			'dateTime',
+			$this->ctime
+		));
+		
+		$entity->addProperty($document->createProperty(
+			'mtime',
+			'dateTime',
+			$this->ctime
 		));
 		
 		$entity->addProperty($document->createProperty(

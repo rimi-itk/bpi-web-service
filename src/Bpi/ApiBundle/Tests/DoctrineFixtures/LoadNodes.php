@@ -7,6 +7,7 @@ use Doctrine\Common\Persistence\ObjectManager;
 
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Entity\Profile;
+use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy;
 use Bpi\ApiBundle\Domain\ValueObject\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\Category;
@@ -24,7 +25,6 @@ class LoadNodes implements FixtureInterface
 	{
 		$resource_builder = new ResourceBuilder;
 		$alpha = $resource_builder
-			->userId(1)
 			->body('alpha_body')
 			->teaser('alpha_teaser')
 			->title('alpha_title')
@@ -33,7 +33,6 @@ class LoadNodes implements FixtureInterface
 		;
 		
 		$bravo = $resource_builder
-			->userId(2)
 			->body('bravo_body')
 			->teaser('bravo_teaser')
 			->title('bravo_title')
@@ -42,7 +41,6 @@ class LoadNodes implements FixtureInterface
 		;
 		
 		$charlie = $resource_builder
-			->userId(1)
 			->body('alpha_body')
 			->teaser('bravo_teaser')
 			->title('charlie_title')
@@ -56,16 +54,19 @@ class LoadNodes implements FixtureInterface
 		
 		$builder = new NodeBuilder();
 		$manager->persist($builder
+			->author(new Author(new AgencyId(1), 1, 'Bush', 'George'))
 			->profile($profile_alpha)
 			->resource($alpha)
 			->build()
 		);
 		$manager->persist($builder
+			->author(new Author(new AgencyId(2), 1, 'Bush', 'George'))
 			->profile($profile_bravo)
 			->resource($bravo)
 			->build()
 		);
 		$manager->persist($builder
+			->author(new Author(new AgencyId(1), 2, 'Potter'))
 			->profile($profile_charlie)
 			->resource($charlie)
 			->build()

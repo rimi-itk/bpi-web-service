@@ -89,6 +89,12 @@ class Entity implements HasLinks
 			unset($this->properties[$key]);
 			$this->properties[$property->getName()] = $property;
 		}
+		
+		foreach ($this->entities as $key => $entity)
+		{
+			unset($this->entities[$key]);
+			$this->entities[$entity->getName()] = $entity;
+		}
 	}
 
 	public function hasProperty($name, $type = null)
@@ -116,7 +122,12 @@ class Entity implements HasLinks
 	public function addChildEntity(Entity $entity)
 	{
 		$this->document->setCursorOnEntity($entity);
-		$this->entities[] = $entity;
+		$this->entities[$entity->getName()] = $entity;
+	}
+	
+	public function getChildEntity($name)
+	{
+		return $this->entities[$name];
 	}
 	
 	/**

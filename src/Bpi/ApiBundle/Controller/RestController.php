@@ -6,14 +6,11 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc; // @ApiDoc(resource=true, description
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
-use Bpi\ApiBundle\Rest\Factory\ResourceFactory;
-use Bpi\ApiBundle\Rest\Factory\LinkFactory;
-use Bpi\ApiBundle\Rest\VersionResolver;
-use Bpi\ApiBundle\Rest\Entity\Node;
-use Bpi\RestMediaTypeBundle\Document;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-
 use Symfony\Component\HttpFoundation\Response;
+
+use Bpi\RestMediaTypeBundle\Document;
+use Bpi\ApiBundle\Transform\Presentation;
 
 class RestController extends FOSRestController
 {
@@ -30,8 +27,7 @@ class RestController extends FOSRestController
 	{
 		$node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findLatest();
 
-		$tr = new \Bpi\ApiBundle\Transform\Transform;
-		$document = $tr->transformMany($node_collection);
+		$document = Presentation::transformMany($node_collection);
 		$document->walkEntities(function($e) use ($document) {
 			$e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
 			$e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
@@ -39,7 +35,7 @@ class RestController extends FOSRestController
 		
 		if ($this->getRequest()->get('_format') == 'html')
 		{
-			$doc2 = new \Bpi\RestMediaTypeBundle\Document();
+			$doc2 = new Document();
 			$document = array('data' => array('output' => $document, 'input' => array('example' => $doc2, 'expected_entities' => array('nodes_query'))));
 		}		
 		
@@ -52,11 +48,10 @@ class RestController extends FOSRestController
 	
 	public function postNodeListAction()
 	{
-		$serializer = $this->get("serializer");
-		$document = $serializer->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
-		$tr = new \Bpi\ApiBundle\Transform\Transform;
+		$document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
+		$extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
 		$node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')
-			->findByNodesQuery($tr->presentationToNodesQuery($document));
+			->findByNodesQuery($extractor->extract('nodesQuery'));
 		
 //		if (false === $query = @simplexml_load_string($this->getRequest()->getContent()))
 //		{
@@ -64,7 +59,7 @@ class RestController extends FOSRestController
 //			throw new HttpException(400, "Expected 'NodesQuery' BPI entity");
 //		}
 		
-		$document = $tr->transformMany($node_collection);
+		$document = Presentation::transformMany($node_collection);
 		$document->walkEntities(function($e) use ($document) {
 			$e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
 			$e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
@@ -72,7 +67,7 @@ class RestController extends FOSRestController
 		
 		if ($this->getRequest()->get('_format') == 'html')
 		{
-			$doc2 = new \Bpi\RestMediaTypeBundle\Document();
+			$doc2 = new Document();
 			$document = array('data' => array('output' => $document, 'input' => array('example' => $doc2, 'expected_entities' => array('nodes_query'))));
 		}
 		
@@ -90,8 +85,7 @@ class RestController extends FOSRestController
 	{
 		$_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
 		
-		$tr = new \Bpi\ApiBundle\Transform\Transform;
-		$document = $tr->domainToRepresentation($_node);
+		$document = Presentation::transform($_node);
 		$node = $document->getEntity('node');
 		$node->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
 		$node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
@@ -105,21 +99,19 @@ class RestController extends FOSRestController
 	/**
 	 * @Rest\Post("/node/item/{id}")
 	 */
-	public function postModifiedNodeAction($id)
+	public function postNodeRevisionAction($id)
 	{
-		$node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($this->getRequest()->get('id'));
 		$document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
 		
-		$tr = new \Bpi\ApiBundle\Transform\Transform;
-		$command = $tr->presentationToPushRevisionCommand($document);
-		$command->setParent($node);
-		$revision = $command->execute();
+		$extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
+
+		$revision = $this->get('domain.push_service')->pushRevision(
+			new \Bpi\ApiBundle\Domain\ValueObject\NodeId($id), 
+			$extractor->extract('agency.author'), 
+			$extractor->extract('resource')
+		);
 		
-		$dm = $this->get('doctrine.odm.mongodb.document_manager');
-		$dm->persist($revision);
-		$dm->flush();
-		
-		$view = $this->view($tr->domainToRepresentation($revision), 201)
+		$view = $this->view(\Bpi\ApiBundle\Transform\Presentation::transform($revision), 201)
 			->setTemplate("BpiApiBundle:Rest:item.html.twig");
 
 		return $this->handleView($view);
@@ -133,34 +125,20 @@ class RestController extends FOSRestController
 	 */
 	public function createNodeAction()
 	{
-		$serializer = $this->get("serializer");
-		$request = $this->get("request");
-		$dm = $this->get('doctrine.odm.mongodb.document_manager');
-//		$params = $this->container->get("fos_rest.request.param_fetcher");
-		
-		try
-		{
-			$document = $serializer->deserialize($request->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
+		$document = $this->get("serializer")->deserialize($this->getRequest()->getContent(), 'Bpi\RestMediaTypeBundle\Document', 'xml');
 
-			$transformer = new \Bpi\ApiBundle\Transform\Transform;
-			$push_command = $transformer->presentationToPushCommand($document);
-			
-			$node_model = $push_command->execute();
+		$extractor = new \Bpi\ApiBundle\Transform\Extractor($document);
 
-			$dm->persist($node_model);
-			$dm->flush();
+		$node = $this->get('domain.push_service')->push(
+			$extractor->extract('agency.author'), 
+			$extractor->extract('resource'), 
+			$extractor->extract('profile')
+		);
 
-			$node_presentation = $transformer->domainToRepresentation($node_model);
-			
-			$view = $this->view($node_presentation, 201)
-				->setTemplate("BpiApiBundle:Rest:push.html.twig");
+		$view = $this->view(\Bpi\ApiBundle\Transform\Presentation::transform($node), 201)
+			->setTemplate("BpiApiBundle:Rest:push.html.twig");
 
-			return $this->handleView($view);
-		}
-		catch(\Exception $e)
-		{
-			echo $e;
-		}
+		return $this->handleView($view);
 	}
 	
 	/**
