@@ -30,7 +30,7 @@ class Document
      * @Serializer\XmlList(inline=true, entry="entity")
      * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\Entity>")
      */
-    protected $entities;
+    protected $entities = array();
 
     /**
      * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Collection")

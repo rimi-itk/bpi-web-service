@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="/bundles/bpiapi/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="/bundles/bpiapi/codemirror/lib/codemirror.css" rel="stylesheet" media="screen">
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+        <script src="/bundles/bpiapi/bootstrap/js/bootstrap.min.js"></script>
+        <script src="/bundles/bpiapi/codemirror/lib/codemirror.js"></script>
+        <script src="/bundles/bpiapi/codemirror/mode/xml/xml.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+
+                // query for available methods
+                $.ajax("{{ path(app.request.attributes.get('_route')) }}.json", {
+                        type: "OPTIONS",
+                        success: function(data){
+                            for(method in data)
+                            {
+                                var tab = $("<li><a href='#tab_"+method+"'  data-toggle='tab'>"+method+"</li>")
+                                var item = $('<div class="tab-pane" id="tab_'+method+'"></div>')
+
+                                // INPUT
+                                if (data[method].input)
+                                {
+                                    item.append($("<h4>Expected entities</h4>"))
+                                   var list = $("<ul></ul>")
+                                   item.append(list)
+
+                                    $(data[method].input.entities).each(function(i,e){
+                                        list.append($("<li>"+e+"</li>"))
+                                    })
+
+                                    var editor = $('<section class="editor"><div class="controls"></div></section>')
+                                    var area = $('<textarea rows="7" class="area span12"></textarea>')
+                                    editor.append(area)
+                                    item.append(editor)
+
+                                }
+
+                                // SEND BUTTON
+                                var send_button = $('<button class="btn btn-primary">Send</button>')
+                                item.append(send_button)
+
+                                // OUTPUT
+                                item.append($("<h3>Output</h3>"))
+                                if (data[method].output)
+                                {
+                                    item.append($("<h4>Expected entities</h4>"))
+                                   var list = $("<ul></ul>")
+                                   item.append(list)
+
+                                    $(data[method].output.entities).each(function(i,e){
+                                        list.append($("<li>"+e+"</li>"))
+                                    })
+                                }
+                                var output = $("<div class='output'><h4 class='status'></h4><textarea rows=15' class='span12 body'></textarea></div>")
+                                item.append(output)
+                                var codemirror = CodeMirror.fromTextArea(output.find('textarea')[0], {
+                                    lineNumbers: true,
+                                    lineWrapping: true
+                                })
+
+                                // BIND SEND REQUEST
+                                send_button.bind('click', {method: method, area: area, output: output, codemirror: codemirror}, function(e){
+                                    var self = $(this)
+                                    data = (e.data.area==undefined) ? '' : e.data.area.val()
+
+                                    $.ajax("{{ path(app.request.attributes.get('_route')) }}", {
+                                        type: e.data.method,
+                                        data: data,
+                                        contentType: "application/xml",
+                                        beforeSend: function() {
+                                            self.addClass("disabled")
+                                            e.data.output.hide().find(".status").empty()
+                                        },
+                                        complete: function(jqXHR, textStatus) {
+                                            self.removeClass("disabled")
+                                            e.data.output.show()
+                                            e.data.output.find(".status").text(jqXHR.status+' '+jqXHR.statusText)
+                                            e.data.codemirror.setValue(jqXHR.responseText)
+                                        }
+                                    })
+                                })
+
+                                $('.nav-tabs').append(tab)
+                                $('.tab-content').append(item)
+                            }
+
+                            $(document).trigger('options_complete')
+
+                             // activate first tab
+                            $('.nav-tabs a:first').tab('show')
+                        }
+                 })
+
+                // load insert buttons into editor
+                $(document).bind('options_complete', function(){
+                    $.ajax("{{ path("schema_list_entities") }}.json", {
+                        type: "GET",
+                        contentType: "application/json",
+                        success: function(data) {
+                            for(entity in data.list)
+                            {
+                                   $(".editor .controls").append($('<button class="insert btn btn-small" data-entity="'+data.list[entity]+'">'+data.list[entity]+'</button>'))
+                            }
+                            $(document).trigger('buttons_loaded');
+                        }
+                    })
+                })
+
+                // activate insert buttons
+                $(document).bind('buttons_loaded', function(){
+                   $('.editor .insert').click(function(){
+                        var self = $(this)
+                        var schema_uri = "{{ path("schema_entity", {"name": ""}) }}/"+$(this).data('entity')
+                        $.ajax(schema_uri, {
+                            type: "GET",
+                            contentType: "application/xml",
+                            beforeSend: function() {
+                                self.attr('disabled', true)
+                            },
+                            complete: function(jqXHR, textStatus) {
+                                self.attr('disabled', false)
+                                if (jqXHR.status == 200)
+                                {
+                                    var val = $(".editor .area").val() + jqXHR.responseText
+                                    $(".editor .area").val(val)
+                                }
+                                else alert('Unable to insert. Server response: '+jqXHR.status+' '+jqXHR.statusText)
+                            }
+                        })
+                    })
+                })
+
+            });
+            </script>
+        </head>
+        <body>
+
+            <div class="container">
+
+                <ul class="nav nav-tabs"></ul>
+
+                <div class="tab-content"></div>
+
+            </div>
+
+        </body>
+    </html>

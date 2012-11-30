@@ -46,9 +46,15 @@ class Profile implements IPresentable
      */
     public function transform(Document $document)
     {
-        $document->currentEntity()->addChildEntity(
-            $document->createEntity('profile')
-        );
+        try
+        {
+            $profile = $document->createEntity('profile');
+            $document->currentEntity()->addChildEntity($profile);
+        }
+        catch(\RuntimeException $e)
+        {
+             $document->appendEntity($profile);
+        }
 
         $this->taxonomy->transform($document);
     }

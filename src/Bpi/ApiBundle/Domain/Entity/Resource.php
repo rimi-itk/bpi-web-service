@@ -57,9 +57,14 @@ class Resource implements IPresentable
      */
     public function transform(Document $document)
     {
-        $document->currentEntity()->addChildEntity(
-            $entity = $document->createEntity('resource')
-        );
+        try
+        {
+            $entity = $document->createEntity('resource');
+            $document->currentEntity()->addChildEntity($entity);
+        } catch (\RuntimeException $e)
+        {
+            $document->appendEntity($entity);
+        }
 
         $entity->addProperty($document->createProperty('title', 'string', $this->title));
         $entity->addProperty($document->createProperty('body', 'string', $this->body));

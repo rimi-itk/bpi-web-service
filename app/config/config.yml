@@ -114,6 +114,7 @@ fos_rest:
         fallback_format: xml
         prefer_extension: true
     view:
+        view_response_listener: force
         formats:
               json: true
               xml: true
