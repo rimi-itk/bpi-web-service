@@ -1,7 +1,7 @@
 <?php
 namespace Bpi\RestMediaTypeBundle\Element;
 
-use JMS\SerializerBundle\Annotation as Serializer;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @Serializer\XmlRoot("link")

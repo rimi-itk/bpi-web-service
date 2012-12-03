@@ -1,7 +1,7 @@
 <?php
 namespace Bpi\RestMediaTypeBundle\Property;
 
-use JMS\SerializerBundle\Annotation as Serializer;
+use JMS\Serializer\Annotation as Serializer;
 
 use Bpi\RestMediaTypeBundle\Element\Property;
 use Bpi\RestMediaTypeBundle\Property\TypeEnum;

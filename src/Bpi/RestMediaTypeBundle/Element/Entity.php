@@ -1,7 +1,7 @@
 <?php
 namespace Bpi\RestMediaTypeBundle\Element;
 
-use JMS\SerializerBundle\Annotation as Serializer;
+use JMS\Serializer\Annotation as Serializer;
 use Bpi\RestMediaTypeBundle\Element\Property;
 use Bpi\RestMediaTypeBundle\Element\Link;
 use Bpi\RestMediaTypeBundle\Element\Scope\HasLinks;
