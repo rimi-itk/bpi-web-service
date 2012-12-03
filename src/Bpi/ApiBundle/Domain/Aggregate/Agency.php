@@ -7,7 +7,7 @@ use Bpi\RestMediaTypeBundle\Document;
 class Agency implements IPresentable
 {
     protected $id;
-    
+
     /**
      * @inheritDoc
      */

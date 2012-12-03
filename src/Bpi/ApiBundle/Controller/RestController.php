@@ -57,9 +57,10 @@ class RestController extends FOSRestController
         $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findLatest();
 
         $document = Presentation::transformMany($node_collection);
-        $document->walkEntities(function($e) use ($document) {
-            $e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
-            $e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+        $router = $this->get('router');
+        $document->walkEntities(function($e) use ($document, $router) {
+            $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
+            $e->addLink($document->createLink('collection', $router->generate('list', array(), true)));
         });
 
         return $document;
@@ -78,9 +79,10 @@ class RestController extends FOSRestController
             ->findByNodesQuery($extractor->extract('nodesQuery'));
 
         $document = Presentation::transformMany($node_collection);
-        $document->walkEntities(function($e) use ($document) {
-            $e->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $e->property('id')->getValue()), true)));
-            $e->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+        $router = $this->get('router');
+        $document->walkEntities(function($e) use ($document, $router) {
+            $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
+            $e->addLink($document->createLink('collection', $router->generate('list', array(), true)));
         });
 
         return $document;
