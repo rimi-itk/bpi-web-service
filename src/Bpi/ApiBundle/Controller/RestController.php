@@ -41,11 +41,6 @@ class RestController extends FOSRestController
         );
     }
 
-    public function testAction()
-    {
-        return new Response('test_action');
-    }
-
     /**
      * Default node listing
      *
@@ -61,6 +56,7 @@ class RestController extends FOSRestController
         $document->walkEntities(function($e) use ($document, $router) {
             $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
             $e->addLink($document->createLink('collection', $router->generate('list', array(), true)));
+            $e->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), 'filename' => ''), true)));
         });
 
         return $document;
@@ -83,6 +79,7 @@ class RestController extends FOSRestController
         $document->walkEntities(function($e) use ($document, $router) {
             $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
             $e->addLink($document->createLink('collection', $router->generate('list', array(), true)));
+            $e->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), "filename" => ""), true)));
         });
 
         return $document;
@@ -218,7 +215,11 @@ class RestController extends FOSRestController
      */
     public function postNodeAction()
     {
-        $extractor = new Extractor($this->getDocument());
+        /** check request body size, must be smaller than 10MB **/
+        if (strlen($this->getRequest()->getContent()) > 10485760)
+            throw new HttpException(413, "Request entity too large");
+
+        $extractor = new Extractor($doc = $this->getDocument());
 
         $node = $this->get('domain.push_service')->push(
             $extractor->extract('agency.author'),
@@ -227,6 +228,37 @@ class RestController extends FOSRestController
         );
 
         return Presentation::transform($node);
+    }
+
+    /**
+     * Link file with node
+     * Filename will overwrite existing one if it has previously set
+     *
+     * @Rest\Put("/node/{node_id}/asset/{filename}")
+     * @Rest\View(statusCode="204")
+     */
+    public function putNodeAssetAction($node_id, $filename)
+    {
+        $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($node_id);
+        if (is_null($node))
+            throw new HttpException(404, 'No such node ID exists');
+
+        $filesystem = $this->get('knp_gaufrette.filesystem_map')->get('assets');
+        $file = new \Gaufrette\File($filename, $filesystem);
+        $result = $file->setContent($this->getRequest()->getContent(), array('title' => 'test_title'));
+
+        if (false === $result)
+            throw new HttpException(500, 'Unable to store requested file');
+
+        $asset = $this->getRepository('BpiApiBundle:Entity\Asset')->findOneBy(array('filename' => $filename));
+
+        $node->addAsset($asset);
+
+        $dm = $this->get('doctrine.odm.mongodb.document_manager');
+        $dm->persist($node);
+        $dm->flush();
+
+        return new Response('', 204);
     }
 
     /**

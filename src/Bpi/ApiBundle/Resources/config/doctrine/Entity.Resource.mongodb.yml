@@ -9,3 +9,9 @@ Bpi\ApiBundle\Domain\Entity\Resource:
       type: string
     ctime:
       type: date
+    assets:
+      reference: true
+      type: many
+      targetDocument: Bpi\ApiBundle\Domain\Entity\Asset
+      cascade: all
+      strategy: pushAll

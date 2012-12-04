@@ -4,6 +4,7 @@ namespace Bpi\ApiBundle\Domain\Aggregate;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
+use Bpi\ApiBundle\Domain\Entity\Asset;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -71,6 +72,15 @@ class Node implements IPresentable
     protected function isSimilarResource(Resource $resource)
     {
         return $this->resource->isSimilar($resource);
+    }
+
+    /**
+     *
+     * @param \Bpi\ApiBundle\Domain\Entity\Asset $asset
+     */
+    public function addAsset(Asset $asset)
+    {
+        $this->resource->addAsset($asset);
     }
 
     /**

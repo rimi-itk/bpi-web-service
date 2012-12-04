@@ -25,6 +25,7 @@ class AppKernel extends Kernel
             new Bpi\ApiBundle\BpiApiBundle(),
             new Bpi\RestMediaTypeBundle\BpiRestMediaTypeBundle(),
             new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
+            new Knp\Bundle\GaufretteBundle\KnpGaufretteBundle()
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

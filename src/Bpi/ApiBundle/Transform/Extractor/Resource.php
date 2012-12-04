@@ -21,8 +21,8 @@ class Resource implements IExtractor
         $entity = $this->doc->getEntity('resource');
         $builder = new ResourceBuilder();
         return $builder
-            ->title($entity->property('body')->getValue())
-            ->body($entity->property('title')->getValue())
+            ->title($entity->property('title')->getValue())
+            ->body($entity->property('body')->getValue())
             ->teaser($entity->property('teaser')->getValue())
             ->ctime(new \DateTime($entity->property('ctime')->getValue()))
             ->build()

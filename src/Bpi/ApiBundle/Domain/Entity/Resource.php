@@ -1,7 +1,7 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Entity;
 
-use Bpi\ApiBundle\Domain\ValueObject\Author;
+use Bpi\ApiBundle\Domain\Entity\Asset;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -21,6 +21,8 @@ class Resource implements IPresentable
 
     protected $type = 'article';
 
+    protected $assets;
+
     public function __construct(
         $title,
         $body,
@@ -32,6 +34,15 @@ class Resource implements IPresentable
         $this->body = $body;
         $this->teaser = $teaser;
         $this->ctime = $ctime;
+    }
+
+    /**
+     *
+     * @param \Bpi\ApiBundle\Domain\Entity\Asset $asset
+     */
+    public function  addAsset(Asset $asset)
+    {
+        $this->assets[] = $asset;
     }
 
     /**

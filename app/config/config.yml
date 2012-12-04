@@ -11,11 +11,20 @@ services:
     domain.push_service:
         class: Bpi\ApiBundle\Domain\Service\PushService
         arguments: ["@doctrine_mongodb.odm.document_manager"]
-          
-#    bpi.apibundle.listener.request:
-#        class: Bpi\ApiBundle\RequestListener
-#        tags:
-#            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+    bpi.gridfs.conn:
+      class: Doctrine\MongoDB\Connection
+      factory_service: doctrine_mongodb.odm.default_connection
+      factory_method: selectDatabase
+      arguments: ["bpi"]
+    bpi.gridfs.db:
+        class: Doctrine\MongoDB\Database
+        factory_service: bpi.gridfs.conn
+        factory_method: getGridFS
+        arguments: ["Asset"]
+    bpi.gridfs:
+        class: Doctrine\MongoDB\GridFS
+        factory_service: bpi.gridfs.db
+        factory_method: getMongoCollection
 
 framework:
     #esi:             ~
@@ -96,6 +105,9 @@ fos_rest:
               xml: true
               bpi: true
               rss: false
+              gif: true
+              jpg: true
+              png: true
         templating_formats:
             html: true
         mime_types:
@@ -117,3 +129,12 @@ jms_serializer:
         # class: My\FooBundle\Entity\User
         # expected path: @MyFooBundle/Resources/config/serializer/Entity.User.(yml|xml|php)
         auto_detection: true
+
+knp_gaufrette:
+    adapters:
+        attachment:
+            gridfs:
+                mongogridfs_id: bpi.gridfs
+    filesystems:
+        assets:
+            adapter: attachment

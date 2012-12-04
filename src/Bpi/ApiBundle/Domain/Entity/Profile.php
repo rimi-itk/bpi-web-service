@@ -12,12 +12,20 @@ class Profile implements IPresentable
     protected $taxonomy;
     protected $relations;
 
+    /**
+     *
+     * @param \Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy $taxonomy
+     */
     public function __construct(Taxonomy $taxonomy)
     {
         $this->taxonomy = $taxonomy;
         $this->relations = new \SplObjectStorage();
     }
 
+    /**
+     *
+     * @param \Bpi\ApiBundle\Domain\Entity\Profile\Relation\IRelation $relation
+     */
     public function addRelation(IRelation $relation)
     {
         $this->attach($relation);
