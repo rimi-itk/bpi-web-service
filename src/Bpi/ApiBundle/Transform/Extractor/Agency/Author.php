@@ -6,6 +6,9 @@ use Bpi\ApiBundle\Domain\Entity\Author as DomainAuthor;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Transform\Extractor\IExtractor;
 
+/**
+ * Extract Author entity from presentation
+ */
 class Author implements IExtractor
 {
     /**
@@ -13,11 +16,20 @@ class Author implements IExtractor
      */
     protected $doc;
 
+    /**
+     * 
+     * @inheritdoc
+     */
     public function __construct(Document $doc)
     {
         $this->doc = $doc;
     }
 
+    /**
+     * 
+     * @inheritdoc
+     * @return \Bpi\ApiBundle\Domain\Entity\Author
+     */
     public function extract()
     {
         $agency = $this->doc->getEntity('agency');

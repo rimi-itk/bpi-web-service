@@ -10,15 +10,30 @@ class Extractor
      */
     protected $doc;
 
+    /**
+     * 
+     * @param \Bpi\RestMediaTypeBundle\Document $doc
+     */
     public function __construct(Document $doc)
     {
         $this->doc = $doc;
     }
 
+    /**
+     * Extract entity by its name
+     * 
+     * @param string $entity_name
+     * @return object extracted domain model
+     * @throws \RuntimeException
+     */
     public function extract($entity_name)
     {
         $classname = $this->buildClassName($entity_name);
         $extractor = new $classname($this->doc);
+        
+        if (!($extractor instanceof Extractor\IExtractor))
+            throw new \RuntimeException('Given entity name ['.$entity_name.'] has no mapped extractor');
+        
         return $extractor->extract();
     }
 

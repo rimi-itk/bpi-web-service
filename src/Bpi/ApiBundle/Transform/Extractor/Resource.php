@@ -4,6 +4,9 @@ namespace Bpi\ApiBundle\Transform\Extractor;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 
+/**
+ * Extract Resource entity from presentation
+ */
 class Resource implements IExtractor
 {
     /**
@@ -11,11 +14,20 @@ class Resource implements IExtractor
      */
     protected $doc;
 
+    /**
+     * 
+     * @inheritdoc
+     */
     public function __construct(Document $doc)
     {
         $this->doc = $doc;
     }
 
+    /**
+     * 
+     * @inheritdoc
+     * @return Bpi\ApiBundle\Domain\Entity\Resource
+     */
     public function extract()
     {
         $entity = $this->doc->getEntity('resource');

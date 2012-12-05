@@ -5,6 +5,9 @@ use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\NodeQuery;
 use Bpi\ApiBundle\Transform\Path;
 
+/**
+ * Extract NodesQuery entity from presentation
+ */
 class NodesQuery implements IExtractor
 {
     /**
@@ -12,11 +15,20 @@ class NodesQuery implements IExtractor
      */
     protected $doc;
 
+    /**
+     * 
+     * @inheritdoc
+     */
     public function __construct(Document $doc)
     {
         $this->doc = $doc;
     }
 
+    /**
+     * 
+     * @inheritdoc
+     * @return \Bpi\ApiBundle\Domain\Entity\NodeQuery
+     */
     public function extract()
     {
         $node_query = new NodeQuery();
