@@ -23,68 +23,42 @@ class Resource implements IPresentable
     protected $type = 'article';
 
     protected $assets = array();
-    
-    protected $embedded_assets = array();
 
     public function __construct(
         $title,
         $body,
         $teaser,
         \DateTime $ctime,
-        array $assets = null
+        array $files = null
     )
     {
         $this->title = $title;
-        $this->body = $body;
+        $this->body = new Resource\Body($body);
         $this->teaser = $teaser;
         $this->ctime = $ctime;
-        $this->embedded_assets = $assets;
+        $this->allocateFiles($files);
     }
 
     /**
-     * 
-     * @param \Bpi\ApiBundle\Domain\Entity\Asset $asset
+     * Allocate files as embedded or attached assets
+     *
+     * @param array $files Gaufrette\File instances
+     * @return void
      */
-    public function addAsset(Asset $asset)
+    public function allocateFiles(array $files = null)
     {
-        $this->assets[] = $asset;
-    }
-    
-    /**
-     * Allocating embedded assets in body
-     * 
-     * @return string body
-     */
-    protected function allocateEmbeddedAssets()
-    {
-        $dom = new \DOMDocument();        
-        $dom->strictErrorChecking = false;
-        
-        libxml_use_internal_errors(true);
-        $result = @$dom->loadHTML($this->body);
-        libxml_clear_errors();
-        
-        // unable to load content
-        if (false === $result)
-            return $this->body;
-            
-        foreach ($this->embedded_assets as $asset)
-        {
-            $asset->allocateInContent($dom);
+        if (is_null($files))
+            return;
+
+        foreach ($files as $file) {
+            $this->assets[] = $this->body->allocateFile($file);
         }
-
-        $body = '';
-        $xpath = new \DOMXPath($dom);
-        foreach($xpath->query('//html/body/*') as $node)
-            $body .= $dom->saveHTML($node);
-        
-        return $body;
     }
 
     /**
      * Copy assets into other filesystem in transactional way
      * Common use case is to persists from memory to storage
-     * 
+     *
      * @param \Gaufrette\Filesystem $fs
      * @return Resource\AssetsTransaction
      */
@@ -92,18 +66,16 @@ class Resource implements IPresentable
     {
         $transaction = new Resource\AssetsTransaction();
         try {
-            foreach($this->assets as $asset)
-            {
+            foreach($this->assets as $asset) {
                 $transaction->add($asset);
                 $asset->copy($fs);
             }
-        } catch(\RuntimeException $e)
-        {
+        } catch(\RuntimeException $e) {
             $transaction->markAsFailed($e);
         }
         return $transaction;
     }
-    
+
     /**
      * Calculate similarity of resources by checking body contents
      *
@@ -134,14 +106,15 @@ class Resource implements IPresentable
             $document->appendEntity($entity);
         }
 
-        $body = $this->allocateEmbeddedAssets();
-        $body = str_ireplace('__embedded_asset_base_url__', $document->generateRoute("get_asset", array('filename'=>'')), $body);
-        
+        // replace embedded assets with local link
+        foreach ($this->assets as $asset)
+                $this->body->replaceAssetLink($asset, $document->generateRoute("get_asset", array('filename'=> $asset->getId())));
+
         $entity->addProperty($document->createProperty('title', 'string', $this->title));
-        $entity->addProperty($document->createProperty('body', 'string', $body));
+        $entity->addProperty($document->createProperty('body', 'string', $this->body->getFlattenContent()));
         $entity->addProperty($document->createProperty('teaser', 'string', $this->teaser));
         $entity->addProperty($document->createProperty('ctime', 'dateTime', $this->ctime));
-        $entity->addProperty($document->createProperty('type', 'string', $this->type));   
+        $entity->addProperty($document->createProperty('type', 'string', $this->type));
     }
 
     /**
@@ -160,5 +133,13 @@ class Resource implements IPresentable
 
         $cmp = new Comparator($this->$field, $resource->$field, $order);
         return $cmp->getResult();
+    }
+
+    /**
+     * This method will be invoked after the entity has been loaded from doctrine
+     */
+    public function wakeup()
+    {
+        $this->body = new Resource\Body($this->body);
     }
 }

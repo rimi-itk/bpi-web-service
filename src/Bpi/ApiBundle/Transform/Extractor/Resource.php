@@ -4,7 +4,6 @@ namespace Bpi\ApiBundle\Transform\Extractor;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\RestMediaTypeBundle\Element\Property;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
-use Bpi\ApiBundle\Domain\Entity\Asset;
 use Gaufrette\File;
 use Gaufrette\Adapter\InMemory as MemoryAdapter;
 use Gaufrette\Filesystem;
@@ -20,7 +19,7 @@ class Resource implements IExtractor
     protected $doc;
 
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function __construct(Document $doc)
@@ -29,7 +28,7 @@ class Resource implements IExtractor
     }
 
     /**
-     * 
+     *
      * {@inheritdoc}
      * @return Bpi\ApiBundle\Domain\Entity\Resource
      */
@@ -37,17 +36,16 @@ class Resource implements IExtractor
     {
         $entity = $this->doc->getEntity('resource');
         $builder = new ResourceBuilder();
-        
-        $entity->walk(function($e) use($builder) {
-            $fs = new Filesystem(new MemoryAdapter());
-            if ($e->typeOf(Property::TYPE_ASSET))
-            {
+        $fs = new Filesystem(new MemoryAdapter());
+
+        $entity->walk(function($e) use ($builder, $fs) {
+            if ($e->typeOf(Property::TYPE_ASSET)) {
                 $file = new File($e->getName(), $fs);
                 $file->setContent($e->getValue());
-                $builder->addAsset(new Asset('', $file));
+                $builder->addFile($file);
             }
         });
-        
+
         return $builder
             ->title($entity->property('title')->getValue())
             ->body($entity->property('body')->getValue())

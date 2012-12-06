@@ -222,8 +222,7 @@ class RestController extends FOSRestController
         if (strlen($this->getRequest()->getContent()) > 10485760)
             throw new HttpException(413, "Request entity too large");
 
-        $extractor = new Extractor($doc = $this->getDocument());
-
+        $extractor = new Extractor($this->getDocument());
         $node = $this->get('domain.push_service')->push(
             $extractor->extract('agency.author'),
             $extractor->extract('resource'),
@@ -253,9 +252,7 @@ class RestController extends FOSRestController
         if (false === $result)
             throw new HttpException(500, 'Unable to store requested file');
 
-        $asset = $this->getRepository('BpiApiBundle:Entity\Asset')->findOneBy(array('filename' => $filename));
-
-        $node->addAsset($asset);
+        $node->allocateFile($file);
 
         $dm = $this->get('doctrine.odm.mongodb.document_manager');
         $dm->persist($node);
@@ -276,7 +273,7 @@ class RestController extends FOSRestController
          * @todo implementation
          */
     }
-    
+
     /**
      * For testing purposes. Echoes back sent request
      *

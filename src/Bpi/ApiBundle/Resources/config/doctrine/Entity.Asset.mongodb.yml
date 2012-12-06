@@ -3,7 +3,7 @@ Bpi\ApiBundle\Domain\Entity\Asset:
   fields:
     id:
       id: true
-    title:
+    type:
       type: string
     file:
       type: file

@@ -2,12 +2,12 @@
 namespace Bpi\ApiBundle\Domain\Factory;
 
 use Bpi\ApiBundle\Domain\Entity\Resource;
-use Bpi\ApiBundle\Domain\Entity\Asset;
+use Gaufrette\File;
 
 class ResourceBuilder
 {
     protected $title, $body, $teaser, $ctime;
-    protected $assets = array();
+    protected $files = array();
 
     /**
      *
@@ -53,11 +53,11 @@ class ResourceBuilder
         return $this;
     }
 
-    public function addAsset(Asset $asset)
+    public function addFile(File $file)
     {
-        $this->assets[] = $asset;
+        $this->files[] = $file;
     }
-    
+
     /**
      *
      * @return boolean
@@ -81,8 +81,6 @@ class ResourceBuilder
         if (!$this->isValidForBuild())
             throw new \RuntimeException('Invalid state: can not build');
 
-        $resource = new Resource($this->title, $this->body, $this->teaser, $this->ctime, $this->assets);
-//        array_walk($this->assets, array($resource, 'addAsset')); // simply calls $resource->addAsset method for each item in array
-        return $resource;
+        return new Resource($this->title, $this->body, $this->teaser, $this->ctime, $this->files);
     }
 }

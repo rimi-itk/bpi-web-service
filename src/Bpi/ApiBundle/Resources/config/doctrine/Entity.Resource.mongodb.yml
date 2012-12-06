@@ -15,3 +15,5 @@ Bpi\ApiBundle\Domain\Entity\Resource:
       targetDocument: Bpi\ApiBundle\Domain\Entity\Asset
       cascade: all
       strategy: pushAll
+  lifecycleCallbacks:
+    postLoad: [ wakeup ]

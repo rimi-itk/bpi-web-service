@@ -4,10 +4,10 @@ namespace Bpi\ApiBundle\Domain\Aggregate;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
-use Bpi\ApiBundle\Domain\Entity\Asset;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Gaufrette\File;
 
 class Node implements IPresentable
 {
@@ -76,11 +76,11 @@ class Node implements IPresentable
 
     /**
      *
-     * @param \Bpi\ApiBundle\Domain\Entity\Asset $asset
+     * @param \Gaufrette\File $file
      */
-    public function addAsset(Asset $asset)
+    public function allocateFile(File $file)
     {
-        $this->resource->addAsset($asset);
+        $this->resource->allocateFiles(array($file));
     }
 
     /**
