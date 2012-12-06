@@ -59,22 +59,26 @@ class Resource implements IPresentable
     {
         $dom = new \DOMDocument();        
         $dom->strictErrorChecking = false;
-        $dom->recover = true;
         
         libxml_use_internal_errors(true);
         $result = @$dom->loadHTML($this->body);
         libxml_clear_errors();
         
-        if (false !== $result)
+        // unable to load content
+        if (false === $result)
+            return $this->body;
+            
+        foreach ($this->embedded_assets as $asset)
         {
-            foreach ($this->embedded_assets as $asset)
-            {
-                $asset->allocateInContent($dom);
-            }
-            return $dom->saveHTML();
+            $asset->allocateInContent($dom);
         }
+
+        $body = '';
+        $xpath = new \DOMXPath($dom);
+        foreach($xpath->query('//html/body/*') as $node)
+            $body .= $dom->saveHTML($node);
         
-        return $this->body;
+        return $body;
     }
 
     /**

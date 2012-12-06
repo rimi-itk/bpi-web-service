@@ -37,11 +37,11 @@ class RestControllerTest extends WebTestCase
         $xml = simplexml_load_string($client->getResponse()->getContent());
         $this->assertEquals('node', $xml->entity['name']);
         
-        // assert embedded image
+        // assert body
         $body = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="body"]'));
-        $this->assertNotEmpty((string) $body);
-        $this->assertTrue((bool)preg_match('~<img id="embedded_img" src="(.+)"~', (string)$body, $matches));
-        $this->assertTrue((bool)preg_match("~[^/]+/embedded_img~", $matches[1]));
+        $this->assertEquals(1, preg_match('~^<p>foo<span>bar</span></p>~', (string)$body), 'At least first line of body must much');
+        $this->assertEquals(1, preg_match('~<img id="embedded_img" src="(.+)"~', (string)$body, $matches));
+        $this->assertEquals(1, preg_match("~[^/]+/embedded_img~", $matches[1]));
 
         $this->console->run($this->load_fixtures);
     }
