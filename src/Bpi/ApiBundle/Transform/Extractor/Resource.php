@@ -21,7 +21,7 @@ class Resource implements IExtractor
 
     /**
      * 
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function __construct(Document $doc)
     {
@@ -30,7 +30,7 @@ class Resource implements IExtractor
 
     /**
      * 
-     * @inheritdoc
+     * {@inheritdoc}
      * @return Bpi\ApiBundle\Domain\Entity\Resource
      */
     public function extract()

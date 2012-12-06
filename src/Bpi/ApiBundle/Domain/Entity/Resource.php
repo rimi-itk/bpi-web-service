@@ -119,7 +119,7 @@ class Resource implements IPresentable
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function transform(Document $document)
     {

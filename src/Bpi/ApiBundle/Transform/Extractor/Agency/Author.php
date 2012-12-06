@@ -18,7 +18,7 @@ class Author implements IExtractor
 
     /**
      * 
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function __construct(Document $doc)
     {
@@ -27,7 +27,7 @@ class Author implements IExtractor
 
     /**
      * 
-     * @inheritdoc
+     * {@inheritdoc}
      * @return \Bpi\ApiBundle\Domain\Entity\Author
      */
     public function extract()

@@ -9,7 +9,7 @@ class Agency implements IPresentable
     protected $id;
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function transform(Document $document)
     {

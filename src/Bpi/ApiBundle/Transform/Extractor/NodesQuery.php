@@ -17,7 +17,7 @@ class NodesQuery implements IExtractor
 
     /**
      * 
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function __construct(Document $doc)
     {
@@ -26,7 +26,7 @@ class NodesQuery implements IExtractor
 
     /**
      * 
-     * @inheritdoc
+     * {@inheritdoc}
      * @return \Bpi\ApiBundle\Domain\Entity\NodeQuery
      */
     public function extract()
