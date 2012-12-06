@@ -2,6 +2,7 @@
 namespace Bpi\RestMediaTypeBundle;
 
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface as Router;
 
 use Bpi\RestMediaTypeBundle\Element\Collection;
 use Bpi\RestMediaTypeBundle\Element\Entity;
@@ -19,6 +20,12 @@ class Document
      * @var Bpi\RestMediaTypeBundle\Element\Entity current entity
      */
     protected $current_entity;
+
+    /**
+     * @Serializer\Exclude
+     * @var \Symfony\Component\Routing\Generator\UrlGeneratorInterface
+     */
+    protected $router;
 
     /**
      * @Serializer\XmlAttribute
@@ -42,6 +49,37 @@ class Document
         $this->version = '0.1';
     }
 
+    /**
+     * Inject router dependency
+     * 
+     * @param \Symfony\Component\Routing\Generator\UrlGeneratorInterface $router
+     */
+    public function setRouter(Router $router)
+    {
+        $this->router = $router;
+    }
+    
+    /**
+     * Generates a URL from the given parameters.
+     *
+     * @param string  $name       The name of the route
+     * @param mixed   $parameters An array of parameters
+     * @param Boolean $absolute   Whether to generate an absolute URL
+     *
+     * @return string The generated URL
+     *
+     * @throws RouteNotFoundException if route doesn't exist
+     */
+    public function generateRoute($name, $parameters = array(), $absolute = false)
+    {
+        return $this->router->generate($name, $parameters, $absolute);
+    }
+    
+    /**
+     * Call the callback on each entity
+     * 
+     * @param callback $callback
+     */
     public function walkEntities($callback)
     {
         array_walk($this->entities, $callback);

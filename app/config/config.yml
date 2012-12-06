@@ -10,7 +10,7 @@ services:
           - ['registerHandler', [ 'bpi', ["@bpi.apibundle.rest.view_extension_handler", 'handleExtension'] ] ]
     domain.push_service:
         class: Bpi\ApiBundle\Domain\Service\PushService
-        arguments: ["@doctrine_mongodb.odm.document_manager"]
+        arguments: ["@doctrine_mongodb.odm.document_manager", "@knp_gaufrette.filesystem_map"]
     bpi.gridfs.conn:
       class: Doctrine\MongoDB\Connection
       factory_service: doctrine_mongodb.odm.default_connection
@@ -25,6 +25,13 @@ services:
         class: Doctrine\MongoDB\GridFS
         factory_service: bpi.gridfs.db
         factory_method: getMongoCollection
+    bpi.presentation.document:
+        class: Bpi\RestMediaTypeBundle\Document
+        calls: 
+          - ['setRouter', [ "@router"] ]
+    bpi.presentation.transformer:
+        class: Bpi\ApiBundle\Transform\Presentation
+        arguments:  ["@bpi.presentation.document"]
 
 framework:
     #esi:             ~

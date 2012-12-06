@@ -41,27 +41,49 @@ class Entity implements HasLinks
      */
     protected $entities;
 
+    /**
+     * 
+     * @param string $name
+     */
     public function __construct($name)
     {
         $this->name = $name;
     }
 
+    /**
+     * Entity name
+     * 
+     * @return string
+     */
     public function getName()
     {
         return $this->name;
     }
 
+    /**
+     * 
+     * @param \Bpi\RestMediaTypeBundle\Element\Property $property
+     */
     public function addProperty(Property $property)
     {
         $this->properties[$property->getName()] = $property;
     }
 
+    /**
+     * 
+     * @param array $properties
+     */
     public function addProperties(array $properties)
     {
         foreach ($properties as $property)
             $this->addProperty($property);
     }
 
+    /**
+     * 
+     * @param \Bpi\RestMediaTypeBundle\Element\Link $link
+     * @return \Bpi\RestMediaTypeBundle\Element\Entity
+     */
     public function addLink(Link $link)
     {
         $this->links[] = $link;
@@ -107,28 +129,49 @@ class Entity implements HasLinks
         return true;
     }
 
+    /**
+     * Attach this entity to document
+     * 
+     * @param \Bpi\RestMediaTypeBundle\Document $document
+     */
     public function attach(Document $document)
     {
         $this->document = $document;
     }
 
+    /**
+     * Check if givendocument is owner of current entity
+     * 
+     * @param \Bpi\RestMediaTypeBundle\Document $document
+     * @return bool
+     */
     public function isOwner(Document $document)
     {
         return spl_object_hash($this->document) == spl_object_hash($document);
     }
 
+    /**
+     * 
+     * @param \Bpi\RestMediaTypeBundle\Element\Entity $entity
+     */
     public function addChildEntity(Entity $entity)
     {
         $this->document->setCursorOnEntity($entity);
         $this->entities[$entity->getName()] = $entity;
     }
 
+    /**
+     * 
+     * @param string $name of entity
+     * @return Entity
+     */
     public function getChildEntity($name)
     {
         return $this->entities[$name];
     }
 
     /**
+     * Get properties matched by name
      *
      * @param string $regexp name regular expression
      * @return array
@@ -139,6 +182,31 @@ class Entity implements HasLinks
         foreach ($this->properties as $property) {
             if (preg_match($regexp, $property->getName(), $matches))
                 $props[$matches[1]] = $property;
+        }
+        return $props;
+    }
+    
+    /**
+     * 
+     * @param \Closure $callback with value, index arguments
+     */
+    public function walk(\Closure $callback)
+    {
+        array_walk($this->properties, $callback);
+    }
+    
+    /**
+     * Get properties matched by type
+     * 
+     * @param string $type
+     * @return array
+     */
+    public function matchPropertiesByType($type)
+    {
+        $props = array();
+        foreach ($this->properties as $property) {
+            if ($property->typeOf($type))
+                $props[$property->getName()] = $property;
         }
         return $props;
     }

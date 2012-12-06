@@ -2,6 +2,7 @@
 namespace Bpi\ApiBundle\Domain\Service;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use Knp\Bundle\GaufretteBundle\FilesystemMap;
 
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
@@ -22,11 +23,18 @@ class PushService
 
     /**
      *
+     * @var Gaufrette\FilesystemMap 
+     */
+    protected $fs_map;
+    
+    /**
+     *
      * @param \Doctrine\Common\Persistence\ObjectManager $manager
      */
-    public function __construct(ObjectManager $manager)
+    public function __construct(ObjectManager $manager, FilesystemMap $fs_map)
     {
         $this->manager = $manager;
+        $this->fs_map = $fs_map;
     }
 
     /**
@@ -39,6 +47,12 @@ class PushService
     public function push(Author $author, Resource $resource, Profile $profile)
     {
         $builder = new NodeBuilder;
+        
+        // copy assets from memory into storage
+        $transaction = $resource->copyAssets($this->fs_map->get('assets'));
+        if ($transaction->rollbackOnFail())
+            $transaction->throwTheReason();
+        
         $node = $builder
             ->author($author)
             ->profile($profile)

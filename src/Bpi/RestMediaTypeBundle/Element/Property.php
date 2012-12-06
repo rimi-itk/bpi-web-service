@@ -9,7 +9,10 @@ use Bpi\RestMediaTypeBundle\Property\TypeEnum;
  */
 class Property
 {
-    const type_entity = 'entity';
+    const TYPE_ASSET = 'asset';
+    const TYPE_NUMBER = 'number';
+    const TYPE_STRING = 'string';
+    const TYPE_DATETIME = 'dateTime';
 
     /**
      * @Serializer\XmlAttribute

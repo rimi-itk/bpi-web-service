@@ -34,11 +34,13 @@ class RestController extends FOSRestController
      */
     protected function getDocument()
     {
-        return $this->get("serializer")->deserialize(
+        $document = $this->get("serializer")->deserialize(
               $this->getRequest()->getContent(),
               'Bpi\RestMediaTypeBundle\Document',
               'xml'
         );
+        $document->setRouter($this->get('router'));
+        return $document;
     }
 
     /**
@@ -51,7 +53,7 @@ class RestController extends FOSRestController
     {
         $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findLatest();
 
-        $document = Presentation::transformMany($node_collection);
+        $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
         $router = $this->get('router');
         $document->walkEntities(function($e) use ($document, $router) {
             $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
@@ -74,7 +76,7 @@ class RestController extends FOSRestController
         $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')
             ->findByNodesQuery($extractor->extract('nodesQuery'));
 
-        $document = Presentation::transformMany($node_collection);
+        $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
         $router = $this->get('router');
         $document->walkEntities(function($e) use ($document, $router) {
             $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
@@ -143,18 +145,19 @@ class RestController extends FOSRestController
     public function schemaEntityAction($name)
     {
         $loader = new \Bpi\ApiBundle\Tests\DoctrineFixtures\LoadNodes();
+        $transformer = $this->get("bpi.presentation.transformer");
         switch ($name) {
             case 'node':
-                return Presentation::transform($loader->createAlphaNode());
+                return $transformer->transform($loader->createAlphaNode());
             break;
             case 'resource':
-                return Presentation::transform($loader->createAlphaResource());
+                return $transformer->transform($loader->createAlphaResource());
             break;
             case 'profile':
-                return Presentation::transform($loader->createAlphaProfile());
+                return $transformer->transform($loader->createAlphaProfile());
             break;
             case 'agency':
-                return Presentation::transform($loader->createAlphaAgency());
+                return $transformer->transform($loader->createAlphaAgency());
             break;
             case 'nodes_query':
                 $doc = new Document;
@@ -180,7 +183,7 @@ class RestController extends FOSRestController
     {
         $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
 
-        $document = Presentation::transform($_node);
+        $document = $this->get("bpi.presentation.transformer")->transform($_node);
         $node = $document->getEntity('node');
         $node->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
         $node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
@@ -204,7 +207,7 @@ class RestController extends FOSRestController
             $extractor->extract('resource')
         );
 
-        return Presentation::transform($revision);
+        return $this->get("bpi.presentation.transformer")->transform($revision);
     }
 
     /**
@@ -227,7 +230,7 @@ class RestController extends FOSRestController
             $extractor->extract('profile')
         );
 
-        return Presentation::transform($node);
+        return $this->get("bpi.presentation.transformer")->transform($node);
     }
 
     /**
@@ -261,6 +264,19 @@ class RestController extends FOSRestController
         return new Response('', 204);
     }
 
+    /**
+     * Output media asset
+     *
+     * @Rest\Put("/asset/{filename}")
+     * @Rest\View(statusCode="200")
+     */
+    public function getAssetAction($filename)
+    {
+        /**
+         * @todo implementation
+         */
+    }
+    
     /**
      * For testing purposes. Echoes back sent request
      *

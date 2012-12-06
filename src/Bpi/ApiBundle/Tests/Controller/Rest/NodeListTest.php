@@ -5,6 +5,17 @@ namespace Bpi\ApiBundle\Tests\Controller\Rest;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Bpi\RestMediaTypeBundle\Document;
 
+class RouterStub implements \Symfony\Component\Routing\Generator\UrlGeneratorInterface
+{
+    public function generate($name, $parameters = array(), $absolute = false)
+    {
+        return 'test_generated_route';
+    }
+    
+    public function setContext(\Symfony\Component\Routing\RequestContext $context) {}
+    public function getContext() {}
+}
+
 class NodeListTest extends WebTestCase
 {
     protected $client;
@@ -27,9 +38,16 @@ class NodeListTest extends WebTestCase
         $this->client->request('POST', '/node/list.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->serializer->serialize($doc, "xml"));
     }
 
-    public function testGetDescSortedList()
+    protected function createDocument()
     {
         $doc = new Document;
+        $doc->setRouter(new RouterStub());
+        return $doc;
+    }
+    
+    public function testGetDescSortedList()
+    {
+        $doc = $this->createDocument();
         $doc->appendEntity($query = $doc->createEntity('nodes_query'));
         $query->addProperty($doc->createProperty('sort[resource.title]', 'string', 'DESC'));
 
@@ -46,7 +64,7 @@ class NodeListTest extends WebTestCase
 
     public function testGetAscSortedList()
     {
-        $doc = new Document;
+        $doc = $this->createDocument();
         $doc->appendEntity($query = $doc->createEntity('nodes_query'));
         $query->addProperty($doc->createProperty('sort[resource.title]', 'string', 'ASC'));
 
@@ -63,7 +81,7 @@ class NodeListTest extends WebTestCase
 
     public function testGetLimitedList()
     {
-        $doc = new Document;
+        $doc = $this->createDocument();
         $doc->appendEntity($query = $doc->createEntity('nodes_query'));
         $query->addProperty($doc->createProperty('amount', 'number', 1));
 
@@ -77,7 +95,7 @@ class NodeListTest extends WebTestCase
 
     public function testGetListWithOffset()
     {
-        $doc = new Document;
+        $doc = $this->createDocument();
         $doc->appendEntity($query = $doc->createEntity('nodes_query'));
         $query->addProperty($doc->createProperty('amount', 'number', 1));
         $query->addProperty($doc->createProperty('offset', 'number', 1));
@@ -94,7 +112,7 @@ class NodeListTest extends WebTestCase
 
     public function testFilterList()
     {
-        $doc = new Document;
+        $doc = $this->createDocument();
         $doc->appendEntity($query = $doc->createEntity('nodes_query'));
         $query->addProperty($doc->createProperty('filter[profile.category]', 'string', 'category_A'));
 
@@ -110,7 +128,7 @@ class NodeListTest extends WebTestCase
 
     public function testSelfLink()
     {
-        $doc = new Document;
+        $doc = $this->createDocument();
         $doc->appendEntity($query = $doc->createEntity('nodes_query'));
 
         $this->doRequest($doc);

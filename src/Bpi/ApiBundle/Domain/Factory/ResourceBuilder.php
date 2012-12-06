@@ -2,10 +2,12 @@
 namespace Bpi\ApiBundle\Domain\Factory;
 
 use Bpi\ApiBundle\Domain\Entity\Resource;
+use Bpi\ApiBundle\Domain\Entity\Asset;
 
 class ResourceBuilder
 {
     protected $title, $body, $teaser, $ctime;
+    protected $assets = array();
 
     /**
      *
@@ -51,6 +53,11 @@ class ResourceBuilder
         return $this;
     }
 
+    public function addAsset(Asset $asset)
+    {
+        $this->assets[] = $asset;
+    }
+    
     /**
      *
      * @return boolean
@@ -74,6 +81,8 @@ class ResourceBuilder
         if (!$this->isValidForBuild())
             throw new \RuntimeException('Invalid state: can not build');
 
-        return new Resource($this->title, $this->body, $this->teaser, $this->ctime);
+        $resource = new Resource($this->title, $this->body, $this->teaser, $this->ctime, $this->assets);
+//        array_walk($this->assets, array($resource, 'addAsset')); // simply calls $resource->addAsset method for each item in array
+        return $resource;
     }
 }
