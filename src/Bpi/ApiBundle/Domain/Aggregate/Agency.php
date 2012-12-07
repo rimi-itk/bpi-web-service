@@ -8,6 +8,8 @@ class Agency implements IPresentable
 {
     protected $id;
 
+    protected $publickey;
+
     /**
      * {@inheritdoc}
      */

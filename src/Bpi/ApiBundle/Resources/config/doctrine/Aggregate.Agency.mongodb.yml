@@ -1,0 +1,11 @@
+Bpi\ApiBundle\Domain\Aggregate\Agency:
+#  db: documents
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\AgencyRepository
+  collection: Agency
+  fields:
+    id:
+      id: true
+    publickey:
+      type: string
+      unique:
+        order: desc
