@@ -23,10 +23,10 @@ class PushService
 
     /**
      *
-     * @var Gaufrette\FilesystemMap 
+     * @var Gaufrette\FilesystemMap
      */
     protected $fs_map;
-    
+
     /**
      *
      * @param \Doctrine\Common\Persistence\ObjectManager $manager
@@ -47,12 +47,12 @@ class PushService
     public function push(Author $author, Resource $resource, Profile $profile)
     {
         $builder = new NodeBuilder;
-        
+
         // copy assets from memory into storage
         $transaction = $resource->copyAssets($this->fs_map->get('assets'));
         if ($transaction->rollbackOnFail())
             $transaction->throwTheReason();
-        
+
         $node = $builder
             ->author($author)
             ->profile($profile)

@@ -42,7 +42,7 @@ class Entity implements HasLinks
     protected $entities;
 
     /**
-     * 
+     *
      * @param string $name
      */
     public function __construct($name)
@@ -52,7 +52,7 @@ class Entity implements HasLinks
 
     /**
      * Entity name
-     * 
+     *
      * @return string
      */
     public function getName()
@@ -61,7 +61,7 @@ class Entity implements HasLinks
     }
 
     /**
-     * 
+     *
      * @param \Bpi\RestMediaTypeBundle\Element\Property $property
      */
     public function addProperty(Property $property)
@@ -70,7 +70,7 @@ class Entity implements HasLinks
     }
 
     /**
-     * 
+     *
      * @param array $properties
      */
     public function addProperties(array $properties)
@@ -80,7 +80,7 @@ class Entity implements HasLinks
     }
 
     /**
-     * 
+     *
      * @param \Bpi\RestMediaTypeBundle\Element\Link $link
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
@@ -131,7 +131,7 @@ class Entity implements HasLinks
 
     /**
      * Attach this entity to document
-     * 
+     *
      * @param \Bpi\RestMediaTypeBundle\Document $document
      */
     public function attach(Document $document)
@@ -141,7 +141,7 @@ class Entity implements HasLinks
 
     /**
      * Check if givendocument is owner of current entity
-     * 
+     *
      * @param \Bpi\RestMediaTypeBundle\Document $document
      * @return bool
      */
@@ -151,7 +151,7 @@ class Entity implements HasLinks
     }
 
     /**
-     * 
+     *
      * @param \Bpi\RestMediaTypeBundle\Element\Entity $entity
      */
     public function addChildEntity(Entity $entity)
@@ -161,7 +161,7 @@ class Entity implements HasLinks
     }
 
     /**
-     * 
+     *
      * @param string $name of entity
      * @return Entity
      */
@@ -185,19 +185,19 @@ class Entity implements HasLinks
         }
         return $props;
     }
-    
+
     /**
-     * 
+     *
      * @param \Closure $callback with value, index arguments
      */
     public function walk(\Closure $callback)
     {
         array_walk($this->properties, $callback);
     }
-    
+
     /**
      * Get properties matched by type
-     * 
+     *
      * @param string $type
      * @return array
      */

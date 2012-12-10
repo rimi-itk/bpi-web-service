@@ -18,7 +18,7 @@ class Profile implements IExtractor
     protected $doc;
 
     /**
-     * 
+     *
      * {@inheritdoc}
      */
     public function __construct(Document $doc)
@@ -27,7 +27,7 @@ class Profile implements IExtractor
     }
 
     /**
-     * 
+     *
      * {@inheritdoc}
      * @return DomainProfile
      */

@@ -10,16 +10,16 @@ use Bpi\RestMediaTypeBundle\Document;
 class Presentation
 {
     protected $doc;
-    
+
     /**
-     * 
+     *
      * @param \Bpi\RestMediaTypeBundle\Document $doc
      */
     public function __construct(Document $doc)
     {
         $this->doc = $doc;
     }
-    
+
     /**
      *
      * @param \Bpi\ApiBundle\Transform\IPresentable $model

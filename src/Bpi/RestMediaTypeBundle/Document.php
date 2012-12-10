@@ -51,14 +51,14 @@ class Document
 
     /**
      * Inject router dependency
-     * 
+     *
      * @param \Symfony\Component\Routing\Generator\UrlGeneratorInterface $router
      */
     public function setRouter(Router $router)
     {
         $this->router = $router;
     }
-    
+
     /**
      * Generates a URL from the given parameters.
      *
@@ -74,10 +74,10 @@ class Document
     {
         return $this->router->generate($name, $parameters, $absolute);
     }
-    
+
     /**
      * Call the callback on each entity
-     * 
+     *
      * @param callback $callback
      */
     public function walkEntities($callback)
