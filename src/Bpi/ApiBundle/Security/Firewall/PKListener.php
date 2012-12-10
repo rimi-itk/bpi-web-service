@@ -38,6 +38,11 @@ class PKListener implements ListenerInterface
     public function handle(GetResponseEvent $event)
     {
         try {
+
+            // skip authentication
+            if ($this->container->get('kernel')->getEnvironment() == 'test_skip_auth')
+                return $this->securityContext->setToken(new PKUserToken()); // authenticated = false
+
             $request = $event->getRequest();
             $token = new PKUserToken();
 

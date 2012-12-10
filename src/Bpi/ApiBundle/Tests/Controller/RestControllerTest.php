@@ -27,11 +27,19 @@ class RestControllerTest extends WebTestCase
         $this->console->run($this->load_fixtures);
     }
 
+    public function doRequest($uri, $body, $method = 'POST')
+    {
+        $client = static::createClient(array(
+              'environment' => 'test_skip_auth'
+        ));
+        $client->request($method, $uri, array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $body);
+        return $client;
+    }
+
     public function testPublish()
     {
-        $client = static::createClient();
+        $client = $this->doRequest('/node.bpi', $this->loadFixture('Push'));
 
-        $client->request(	'POST', '/node.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('Push'));
         $this->assertEquals(201, $client->getResponse()->getStatusCode());
 
         $xml = simplexml_load_string($client->getResponse()->getContent());
@@ -48,10 +56,10 @@ class RestControllerTest extends WebTestCase
 
     public function testPublishRevision()
     {
-        $client = static::createClient();
+
 
         // find first node
-        $client->request('POST', '/node/list.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('NodesQuery/FindOne'));
+        $client = $this->doRequest('/node/list.bpi', $this->loadFixture('NodesQuery/FindOne'));
         $xml = simplexml_load_string($client->getResponse()->getContent());
         $links = $xml->xpath('//entity[@name="node"]/links/link[@rel="self"]');
 
@@ -59,7 +67,7 @@ class RestControllerTest extends WebTestCase
 
         // push revision
         /** @todo modify resource from response */
-        $client->request(	'POST', $links[0]['href'].'.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('PushRevision'));
+        $client = $this->doRequest($links[0]['href'].'.bpi', $this->loadFixture('PushRevision'));
         $this->assertEquals(201, $client->getResponse()->getStatusCode());
 
         $xml = simplexml_load_string($client->getResponse()->getContent());

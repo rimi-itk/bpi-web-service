@@ -11,7 +11,7 @@ class RouterStub implements \Symfony\Component\Routing\Generator\UrlGeneratorInt
     {
         return 'test_generated_route';
     }
-    
+
     public function setContext(\Symfony\Component\Routing\RequestContext $context) {}
     public function getContext() {}
 }
@@ -30,7 +30,9 @@ class NodeListTest extends WebTestCase
 
     public function setUp()
     {
-        $this->client = static::createClient();
+        $this->client = static::createClient(array(
+              'environment' => 'test_skip_auth'
+        ));
     }
 
     protected function doRequest(Document $doc)
@@ -44,7 +46,7 @@ class NodeListTest extends WebTestCase
         $doc->setRouter(new RouterStub());
         return $doc;
     }
-    
+
     public function testGetDescSortedList()
     {
         $doc = $this->createDocument();

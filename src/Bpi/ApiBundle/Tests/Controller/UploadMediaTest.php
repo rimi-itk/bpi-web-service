@@ -27,11 +27,19 @@ class UploadMediaTest extends WebTestCase
         $this->console->run($this->load_fixtures);
     }
 
+    public function doRequest($uri, $body, $method = 'POST')
+    {
+        $client = static::createClient(array(
+              'environment' => 'test_skip_auth'
+        ));
+        $client->request($method, $uri, array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $body);
+        return $client;
+    }
+
     public function testSendLargeRequest()
     {
         try{
-            $client = static::createClient();
-            $client->request(	'POST', '/node.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('Assets/EmbededOverflow'));
+            $client = $this->doRequest('/node.bpi', $this->loadFixture('Assets/EmbededOverflow'));
         } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
             $this->assertEquals(413, $e->getStatusCode());
         }
@@ -39,10 +47,8 @@ class UploadMediaTest extends WebTestCase
 
     public function testPostAssetRequest()
     {
-        $client = static::createClient();
-
         // find first node
-        $client->request('POST', '/node/list.bpi', array(), array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'), $this->loadFixture('NodesQuery/FindOne'));
+        $client = $this->doRequest('/node/list.bpi', $this->loadFixture('NodesQuery/FindOne'));
         $xml = simplexml_load_string($client->getResponse()->getContent());
 
         $links = $xml->xpath('//entity[@name="node"]/links/link[@rel="assets"]'); // assets relations
@@ -51,7 +57,7 @@ class UploadMediaTest extends WebTestCase
         // push revision
         $image = $this->loadFixture('Assets/img', 'gif');
         $image_name = mt_rand().'.gif';
-        $client->request(	'PUT', $links[0]['href'].'/'.$image_name, array(), array(), array( 'HTTP_Content_Type' => 'image/gif', 'http_content_length' => strlen($image)), $image);
+        $client = $this->doRequest($links[0]['href'].'/'.$image_name, $image, 'PUT');
         $this->assertEquals(204, $client->getResponse()->getStatusCode());
         $this->assertEmpty($client->getResponse()->getContent());
 

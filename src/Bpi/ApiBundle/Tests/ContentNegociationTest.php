@@ -8,7 +8,9 @@ class ContentNegociationTest extends WebTestCase
 {
     public function doRequest($http_accept, $file_extension)
     {
-        $client = static::createClient();
+        $client = static::createClient(array(
+              'environment' => 'test_skip_auth'
+        ));
 
         $accept = $http_accept ? array('HTTP_ACCEPT' => $http_accept) : array();
 
