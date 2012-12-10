@@ -65,7 +65,7 @@
                                     var self = $(this)
                                     data = (e.data.area==undefined) ? '' : e.data.area.val()
 
-                                    $.ajax("{{ path(app.request.attributes.get('_route')) }}", {
+                                    $.ajax("{{ path(app.request.attributes.get('_route')) }}.bpi", {
                                         type: e.data.method,
                                         data: data,
                                         contentType: "application/xml",

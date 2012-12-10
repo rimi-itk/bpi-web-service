@@ -63,6 +63,17 @@ class RestControllerTest extends WebTestCase
         }
     }
 
+    public function testSkipAuthorizationForOptionsRequest()
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/node/list.xml');
+        $this->assertEquals(401, $client->getResponse()->getStatusCode(), 'Response must be 401 Not authorized');
+
+        $client->request('OPTIONS', '/node/list.xml');
+        $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Response must be 200 Ok');
+    }
+
     public function testPublish()
     {
         $client = $this->doRequest('/node.bpi', $this->loadFixture('Push'));

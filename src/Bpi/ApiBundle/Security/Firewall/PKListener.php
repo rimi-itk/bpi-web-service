@@ -39,12 +39,14 @@ class PKListener implements ListenerInterface
     {
         try {
 
-            // skip authentication
             if ($this->container->get('kernel')->getEnvironment() == 'test_skip_auth')
-                return $this->securityContext->setToken(new PKUserToken()); // authenticated = false
+                return $this->skipAuthorization();
 
             $request = $event->getRequest();
             $token = new PKUserToken();
+
+            if ($request->isMethod('OPTIONS'))
+                return $this->skipAuthorization();
 
             if ($request->headers->has('Authorization')) {
                 if (!preg_match('~BPI pk="(?<pk>[^"]+)", token="(?<token>[^"]+)"~i', $request->headers->get('Authorization'), $matches))
@@ -80,5 +82,14 @@ class PKListener implements ListenerInterface
 
             $event->setResponse($controller_result_event->getResponse());
         }
+    }
+
+    /**
+     * Skip authorization check
+     * User remains unauthorized
+     */
+    protected function skipAuthorization()
+    {
+        $this->securityContext->setToken(new PKUserToken());
     }
 }
