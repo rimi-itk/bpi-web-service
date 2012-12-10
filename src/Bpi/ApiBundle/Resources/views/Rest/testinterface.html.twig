@@ -7,6 +7,8 @@
         <script src="/bundles/bpiapi/bootstrap/js/bootstrap.min.js"></script>
         <script src="/bundles/bpiapi/codemirror/lib/codemirror.js"></script>
         <script src="/bundles/bpiapi/codemirror/mode/xml/xml.js"></script>
+        <script src="https://raw.github.com/kvz/phpjs/master/functions/strings/sha1.js"></script>
+        <script src="https://raw.github.com/kvz/phpjs/master/functions/xml/utf8_encode.js"></script>
         <script type="text/javascript">
             $(document).ready(function(){
 
@@ -19,10 +21,18 @@
                                 var tab = $("<li><a href='#tab_"+method+"'  data-toggle='tab'>"+method+"</li>")
                                 var item = $('<div class="tab-pane" id="tab_'+method+'"></div>')
 
+                                // AUTH
+                                if (method != 'OPTIONS')
+                                {
+                                    item.append($("<h4>Authentication</h4>"))
+                                    var auth_agency_select = item.append($('<select name="_authorization[pk]"><option value="alpha_public_key">Agency Alpha<option value="bravo_public_key">Agency Bravo<option value="charlie_public_key">Agency Charlie</select>'))
+                                    var auth_secret_input = item.append($('<input type="text" name="secret" placeholder="secret" value="secret" title="Secret phrase">'))
+                                }
+
                                 // INPUT
                                 if (data[method].input)
                                 {
-                                    item.append($("<h4>Expected entities</h4>"))
+                                   item.append($("<h4>Expected entities</h4>"))
                                    var list = $("<ul></ul>")
                                    item.append(list)
 
@@ -38,7 +48,7 @@
                                 }
 
                                 // SEND BUTTON
-                                var send_button = $('<button class="btn btn-primary">Send</button>')
+                                var send_button = $('<div class="control-group"><div class="controls"><button class="btn btn-primary">Send</button></div></div>')
                                 item.append(send_button)
 
                                 // OUTPUT
@@ -61,7 +71,7 @@
                                 })
 
                                 // BIND SEND REQUEST
-                                send_button.bind('click', {method: method, area: area, output: output, codemirror: codemirror}, function(e){
+                                send_button.bind('click', {method: method, area: area, output: output, codemirror: codemirror, auth: {ag: auth_agency_select, sc: auth_secret_input}}, function(e){
                                     var self = $(this)
                                     data = (e.data.area==undefined) ? '' : e.data.area.val()
 
@@ -69,6 +79,7 @@
                                         type: e.data.method,
                                         data: data,
                                         contentType: "application/xml",
+                                        headers: {Authorization: 'BPI pk="'+e.data.auth.ag.find(':selected').val()+'", token="'+sha1(e.data.auth.ag.find(':selected').val()+e.data.auth.sc.val())+'"'},
                                         beforeSend: function() {
                                             self.addClass("disabled")
                                             e.data.output.hide().find(".status").empty()

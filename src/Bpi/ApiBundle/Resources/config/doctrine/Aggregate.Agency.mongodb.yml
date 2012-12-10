@@ -5,7 +5,13 @@ Bpi\ApiBundle\Domain\Aggregate\Agency:
   fields:
     id:
       id: true
-    publickey:
+    name:
+      type: string
+    moderator:
+      type: string
+    secret:
+      type: string
+    public_key:
       type: string
       unique:
         order: desc
