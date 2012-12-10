@@ -36,6 +36,33 @@ class RestControllerTest extends WebTestCase
         return $client;
     }
 
+    public function testAnswerBadRequestOnPostMalformedRequest()
+    {
+        // empty request
+        try {
+            $client = $this->doRequest('/node.bpi', '');
+            $this->fail('HTTP Exception expected');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            $this->assertEquals(400, $e->getStatusCode(), 'Response must be 400 Bad Request');
+        }
+
+        // bad xml request
+        try {
+            $client = $this->doRequest('/node.bpi', '<foo>');
+            $this->fail('HTTP Exception expected');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            $this->assertEquals(400, $e->getStatusCode(), 'Response must be 400 Bad Request');
+        }
+
+        // non xml request
+        try {
+            $client = $this->doRequest('/node.bpi', 'foo');
+            $this->fail('HTTP Exception expected');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            $this->assertEquals(400, $e->getStatusCode(), 'Response must be 400 Bad Request');
+        }
+    }
+
     public function testPublish()
     {
         $client = $this->doRequest('/node.bpi', $this->loadFixture('Push'));

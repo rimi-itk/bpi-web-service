@@ -8,7 +8,6 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Response;
 
 use Bpi\RestMediaTypeBundle\Document;
-use Bpi\ApiBundle\Transform\Presentation;
 use Bpi\ApiBundle\Transform\Extractor;
 
 /**
@@ -34,8 +33,16 @@ class RestController extends FOSRestController
      */
     protected function getDocument()
     {
+        $request_body = $this->getRequest()->getContent();
+
+        /**
+         * @todo validate against schema (logical check)
+         */
+        if (empty($request_body) || false === simplexml_load_string($request_body))
+            throw new HttpException(400, 'Bad Request'); // syntax check fail
+
         $document = $this->get("serializer")->deserialize(
-              $this->getRequest()->getContent(),
+              $request_body,
               'Bpi\RestMediaTypeBundle\Document',
               'xml'
         );
