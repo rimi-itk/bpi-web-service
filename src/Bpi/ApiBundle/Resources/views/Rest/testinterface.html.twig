@@ -9,11 +9,15 @@
         <script src="/bundles/bpiapi/codemirror/mode/xml/xml.js"></script>
         <script src="https://raw.github.com/kvz/phpjs/master/functions/strings/sha1.js"></script>
         <script src="https://raw.github.com/kvz/phpjs/master/functions/xml/utf8_encode.js"></script>
+        <style type="text/css">
+            .output .body { height: auto; min-height: 500px; }
+            .output iframe.body { border:0; margin:0 }
+        </style>
         <script type="text/javascript">
             $(document).ready(function(){
 
                 // query for available methods
-                $.ajax("{{ path(app.request.attributes.get('_route')) }}.json", {
+                $.ajax("{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}.json", {
                         type: "OPTIONS",
                         success: function(data){
                             for(method in data)
@@ -21,49 +25,52 @@
                                 var tab = $("<li><a href='#tab_"+method+"'  data-toggle='tab'>"+method+"</li>")
                                 var item = $('<div class="tab-pane" id="tab_'+method+'"></div>')
 
-                                // AUTH
+                                // INPUT
+                                var input = $('<div class="well well-large"></div>')
+                                item.append(input)
+
+                                // INPUT AUTH
                                 if (method != 'OPTIONS')
                                 {
-                                    item.append($("<h4>Authentication</h4>"))
-                                    var auth_agency_select = item.append($('<select name="_authorization[pk]"><option value="alpha_public_key">Agency Alpha<option value="bravo_public_key">Agency Bravo<option value="charlie_public_key">Agency Charlie</select>'))
-                                    var auth_secret_input = item.append($('<input type="text" name="secret" placeholder="secret" value="secret" title="Secret phrase">'))
+                                    input.append($("<h4>Authentication</h4>"))
+                                    var auth_agency_select = input.append($('<select name="_authorization[pk]"><option value="alpha_public_key">Agency Alpha<option value="bravo_public_key">Agency Bravo<option value="charlie_public_key">Agency Charlie</select>'))
+                                    var auth_secret_input = input.append($('<input type="text" name="secret" placeholder="secret" value="secret" title="Secret phrase">'))
                                 }
 
-                                // INPUT
+                                // INPUT DATA
                                 if (data[method].input)
                                 {
-                                   item.append($("<h4>Expected entities</h4>"))
+                                   input.append($("<h4>Expected entities</h4>"))
                                    var list = $("<ul></ul>")
-                                   item.append(list)
+                                   input.append(list)
 
                                     $(data[method].input.entities).each(function(i,e){
                                         list.append($("<li>"+e+"</li>"))
                                     })
 
                                     var editor = $('<section class="editor"><div class="controls"></div></section>')
-                                    var area = $('<textarea rows="7" class="area span12"></textarea>')
+                                    var area = $('<textarea rows="7" class="area span11"></textarea>')
                                     editor.append(area)
-                                    item.append(editor)
+                                    input.append(editor)
 
                                 }
 
-                                // SEND BUTTON
+                                // INPUT SEND BUTTON
                                 var send_button = $('<div class="control-group"><div class="controls"><button class="btn btn-primary">Send</button></div></div>')
-                                item.append(send_button)
+                                input.append(send_button)
 
                                 // OUTPUT
-                                item.append($("<h3>Output</h3>"))
+                                item.append($("<fieldset><legend><h3>Output</h3></legend></fieldset>"))
                                 if (data[method].output)
                                 {
-                                    item.append($("<h4>Expected entities</h4>"))
-                                   var list = $("<ul></ul>")
-                                   item.append(list)
+                                    var expected_entities = $("<div><strong>Expected entities: </strong></div>")
+                                    item.append(expected_entities)
 
                                     $(data[method].output.entities).each(function(i,e){
-                                        list.append($("<li>"+e+"</li>"))
+                                        expected_entities.append($('<span>'+e+"</span>"))
                                     })
                                 }
-                                var output = $("<div class='output'><h4 class='status'></h4><textarea rows=15' class='span12 body'></textarea></div>")
+                                var output = $("<div class='output tabbable'><h4 class='status text-info'></h4><ul class='nav nav-tabs'><li class='active'><a href='#adopted_"+method+"' data-toggle='tab'>Adopted output</a></li><li><a href='#raw_"+method+"' data-toggle='tab' class='raw'>Raw output</a></li></ul><div class='tab-content'><div class='tab-pane active' id='adopted_"+method+"'><iframe id='preview_"+method+"' class='body preview span12'></iframe></div><div class='tab-pane' id='raw_"+method+"'><textarea rows=15' class='span12 body'></textarea></div></div>")
                                 item.append(output)
                                 var codemirror = CodeMirror.fromTextArea(output.find('textarea')[0], {
                                     lineNumbers: true,
@@ -75,7 +82,7 @@
                                     var self = $(this)
                                     data = (e.data.area==undefined) ? '' : e.data.area.val()
 
-                                    $.ajax("{{ path(app.request.attributes.get('_route')) }}.bpi", {
+                                    $.ajax("{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}.bpi", {
                                         type: e.data.method,
                                         data: data,
                                         contentType: "application/xml",
@@ -85,22 +92,52 @@
                                             e.data.output.hide().find(".status").empty()
                                         },
                                         complete: function(jqXHR, textStatus) {
+
+                                            // display raw output
                                             self.removeClass("disabled")
                                             e.data.output.show()
+                                            e.data.output.find('.nav-tabs a.raw').tab('show') // codemirror works only in visible zone
                                             e.data.output.find(".status").text(jqXHR.status+' '+jqXHR.statusText)
                                             e.data.codemirror.setValue(jqXHR.responseText)
+                                            e.data.output.find('.nav-tabs a:first').tab('show') // switch back to first active tab
+
+                                            // human friendly output for navigation
+                                            var xml = jqXHR.responseXML
+                                            $.ajax('/bundles/bpiapi/schema/stylesheet-1.0.xsl', {
+                                                accepts: {
+                                                    xsl: "application/xml"
+                                                },
+                                                dataType: "xml",
+                                                success: function(xsl){
+
+                                                    // do the xsl transformation
+                                                    xsltProcessor=new XSLTProcessor();
+                                                    xsltProcessor.importStylesheet(xsl);
+                                                    resultDocument = xsltProcessor.transformToDocument(xml);
+
+                                                    // write to iframe
+                                                    var previewFrame = document.getElementById('preview_'+e.data.method)
+                                                    var preview = previewFrame.contentDocument ||  previewFrame.contentWindow.document;
+                                                    preview.open();
+                                                    preview.write($(resultDocument.body).html());
+                                                    preview.close();
+
+                                                }
+                                            })
+
                                         }
                                     })
                                 })
 
-                                $('.nav-tabs').append(tab)
-                                $('.tab-content').append(item)
+                                $('.nav-tabs:first').append(tab)
+                                $('.tab-content:first').append(item)
+
                             }
 
                             $(document).trigger('options_complete')
 
                              // activate first tab
-                            $('.nav-tabs a:first').tab('show')
+                            $('.nav-tabs:first a:first').tab('show')
                         }
                  })
 
@@ -150,9 +187,10 @@
 
             <div class="container">
 
-                <ul class="nav nav-tabs"></ul>
-
-                <div class="tab-content"></div>
+                <div class="tabbable">
+                    <ul class="nav nav-tabs"></ul>
+                    <div class="tab-content"></div>
+                </div>
 
             </div>
 

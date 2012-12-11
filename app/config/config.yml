@@ -117,13 +117,14 @@ sensio_framework_extra:
 fos_rest:
     service:
       view_handler: bpi.apibundle.rest.view_handler
-    param_fetcher_listener: true
+    routing_loader:
+        default_format: html
     format_listener:
         default_priorities: ['bpi', 'xml', 'json', 'html', '*/*']
         fallback_format: xml
         prefer_extension: true
     view:
-        view_response_listener: force
+        view_response_listener: true
         formats:
               json: true
               xml: true
@@ -132,6 +133,7 @@ fos_rest:
               gif: true
               jpg: true
               png: true
+              html: true
         templating_formats:
             html: true
         mime_types:

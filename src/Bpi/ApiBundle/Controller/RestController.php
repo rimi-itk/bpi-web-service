@@ -50,7 +50,7 @@ class RestController extends FOSRestController
         return $document;
     }
 
-    /**
+     /**
      * Default node listing
      *
      * @Rest\Get("/node/list")
@@ -134,6 +134,7 @@ class RestController extends FOSRestController
      *
      * @category test interface
      * @Rest\Get("/shema/entity/list")
+     * @Rest\View
      */
     public function schemaListEntitiesAction()
     {
@@ -196,6 +197,43 @@ class RestController extends FOSRestController
         $node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
 
         return $document;
+    }
+
+    /**
+      * Display available options
+      * 1. HTTP verbs
+      * 2. Expected media type entities in input/output
+      *
+      * @Rest\Options("/node/item/{id}")
+      */
+    public function nodeItemOptionsAction($id)
+    {
+        $options = array(
+              'GET' => array(
+                    'output' => array(
+                          'entities' => array(
+                                'node'
+                          )
+                    )
+              ),
+              'OPTIONS' => array(),
+              'POST' => array(
+                    'input' => array(
+                          'entities' => array(
+                                'agency',
+                                'resource',
+                                'profile',
+                          )
+                    ),
+                    'output' => array(
+                          'entities' => array(
+                                'node'
+                          )
+                    )
+              )
+        );
+        $headers = array('Allow' => implode(', ', array_keys($options)));
+        return $this->handleView($this->view($options, 200, $headers));
     }
 
     /**
