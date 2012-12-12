@@ -50,6 +50,16 @@ class RestController extends FOSRestController
         return $document;
     }
 
+    /**
+     * Main page of API redirects to human representation of entry point
+     *
+     * @Rest\Get("/")
+     */
+    public function indexAction()
+    {
+        return $this->redirectView($this->get('router')->generate('list').'.html', 302);
+    }
+
      /**
      * Default node listing
      *

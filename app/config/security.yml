@@ -23,6 +23,10 @@ security:
             pattern: ^/shema.*
             security: false
 
+        mainpage:
+            pattern: ^/$
+            security: false
+
         api:
             pattern:   ^/.*
             pk:      true
