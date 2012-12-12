@@ -3,8 +3,9 @@ namespace Bpi\ApiBundle\Domain\ValueObject;
 
 use Bpi\ApiBundle\Domain\Repository\AudienceRepository;
 use Bpi\ApiBundle\Transform\Comparator;
+use Bpi\ApiBundle\Transform\IPresentable;
 
-class Audience implements IValueObject
+class Audience implements IValueObject, IPresentable
 {
     protected $name;
 
@@ -46,5 +47,15 @@ class Audience implements IValueObject
     public function isInRepository(AudienceRepository $repository)
     {
         return $repository->findAll()->contains($this);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param \Bpi\RestMediaTypeBundle\Document $document
+     */
+    public function transform(\Bpi\RestMediaTypeBundle\Document $document)
+    {
+        $document->currentEntity()->addProperty($document->createProperty($this->name, 'audience', $this->name));
     }
 }

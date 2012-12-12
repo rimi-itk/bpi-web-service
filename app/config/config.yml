@@ -14,6 +14,8 @@ services:
     domain.push_service:
         class: Bpi\ApiBundle\Domain\Service\PushService
         arguments: ["@doctrine_mongodb.odm.document_manager", "@knp_gaufrette.filesystem_map"]
+    domain.profile_service:
+        class: Bpi\ApiBundle\Domain\Service\ProfileService
     #gridfs gaufrette
     bpi.gridfs.conn:
       class: Doctrine\MongoDB\Connection

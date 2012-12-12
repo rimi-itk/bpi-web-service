@@ -9,16 +9,16 @@ class Agency implements IPresentable
     protected $id;
 
     protected $name;
-    
+
     protected $moderator;
 
     protected $public_key;
-    
+
     protected $secret;
 
     public function __construct($name, $moderator, $public_key, $secret)
     {
-        $this->name = $name;        
+        $this->name = $name;
         $this->moderator = $moderator;
         $this->publickey = $public_key;
         $this->secret = $secret;

@@ -121,7 +121,6 @@ class RestController extends FOSRestController
                           )
                     )
               ),
-              'OPTIONS' => array(),
               'POST' => array(
                     'input' => array(
                           'entities' => array(
@@ -133,7 +132,8 @@ class RestController extends FOSRestController
                                 'node'
                           )
                     )
-              )
+              ),
+              'OPTIONS' => array(),
         );
         $headers = array('Allow' => implode(', ', array_keys($options)));
         return $this->handleView($this->view($options, 200, $headers));
@@ -226,7 +226,6 @@ class RestController extends FOSRestController
                           )
                     )
               ),
-              'OPTIONS' => array(),
               'POST' => array(
                     'input' => array(
                           'entities' => array(
@@ -240,7 +239,8 @@ class RestController extends FOSRestController
                                 'node'
                           )
                     )
-              )
+              ),
+              'OPTIONS' => array(),
         );
         $headers = array('Allow' => implode(', ', array_keys($options)));
         return $this->handleView($this->view($options, 200, $headers));
@@ -296,19 +296,19 @@ class RestController extends FOSRestController
     public function nodeAssetOptionsAction($node_id)
     {
         $options = array(
-              'OPTIONS' => array(),
               'PUT' => array(
                     'input' => array(
                           'entities' => array(
                                 'binary file',
                           )
                     ),
-              )
+              ),
+              'OPTIONS' => array(),
         );
         $headers = array('Allow' => implode(', ', array_keys($options)));
         return $this->handleView($this->view($options, 200, $headers));
     }
-    
+
     /**
      * Only for live documentation
      *
@@ -317,9 +317,9 @@ class RestController extends FOSRestController
      */
     public function getNodeAssetAction($node_id)
     {
-        
+
     }
-    
+
     /**
      * Link file with node
      * Filename will overwrite existing one if it has previously set
@@ -360,6 +360,40 @@ class RestController extends FOSRestController
         /**
          * @todo implementation
          */
+    }
+
+    /**
+     * Get profile dictionary
+     *
+     * @Rest\Get("/profile_dictionary", name="profile_dictionary")
+     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
+     */
+    public function profileDictionaryAction()
+    {
+        $dictionary = $this->get('domain.profile_service')->provideDictionary();
+        return $this->get("bpi.presentation.transformer")->transform($dictionary);
+    }
+
+    /**
+     * Get profile dictionary options
+     *
+     * @Rest\Options("/profile_dictionary")
+     * @Rest\View(statusCode="200")
+     */
+    public function profileDictionaryOptionsAction()
+    {
+        $options = array(
+              'GET' => array(
+                    'output' => array(
+                          'entities' => array(
+                                'profile_dictionary',
+                          )
+                    ),
+              ),
+              'OPTIONS' => array(),
+        );
+        $headers = array('Allow' => implode(', ', array_keys($options)));
+        return $this->view($options, 200, $headers);
     }
 
     /**

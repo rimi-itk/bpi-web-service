@@ -74,6 +74,15 @@ class RestControllerTest extends WebTestCase
         $this->assertEquals(200, $client->getResponse()->getStatusCode(), 'Response must be 200 Ok');
     }
 
+    public function testProfileDictionary()
+    {
+        $client = $this->doRequest('/profile_dictionary.xml', '', 'GET');
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
+        $xml = simplexml_load_string($client->getResponse()->getContent());
+        $entity = $xml->xpath('//entity[@name="profile_dictionary"]');
+        $this->assertEquals(1, count($entity));
+    }
+
     public function testPublish()
     {
         $client = $this->doRequest('/node.bpi', $this->loadFixture('Push'));

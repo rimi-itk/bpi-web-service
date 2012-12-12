@@ -3,8 +3,9 @@ namespace Bpi\ApiBundle\Domain\ValueObject;
 
 use Bpi\ApiBundle\Domain\Repository\CategoryRepository;
 use Bpi\ApiBundle\Transform\Comparator;
+use Bpi\ApiBundle\Transform\IPresentable;
 
-class Category implements IValueObject
+class Category implements IValueObject, IPresentable
 {
     const undefined = 'undefined';
 
@@ -52,5 +53,15 @@ class Category implements IValueObject
     public function isInRepository(CategoryRepository $repository)
     {
         return $repository->findAll()->contains($this);
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param \Bpi\RestMediaTypeBundle\Document $document
+     */
+    public function transform(\Bpi\RestMediaTypeBundle\Document $document)
+    {
+        $document->currentEntity()->addProperty($document->createProperty($this->name, 'category', $this->name));
     }
 }
