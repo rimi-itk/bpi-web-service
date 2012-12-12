@@ -82,11 +82,15 @@
                                     var self = $(this)
                                     data = (e.data.area==undefined) ? '' : e.data.area.val()
 
+                                    var headers = (e.data.auth.ag && e.data.auth.sc)
+                                        ? {Authorization: 'BPI pk="'+e.data.auth.ag.find(':selected').val()+'", token="'+sha1(e.data.auth.ag.find(':selected').val()+e.data.auth.sc.val())+'"'}
+                                        : {}
+
                                     $.ajax("{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}.bpi", {
                                         type: e.data.method,
                                         data: data,
                                         contentType: "application/xml",
-                                        headers: {Authorization: 'BPI pk="'+e.data.auth.ag.find(':selected').val()+'", token="'+sha1(e.data.auth.ag.find(':selected').val()+e.data.auth.sc.val())+'"'},
+                                        headers: headers,
                                         beforeSend: function() {
                                             self.addClass("disabled")
                                             e.data.output.hide().find(".status").empty()
@@ -160,7 +164,7 @@
                 $(document).bind('buttons_loaded', function(){
                    $('.editor .insert').click(function(){
                         var self = $(this)
-                        var schema_uri = "{{ path("schema_entity", {"name": ""}) }}/"+$(this).data('entity')
+                        var schema_uri = "{{ path("schema_entity", {"name": ""}) }}/"+$(this).data('entity')+'.xml'
                         $.ajax(schema_uri, {
                             type: "GET",
                             contentType: "application/xml",
@@ -187,6 +191,16 @@
 
             <div class="container">
 
+                <div class="navbar navbar-static-top">
+                    <div class="navbar-inner">
+                        <ul class="nav">
+                            <li><a href="{{path("index")}}">BPI API</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <br>
+                
                 <div class="tabbable">
                     <ul class="nav nav-tabs"></ul>
                     <div class="tab-content"></div>
