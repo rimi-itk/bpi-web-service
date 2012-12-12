@@ -158,7 +158,7 @@ class RestController extends FOSRestController
      *
      * @category test interface
      * @Rest\Get("/shema/entity/{name}")
-     * @Rest\View()
+     * @Rest\View
      */
     public function schemaEntityAction($name)
     {
@@ -287,6 +287,39 @@ class RestController extends FOSRestController
         return $this->get("bpi.presentation.transformer")->transform($node);
     }
 
+     /**
+     * Asset options
+     *
+     * @Rest\Options("/node/{node_id}/asset")
+     * @Rest\View
+     */
+    public function nodeAssetOptionsAction($node_id)
+    {
+        $options = array(
+              'OPTIONS' => array(),
+              'PUT' => array(
+                    'input' => array(
+                          'entities' => array(
+                                'binary file',
+                          )
+                    ),
+              )
+        );
+        $headers = array('Allow' => implode(', ', array_keys($options)));
+        return $this->handleView($this->view($options, 200, $headers));
+    }
+    
+    /**
+     * Only for live documentation
+     *
+     * @Rest\Get("/node/{node_id}/asset")
+     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="200")
+     */
+    public function getNodeAssetAction($node_id)
+    {
+        
+    }
+    
     /**
      * Link file with node
      * Filename will overwrite existing one if it has previously set
