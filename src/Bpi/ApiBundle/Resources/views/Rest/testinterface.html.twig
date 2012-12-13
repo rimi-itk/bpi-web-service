@@ -193,8 +193,11 @@
 
                 <div class="navbar navbar-static-top">
                     <div class="navbar-inner">
+                        <a class="brand" href="#">BPI REST API</a>
                         <ul class="nav">
-                            <li {% if (app.request.attributes.get('_route') == 'index') %} class="active" {%endif%}><a href="{{path("index")}}">BPI API</a></li>
+                            <li {% if (app.request.attributes.get('_route') == 'doc') %} class="active" {%endif%}><a href="{{path("doc",{page:"introduction"})}}.html">Overview</a></li>
+                            <li class="divider-vertical"></li>
+                            <li {% if (app.request.attributes.get('_route') == 'index') %} class="active" {%endif%}><a href="{{path("index")}}">Nodes</a></li>
                             <li {% if (app.request.attributes.get('_route') == 'profile_dictionary') %} class="active" {%endif%}><a href="{{path("profile_dictionary")}}.html">Profile Dictionary</a></li>
                         </ul>
                     </div>

@@ -5,9 +5,14 @@
     
     <xsl:template match="/">
     
-        <html><body>
+        <html>
+            <head>
+                <link href="/bundles/bpiapi/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+            </head>
+            <body>
                   <xsl:apply-templates select="bpi/entity"/>
-        </body></html>
+            </body>
+        </html>
        
     </xsl:template>
             

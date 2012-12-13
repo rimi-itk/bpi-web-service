@@ -17,11 +17,12 @@
         "jms/di-extra-bundle": "1.3.*",
         "jms/serializer-bundle": "dev-master#28e1737c58c20f361ced291ea5ed9ae938106736",
         "nelmio/api-doc-bundle": "dev-master",
-        "friendsofsymfony/rest-bundle": "0.10.x-dev",
+        "friendsofsymfony/rest-bundle": "0.11.x-dev",
         "doctrine/mongodb-odm-bundle": "3.0.*",
         "doctrine/doctrine-fixtures-bundle": "dev-master",
         "stof/doctrine-extensions-bundle": "dev-master",
-        "knplabs/knp-gaufrette-bundle": "dev-master#2a505d1b3015820c26ef8d8672a0f103110f193e"
+        "knplabs/knp-gaufrette-bundle": "dev-master#2a505d1b3015820c26ef8d8672a0f103110f193e",
+        "knplabs/knp-markdown-bundle": "1.2.*@dev"
     },
     "scripts": {
         "post-install-cmd": [

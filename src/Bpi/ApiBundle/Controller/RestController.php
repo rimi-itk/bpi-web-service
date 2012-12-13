@@ -406,4 +406,21 @@ class RestController extends FOSRestController
         $view = $this->view($this->get('request')->getContent(), 200);
         return $this->handleView($view);
     }
+
+    /**
+     * Static documentation for the service
+     *
+     * @Rest\Get("/doc/{page}")
+     * @Rest\View(template="BpiApiBundle:Rest:static_doc.html.twig")
+     * @param string $page
+     */
+    public function docAction($page)
+    {
+        try {
+            $file = $this->get('kernel')->locateResource('@BpiApiBundle/Resources/doc/'.$page.'.md');
+            return $this->view(file_get_contents($file));
+        } catch (\InvalidArgumentException $e) {
+            throw $this->createNotFoundException();
+        }
+    }
 }
