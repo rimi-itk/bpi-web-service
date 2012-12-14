@@ -115,6 +115,7 @@ class RestController extends FOSRestController
     {
         $options = array(
               'GET' => array(
+                    'action' => 'List of nodes',
                     'output' => array(
                           'entities' => array(
                                 'node'
@@ -122,6 +123,7 @@ class RestController extends FOSRestController
                     )
               ),
               'POST' => array(
+                    'action' => 'Node list query',
                     'input' => array(
                           'entities' => array(
                                 'nodes_query'
@@ -133,7 +135,7 @@ class RestController extends FOSRestController
                           )
                     )
               ),
-              'OPTIONS' => array(),
+              'OPTIONS' => array('action' => 'List available options'),
         );
         $headers = array('Allow' => implode(', ', array_keys($options)));
         return $this->handleView($this->view($options, 200, $headers));
@@ -220,6 +222,7 @@ class RestController extends FOSRestController
     {
         $options = array(
               'GET' => array(
+                    'action' => 'Node item',
                     'output' => array(
                           'entities' => array(
                                 'node'
@@ -227,6 +230,7 @@ class RestController extends FOSRestController
                     )
               ),
               'POST' => array(
+                    'action' => 'Post node revision',
                     'input' => array(
                           'entities' => array(
                                 'agency',
@@ -240,7 +244,7 @@ class RestController extends FOSRestController
                           )
                     )
               ),
-              'OPTIONS' => array(),
+              'OPTIONS' => array('action' => 'List available options'),
         );
         $headers = array('Allow' => implode(', ', array_keys($options)));
         return $this->handleView($this->view($options, 200, $headers));
@@ -297,13 +301,14 @@ class RestController extends FOSRestController
     {
         $options = array(
               'PUT' => array(
+                    'action' => 'Add asset to specific node',
                     'input' => array(
                           'entities' => array(
                                 'binary file',
                           )
                     ),
               ),
-              'OPTIONS' => array(),
+              'OPTIONS' => array('action' => 'List available options'),
         );
         $headers = array('Allow' => implode(', ', array_keys($options)));
         return $this->handleView($this->view($options, 200, $headers));
@@ -384,13 +389,14 @@ class RestController extends FOSRestController
     {
         $options = array(
               'GET' => array(
+                    'action' => 'Get profile dictionary',
                     'output' => array(
                           'entities' => array(
                                 'profile_dictionary',
                           )
                     ),
               ),
-              'OPTIONS' => array(),
+              'OPTIONS' => array('action' => 'List available options'),
         );
         $headers = array('Allow' => implode(', ', array_keys($options)));
         return $this->view($options, 200, $headers);

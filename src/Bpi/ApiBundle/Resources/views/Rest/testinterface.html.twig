@@ -25,6 +25,8 @@
                                 var tab = $("<li><a href='#tab_"+method+"'  data-toggle='tab'>"+method+"</li>")
                                 var item = $('<div class="tab-pane" id="tab_'+method+'"></div>')
 
+                                item.append("<h3>"+data[method].action+"</h3>")
+
                                 // INPUT
                                 var input = $('<div class="well well-large"></div>')
                                 item.append(input)
