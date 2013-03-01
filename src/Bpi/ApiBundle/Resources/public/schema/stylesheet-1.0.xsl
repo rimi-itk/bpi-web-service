@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     
-    <xsl:output version="5.0" method="html"/>
+    <xsl:output version="5.0" method="html" encoding="UTF-8" omit-xml-declaration="yes" />
     
     <xsl:template match="/">
     
         <html>
             <head>
-                <link href="/bundles/bpiapi/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen" />
+                
             </head>
-            <body>
-                  <xsl:apply-templates select="bpi/entity"/>
+            <body>    
+              <div style="font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+                <xsl:apply-templates select="bpi/entity"/>
+              </div>
             </body>
         </html>
        
