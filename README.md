@@ -69,6 +69,11 @@ Standard API errors
 *   5xx    Server error. Contact system administrator.
 
 
+Versioning policy
+--------
+
+See [semver.org][semver.org].
+
 Database Schema
 --------
     Node = {
@@ -166,3 +171,4 @@ Database Schema
 
 
 [RFC2616]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+[semver.org]: http://semver.org/
