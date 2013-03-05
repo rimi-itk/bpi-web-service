@@ -3,6 +3,8 @@ namespace Bpi\ApiBundle\Domain\Aggregate;
 
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
+use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
+use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 
 class Agency implements IPresentable
 {
@@ -24,7 +26,7 @@ class Agency implements IPresentable
         $this->secret = $secret;
     }
 
-        /**
+    /**
      * {@inheritdoc}
      */
     public function transform(Document $document)
@@ -33,5 +35,25 @@ class Agency implements IPresentable
         $entity->addProperty($document->createProperty('name', 'string', $this->name));
         $entity->addProperty($document->createProperty('moderator', 'string', $this->moderator));
         $entity->addProperty($document->createProperty('public_key', 'string', $this->public_key));
+    }
+
+    /**
+     * Get copyleft
+     *
+     * @return \Bpi\ApiBundle\Domain\ValueObject\Copyleft
+     */
+    public function getCopyleft()
+    {
+        return new Copyleft('Originally published by ' . $this->name . '.');
+    }
+
+    /**
+     * Get Agency ID
+     *
+     * @return \Bpi\ApiBundle\Domain\ValueObject\AgencyId
+     */
+    public function getAgencyId()
+    {
+      return new AgencyId($this->id);
     }
 }

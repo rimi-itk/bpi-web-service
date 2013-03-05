@@ -9,6 +9,7 @@ use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;
+use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 
 /**
  * Domain service for content syndication
@@ -30,6 +31,7 @@ class PushService
     /**
      *
      * @param \Doctrine\Common\Persistence\ObjectManager $manager
+     * @param \Knp\Bundle\GaufretteBundle\FilesystemMap  $fs_map
      */
     public function __construct(ObjectManager $manager, FilesystemMap $fs_map)
     {
@@ -39,20 +41,22 @@ class PushService
 
     /**
      *
-     * @param \Bpi\ApiBundle\Domain\Entity\Author $author
-     * @param Resource $resource
-     * @param \Bpi\ApiBundle\Domain\Entity\Profile $profile
+     * @param  \Bpi\ApiBundle\Domain\Entity\Author  $author
+     * @param  Resource                             $resource
+     * @param  \Bpi\ApiBundle\Domain\Entity\Profile $profile
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
-    public function push(Author $author, Resource $resource, Profile $profile)
+    public function push(Author $author, ResourceBuilder $resource_builder, Profile $profile)
     {
-        $builder = new NodeBuilder;
+        $this->assignCopyleft($author, $resource_builder);
+        $resource = $resource_builder->build();
 
         // copy assets from memory into storage
         $transaction = $resource->copyAssets($this->fs_map->get('assets'));
         if ($transaction->rollbackOnFail())
             $transaction->throwTheReason();
 
+        $builder = new NodeBuilder;
         $node = $builder
             ->author($author)
             ->profile($profile)
@@ -68,9 +72,9 @@ class PushService
 
     /**
      *
-     * @param \Bpi\ApiBundle\Domain\ValueObject\NodeId $node_id
-     * @param \Bpi\ApiBundle\Domain\Entity\Author $author
-     * @param Resource $resource
+     * @param  \Bpi\ApiBundle\Domain\ValueObject\NodeId $node_id
+     * @param  \Bpi\ApiBundle\Domain\Entity\Author      $author
+     * @param  Resource                                 $resource
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
     public function pushRevision(NodeId $node_id, Author $author, Resource $resource)
@@ -83,5 +87,20 @@ class PushService
         $this->manager->flush();
 
         return $revision;
+    }
+
+    /**
+     * Add agency copyleft to the resource
+     *
+     * @param \Bpi\ApiBundle\Domain\Entity\Author           $author
+     * @param \Bpi\ApiBundle\Domain\Factory\ResourceBuilder $builder
+     */
+    public function assignCopyleft(Author $author, ResourceBuilder $builder)
+    {
+        $copyleft = $this->manager->getRepository('BpiApiBundle:Aggregate\Agency')
+            ->find($author->getAgencyId()->id())
+            ->getCopyleft();
+
+        $builder->copyleft($copyleft);
     }
 }

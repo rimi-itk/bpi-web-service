@@ -5,8 +5,6 @@ use Bpi\ApiBundle\Domain\Aggregate\Node;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
-use Bpi\ApiBundle\Domain\Aggregate\Agency;
-use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 
 class NodeBuilder
 {

@@ -28,9 +28,8 @@ class Resource implements IExtractor
     }
 
     /**
-     *
      * {@inheritdoc}
-     * @return Bpi\ApiBundle\Domain\Entity\Resource
+     * @return Bpi\ApiBundle\Domain\Factory\ResourceBuilder
      */
     public function extract()
     {
@@ -51,7 +50,6 @@ class Resource implements IExtractor
             ->body($entity->property('body')->getValue())
             ->teaser($entity->property('teaser')->getValue())
             ->ctime(new \DateTime($entity->property('ctime')->getValue()))
-            ->build()
         ;
     }
 }

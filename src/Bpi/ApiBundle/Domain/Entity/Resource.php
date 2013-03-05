@@ -1,7 +1,7 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Entity;
 
-use Bpi\ApiBundle\Domain\Entity\Asset;
+use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -24,10 +24,13 @@ class Resource implements IPresentable
 
     protected $assets = array();
 
+    protected $copyleft;
+
     public function __construct(
         $title,
         $body,
         $teaser,
+        Copyleft $copyleft,
         \DateTime $ctime,
         array $files = null
     )
@@ -35,6 +38,7 @@ class Resource implements IPresentable
         $this->title = $title;
         $this->body = new Resource\Body($body);
         $this->teaser = $teaser;
+        $this->copyleft = $copyleft;
         $this->ctime = $ctime;
         $this->allocateFiles($files);
     }
@@ -42,7 +46,7 @@ class Resource implements IPresentable
     /**
      * Allocate files as embedded or attached assets
      *
-     * @param array $files Gaufrette\File instances
+     * @param  array $files Gaufrette\File instances
      * @return void
      */
     public function allocateFiles(array $files = null)
@@ -59,27 +63,28 @@ class Resource implements IPresentable
      * Copy assets into other filesystem in transactional way
      * Common use case is to persists from memory to storage
      *
-     * @param \Gaufrette\Filesystem $fs
+     * @param  \Gaufrette\Filesystem      $fs
      * @return Resource\AssetsTransaction
      */
     public function copyAssets(Filesystem $fs)
     {
         $transaction = new Resource\AssetsTransaction();
         try {
-            foreach($this->assets as $asset) {
+            foreach ($this->assets as $asset) {
                 $transaction->add($asset);
                 $asset->copy($fs);
             }
-        } catch(\RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             $transaction->markAsFailed($e);
         }
+
         return $transaction;
     }
 
     /**
      * Calculate similarity of resources by checking body contents
      *
-     * @param Resource $resource
+     * @param  Resource $resource
      * @return boolean
      */
     public function isSimilar(Resource $resource)
@@ -110,8 +115,10 @@ class Resource implements IPresentable
         foreach ($this->assets as $asset)
                 $this->body->replaceAssetLink($asset, $document->generateRoute("get_asset", array('filename'=> $asset->getId())));
 
+        $copyleft = '<p>' . $this->copyleft . '</p>';
+
         $entity->addProperty($document->createProperty('title', 'string', $this->title));
-        $entity->addProperty($document->createProperty('body', 'string', $this->body->getFlattenContent()));
+        $entity->addProperty($document->createProperty('body', 'string', $this->body->getFlattenContent() . $copyleft));
         $entity->addProperty($document->createProperty('teaser', 'string', $this->teaser));
         $entity->addProperty($document->createProperty('ctime', 'dateTime', $this->ctime));
         $entity->addProperty($document->createProperty('type', 'string', $this->type));
@@ -119,19 +126,21 @@ class Resource implements IPresentable
 
     /**
      *
-     * @param \Bpi\ApiBundle\Domain\Entity\Resource $resource
-     * @param string $field
-     * @param int $order 1=asc, -1=desc
-     * @return int see strcmp PHP function
+     * @param  \Bpi\ApiBundle\Domain\Entity\Resource $resource
+     * @param  string                                $field
+     * @param  int                                   $order    1=asc, -1=desc
+     * @return int                                   see strcmp PHP function
      */
     public function compare(Resource $resource, $field, $order = 1)
     {
         if (stristr($field, '.')) {
             list($local_field, $child_field) = explode(".", $field, 2);
+
             return $this->$local_field->compare($resource->$local_field, $child_field, $order);
         }
 
         $cmp = new Comparator($this->$field, $resource->$field, $order);
+
         return $cmp->getResult();
     }
 
