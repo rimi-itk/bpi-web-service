@@ -11,7 +11,25 @@ class RestControllerTest extends WebTestCase
 
     protected function loadFixture($name)
     {
-        return file_get_contents(__DIR__.'/../Fixtures/'.$name.'.bpi');
+        $fixture = file_get_contents(__DIR__.'/../Fixtures/'.$name.'.bpi');
+
+        if ($name == 'Push')
+        {
+            return $this->replaceAgencyIdWithActualValue($fixture);
+        }
+
+        return $fixture;
+    }
+
+    protected function replaceAgencyIdWithActualValue($fixture)
+    {
+        static::$kernel = static::createKernel();
+        static::$kernel->boot();
+        $dm = static::$kernel->getContainer()->get('doctrine.odm.mongodb.document_manager');
+
+        $query = $dm->getRepository('BpiApiBundle:Aggregate\Agency')->createQueryBuilder();
+        $real_agency_id = $query->limit(1)->getQuery()->execute()->getSingleResult()->getAgencyId()->id();
+        return str_replace('stub_agency_id', $real_agency_id, $fixture);
     }
 
     public function __construct()
@@ -95,6 +113,7 @@ class RestControllerTest extends WebTestCase
         // assert body
         $body = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="body"]'));
         $this->assertEquals(1, preg_match('~^<p>foo<span>bar</span></p>~', (string)$body), 'At least first line of body must much');
+        $this->assertEquals(1, preg_match('~<p>Originally published by Agency Alpha.</p>$~', (string)$body), 'Copyleft doesn\'t exists');
         $this->assertEquals(1, preg_match('~<img id="embedded_img" src="(.+)"~', (string)$body, $matches), 'embedded_img not found');
         $this->assertEquals(1, preg_match("~.+~", $matches[1]), 'src is empty');
 
@@ -103,8 +122,6 @@ class RestControllerTest extends WebTestCase
 
     public function testPublishRevision()
     {
-
-
         // find first node
         $client = $this->doRequest('/node/list.bpi', $this->loadFixture('NodesQuery/FindOne'));
         $xml = simplexml_load_string($client->getResponse()->getContent());
@@ -119,6 +136,10 @@ class RestControllerTest extends WebTestCase
 
         $xml = simplexml_load_string($client->getResponse()->getContent());
         $this->assertEquals('node', $xml->entity['name']);
+
+        // assert body
+        $body = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="body"]'));
+        $this->assertEquals(0, preg_match('~<p>Originally published by Agency Alpha.</p>$~', (string)$body), 'Copyleft doesn\'t exists');
 
         $this->console->run($this->load_fixtures);
     }

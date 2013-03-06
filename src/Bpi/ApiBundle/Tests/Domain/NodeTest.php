@@ -8,6 +8,7 @@ use Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy;
 use Bpi\ApiBundle\Domain\ValueObject\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\Category;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 
@@ -30,6 +31,7 @@ class NodeTest extends \PHPUnit_Framework_TestCase
             ->teaser('alpha_teaser')
             ->title('alpha_title')
             ->ctime(new \DateTime("-1 day"))
+            ->copyleft(new Copyleft('copyleft'))
             ->build()
         ;
 

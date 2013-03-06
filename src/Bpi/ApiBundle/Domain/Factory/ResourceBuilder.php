@@ -97,6 +97,10 @@ class ResourceBuilder
      */
     public function build()
     {
+        // Copyleft is optional, so null object will be placed
+        if (is_null($this->copyleft))
+            $this->copyleft = new Copyleft('');
+
         if (!$this->isValidForBuild())
             throw new \RuntimeException('Invalid state: can not build');
 

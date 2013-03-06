@@ -74,14 +74,14 @@ class PushService
      *
      * @param  \Bpi\ApiBundle\Domain\ValueObject\NodeId $node_id
      * @param  \Bpi\ApiBundle\Domain\Entity\Author      $author
-     * @param  Resource                                 $resource
+     * @param  ResourceBuilder                          $builder
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
-    public function pushRevision(NodeId $node_id, Author $author, Resource $resource)
+    public function pushRevision(NodeId $node_id, Author $author, ResourceBuilder $builder)
     {
         $node = $this->manager->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($node_id->id());
 
-        $revision = $node->createRevision($author, $resource);
+        $revision = $node->createRevision($author, $builder->build());
 
         $this->manager->persist($revision);
         $this->manager->flush();

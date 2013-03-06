@@ -1,7 +1,7 @@
 <bpi version="0.1">
 	<entity name="agency">
 		<properties>
-			<property type="string" name="id" >11</property>
+			<property type="string" name="id" >stub_agency_id</property>
 		</properties>
 		<entity name="author">
 			<properties>
