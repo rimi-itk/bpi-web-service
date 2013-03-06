@@ -406,11 +406,11 @@ class RestController extends FOSRestController
      * For testing purposes. Echoes back sent request
      *
      * @Rest\Get("/tools/echo")
+     * @Rest\View(statusCode="200")
      */
     public function echoAction()
     {
-        $view = $this->view($this->get('request')->getContent(), 200);
-        return $this->handleView($view);
+        return $this->view($this->get('request')->getContent(), 200);
     }
 
     /**
