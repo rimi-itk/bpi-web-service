@@ -38,13 +38,13 @@ class Agency implements IPresentable
     }
 
     /**
-     * Get copyleft
+     * Set autorship
      *
-     * @return \Bpi\ApiBundle\Domain\ValueObject\Copyleft
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Copyleft $copyleft
      */
-    public function getCopyleft()
+    public function setAuthorship(Copyleft $copyleft)
     {
-        return new Copyleft('Originally published by ' . $this->name . '.');
+        $copyleft->addCopyrigher($this->name);
     }
 
     /**

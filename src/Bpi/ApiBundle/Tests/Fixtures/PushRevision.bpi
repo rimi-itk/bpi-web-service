@@ -25,4 +25,10 @@
 			<property type="relation.faust" name="book">636090966</property>
 		</properties>
 	</entity>
+	<entity name="params">
+		<properties>
+			<property type="boolean" name="editable" >1</property>
+			<property type="boolean" name="authorship" >1</property>
+		</properties>
+	</entity>
 </bpi>

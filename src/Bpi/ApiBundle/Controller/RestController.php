@@ -263,7 +263,8 @@ class RestController extends FOSRestController
         $revision = $this->get('domain.push_service')->pushRevision(
             new \Bpi\ApiBundle\Domain\ValueObject\NodeId($id),
             $extractor->extract('agency.author'),
-            $extractor->extract('resource')
+            $extractor->extract('resource'),
+            $extractor->extract('params')
         );
 
         return $this->get("bpi.presentation.transformer")->transform($revision);
@@ -285,7 +286,8 @@ class RestController extends FOSRestController
         $node = $this->get('domain.push_service')->push(
             $extractor->extract('agency.author'),
             $extractor->extract('resource'),
-            $extractor->extract('profile')
+            $extractor->extract('profile'),
+            $extractor->extract('params')
         );
 
         return $this->get("bpi.presentation.transformer")->transform($node);

@@ -7,8 +7,11 @@ use Knp\Bundle\GaufretteBundle\FilesystemMap;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Resource;
-use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
+use Bpi\ApiBundle\Domain\Aggregate\Params;
+use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;
+use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
+use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 
 /**
@@ -41,14 +44,20 @@ class PushService
 
     /**
      *
-     * @param  \Bpi\ApiBundle\Domain\Entity\Author  $author
-     * @param  Resource                             $resource
-     * @param  \Bpi\ApiBundle\Domain\Entity\Profile $profile
+     * @param  \Bpi\ApiBundle\Domain\Entity\Author    $author
+     * @param  Resource                               $resource
+     * @param  \Bpi\ApiBundle\Domain\Entity\Profile   $profile
+     * @param  \Bpi\ApiBundle\Domain\Aggregate\Params $params
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
-    public function push(Author $author, ResourceBuilder $resource_builder, Profile $profile)
+    public function push(Author $author, ResourceBuilder $resource_builder, Profile $profile, Params $params)
     {
-        $this->assignCopyleft($author, $resource_builder);
+        $authorship = $params->filter(function($e){
+            if ($e instanceof Authorship)
+                return true;
+        })->first();
+
+        $this->assignCopyleft($author, $resource_builder, $authorship);
         $resource = $resource_builder->build();
 
         // copy assets from memory into storage
@@ -61,6 +70,7 @@ class PushService
             ->author($author)
             ->profile($profile)
             ->resource($resource)
+            ->params($params)
             ->build()
         ;
 
@@ -75,13 +85,14 @@ class PushService
      * @param  \Bpi\ApiBundle\Domain\ValueObject\NodeId $node_id
      * @param  \Bpi\ApiBundle\Domain\Entity\Author      $author
      * @param  ResourceBuilder                          $builder
+     * @param  \Bpi\ApiBundle\Domain\Aggregate\Params   $params
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
-    public function pushRevision(NodeId $node_id, Author $author, ResourceBuilder $builder)
+    public function pushRevision(NodeId $node_id, Author $author, ResourceBuilder $builder, Params $params)
     {
         $node = $this->manager->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($node_id->id());
 
-        $revision = $node->createRevision($author, $builder->build());
+        $revision = $node->createRevision($author, $builder->build(), $params);
 
         $this->manager->persist($revision);
         $this->manager->flush();
@@ -94,12 +105,21 @@ class PushService
      *
      * @param \Bpi\ApiBundle\Domain\Entity\Author           $author
      * @param \Bpi\ApiBundle\Domain\Factory\ResourceBuilder $builder
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Autorship   $autorship
      */
-    public function assignCopyleft(Author $author, ResourceBuilder $builder)
+    public function assignCopyleft(Author $author, ResourceBuilder $builder, Authorship $autorship)
     {
-        $copyleft = $this->manager->getRepository('BpiApiBundle:Aggregate\Agency')
+        $copyleft = new Copyleft;
+        
+        // Set agency as default original copyrighter
+        $this->manager->getRepository('BpiApiBundle:Aggregate\Agency')
             ->find($author->getAgencyId()->id())
-            ->getCopyleft();
+            ->setAuthorship($copyleft);
+
+        if ($autorship->isPositive())
+        {
+            $author->setAuthorship($copyleft);
+        }
 
         $builder->copyleft($copyleft);
     }

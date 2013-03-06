@@ -4,6 +4,8 @@ namespace Bpi\ApiBundle\Domain\Aggregate;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
+use Bpi\ApiBundle\Domain\Aggregate\Params;
+use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -20,16 +22,17 @@ class Node implements IPresentable
     protected $level = 0;
     protected $lock_time;
 
-//	protected $comment;
     protected $author;
     protected $resource;
     protected $profile;
+    protected $params;
 
-    public function __construct(Author $author, Resource $resource, Profile $profile)
+    public function __construct(Author $author, Resource $resource, Profile $profile, Params $params)
     {
         $this->author = $author;
         $this->resource = $resource;
         $this->profile = $profile;
+        $this->params = $params;
 
         $this->markTimes();
     }
@@ -89,13 +92,14 @@ class Node implements IPresentable
      * @param Resource $resource
      * @return Node
      */
-    public function createRevision(Author $author, Resource $resource)
+    public function createRevision(Author $author, Resource $resource, Params $params)
     {
         $builder = new \Bpi\ApiBundle\Domain\Factory\NodeBuilder;
         $node = $builder
             ->author($author)
             ->profile($this->profile)
             ->resource($resource)
+            ->params($params)
             ->build()
         ;
 
@@ -127,6 +131,13 @@ class Node implements IPresentable
             'string',
             $this->getId()
         ));
+
+        $entity->addProperty($document->createProperty(
+            'editable',
+            'boolean',
+            $this->params->filter(function($e){ if ($e instanceof Editable) return true; })->first()->isPositive()
+        ));
+
         $document->appendEntity($entity);
 
         $this->profile->transform($document);

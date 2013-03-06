@@ -6,6 +6,7 @@ use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
+use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy;
@@ -13,6 +14,8 @@ use Bpi\ApiBundle\Domain\ValueObject\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\Category;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
+use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
+use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
 use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 
@@ -111,6 +114,7 @@ class LoadNodes implements FixtureInterface
             ->author(new Author(new AgencyId(1), 1, 'Bush', 'George'))
             ->profile($this->createAlphaProfile())
             ->resource($this->createAlphaResource())
+            ->params(new Params(array(new Editable(1), new Authorship(1))))
             ->build()
         ;
         return $node;
@@ -127,6 +131,7 @@ class LoadNodes implements FixtureInterface
             ->author(new Author(new AgencyId(2), 1, 'Bush', 'George'))
             ->profile($this->createBravoProfile())
             ->resource($this->createBravoResource())
+            ->params(new Params(array(new Editable(1), new Authorship(0))))
             ->build()
         ;
         return $node;
@@ -143,6 +148,7 @@ class LoadNodes implements FixtureInterface
             ->author(new Author(new AgencyId(1), 2, 'Potter'))
             ->profile($this->createCharlieProfile())
             ->resource($this->createCharlieResource())
+            ->params(new Params(array(new Editable(0), new Authorship(1))))
             ->build()
         ;
         return $node;

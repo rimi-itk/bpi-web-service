@@ -1,0 +1,5 @@
+Bpi\ApiBundle\Domain\ValueObject\Param\Authorship:
+  type: embeddedDocument
+  fields:
+    authorship:
+      type: string

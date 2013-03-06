@@ -2,6 +2,7 @@
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 
 class Author
 {
@@ -41,5 +42,15 @@ class Author
     public function getFullName()
     {
         return ($this->firstname ? $this->firstname.' ' : '') . $this->lastname;
+    }
+
+    /**
+     * Set autorship
+     *
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Copyleft $copyleft
+     */
+    public function setAuthorship(Copyleft $copyleft)
+    {
+        $copyleft->addCopyrigher($this->getFullName(), false);
     }
 }

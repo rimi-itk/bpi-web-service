@@ -35,8 +35,8 @@ class Author implements IExtractor
         $agency = $this->doc->getEntity('agency');
         $author = $agency->getChildEntity('author');
 
-        $firstname = $author->hasProperty('firstname') ? $author->property('firstname') : null;
-        $lastname = $author->hasProperty('lastname') ? $author->property('lastname') : null;
+        $firstname = $author->hasProperty('firstname') ? $author->property('firstname')->getValue() : null;
+        $lastname = $author->hasProperty('lastname') ? $author->property('lastname')->getValue() : null;
         if (is_null($lastname) && !is_null($firstname)) {
             $lastname = $firstname;
             unset($firstname);

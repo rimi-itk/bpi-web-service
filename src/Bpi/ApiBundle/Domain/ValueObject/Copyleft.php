@@ -3,15 +3,17 @@ namespace Bpi\ApiBundle\Domain\ValueObject;
 
 class Copyleft implements IValueObject
 {
-    protected $licence;
+    protected $copyrighers = array();
 
     /**
+     * Name of copyleft owner
      *
-     * @param string $licence
+     * @param string $name
+     * @param boolean $direction true for add item to the end, otherwise prepend
      */
-    public function __construct($licence)
+    public function addCopyrigher($name, $direction = true)
     {
-        $this->licence = $licence;
+        $direction ? $this->copyrighers[] = $name : array_unshift($this->copyrighers, $name);
     }
 
     /**
@@ -26,6 +28,6 @@ class Copyleft implements IValueObject
 
     public function __toString()
     {
-        return $this->licence;
+        return 'Originally published by ' . implode(', ', $this->copyrighers) . '.';
     }
 }

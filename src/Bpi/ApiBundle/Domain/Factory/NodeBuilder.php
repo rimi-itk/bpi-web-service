@@ -2,6 +2,7 @@
 namespace Bpi\ApiBundle\Domain\Factory;
 
 use Bpi\ApiBundle\Domain\Aggregate\Node;
+use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
@@ -11,6 +12,7 @@ class NodeBuilder
     protected $author;
     protected $profile;
     protected $resource;
+    protected $params;
 
     /**
      *
@@ -47,6 +49,17 @@ class NodeBuilder
 
     /**
      *
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Params $params
+     * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
+     */
+    public function params(Params $params)
+    {
+        $this->params = $params;
+        return $this;
+    }
+
+    /**
+     *
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      * @throws \RuntimeException
      */
@@ -61,6 +74,9 @@ class NodeBuilder
         if (is_null($this->resource))
             throw new \RuntimeException('Invalid state: Resource is required');
 
-        return new Node($this->author, $this->resource, $this->profile);
+        if (is_null($this->params))
+            throw new \RuntimeException('Invalid state: Params is required');
+
+        return new Node($this->author, $this->resource, $this->profile, $this->params);
     }
 }

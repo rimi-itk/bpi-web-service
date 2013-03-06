@@ -1,14 +1,16 @@
 <?php
 namespace Bpi\ApiBundle\Tests\Domain;
 
-use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy;
+use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\Category;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
+use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
+use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 
@@ -54,12 +56,14 @@ class NodeTest extends \PHPUnit_Framework_TestCase
             ->author($this->authors->alpha)
             ->profile($profile_alpha)
             ->resource($this->resources->alpha)
+            ->params(new Params(array('autorship' => new Authorship(1), 'editable' => new Editable(1))))
             ->build();
 
         $this->nodes->bravo = $builder
             ->author($this->authors->alpha)
             ->profile($profile_bravo)
             ->resource($this->resources->bravo)
+            ->params(new Params(array('autorship' => new Authorship(0), 'editable' => new Editable(1))))
             ->build();
     }
 
@@ -76,6 +80,11 @@ class NodeTest extends \PHPUnit_Framework_TestCase
 
     public function testRevisions()
     {
-        $this->assertInstanceOf('\Bpi\ApiBundle\Domain\Aggregate\Node', $this->nodes->alpha->createRevision($this->authors->alpha, $this->resources->bravo));
+        $revision = $this->nodes->alpha->createRevision(
+            $this->authors->alpha,
+            $this->resources->bravo,
+            new Params(array('autorship' => new Authorship(0), 'editable' => new Editable(0)))
+        );
+        $this->assertInstanceOf('\Bpi\ApiBundle\Domain\Aggregate\Node', $revision);
     }
 }

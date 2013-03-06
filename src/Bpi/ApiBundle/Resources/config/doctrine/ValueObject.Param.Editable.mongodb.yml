@@ -1,0 +1,5 @@
+Bpi\ApiBundle\Domain\ValueObject\Param\Editable:
+  type: embeddedDocument
+  fields:
+    editable:
+      type: string
