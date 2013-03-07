@@ -5,6 +5,7 @@ use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy;
 use Bpi\ApiBundle\Domain\Entity\Profile\Relation\IRelation;
+use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
 use Bpi\ApiBundle\Transform\Comparator;
 
 class Profile implements IPresentable
@@ -29,6 +30,16 @@ class Profile implements IPresentable
     public function addRelation(IRelation $relation)
     {
         $this->attach($relation);
+    }
+
+    /**
+     * Set the yearwheel taxonomy
+     *
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Yearwheel $yearwheel
+     */
+    public function setYearwheel(Yearwheel $yearwheel)
+    {
+        $this->taxonomy->setYearwheel($yearwheel);
     }
 
     /**

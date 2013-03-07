@@ -29,6 +29,7 @@
 			<property type="string" name="type" >article</property>
 			<property type="string" name="category" >Category A</property>
 			<property type="string" name="audience" >all</property>
+			<property type="string" name="yearwheel" >Winter</property>
 		</properties>
 	</entity>
 	<entity name="params">

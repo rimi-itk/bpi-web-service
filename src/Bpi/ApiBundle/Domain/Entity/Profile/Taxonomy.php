@@ -5,11 +5,14 @@ use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\ValueObject\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\Category;
+use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
 
 class Taxonomy implements IPresentable
 {
     protected $audience;
     protected $category;
+    protected $yearwheel;
+
 //	protected $type;
 //	protected $tags;
 
@@ -19,10 +22,14 @@ class Taxonomy implements IPresentable
         $this->category = $category;
     }
 
-//	public function changeCategory(Category $category)
-//	{
-//		$this->category = $category;
-//	}
+    /**
+     *
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Yearwheel $yearwheel
+     */
+    public function setYearwheel(Yearwheel $yearwheel)
+    {
+        $this->yearwheel = $yearwheel;
+    }
 
     /**
      *
@@ -42,6 +49,11 @@ class Taxonomy implements IPresentable
         return $cmp->getResult();
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * @param \Bpi\RestMediaTypeBundle\Document $document
+     */
     public function transform(Document $document)
     {
         $entity = $document->currentEntity();
@@ -55,5 +67,14 @@ class Taxonomy implements IPresentable
             'string',
             $this->audience->name()
         ));
+
+        if ($this->yearwheel instanceof Yearwheel)
+        {
+            $entity->addProperty($document->createProperty(
+                'yearwheel',
+                'string',
+                $this->yearwheel->name()
+            ));
+        }
     }
 }

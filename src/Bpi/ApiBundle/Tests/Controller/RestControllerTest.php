@@ -113,6 +113,16 @@ class RestControllerTest extends WebTestCase
         // assert param
         $this->assertNotEmpty(current($xml->xpath('//entity[@name="node"]/properties/property[@name="editable"]')));
 
+        // assert profile
+        $yearwheel = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="yearwheel"]'));
+        $this->assertEquals('Winter', (string)$yearwheel);
+        $audience = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="audience"]'));
+        $this->assertEquals('all', (string)$audience);
+        $category = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="category"]'));
+        $this->assertEquals('Category A', (string)$category);
+        $type = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="type"]'));
+        $this->assertEquals('article', (string)$type);
+
         // assert body
         $body = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="body"]'));
         $this->assertEquals(1, preg_match('~^<p>foo<span>bar</span></p>~', (string)$body), 'At least first line of body must much');
