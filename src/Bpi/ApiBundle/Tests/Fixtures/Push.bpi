@@ -30,6 +30,7 @@
 			<property type="string" name="category" >Category A</property>
 			<property type="string" name="audience" >all</property>
 			<property type="string" name="yearwheel" >Winter</property>
+			<property type="string" name="tags" >foo, bar, zoo</property>
 		</properties>
 	</entity>
 	<entity name="params">

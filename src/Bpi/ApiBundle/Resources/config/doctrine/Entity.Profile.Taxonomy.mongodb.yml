@@ -11,3 +11,5 @@ Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy:
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\ValueObject\Category
+  lifecycleCallbacks:
+    postLoad: [ wakeup ]

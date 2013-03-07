@@ -6,20 +6,48 @@ use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\ValueObject\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\Category;
 use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
+use Bpi\ApiBundle\Domain\ValueObject\ValueObjectList;
 
 class Taxonomy implements IPresentable
 {
+    /**
+     * Mandatory attribute
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\Audience
+     */
     protected $audience;
+
+    /**
+     * Mandatory attribute
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\Category
+     */
     protected $category;
+
+    /**
+     * Closed optional attribute
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\Yearwheel
+     */
     protected $yearwheel;
 
-//	protected $type;
-//	protected $tags;
+    /**
+     * Open optional dictionary
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\ValueObjectList
+     */
+    protected $tags;
 
+    /**
+     *
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Audience $audience
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Category $category
+     */
     public function __construct(Audience $audience, Category $category)
     {
         $this->audience = $audience;
         $this->category = $category;
+        $this->tags = new ValueObjectList();
     }
 
     /**
@@ -29,6 +57,16 @@ class Taxonomy implements IPresentable
     public function setYearwheel(Yearwheel $yearwheel)
     {
         $this->yearwheel = $yearwheel;
+    }
+
+    /**
+     * Set tag list to the taxonomy
+     *
+     * @param array $tags list of tags
+     */
+    public function setTags(array $tags)
+    {
+        $this->tags = new ValueObjectList($tags);
     }
 
     /**
@@ -50,6 +88,14 @@ class Taxonomy implements IPresentable
     }
 
     /**
+     * Called by persistence layer after object was initialized
+     */
+    public function wakeup()
+    {
+        $this->tags = new ValueObjectList();
+    }
+
+        /**
      * {@inheritdoc}
      *
      * @param \Bpi\RestMediaTypeBundle\Document $document
@@ -74,6 +120,15 @@ class Taxonomy implements IPresentable
                 'yearwheel',
                 'string',
                 $this->yearwheel->name()
+            ));
+        }
+
+        if ($this->tags->count())
+        {
+            $entity->addProperty($document->createProperty(
+                'tags',
+                'string',
+                implode(', ', $this->tags->toArray())
             ));
         }
     }

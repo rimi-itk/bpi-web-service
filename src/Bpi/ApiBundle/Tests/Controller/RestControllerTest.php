@@ -122,6 +122,8 @@ class RestControllerTest extends WebTestCase
         $this->assertEquals('Category A', (string)$category);
         $type = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="type"]'));
         $this->assertEquals('article', (string)$type);
+        $tags = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="tags"]'));
+        $this->assertEquals('foo, bar, zoo', (string)$tags);
 
         // assert body
         $body = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="body"]'));
