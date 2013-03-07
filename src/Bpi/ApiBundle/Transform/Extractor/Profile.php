@@ -7,6 +7,7 @@ use Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy;
 use Bpi\ApiBundle\Domain\ValueObject\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\Category;
 use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
+use Bpi\ApiBundle\Domain\ValueObject\Tag;
 use Bpi\ApiBundle\Domain\Repository\YearwheelRepository;
 
 /**
@@ -41,7 +42,7 @@ class Profile implements IExtractor
             new Category($entity->property('category')->getValue())
         ));
 
-        // optional property
+        // optional yearwheel property
         if ($entity->hasProperty('yearwheel'))
         {
             $yearwheel = new Yearwheel($entity->property('yearwheel')->getValue());
@@ -51,6 +52,21 @@ class Profile implements IExtractor
                 throw new Exception('Incorrect yearwheel value');
             }
             $profile->setYearwheel($yearwheel);
+        }
+
+        // optional tags property
+        if ($entity->hasProperty('tags'))
+        {
+            $tags = explode(",", $entity->property('yearwheel')->getValue());
+            if (count($tags))
+            {
+                $tags = array_unique($tags);
+                array_walk($tags, function(&$e){
+                    $e = new Tag(trim($e));
+                });
+
+                $profile->setTags($tags);
+            }
         }
 
         return $profile;

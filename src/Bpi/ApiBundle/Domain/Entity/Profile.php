@@ -44,6 +44,15 @@ class Profile implements IPresentable
 
     /**
      *
+     * @param array $tags
+     */
+    public function setTags($tags)
+    {
+        $this->taxonomy->setTags($tags);
+    }
+
+    /**
+     *
      * @param \Bpi\ApiBundle\Domain\Entity $profile
      * @param string $field
      * @param int $order 1=asc, -1=desc
