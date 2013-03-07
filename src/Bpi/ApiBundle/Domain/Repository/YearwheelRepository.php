@@ -7,6 +7,10 @@ use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
 
 class YearwheelRepository implements ObjectRepository
 {
+    /**
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\ValueObjectList
+     */
     protected $list;
 
     public function __construct()
@@ -16,6 +20,8 @@ class YearwheelRepository implements ObjectRepository
         $this->list->set('Christmas', new Yearwheel('Christmas'));
         $this->list->set('Summer', new Yearwheel('Summer'));
         $this->list->set('Winter', new Yearwheel('Winter'));
+        $this->list->set('Spring', new Yearwheel('Spring'));
+        $this->list->set('Autumn', new Yearwheel('Autumn'));
     }
 
     /**
