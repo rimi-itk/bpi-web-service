@@ -1,0 +1,24 @@
+<!-- 
+1. Default namespace reserved for domain terms
+2. Processing instructions are namespaced under xxx namespace in RDF style
+ -->
+<bpi version="0.2" xmlns:description="urn:description" xmlns:appstate="urn:appstate">
+	<node description:type="entity">
+		<appstate:appstate>
+			<appstate:link rel="self" href="..." />
+			<appstate:link rel="collection" href="..." />
+			<appstate:link rel="parent" href="..." />
+			<appstate:link rel="revisions" href="..." />
+			<appstate:link rel="assets" href="..." />
+			<appstate:query rel="select" href="...">
+				<appstate:param name="title"></appstate:param>
+				<appstate:param name="teaser"></appstate:param>
+				<appstate:param name="body"></appstate:param>
+			</appstate:query>
+			<appstate:template><!-- ... --></appstate:template>
+		</appstate:appstate>
+		<title decription:type="property">TITLE</title>
+		<teaser description:type="property">TEASER</teaser>
+		<body description:type="property">BODY</body>
+	</node>
+</bpi>
