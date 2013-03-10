@@ -42,6 +42,11 @@ class Entity implements HasLinks
     protected $entities;
 
     /**
+     * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Controls")
+     */
+    protected $hypermedia;
+    
+    /**
      *
      * @param string $name
      */
@@ -209,5 +214,16 @@ class Entity implements HasLinks
                 $props[$property->getName()] = $property;
         }
         return $props;
+    }
+    
+    /**
+     * 
+     * @param \Bpi\RestMediaTypeBundle\Element\Element\Controls $controls
+     * @return \Bpi\RestMediaTypeBundle\Element\Entity
+     */
+    public function setControls(Controls $controls)
+    {
+        $this->hypermedia = $controls;
+        return $this;
     }
 }

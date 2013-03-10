@@ -74,7 +74,7 @@ class Document
     {
         return $this->router->generate($name, $parameters, $absolute);
     }
-
+    
     /**
      * Call the callback on each entity
      *
@@ -123,6 +123,20 @@ class Document
      * @param string $name
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
+    public function createRootEntity($name)
+    {
+        $entity = new Entity($name);
+        $entity->attach($this);
+        $this->entities[] = $entity;
+        $this->setCursorOnEntity($entity);
+        return $entity;
+    }
+    
+    /**
+     *
+     * @param string $name
+     * @return \Bpi\RestMediaTypeBundle\Element\Entity
+     */
     public function createEntity($name)
     {
         $entity = new Entity($name);
@@ -142,6 +156,15 @@ class Document
         $entity->attach($this);
     }
 
+    /**
+     * 
+     * @return \Bpi\RestMediaTypeBundle\Element\Controls
+     */
+    public function createControls()
+    {
+        return new Element\Controls();
+    }
+    
     /**
      *
      * @param string $name
@@ -177,6 +200,23 @@ class Document
         return new Link($rel, $href, $title);
     }
 
+    /**
+     * 
+     * @param string $rel
+     * @param string $href
+     * @param array $params
+     * @return \Bpi\RestMediaTypeBundle\Element\Query
+     */
+    public function createQuery($rel, $href, array $params, $title = null)
+    {
+        $query = new Element\Query($rel, $href, $title);
+        foreach($params as $param)
+        {
+            $query->addParam(new Element\Param($param));
+        }
+        return $query;
+    }
+    
     /**
      * Get last used entity
      *
