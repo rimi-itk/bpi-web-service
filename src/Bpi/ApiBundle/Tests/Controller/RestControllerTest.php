@@ -107,30 +107,11 @@ class RestControllerTest extends WebTestCase
 
         $this->assertEquals(201, $client->getResponse()->getStatusCode());
 
+        // just ensure that service echoes back same structure
         $xml = simplexml_load_string($client->getResponse()->getContent());
         $this->assertEquals('node', $xml->entity['name']);
-
-        // assert param
-        $this->assertNotEmpty(current($xml->xpath('//entity[@name="node"]/properties/property[@name="editable"]')));
-
-        // assert profile
-        $yearwheel = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="yearwheel"]'));
-        $this->assertEquals('Winter', (string)$yearwheel);
-        $audience = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="audience"]'));
-        $this->assertEquals('all', (string)$audience);
-        $category = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="category"]'));
-        $this->assertEquals('Category A', (string)$category);
-        $type = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="type"]'));
-        $this->assertEquals('article', (string)$type);
-        $tags = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="tags"]'));
-        $this->assertEquals('foo, bar, zoo', (string)$tags);
-
-        // assert body
-        $body = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="body"]'));
-        $this->assertEquals(1, preg_match('~^<p>foo<span>bar</span></p>~', (string)$body), 'At least first line of body must much');
-        $this->assertEquals(1, preg_match('~<p>Originally published by George Mihailov, Agency Alpha.</p>$~', (string)$body), 'Copyleft doesn\'t exists');
-        $this->assertEquals(1, preg_match('~<img id="embedded_img" src="(.+)"~', (string)$body, $matches), 'embedded_img not found');
-        $this->assertEquals(1, preg_match("~.+~", $matches[1]), 'src is empty');
+        $this->assertNotEmpty(current($xml->xpath('//entity/entity[@name="profile"]')));
+        $this->assertNotEmpty(current($xml->xpath('//entity/entity[@name="resource"]')));
 
         $this->console->run($this->load_fixtures);
     }

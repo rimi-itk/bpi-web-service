@@ -5,17 +5,6 @@ namespace Bpi\ApiBundle\Tests\Controller\Rest;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Bpi\RestMediaTypeBundle\Document;
 
-class RouterStub implements \Symfony\Component\Routing\Generator\UrlGeneratorInterface
-{
-    public function generate($name, $parameters = array(), $absolute = false)
-    {
-        return 'test_generated_route';
-    }
-
-    public function setContext(\Symfony\Component\Routing\RequestContext $context) {}
-    public function getContext() {}
-}
-
 class NodeListTest extends WebTestCase
 {
     protected $client;
@@ -43,7 +32,7 @@ class NodeListTest extends WebTestCase
     protected function createDocument()
     {
         $doc = new Document;
-        $doc->setRouter(new RouterStub());
+        $doc->setRouter($this->getMock('\Symfony\Component\Routing\Generator\UrlGeneratorInterface'));
         return $doc;
     }
 

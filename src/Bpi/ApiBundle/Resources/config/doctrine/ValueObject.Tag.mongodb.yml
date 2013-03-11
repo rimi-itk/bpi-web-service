@@ -1,0 +1,5 @@
+Bpi\ApiBundle\Domain\ValueObject\Tag:
+  type: embeddedDocument
+  fields:
+    name:
+      type: string

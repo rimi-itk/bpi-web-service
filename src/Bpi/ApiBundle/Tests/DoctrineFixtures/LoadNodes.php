@@ -9,15 +9,17 @@ use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
-use Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy;
 use Bpi\ApiBundle\Domain\ValueObject\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\Category;
+use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
+use Bpi\ApiBundle\Domain\ValueObject\Tag;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
 use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
+use Bpi\ApiBundle\Domain\Factory\ProfileBuilder;
 
 class LoadNodes implements FixtureInterface
 {
@@ -82,7 +84,14 @@ class LoadNodes implements FixtureInterface
      */
     public function createAlphaProfile()
     {
-        return new Profile(new Taxonomy(new Audience('audience_A'), new Category('category_A')));
+        $builder = new ProfileBuilder();
+        return $builder
+            ->audience(new Audience('audience_A'))
+            ->category(new Category('category_A'))
+            ->yearwheel(new Yearwheel('Winter'))
+            ->tags('bravo, alpha, charlie')
+            ->build();
+        ;
     }
 
     /**
@@ -91,7 +100,13 @@ class LoadNodes implements FixtureInterface
      */
     public function createBravoProfile()
     {
-        return new Profile(new Taxonomy(new Audience('audience_A'), new Category('category_B')));
+        $builder = new ProfileBuilder();
+        return $builder
+            ->audience(new Audience('audience_B'))
+            ->category(new Category('category_B'))
+            ->yearwheel(new Yearwheel('Winter'))
+            ->build();
+        ;
     }
 
     /**
@@ -100,7 +115,13 @@ class LoadNodes implements FixtureInterface
      */
     public function createCharlieProfile()
     {
-        return new Profile(new Taxonomy(new Audience('audience_B'), new Category('category_A')));
+        $builder = new ProfileBuilder();
+        return $builder
+            ->audience(new Audience('audience_A'))
+            ->category(new Category('category_B'))
+            ->tags('bravo, alpha, charlie')
+            ->build();
+        ;
     }
 
     /**
