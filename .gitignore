@@ -12,3 +12,6 @@ app/config/parameters.ini
 # IDE
 nbproject/*
 /*.lock
+
+#SDK
+src/Bpi/Sdk/vendor/*

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpi version="0.1">
+  <item type="collection">
+    <hypermedia>
+      <link rel="self" href="abc" title=""/>
+      <link rel="collection" href="http://example.com/collection" title="Collection"/>
+      <query rel="search" href="http://example.com/search" title="Search">
+        <params>
+          <param name="id"/>
+        </params>
+      </query>
+      <query rel="filter" href="xyz" title="Filtration">
+        <params>
+          <param name="name"/>
+          <param name="title"/>
+        </params>
+      </query>
+    </hypermedia>
+  </item>
+  <item type="entity">
+    <hypermedia>
+      <link rel="self" href="" />
+    </hypermedia>
+    <title type="property">COLLECTION_TITLE</title>
+    <teaser type="property">COLLECTION_TEASER</teaser>
+  </item>
+</bpi>
