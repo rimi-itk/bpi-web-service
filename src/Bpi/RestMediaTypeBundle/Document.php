@@ -202,4 +202,24 @@ class Document
         if ($entity->isOwner($this))
             $this->current_entity = $entity;
     }
+
+    /**
+     * Dump document as recursive array
+     *
+     * @return array
+     */
+    public function dump()
+    {
+        $dump = array();
+        foreach($this->getEntities() as $entity)
+        {
+            $entity_dump = array();
+            $entity->walk(function($property) use (&$entity_dump) {
+                // @todo in some cases entity can have many properties with the same name
+                $entity_dump[$property->getName()] = $property->getValue();
+            });
+            $dump[$entity->getName()] = $entity_dump;
+        }
+        return $dump;
+    }
 }
