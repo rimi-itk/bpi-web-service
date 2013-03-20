@@ -181,7 +181,7 @@ class LoadNodes implements FixtureInterface
      */
     public function createAlphaAgency()
     {
-        return new Agency(new AgencyId(1));
+        return new Agency('Aarhus Kommunes Biblioteker', 'Agency Moderator Name', 'Publickey', 'Secret');
     }
 
     /**

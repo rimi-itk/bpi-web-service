@@ -22,7 +22,7 @@ class Agency implements IPresentable
     {
         $this->name = $name;
         $this->moderator = $moderator;
-        $this->publickey = $public_key;
+        $this->public_key = $public_key;
         $this->secret = $secret;
     }
 
