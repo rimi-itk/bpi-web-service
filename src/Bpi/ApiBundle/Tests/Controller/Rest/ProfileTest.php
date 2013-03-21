@@ -63,16 +63,14 @@ class ProfileTest extends WebTestCase
         $this->assertEquals('audience_A', (string)$audience);
         $category = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="category"]'));
         $this->assertEquals('category_A', (string)$category);
-        $type = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="type"]'));
-        $this->assertEquals('article', (string)$type);
         $tags = current($xml->xpath('//entity/entity[@name="profile"]/properties/property[@name="tags"]'));
         $this->assertEquals('foo, bar, zoo', (string)$tags);
 
         // assert body
+        $type = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="type"]'));
+        $this->assertEquals('article', (string)$type);
         $body = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="body"]'));
-        $this->assertEquals(1, preg_match('~^<p>foo<span>bar</span></p>~', (string)$body), 'At least first line of body must much');
-        $this->assertEquals(1, preg_match('~<p>Originally published by George Mihailov, Agency Alpha.</p>$~', (string)$body), 'Copyleft doesn\'t exists');
-        $this->assertEquals(1, preg_match('~<img id="embedded_img" src="(.+)"~', (string)$body, $matches), 'embedded_img not found');
-        $this->assertEquals(1, preg_match("~.+~", $matches[1]), 'src is empty');
+        $this->assertEquals(1, preg_match('~^<p>alpha_body</p>~', (string)$body), 'At least first line of body must much');
+        $this->assertEquals(1, preg_match('~<p>Originally published by George Bush, Aarhus Kommunes Biblioteker.</p>$~', (string)$body), 'Copyleft doesn\'t exists');
     }
 }

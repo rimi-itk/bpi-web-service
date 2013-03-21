@@ -114,7 +114,6 @@ class NodeListTest extends WebTestCase
         $titles = $xml->xpath('//entity[@name="node"]/entity[@name="resource"]/properties/property[@name="title"]');
 
         $this->assertEquals('alpha_title', (string)$titles[0]);
-        $this->assertEquals('charlie_title', (string)$titles[1]);
     }
 
     public function testSelfLink()
