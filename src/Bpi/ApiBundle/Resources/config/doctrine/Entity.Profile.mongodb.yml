@@ -18,5 +18,4 @@ Bpi\ApiBundle\Domain\Entity\Profile:
       targetDocument: Bpi\ApiBundle\Domain\ValueObject\Yearwheel
   embedMany:
     tags: ~
-  lifecycleCallbacks:
-    postLoad: [ wakeup ]
+

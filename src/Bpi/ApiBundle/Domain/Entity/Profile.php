@@ -117,12 +117,4 @@ class Profile implements IPresentable
              $document->appendEntity($entity);
         }
     }
-
-    /**
-     * Called by persistence layer after object was initialized
-     */
-    public function wakeup()
-    {
-        $this->tags = new VOList();
-    }
 }
