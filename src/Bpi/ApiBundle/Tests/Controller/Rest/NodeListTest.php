@@ -50,7 +50,7 @@ class NodeListTest extends WebTestCase
 
         $this->assertEquals('charlie_title', (string)$titles[0]);
         $this->assertEquals('bravo_title', (string)$titles[1]);
-        $this->assertEquals('alpha_title', (string)$titles[2]);
+        $this->assertEquals('alpha_title unicode(❶)', (string)$titles[2]);
     }
 
     public function testGetAscSortedList()
@@ -67,7 +67,7 @@ class NodeListTest extends WebTestCase
 
         $this->assertEquals('charlie_title', (string)$titles[2]);
         $this->assertEquals('bravo_title', (string)$titles[1]);
-        $this->assertEquals('alpha_title', (string)$titles[0]);
+        $this->assertEquals('alpha_title unicode(❶)', (string)$titles[0]);
     }
 
     public function testGetLimitedList()
@@ -113,7 +113,7 @@ class NodeListTest extends WebTestCase
         $xml = simplexml_load_string($this->client->getResponse()->getContent());
         $titles = $xml->xpath('//entity[@name="node"]/entity[@name="resource"]/properties/property[@name="title"]');
 
-        $this->assertEquals('alpha_title', (string)$titles[0]);
+        $this->assertEquals('alpha_title unicode(❶)', (string)$titles[0]);
     }
 
     public function testSelfLink()

@@ -31,11 +31,11 @@ class LoadNodes implements FixtureInterface
         //@todo add assets
         $resource_builder = new ResourceBuilder;
         $alpha = $resource_builder
-              ->body('<p>alpha_body</p>')
-              ->teaser('alpha_teaser')
-              ->title('alpha_title')
+              ->body('<p>alpha_body unicode(❶)</p>')
+              ->teaser('alpha_teaser unicode(❶)')
+              ->title('alpha_title unicode(❶)')
               ->ctime(new \DateTime("-1 day"))
-              ->copyleft(new Copyleft('alpha_copyleft'))
+              ->copyleft(new Copyleft('alpha_copyleft unicode(❶)'))
         ;
         return $alpha;
     }

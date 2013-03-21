@@ -70,7 +70,11 @@ class ProfileTest extends WebTestCase
         $type = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="type"]'));
         $this->assertEquals('article', (string)$type);
         $body = current($xml->xpath('//entity/entity[@name="resource"]/properties/property[@name="body"]'));
-        $this->assertEquals(1, preg_match('~^<p>alpha_body</p>~', (string)$body), 'At least first line of body must much');
-        $this->assertEquals(1, preg_match('~<p>Originally published by George Bush, Aarhus Kommunes Biblioteker.</p>$~', (string)$body), 'Copyleft doesn\'t exists');
+
+        $this->assertEquals(
+            '<p>alpha_body unicode(❶)</p><p>Originally published by George Bush, Aarhus Kommunes Biblioteker.</p>',
+            (string)$body,
+            'Body or copyleft doesn\'t match'
+        );
     }
 }
