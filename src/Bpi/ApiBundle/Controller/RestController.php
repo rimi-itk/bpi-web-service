@@ -263,7 +263,7 @@ class RestController extends FOSRestController
 
         $revision = $this->get('domain.push_service')->pushRevision(
             new \Bpi\ApiBundle\Domain\ValueObject\NodeId($id),
-            $extractor->extract('agency.author'),
+            $extractor->extract('author'),
             $extractor->extract('resource'),
             $extractor->extract('params')
         );
@@ -286,7 +286,7 @@ class RestController extends FOSRestController
                 'agency_id' => array(
                     new Constraints\NotBlank()
                 ),
-                'client_id' => array(
+                'local_id' => array(
                     new Constraints\NotBlank()
                 ),
                 'firstname' => array(
@@ -311,15 +311,8 @@ class RestController extends FOSRestController
                     new Constraints\Length(array('min' => 2, 'max' => 5000))
                 ),
                 'ctime' => array(
-                    new Constraints\Callback(function($value, \Symfony\Component\Validator\ExecutionContext $context){
-                        try{
-                            if (false === \DateTime::createFromFormat(\DateTime::W3C, $value))
-                                $context->addViolationAtPath('ctime', 'Unable to parse date format '.\DateTime::W3C);
-                        } catch (\Exception $e)
-                        {
-                            $context->addViolationAtPath('ctime', $e->getMessage());
-                        }
-                    })
+                    //@todo validate against DateTime::W3C format
+                    new Constraints\NotBlank()
                 ),
                 'type' => array(
                     new Constraints\NotBlank()
@@ -341,6 +334,17 @@ class RestController extends FOSRestController
             )
         ));
 
+        $params = new Constraints\Collection(array(
+            'fields' => array(
+                'editable' => array(
+                    new Constraints\Range(array('min' => 0, 'max' => 1))
+                ),
+                'authorship' => array(
+                    new Constraints\Range(array('min' => 0, 'max' => 1))
+                ),
+            )
+        ));
+
         $node = array(
             'fields' => array(
                 'author' => array(
@@ -351,6 +355,9 @@ class RestController extends FOSRestController
                 ),
                 'profile' => array(
                     $profile
+                ),
+                'params' => array(
+                    $params
                 )
             )
         );
@@ -380,7 +387,7 @@ class RestController extends FOSRestController
 
         $extractor = new Extractor($document);
         $node = $this->get('domain.push_service')->push(
-            $extractor->extract('agency.author'),
+            $extractor->extract('author'),
             $extractor->extract('resource'),
             $extractor->extract('profile'),
             $extractor->extract('params')
