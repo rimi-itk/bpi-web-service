@@ -7,17 +7,17 @@ use Doctrine\Common\Persistence\ObjectManager;
 
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
-use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
-use Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy;
 use Bpi\ApiBundle\Domain\ValueObject\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\Category;
-use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
-use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
+use Bpi\ApiBundle\Domain\Factory\ProfileBuilder;
+use Bpi\ApiBundle\Domain\Service\PushService;
+use Knp\Bundle\GaufretteBundle\FilesystemMap;
 
 class LoadNodes implements FixtureInterface
 {
@@ -28,14 +28,14 @@ class LoadNodes implements FixtureInterface
      */
     public function createAlphaResource()
     {
+        //@todo add assets
         $resource_builder = new ResourceBuilder;
         $alpha = $resource_builder
-              ->body('alpha_body')
-              ->teaser('alpha_teaser')
-              ->title('alpha_title')
+              ->body('<p>alpha_body unicode(❶)</p>')
+              ->teaser('alpha_teaser unicode(❶)')
+              ->title('alpha_title unicode(❶)')
               ->ctime(new \DateTime("-1 day"))
-              ->copyleft(new Copyleft('alpha_copyleft'))
-              ->build()
+              ->copyleft(new Copyleft('alpha_copyleft unicode(❶)'))
         ;
         return $alpha;
     }
@@ -53,7 +53,6 @@ class LoadNodes implements FixtureInterface
               ->title('bravo_title')
               ->ctime(new \DateTime("+1 day"))
               ->copyleft(new Copyleft('bravo_copyleft'))
-              ->build()
         ;
         return $bravo;
     }
@@ -71,7 +70,6 @@ class LoadNodes implements FixtureInterface
               ->title('charlie_title')
               ->ctime(new \DateTime("now"))
               ->copyleft(new Copyleft('charlie_copyleft'))
-              ->build()
         ;
         return $charlie;
     }
@@ -82,7 +80,14 @@ class LoadNodes implements FixtureInterface
      */
     public function createAlphaProfile()
     {
-        return new Profile(new Taxonomy(new Audience('audience_A'), new Category('category_A')));
+        $builder = new ProfileBuilder();
+        return $builder
+            ->audience(new Audience('audience_A'))
+            ->category(new Category('category_A'))
+            ->yearwheel(new Yearwheel('Winter'))
+            ->tags('foo, bar, zoo')
+            ->build();
+        ;
     }
 
     /**
@@ -91,7 +96,13 @@ class LoadNodes implements FixtureInterface
      */
     public function createBravoProfile()
     {
-        return new Profile(new Taxonomy(new Audience('audience_A'), new Category('category_B')));
+        $builder = new ProfileBuilder();
+        return $builder
+            ->audience(new Audience('audience_B'))
+            ->category(new Category('category_B'))
+            ->yearwheel(new Yearwheel('Winter'))
+            ->build();
+        ;
     }
 
     /**
@@ -100,78 +111,59 @@ class LoadNodes implements FixtureInterface
      */
     public function createCharlieProfile()
     {
-        return new Profile(new Taxonomy(new Audience('audience_B'), new Category('category_A')));
-    }
-
-    /**
-     *
-     * @return Bpi\ApiBundle\Domain\Aggregate\Node
-     */
-    public function createAlphaNode()
-    {
-        $builder = new NodeBuilder();
-        $node = $builder
-            ->author(new Author(new AgencyId(1), 1, 'Bush', 'George'))
-            ->profile($this->createAlphaProfile())
-            ->resource($this->createAlphaResource())
-            ->params(new Params(array(new Editable(1), new Authorship(1))))
-            ->build()
+        $builder = new ProfileBuilder();
+        return $builder
+            ->audience(new Audience('audience_A'))
+            ->category(new Category('category_B'))
+            ->tags('bravo, alpha, charlie')
+            ->build();
         ;
-        return $node;
     }
 
     /**
      *
-     * @return Bpi\ApiBundle\Domain\Aggregate\Node
+     * @return \Knp\Bundle\GaufretteBundle\FilesystemMap
      */
-    public function createBravoNode()
+    protected function createFilesystemMap()
     {
-        $builder = new NodeBuilder();
-        $node = $builder
-            ->author(new Author(new AgencyId(2), 1, 'Bush', 'George'))
-            ->profile($this->createBravoProfile())
-            ->resource($this->createBravoResource())
-            ->params(new Params(array(new Editable(1), new Authorship(0))))
-            ->build()
-        ;
-        return $node;
+        return new FilesystemMap(array('assets' => new \Gaufrette\Filesystem(new \Gaufrette\Adapter\InMemory())));
     }
 
-    /**
-     *
-     * @return Bpi\ApiBundle\Domain\Aggregate\Node
-     */
-    public function createCharlieNode()
-    {
-        $builder = new NodeBuilder();
-        $node = $builder
-            ->author(new Author(new AgencyId(1), 2, 'Potter'))
-            ->profile($this->createCharlieProfile())
-            ->resource($this->createCharlieResource())
-            ->params(new Params(array(new Editable(0), new Authorship(1))))
-            ->build()
-        ;
-        return $node;
-    }
-
-    /**
-     *
-     * @return \Bpi\ApiBundle\Domain\Aggregate\Agency
-     */
-    public function createAlphaAgency()
-    {
-        return new Agency(new AgencyId(1));
-    }
 
     /**
      * {@inheritDoc}
      */
     public function load(ObjectManager $manager)
     {
-        $manager->persist($this->createAlphaNode());
-        $manager->persist($this->createBravoNode());
-        $manager->persist($this->createCharlieNode());
+        $agency = new Agency('Aarhus Kommunes Biblioteker', 'Agency Moderator Name', 'Publickey', 'Secret');
+        $manager->persist($agency);
         $manager->flush();
+
+        $service = new PushService($manager, $this->createFilesystemMap());
+
+        // Alpha
+        $service->push(
+            new Author($agency->getAgencyId(), 1, 'Bush', 'George'),
+            $this->createAlphaResource(),
+            $this->createAlphaProfile(),
+            new Params(array(new Editable(1), new Authorship(1)))
+        );
+
+        // Bravo
+        $service->push(
+            new Author($agency->getAgencyId(), 2, 'Potter', 'Harry'),
+            $this->createBravoResource(),
+            $this->createBravoProfile(),
+            new Params(array(new Editable(1), new Authorship(0)))
+        );
+
+        // Charlie
+        $service->push(
+            new Author($agency->getAgencyId(), 2, 'Potter'),
+            $this->createCharlieResource(),
+            $this->createCharlieProfile(),
+            new Params(array(new Editable(0), new Authorship(1)))
+        );
     }
 
 }

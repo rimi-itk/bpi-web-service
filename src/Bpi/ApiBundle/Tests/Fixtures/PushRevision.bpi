@@ -1,16 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <bpi version="0.1">
-	<entity name="agency">
-		<properties>
-			<property type="string" name="id" >stub_agency_id</property>
-		</properties>
-		<entity name="author">
-			<properties>
-				<property type="string" name="id" >123</property>
-				<property type="string" name="firstname" >George</property>
-				<property type="string" name="lastname" >Mihailov</property>
-			</properties>
-		</entity>
-	</entity>
+	<entity name="author">
+                <properties>
+                        <property type="string" name="agency_id" >stub_agency_id</property>
+                        <property type="string" name="local_id" >123</property>
+                        <property type="string" name="firstname" >George</property>
+                        <property type="string" name="lastname" >Mihailov</property>
+                </properties>
+        </entity>
 	<entity name="resource">
 		<properties>
 			<property type="string" name="user_id" >22</property>

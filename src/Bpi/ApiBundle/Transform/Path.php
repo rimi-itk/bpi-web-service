@@ -25,8 +25,8 @@ class Path
             'profile.category',
             'profile.audience',
         ), array(
-            'profile.taxonomy.category.name',
-            'profile.taxonomy.audience.name',
+            'profile.category.name',
+            'profile.audience.name',
         ), $this->path);
     }
 }

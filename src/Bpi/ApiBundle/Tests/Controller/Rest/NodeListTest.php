@@ -5,17 +5,6 @@ namespace Bpi\ApiBundle\Tests\Controller\Rest;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Bpi\RestMediaTypeBundle\Document;
 
-class RouterStub implements \Symfony\Component\Routing\Generator\UrlGeneratorInterface
-{
-    public function generate($name, $parameters = array(), $absolute = false)
-    {
-        return 'test_generated_route';
-    }
-
-    public function setContext(\Symfony\Component\Routing\RequestContext $context) {}
-    public function getContext() {}
-}
-
 class NodeListTest extends WebTestCase
 {
     protected $client;
@@ -43,7 +32,7 @@ class NodeListTest extends WebTestCase
     protected function createDocument()
     {
         $doc = new Document;
-        $doc->setRouter(new RouterStub());
+        $doc->setRouter($this->getMock('\Symfony\Component\Routing\Generator\UrlGeneratorInterface'));
         return $doc;
     }
 
@@ -61,7 +50,7 @@ class NodeListTest extends WebTestCase
 
         $this->assertEquals('charlie_title', (string)$titles[0]);
         $this->assertEquals('bravo_title', (string)$titles[1]);
-        $this->assertEquals('alpha_title', (string)$titles[2]);
+        $this->assertEquals('alpha_title unicode(❶)', (string)$titles[2]);
     }
 
     public function testGetAscSortedList()
@@ -78,7 +67,7 @@ class NodeListTest extends WebTestCase
 
         $this->assertEquals('charlie_title', (string)$titles[2]);
         $this->assertEquals('bravo_title', (string)$titles[1]);
-        $this->assertEquals('alpha_title', (string)$titles[0]);
+        $this->assertEquals('alpha_title unicode(❶)', (string)$titles[0]);
     }
 
     public function testGetLimitedList()
@@ -124,8 +113,7 @@ class NodeListTest extends WebTestCase
         $xml = simplexml_load_string($this->client->getResponse()->getContent());
         $titles = $xml->xpath('//entity[@name="node"]/entity[@name="resource"]/properties/property[@name="title"]');
 
-        $this->assertEquals('alpha_title', (string)$titles[0]);
-        $this->assertEquals('charlie_title', (string)$titles[1]);
+        $this->assertEquals('alpha_title unicode(❶)', (string)$titles[0]);
     }
 
     public function testSelfLink()
