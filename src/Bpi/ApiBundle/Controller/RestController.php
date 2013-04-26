@@ -58,7 +58,41 @@ class RestController extends FOSRestController
      */
     public function indexAction()
     {
-        return $this->redirectView($this->get('router')->generate('list').'.html', 302);
+        $document = new Document();
+        $entity = $document->createRootEntity('resource');
+        $hypermedia = $document->createHypermediaSection();
+        $entity->setHypermedia($hypermedia);
+        $hypermedia->addQuery($document->createQuery(
+            'item',
+            $this->get('router')->generate('node_resource', array(), true),
+            array('id'),
+            'Find a node by ID'
+        ));
+        $hypermedia->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
+        $hypermedia->addLink($document->createLink(
+            'self',
+            $this->get('router')->generate('node_resource', array(), true),
+            'Node resource'
+        ));
+        $hypermedia->addLink($document->createLink(
+            'collection',
+            $this->get('router')->generate('list', array(), true),
+            'Node collection'
+        ));
+
+        $hypermedia->addTemplate($template = $document->createTemplate(
+            'push',
+            $this->get('router')->generate('node_resource', array(), true),
+            'Template for pushing node content'
+        ));
+        $template->createField('title');
+        $template->createField('body');
+        $template->createField('teaser');
+        $template->createField('category');
+        $template->createField('audience');
+
+        // @todo: listen to requested format and serialize regarding it
+        return new Response($this->get("serializer")->serialize($document, 'xml'));
     }
 
      /**
@@ -445,12 +479,12 @@ class RestController extends FOSRestController
      * @Rest\Get("/node")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface2.html.twig")
      */
-    public function nodeAbstractAction()
+    public function nodeResourceAction()
     {
         $document = new Document();
         $entity = $document->createRootEntity('node');
-        $controls = $document->createControls();
-        $entity->setControls($controls);
+        $controls = $document->createHypermediaSection();
+        $entity->setHypermedia($controls);
         $controls->addQuery($document->createQuery('search', 'abc', array('id'), 'Find a node by ID'));
         $controls->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
         $controls->addLink($document->createLink('self', 'abc'));

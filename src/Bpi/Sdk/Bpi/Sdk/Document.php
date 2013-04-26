@@ -21,7 +21,7 @@ class Document implements \Iterator, \Countable
     protected $iterator;
     
     /**
-     * 
+     *
      * @param \Goutte\Client $client
      */
     public function __construct(Client $client)
@@ -31,20 +31,20 @@ class Document implements \Iterator, \Countable
     
     /**
      * Gateway to make direct requests to API
-     * 
+     *
      * @param string $method
      * @param string $uri
      * @param array $params
      */
     public function request($method, $uri, array $params = array())
     {
-        $this->crawler = $this->http_client->request($method, $uri, $params);
+        $this->crawler = $this->http_client->request($method, $uri, $params, array(), array( 'HTTP_Content_Type' => 'application/vnd.bpi.api+xml'));
         $this->rewind();
     }
     
     /**
-     * 
-     * @return Symfony\Component\DomCrawler\Crawler crawler copy
+     *
+     * @return \Symfony\Component\DomCrawler\Crawler crawler copy
      */
     public function getCrawler()
     {
@@ -53,7 +53,7 @@ class Document implements \Iterator, \Countable
 
     /**
      * Access hypermedia link.
-     * 
+     *
      * @param string $rel
      * @return \Bpi\Sdk\Link
      */
@@ -69,7 +69,7 @@ class Document implements \Iterator, \Countable
     
     /**
      * Click on link.
-     * 
+     *
      * @param \Bpi\Sdk\Link $link
      */
     public function followLink(Link $link)
@@ -79,7 +79,7 @@ class Document implements \Iterator, \Countable
     
     /**
      * Access hypermedia query.
-     * 
+     *
      * @param string $rel
      * @return \Bpi\Sdk\Query
      */

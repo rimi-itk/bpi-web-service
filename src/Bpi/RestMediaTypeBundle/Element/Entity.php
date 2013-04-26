@@ -8,7 +8,7 @@ use Bpi\RestMediaTypeBundle\Element\Scope\HasLinks;
 use Bpi\RestMediaTypeBundle\Document;
 
 /**
- * @Serializer\XmlRoot("entity")
+ * @Serializer\XmlRoot("item")
  */
 class Entity implements HasLinks
 {
@@ -21,7 +21,7 @@ class Entity implements HasLinks
      * @Serializer\XmlAttribute
      * @Serializer\Type("string")
      */
-    protected $name;
+    protected $type;
 
     /**
      * @Serializer\XmlList(entry="link")
@@ -42,17 +42,17 @@ class Entity implements HasLinks
     protected $entities;
 
     /**
-     * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Controls")
+     * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Hypermedia")
      */
     protected $hypermedia;
     
     /**
      *
-     * @param string $name
+     * @param string $type
      */
-    public function __construct($name)
+    public function __construct($type)
     {
-        $this->name = $name;
+        $this->type = $type;
     }
 
     /**
@@ -218,10 +218,10 @@ class Entity implements HasLinks
     
     /**
      * 
-     * @param \Bpi\RestMediaTypeBundle\Element\Element\Controls $controls
+     * @param \Bpi\RestMediaTypeBundle\Element\Hypermedia $controls
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
-    public function setControls(Controls $controls)
+    public function setHypermedia(Hypermedia $controls)
     {
         $this->hypermedia = $controls;
         return $this;

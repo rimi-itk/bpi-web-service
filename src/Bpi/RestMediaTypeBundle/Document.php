@@ -34,7 +34,7 @@ class Document
     protected $version;
 
     /**
-     * @Serializer\XmlList(inline=true, entry="entity")
+     * @Serializer\XmlList(inline=true, entry="item")
      * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\Entity>")
      */
     protected $entities = array();
@@ -158,11 +158,11 @@ class Document
 
     /**
      * 
-     * @return \Bpi\RestMediaTypeBundle\Element\Controls
+     * @return \Bpi\RestMediaTypeBundle\Element\Hypermedia
      */
-    public function createControls()
+    public function createHypermediaSection()
     {
-        return new Element\Controls();
+        return new Element\Hypermedia();
     }
     
     /**
@@ -216,8 +216,21 @@ class Document
         }
         return $query;
     }
-    
+
     /**
+     *
+     * @param string $rel
+     * @param string $href
+     * @param array $fields
+     * @param string $title
+     * @return \Bpi\RestMediaTypeBundle\Element\Template
+     */
+    public function createTemplate($rel, $href, $title = null)
+    {
+        return new Element\Template($rel, $href, $title);
+    }
+
+     /**
      * Get last used entity
      *
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
