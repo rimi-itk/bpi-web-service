@@ -52,6 +52,7 @@ class Document implements \Iterator, \Countable
     }
 
     /**
+     * Access hypermedia link.
      * 
      * @param string $rel
      * @return \Bpi\Sdk\Link
@@ -67,6 +68,7 @@ class Document implements \Iterator, \Countable
     }
     
     /**
+     * Click on link.
      * 
      * @param \Bpi\Sdk\Link $link
      */
@@ -76,6 +78,7 @@ class Document implements \Iterator, \Countable
     }
     
     /**
+     * Access hypermedia query.
      * 
      * @param string $rel
      * @return \Bpi\Sdk\Query
@@ -91,6 +94,7 @@ class Document implements \Iterator, \Countable
     }
 
     /**
+     * Send query.
      * 
      * @param \Bpi\Sdk\Query $query
      * @param array $params
@@ -98,6 +102,32 @@ class Document implements \Iterator, \Countable
     public function sendQuery(Query $query, $params)
     {
         $query->send($this, $params);
+    }
+
+    /**
+     * Access hypermedia template.
+     *
+     * @param string $rel
+     * @return \Bpi\Sdk\Template
+     */
+    public function template($rel)
+    {
+        $query = $this->crawler
+              ->filter("hypermedia > template[rel='{$rel}']")
+              ->first()
+        ;
+
+        return new Template($query);
+    }
+
+    /**
+     * Post rendered template.
+     *
+     * @param \Bpi\Sdk\Template $template
+     */
+    public function postTemplate(Template $template)
+    {
+        $template->post($this);
     }
 
     /**

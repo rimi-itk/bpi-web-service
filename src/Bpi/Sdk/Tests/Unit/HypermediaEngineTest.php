@@ -81,4 +81,32 @@ class HypermediaEngineTest extends \PHPUnit_Framework_TestCase
         $doc->request('GET', 'http://example.com');
         $doc->sendQuery($doc->query('search'), array('id' => 'foo', 'zoo' => 'foo'));
     }
+
+    public function testTemplate()
+    {
+        $client = $this->createMockClient();
+
+        $doc = new Document($client);
+        $doc->request('GET', 'http://example.com');
+        $self = $this;
+        $doc->template('push')->eachField(function($field) use($self) {
+            $self->assertNotEmpty((string) $field);
+        });
+    }
+
+    public function testPostTemplate()
+    {
+        $client = $this->createMockClient();
+        $post_data = array('title' => 'title', 'teaser' => 'teaser', 'body' => 'body', 'type' => 'type');
+        $client->expects($this->at(1))
+              ->method('request')
+              ->with($this->equalTo('POST'), $this->equalTo('http://example.com/node'), $this->equalTo($post_data))
+              ->will($this->returnValue(new Crawler(file_get_contents(__DIR__ . '/Fixtures/Node.bpi'))));
+
+        $doc = new Document($client);
+        $doc->request('GET', 'http://example.com');
+        $doc->template('push')->eachField(function($field) {
+              $field->setValue((string) $field);
+        })->post($doc);
+    }
 }

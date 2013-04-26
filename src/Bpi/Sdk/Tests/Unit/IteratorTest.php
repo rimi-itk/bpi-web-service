@@ -39,7 +39,7 @@ class IteratorTest extends \PHPUnit_Framework_TestCase
                 $this->assertTrue($item->isTypeOf('collection'));
             elseif ($i == 1)
                 $this->assertTrue($item->isTypeOf('entity'));
-            else 
+            else
                 $this->fail('Unexpected');
             $i++;
         }

@@ -15,6 +15,14 @@
           <param name="title"/>
         </params>
       </query>
+      <template rel="push" href="http://example.com/node" title="Node template">
+        <fields>
+          <field name="title"/>
+          <field name="teaser"/>
+          <field name="body"/>
+          <field name="type"/>
+        </fields>
+      </template>
     </hypermedia>
     <title type="property">TITLE</title>
     <teaser type="property">TEASER</teaser>
