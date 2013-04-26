@@ -6,15 +6,34 @@ use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 
 class Author
 {
+    /**
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\AgencyId
+     */
     protected $agency_id;
+
+    /**
+     *
+     * @var string
+     */
     protected $client_id;
+
+    /**
+     *
+     * @var string
+     */
     protected $firstname;
+
+    /**
+     *
+     * @var string|null
+     */
     protected $lastname;
 
     /**
      *
      * @param \Bpi\ApiBundle\Domain\ValueObject\AgencyId $agency_id
-     * @param string $client_id
+     * @param string $client_id Author ID in client local system
      * @param string $lastname
      * @param string|null $firstname
      */

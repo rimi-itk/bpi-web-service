@@ -1,5 +1,5 @@
 <?php
-namespace Bpi\ApiBundle\Transform\Extractor\Agency;
+namespace Bpi\ApiBundle\Transform\Extractor;
 
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\Author as DomainAuthor;
@@ -32,8 +32,7 @@ class Author implements IExtractor
      */
     public function extract()
     {
-        $agency = $this->doc->getEntity('agency');
-        $author = $agency->getChildEntity('author');
+        $author = $this->doc->getEntity('author');
 
         $firstname = $author->hasProperty('firstname') ? $author->property('firstname')->getValue() : null;
         $lastname = $author->hasProperty('lastname') ? $author->property('lastname')->getValue() : null;
@@ -43,8 +42,8 @@ class Author implements IExtractor
         }
 
         return new DomainAuthor(
-            new AgencyId($agency->property('id')->getValue()),
-            $author->property('id')->getValue(),
+            new AgencyId($author->property('agency_id')->getValue()),
+            $author->property('local_id')->getValue(),
             $lastname,
             $firstname
         );

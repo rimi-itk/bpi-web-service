@@ -6,6 +6,7 @@ use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\Constraints;
 
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Extractor;
@@ -262,12 +263,107 @@ class RestController extends FOSRestController
 
         $revision = $this->get('domain.push_service')->pushRevision(
             new \Bpi\ApiBundle\Domain\ValueObject\NodeId($id),
-            $extractor->extract('agency.author'),
+            $extractor->extract('author'),
             $extractor->extract('resource'),
             $extractor->extract('params')
         );
 
         return $this->get("bpi.presentation.transformer")->transform($revision);
+    }
+
+    /**
+     * Create form to make validation
+     *
+     * @param array $data
+     * @return \Symfony\Component\Validator\ConstraintViolationList
+     */
+    protected function _isValidForPushNode(array $data)
+    {
+        // @todo move somewhere all this validation stuff
+
+        $author = new Constraints\Collection(array(
+            'fields' => array(
+                'agency_id' => array(
+                    new Constraints\NotBlank()
+                ),
+                'local_id' => array(
+                    new Constraints\NotBlank()
+                ),
+                'firstname' => array(
+                    new Constraints\Length(array('min' => 2, 'max' => 100))
+                ),
+                'lastname' => array(
+                    new Constraints\Length(array('min' => 2, 'max' => 100))
+                ),
+            )
+        ));
+
+        $resource = new Constraints\Collection(array(
+            'allowExtraFields' => true,
+            'fields' => array(
+                'title' => array(
+                    new Constraints\Length(array('min' => 2, 'max' => 500))
+                ),
+                'body' => array(
+                    new Constraints\Length(array('min' => 2))
+                ),
+                'teaser' => array(
+                    new Constraints\Length(array('min' => 2, 'max' => 5000))
+                ),
+                'ctime' => array(
+                    //@todo validate against DateTime::W3C format
+                    new Constraints\NotBlank()
+                ),
+                'type' => array(
+                    new Constraints\NotBlank()
+                ),
+                // assets - compulsory
+            )
+        ));
+
+        $profile = new Constraints\Collection(array(
+            'allowExtraFields' => true,
+            'fields' => array(
+                'category' => array(
+                    new Constraints\Length(array('min' => 2, 'max' => 100))
+                ),
+                'audience' => array(
+                    new Constraints\Length(array('min' => 2, 'max' => 100))
+                ),
+                // tags, yearwheel - compulsory
+            )
+        ));
+
+        $params = new Constraints\Collection(array(
+            'fields' => array(
+                'editable' => array(
+                    new Constraints\Range(array('min' => 0, 'max' => 1))
+                ),
+                'authorship' => array(
+                    new Constraints\Range(array('min' => 0, 'max' => 1))
+                ),
+            )
+        ));
+
+        $node = array(
+            'fields' => array(
+                'author' => array(
+                    $author
+                ),
+                'resource' => array(
+                    $resource
+                ),
+                'profile' => array(
+                    $profile
+                ),
+                'params' => array(
+                    $params
+                )
+            )
+        );
+
+        $validator = $this->container->get('validator');
+        return $validator->validateValue($data, new Constraints\Collection($node));
     }
 
     /**
@@ -282,9 +378,16 @@ class RestController extends FOSRestController
         if (strlen($this->getRequest()->getContent()) > 10485760)
             throw new HttpException(413, "Request entity too large");
 
-        $extractor = new Extractor($this->getDocument());
+        $document = $this->getDocument();
+
+        // request validation
+        $violations = $this->_isValidForPushNode($document->dump());
+        if (count($violations))
+            throw new HttpException(422, (string) $violations);
+
+        $extractor = new Extractor($document);
         $node = $this->get('domain.push_service')->push(
-            $extractor->extract('agency.author'),
+            $extractor->extract('author'),
             $extractor->extract('resource'),
             $extractor->extract('profile'),
             $extractor->extract('params')

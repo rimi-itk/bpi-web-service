@@ -1,34 +1,59 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Entity;
 
+use Bpi\ApiBundle\Transform\Comparator;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
-use Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy;
 use Bpi\ApiBundle\Domain\Entity\Profile\Relation\IRelation;
-use Bpi\ApiBundle\Transform\Comparator;
+use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
+use Bpi\ApiBundle\Domain\ValueObject\Audience;
+use Bpi\ApiBundle\Domain\ValueObject\Category;
+use Bpi\ApiBundle\Domain\ValueObject\ValueObjectList as VOList;
 
 class Profile implements IPresentable
 {
-    protected $taxonomy;
+    /**
+     * Mandatory attribute
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\Audience
+     */
+    protected $audience;
+
+    /**
+     * Mandatory attribute
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\Category
+     */
+    protected $category;
+
+    /**
+     * Closed optional attribute
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\Yearwheel
+     */
+    protected $yearwheel;
+
+    /**
+     * Open optional dictionary
+     *
+     * @var Bpi\ApiBundle\Domain\ValueObject\ValueObjectList
+     */
+    protected $tags;
+
+    /**
+     * @TODO
+     *
+     * @var mixed
+     */
     protected $relations;
 
-    /**
-     *
-     * @param \Bpi\ApiBundle\Domain\Entity\Profile\Taxonomy $taxonomy
-     */
-    public function __construct(Taxonomy $taxonomy)
+    public function __construct(Audience $audience, Category $category, Yearwheel $yearwheel = null, VOList $tags = null)
     {
-        $this->taxonomy = $taxonomy;
+        $this->audience = $audience;
+        $this->category = $category;
+        $this->yearwheel = $yearwheel;
+        $this->tags = $tags;
         $this->relations = new \SplObjectStorage();
-    }
-
-    /**
-     *
-     * @param \Bpi\ApiBundle\Domain\Entity\Profile\Relation\IRelation $relation
-     */
-    public function addRelation(IRelation $relation)
-    {
-        $this->attach($relation);
     }
 
     /**
@@ -55,12 +80,41 @@ class Profile implements IPresentable
     public function transform(Document $document)
     {
         try {
-            $profile = $document->createEntity('profile');
-            $document->currentEntity()->addChildEntity($profile);
-        } catch(\RuntimeException $e) {
-             $document->appendEntity($profile);
-        }
+            $entity = $document->createEntity('profile');
 
-        $this->taxonomy->transform($document);
+            $entity->addProperty($document->createProperty(
+                'category',
+                'string',
+                $this->category->name()
+            ));
+
+            $entity->addProperty($document->createProperty(
+                'audience',
+                'string',
+                $this->audience->name()
+            ));
+
+            if ($this->yearwheel instanceof Yearwheel)
+            {
+                $entity->addProperty($document->createProperty(
+                    'yearwheel',
+                    'string',
+                    $this->yearwheel->name()
+                ));
+            }
+
+            if ($this->tags->count())
+            {
+                $entity->addProperty($document->createProperty(
+                    'tags',
+                    'string',
+                    implode(', ', $this->tags->toArray())
+                ));
+            }
+
+            $document->currentEntity()->addChildEntity($entity);
+        } catch(\RuntimeException $e) {
+             $document->appendEntity($entity);
+        }
     }
 }

@@ -9,6 +9,13 @@ Bpi\ApiBundle\Domain\Entity\Resource:
       type: string
     ctime:
       type: date
+    type:
+      type: string
+    copyleft:
+      embedded: true
+      type: one
+      strategy: pushAll
+      targetDocument: Bpi\ApiBundle\Domain\ValueObject\Copyleft
     assets:
       reference: true
       type: many

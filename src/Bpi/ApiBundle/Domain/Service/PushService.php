@@ -110,7 +110,7 @@ class PushService
     public function assignCopyleft(Author $author, ResourceBuilder $builder, Authorship $autorship)
     {
         $copyleft = new Copyleft;
-        
+
         // Set agency as default original copyrighter
         $this->manager->getRepository('BpiApiBundle:Aggregate\Agency')
             ->find($author->getAgencyId()->id())

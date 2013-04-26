@@ -9,7 +9,7 @@ class ValueObjectList extends ArrayCollection
     {
         $this->rewind();
         while($this->valid()) {
-            if ($vo->equals($this->current()))
+            if ($value_object->equals($this->current()))
                 return true;
 
             $this->next();

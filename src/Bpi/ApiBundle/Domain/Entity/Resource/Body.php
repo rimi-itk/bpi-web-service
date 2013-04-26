@@ -7,6 +7,7 @@ use Gaufrette\File;
 class Body
 {
     const BASE_URL_STUB = '__embedded_asset_base_url__';
+    const WELLFORM_INDICATOR = '__wellform__';
 
     /**
      *
@@ -27,7 +28,20 @@ class Body
         $this->dom->strictErrorChecking = false;
 
         libxml_use_internal_errors(true);
-        $result = @$this->dom->loadHTML($content);
+
+        // DOMDocument detects encoding from meta tag
+        if (false === stristr($content, 'id="' . self::WELLFORM_INDICATOR . '"'))
+        {
+            $wellformed_content = '<!DOCTYPE html><html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" id="' . self::WELLFORM_INDICATOR . '" /></head><body>';
+            $wellformed_content .= $content;
+            $wellformed_content .= '</body></html>';
+        }
+        else
+        {
+            $wellformed_content = $content;
+        }
+
+        $result = @$this->dom->loadHTML($wellformed_content);
         libxml_clear_errors();
 
         if (false === $result) {
@@ -78,11 +92,13 @@ class Body
      */
     public function getFlattenContent()
     {
-        $content = '';
-        $xpath = new \DOMXPath($this->dom);
-        foreach($xpath->query('//html/body/*') as $node)
-            $content .= $this->dom->saveHTML($node);
-
-        return $content;
+        // Fixed length strings must work faster that regexp
+        $replaces = array(
+            '<html>', '</html>',
+            '<head>', '</head>',
+            '<body>', '</body>',
+            '<meta content="text/html; charset=utf-8" http-equiv="Content-Type" id="__wellform__"></meta>',
+        );
+        return str_ireplace($replaces, '', $this->dom->C14N());
     }
 }
