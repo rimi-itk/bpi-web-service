@@ -120,12 +120,13 @@ class Document
 
     /**
      *
+     * @param string $type
      * @param string $name
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
-    public function createRootEntity($name)
+    public function createRootEntity($type, $name = null)
     {
-        $entity = new Entity($name);
+        $entity = new Entity($type, $name);
         $entity->attach($this);
         $this->entities[] = $entity;
         $this->setCursorOnEntity($entity);

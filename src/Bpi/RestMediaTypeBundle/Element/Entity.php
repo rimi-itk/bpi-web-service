@@ -13,6 +13,11 @@ use Bpi\RestMediaTypeBundle\Document;
 class Entity implements HasLinks
 {
     /**
+     * Item without name
+     */
+    const NONAME = 'noname';
+
+    /**
      * @Serializer\Exclude
      */
     protected $document;
@@ -22,6 +27,12 @@ class Entity implements HasLinks
      * @Serializer\Type("string")
      */
     protected $type;
+
+    /**
+     * @Serializer\XmlAttribute
+     * @Serializer\Type("string")
+     */
+    protected $name;
 
     /**
      * @Serializer\XmlList(entry="link")
@@ -50,9 +61,10 @@ class Entity implements HasLinks
      *
      * @param string $type
      */
-    public function __construct($type)
+    public function __construct($type, $name = null)
     {
         $this->type = $type;
+        $this->name = $name ? $name : self::NONAME;
     }
 
     /**

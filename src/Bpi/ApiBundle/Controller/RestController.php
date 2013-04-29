@@ -59,7 +59,7 @@ class RestController extends FOSRestController
     public function indexAction()
     {
         $document = new Document();
-        $entity = $document->createRootEntity('resource');
+        $entity = $document->createRootEntity('resource', 'node');
         $hypermedia = $document->createHypermediaSection();
         $entity->setHypermedia($hypermedia);
         $hypermedia->addQuery($document->createQuery(
