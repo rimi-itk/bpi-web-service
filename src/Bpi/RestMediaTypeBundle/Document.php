@@ -134,13 +134,15 @@ class Document
     }
     
     /**
+     * Create new entity instance
      *
+     * @param string $type
      * @param string $name
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
-    public function createEntity($name)
+    public function createEntity($type, $name = null)
     {
-        $entity = new Entity($name);
+        $entity = new Entity($type, $name);
         $entity->attach($this);
         return $entity;
     }

@@ -13,8 +13,8 @@ class EndpointTest extends WebTestCase
         $doc = new Document($client = new \Goutte\Client());
         $doc->request('GET', 'http://bpi.dev/app_dev.php/');
 
-        $this->assertEquals(1, $doc->count());
         $doc->reduceItemsByAttr('name', 'node');
+        $this->assertEquals(1, $doc->count());
         $this->assertTrue($doc->link('self') instanceof \Bpi\Sdk\Link);
         $this->assertTrue($doc->link('collection') instanceof \Bpi\Sdk\Link);
         $this->assertTrue($doc->query('item') instanceof \Bpi\Sdk\Query);

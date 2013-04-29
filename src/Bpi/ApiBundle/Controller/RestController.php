@@ -30,7 +30,7 @@ class RestController extends FOSRestController
     /**
      * Get unserialized request body
      *
-     * @return Bpi\RestMediaTypeBundle\Document
+     * @return \Bpi\RestMediaTypeBundle\Document
      */
     protected function getDocument()
     {
@@ -52,6 +52,16 @@ class RestController extends FOSRestController
     }
 
     /**
+     *
+     * @param \Bpi\RestMediaTypeBundle\Document $document
+     */
+    protected function createResponse(Document $document)
+    {
+        // @todo: listen to requested format and serialize regarding it
+        return new Response($this->get("serializer")->serialize($document, 'xml'));
+    }
+
+    /**
      * Main page of API redirects to human representation of entry point
      *
      * @Rest\Get("/")
@@ -59,21 +69,25 @@ class RestController extends FOSRestController
     public function indexAction()
     {
         $document = new Document();
-        $entity = $document->createRootEntity('resource', 'node');
+
+        // Node resource
+        $node = $document->createRootEntity('resource', 'node');
         $hypermedia = $document->createHypermediaSection();
-        $entity->setHypermedia($hypermedia);
+        $node->setHypermedia($hypermedia);
         $hypermedia->addQuery($document->createQuery(
             'item',
             $this->get('router')->generate('node_resource', array(), true),
             array('id'),
             'Find a node by ID'
         ));
+
         $hypermedia->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
         $hypermedia->addLink($document->createLink(
             'self',
             $this->get('router')->generate('node_resource', array(), true),
             'Node resource'
         ));
+
         $hypermedia->addLink($document->createLink(
             'collection',
             $this->get('router')->generate('list', array(), true),
@@ -85,14 +99,24 @@ class RestController extends FOSRestController
             $this->get('router')->generate('node_resource', array(), true),
             'Template for pushing node content'
         ));
+
         $template->createField('title');
         $template->createField('body');
         $template->createField('teaser');
         $template->createField('category');
         $template->createField('audience');
 
-        // @todo: listen to requested format and serialize regarding it
-        return new Response($this->get("serializer")->serialize($document, 'xml'));
+        // Profile resource
+        $profile = $document->createRootEntity('resource', 'profile');
+        $profile_hypermedia = $document->createHypermediaSection();
+        $profile->setHypermedia($profile_hypermedia);
+        $profile_hypermedia->addLink($document->createLink(
+            'dictionary',
+            $this->get('router')->generate('profile_dictionary', array(), true),
+            'Profile items dictionary'
+        ));
+
+        return $this->createResponse($document);
     }
 
      /**
@@ -580,13 +604,14 @@ class RestController extends FOSRestController
     /**
      * Get profile dictionary
      *
-     * @Rest\Get("/profile_dictionary", name="profile_dictionary")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
+     * @Rest\Get("/profile/dictionary", name="profile_dictionary")
+     * #Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
      */
     public function profileDictionaryAction()
     {
         $dictionary = $this->get('domain.profile_service')->provideDictionary();
-        return $this->get("bpi.presentation.transformer")->transform($dictionary);
+        $document = $this->get("bpi.presentation.transformer")->transform($dictionary);
+        return $this->createResponse($document);
     }
 
     /**
