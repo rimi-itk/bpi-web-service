@@ -80,41 +80,40 @@ class Profile implements IPresentable
     public function transform(Document $document)
     {
         try {
-            $entity = $document->createEntity('profile');
-
-            $entity->addProperty($document->createProperty(
-                'category',
-                'string',
-                $this->category->name()
-            ));
-
-            $entity->addProperty($document->createProperty(
-                'audience',
-                'string',
-                $this->audience->name()
-            ));
-
-            if ($this->yearwheel instanceof Yearwheel)
-            {
-                $entity->addProperty($document->createProperty(
-                    'yearwheel',
-                    'string',
-                    $this->yearwheel->name()
-                ));
-            }
-
-            if ($this->tags->count())
-            {
-                $entity->addProperty($document->createProperty(
-                    'tags',
-                    'string',
-                    implode(', ', $this->tags->toArray())
-                ));
-            }
-
-            $document->currentEntity()->addChildEntity($entity);
+            $entity = $document->currentEntity();
         } catch(\RuntimeException $e) {
-             $document->appendEntity($entity);
+            $entity = $document->createEntity('entity', 'profile');
+            $document->appendEntity($entity);
+        }
+
+        $entity->addProperty($document->createProperty(
+            'category',
+            'string',
+            $this->category->name()
+        ));
+
+        $entity->addProperty($document->createProperty(
+            'audience',
+            'string',
+            $this->audience->name()
+        ));
+
+        if ($this->yearwheel instanceof Yearwheel)
+        {
+            $entity->addProperty($document->createProperty(
+                'yearwheel',
+                'string',
+                $this->yearwheel->name()
+            ));
+        }
+
+        if ($this->tags->count())
+        {
+            $entity->addProperty($document->createProperty(
+                'tags',
+                'string',
+                implode(', ', $this->tags->toArray())
+            ));
         }
     }
 }

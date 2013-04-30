@@ -52,19 +52,10 @@ class RestController extends FOSRestController
     }
 
     /**
-     *
-     * @param \Bpi\RestMediaTypeBundle\Document $document
-     */
-    protected function createResponse(Document $document)
-    {
-        // @todo: listen to requested format and serialize regarding it
-        return new Response($this->get("serializer")->serialize($document, 'xml'));
-    }
-
-    /**
      * Main page of API redirects to human representation of entry point
      *
      * @Rest\Get("/")
+     * @Rest\View()
      */
     public function indexAction()
     {
@@ -116,13 +107,13 @@ class RestController extends FOSRestController
             'Profile items dictionary'
         ));
 
-        return $this->createResponse($document);
+        return $document;
     }
 
      /**
      * Default node listing
      *
-     * @Rest\Get("/node/list")
+     * @Rest\Get("/node/collection")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="200")
      */
     public function listAction()
@@ -132,9 +123,13 @@ class RestController extends FOSRestController
         $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
         $router = $this->get('router');
         $document->walkEntities(function($e) use ($document, $router) {
-            $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
-            $e->addLink($document->createLink('collection', $router->generate('list', array(), true)));
-            $e->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), 'filename' => ''), true)));
+            $hypermedia = $document->createHypermediaSection();
+            $e->setHypermedia($hypermedia);
+            $hypermedia->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
+            $hypermedia->addLink($document->createLink('collection', $router->generate('list', array(), true)));
+
+            // @todo: implementation
+            //$hypermedia->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), 'filename' => ''), true)));
         });
 
         return $document;
@@ -143,7 +138,7 @@ class RestController extends FOSRestController
     /**
      * List nodes by recieved nodes_query
      *
-     * @Rest\Post("/node/list")
+     * @Rest\Post("/node/collection")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
      */
     public function postNodeListAction()
@@ -605,13 +600,13 @@ class RestController extends FOSRestController
      * Get profile dictionary
      *
      * @Rest\Get("/profile/dictionary", name="profile_dictionary")
-     * #Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
+     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
      */
     public function profileDictionaryAction()
     {
         $dictionary = $this->get('domain.profile_service')->provideDictionary();
         $document = $this->get("bpi.presentation.transformer")->transform($dictionary);
-        return $this->createResponse($document);
+        return $document;
     }
 
     /**

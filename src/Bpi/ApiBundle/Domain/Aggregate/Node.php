@@ -112,24 +112,18 @@ class Node implements IPresentable
      */
     public function transform(Document $document)
     {
-        $entity = $document->createEntity('node');
-
-        $entity->addProperty($document->createProperty(
-            'ctime',
-            'dateTime',
-            $this->ctime
-        ));
-
-        $entity->addProperty($document->createProperty(
-            'mtime',
-            'dateTime',
-            $this->ctime
-        ));
+        $entity = $document->createEntity('entity');
 
         $entity->addProperty($document->createProperty(
             'id',
             'string',
             $this->getId()
+        ));
+
+        $entity->addProperty($document->createProperty(
+            'syndication',
+            'dateTime',
+            $this->ctime
         ));
 
         $entity->addProperty($document->createProperty(
@@ -140,8 +134,8 @@ class Node implements IPresentable
 
         $document->appendEntity($entity);
 
-        $this->profile->transform($document);
         $document->setCursorOnEntity($entity);
+        $this->profile->transform($document);
         $this->resource->transform($document);
     }
 }

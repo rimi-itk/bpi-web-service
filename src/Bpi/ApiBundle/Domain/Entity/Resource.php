@@ -105,9 +105,9 @@ class Resource implements IPresentable
     public function transform(Document $document)
     {
         try {
-            $entity = $document->createEntity('resource');
-            $document->currentEntity()->addChildEntity($entity);
+            $entity= $document->currentEntity();
         } catch (\RuntimeException $e) {
+            $entity = $document->createEntity('entity', 'resource');
             $document->appendEntity($entity);
         }
 
@@ -120,7 +120,7 @@ class Resource implements IPresentable
         $entity->addProperty($document->createProperty('title', 'string', $this->title));
         $entity->addProperty($document->createProperty('body', 'string', $this->body->getFlattenContent() . $copyleft));
         $entity->addProperty($document->createProperty('teaser', 'string', $this->teaser));
-        $entity->addProperty($document->createProperty('ctime', 'dateTime', $this->ctime));
+        $entity->addProperty($document->createProperty('creation', 'dateTime', $this->ctime));
         $entity->addProperty($document->createProperty('type', 'string', $this->type));
     }
 

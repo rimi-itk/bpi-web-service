@@ -1,19 +1,16 @@
 <?php
-namespace Bpi\ApiBundle\Tests\Controller;
+namespace Bpi\ApiBundle\Tests\SDK;
 
-require_once __DIR__ . '/../../../Sdk/vendor/autoload.php';
-
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Bpi\Sdk\Document;
 
-class EndpointTest extends WebTestCase
+class EndpointTest extends SDKTestCase
 {
     public function testEndpoint()
     {
-        $doc = new Document($client = new \Goutte\Client());
-        $doc->request('GET', 'http://bpi.dev/app_dev.php/');
+        $doc = $this->createDocument($client = new \Goutte\Client());
+        $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
 
-        $doc->reduceItemsByAttr('name', 'node');
+        $doc->firstItem('name', 'node');
         $this->assertEquals(1, $doc->count());
         $this->assertTrue($doc->link('self') instanceof \Bpi\Sdk\Link);
         $this->assertTrue($doc->link('collection') instanceof \Bpi\Sdk\Link);
