@@ -155,6 +155,26 @@ class Document
     public function appendEntity(Entity $entity)
     {
         $this->entities[] = $entity;
+        $this->addEntity($entity);
+    }
+
+    /**
+     * Prepend entity to the beginning of document
+     *
+     * @param \Bpi\RestMediaTypeBundle\Element\Entity $entity
+     */
+    public function prependEntity(Entity $entity)
+    {
+        array_unshift($this->entities, $entity);
+        $this->addEntity($entity);
+    }
+
+    /**
+     *
+     * @param \Bpi\RestMediaTypeBundle\Element\Entity $entity
+     */
+    protected function addEntity(Entity $entity)
+    {
         $this->setCursorOnEntity($entity);
         $entity->attach($this);
     }

@@ -118,7 +118,18 @@ class RestController extends FOSRestController
      */
     public function listAction()
     {
-        $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findLatest();
+        $node_query = new \Bpi\ApiBundle\Domain\Entity\NodeQuery();
+        $node_query->sort('ctime', 'desc');
+        $node_query->amount(20);
+        if ($amount = $this->getRequest()->query->get('amount', false)) {
+            $node_query->amount($amount);
+        }
+
+        if ($offset = $this->getRequest()->query->get('offset', false)) {
+            $node_query->offset($offset);
+        }
+
+        $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findByNodesQuery($node_query);
 
         $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
         $router = $this->get('router');
@@ -131,6 +142,20 @@ class RestController extends FOSRestController
             // @todo: implementation
             //$hypermedia->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), 'filename' => ''), true)));
         });
+
+        // Collection description
+        $collection = $document->createEntity('collection');
+        $document->prependEntity($collection);
+        $hypermedia = $document->createHypermediaSection();
+        $collection->setHypermedia($hypermedia);
+        $hypermedia->addLink($document->createLink('canonical', $router->generate('list', array(), true)));
+        $hypermedia->addLink($document->createLink('self', $router->generate('list', $this->getRequest()->query->all(), true)));
+        $hypermedia->addQuery($document->createQuery(
+            'pagination',
+            $this->get('router')->generate('list', array(), true),
+            array('amount', 'offset'),
+            'Amount of items and starting offset'
+        ));
 
         return $document;
     }
