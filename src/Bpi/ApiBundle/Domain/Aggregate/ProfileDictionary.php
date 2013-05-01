@@ -15,13 +15,11 @@ class ProfileDictionary implements IPresentable
         $this->categories = $categories;
     }
 
-        /**
+    /**
      * {@inheritdoc}
      */
     public function transform(Document $document)
     {
-        $document->appendEntity($document->createEntity('profile_dictionary'));
-
         foreach ($this->audiences as $audience)
             $audience->transform($document);
 

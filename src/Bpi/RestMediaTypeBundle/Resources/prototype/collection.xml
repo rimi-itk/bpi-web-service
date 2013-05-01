@@ -1,0 +1,25 @@
+<bpi version="0.2" xmlns:description="urn:description" xmlns:appstate="urn:appstate">
+	<nodes description:type="collection">
+		<appstate:appstate>
+			<appstate:link rel="canonical" href="..." />
+			<appstate:link rel="self" href="..." />
+			<appstate:query rel="search" href="...">
+				<appstate:param name="term"></appstate:param>
+				<appstate:param name="filter[title]"></appstate:param>
+				<appstate:param name="sort[teaser]"></appstate:param>
+			</appstate:query>
+			<appstate:query rel="select" href="...">
+				<appstate:param name="title"></appstate:param>
+				<appstate:param name="teaser"></appstate:param>
+				<appstate:param name="body"></appstate:param>
+			</appstate:query>
+		</appstate:appstate>
+		<node description:type="collection/item entity">
+			<appstate:appstate>
+				<appstate:link rel="self" href="" />
+			</appstate:appstate>
+			<title decription:type="property">TITLE</title>
+			<teaser description:type="property">TEASER</teaser>
+		</node>
+	</nodes>
+</bpi>

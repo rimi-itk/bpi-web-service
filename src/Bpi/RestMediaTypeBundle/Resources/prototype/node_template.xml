@@ -1,0 +1,31 @@
+<bpi version="0.2" xmlns:description="urn:description" xmlns:appstate="urn:appstate">
+	<node description:type="entity">
+		<appstate:appstate>
+			<appstate:link rel="audience/collection" href="..." />
+			<appstate:link rel="category/collection" href="..." />
+			<appstate:link rel="yearwheel/collection" href="..." />
+			<appstate:template rel="node">
+				<appstate:param name="title"></appstate:param>
+				<appstate:param name="teaser"></appstate:param>
+				<appstate:param name="body"></appstate:param>
+				<appstate:param name="ctime"></appstate:param>
+				<appstate:param name="type"></appstate:param>
+				<appstate:list name="assets">
+		                	<appstate:param name="name"></appstate:param>
+					<!-- asset URI on BPI or inline encoded -->
+					<appstate:param name="body"></appstate:param>
+                		</appstate:list>
+				<appstate:list name="relations">
+				    <appstate:param name="name"></appstate:param>
+				    <appstate:param name="type"></appstate:param>
+				    <appstate:param name="value"></appstate:param>
+				</appstate:list>
+				<appstate:choice name="audience" rel="audience/collection" />
+				<appstate:choice name="category" rel="category/collection" />
+                		<appstate:param name="tags"></appstate:param>
+				<!-- add invariant, like "yearwheel:skip" to not introduce "optional" attr -->
+		                <appstate:choice name="yearwheel" rel="yearwheel/collection" />
+			</appstate:template>
+		</appstate:appstate>
+	</node>
+</bpi>
