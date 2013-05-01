@@ -127,7 +127,7 @@ fos_rest:
     service:
       view_handler: bpi.apibundle.rest.view_handler
     routing_loader:
-        default_format: html
+        default_format: bpi
     format_listener:
         default_priorities: ['bpi', 'xml', 'json', 'html', '*/*']
         fallback_format: xml

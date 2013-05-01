@@ -94,7 +94,7 @@ class RestControllerTest extends WebTestCase
 
     public function testProfileDictionary()
     {
-        $client = $this->doRequest('/profile_dictionary.xml', '', 'GET');
+        $client = $this->doRequest('/profile/dictionary.xml', '', 'GET');
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
         $xml = simplexml_load_string($client->getResponse()->getContent());
         $entity = $xml->xpath('//entity[@name="profile_dictionary"]');

@@ -49,7 +49,7 @@ class PKListener implements ListenerInterface
                 return $this->skipAuthorization();
 
             if ($request->headers->has('Authorization')) {
-                if (!preg_match('~BPI pk="(?<pk>[^"]+)", token="(?<token>[^"]+)"~i', $request->headers->get('Authorization'), $matches))
+                if (!preg_match('~BPI agency="(?<agency>[^"]+)", pk="(?<pk>[^"]+)", token="(?<token>[^"]+)"~i', $request->headers->get('Authorization'), $matches))
                     throw new AuthenticationException('Authorization credintials required');
 
                 $token->setUser($matches['pk']);

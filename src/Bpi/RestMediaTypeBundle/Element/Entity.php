@@ -8,14 +8,25 @@ use Bpi\RestMediaTypeBundle\Element\Scope\HasLinks;
 use Bpi\RestMediaTypeBundle\Document;
 
 /**
- * @Serializer\XmlRoot("entity")
+ * @Serializer\XmlRoot("item")
  */
 class Entity implements HasLinks
 {
     /**
+     * Item without name
+     */
+    const NONAME = 'noname';
+
+    /**
      * @Serializer\Exclude
      */
     protected $document;
+
+    /**
+     * @Serializer\XmlAttribute
+     * @Serializer\Type("string")
+     */
+    protected $type;
 
     /**
      * @Serializer\XmlAttribute
@@ -42,12 +53,18 @@ class Entity implements HasLinks
     protected $entities;
 
     /**
-     *
-     * @param string $name
+     * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Hypermedia")
      */
-    public function __construct($name)
+    protected $hypermedia;
+    
+    /**
+     *
+     * @param string $type
+     */
+    public function __construct($type, $name = null)
     {
-        $this->name = $name;
+        $this->type = $type;
+        $this->name = $name ? $name : self::NONAME;
     }
 
     /**
@@ -209,5 +226,16 @@ class Entity implements HasLinks
                 $props[$property->getName()] = $property;
         }
         return $props;
+    }
+    
+    /**
+     * 
+     * @param \Bpi\RestMediaTypeBundle\Element\Hypermedia $controls
+     * @return \Bpi\RestMediaTypeBundle\Element\Entity
+     */
+    public function setHypermedia(Hypermedia $controls)
+    {
+        $this->hypermedia = $controls;
+        return $this;
     }
 }
