@@ -129,7 +129,10 @@ class Node implements IPresentable
         $entity->addProperty($document->createProperty(
             'editable',
             'boolean',
-            $this->params->filter(function($e){ if ($e instanceof Editable) return true; })->first()->isPositive()
+            (int) $this->params
+                ->filter(function($e){ if ($e instanceof Editable) return true; })
+                ->first()
+                ->isPositive()
         ));
 
         $document->appendEntity($entity);
