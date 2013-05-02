@@ -235,9 +235,20 @@ class Document
         $query = new Element\Query($rel, $href, $title);
         foreach($params as $param)
         {
-            $query->addParam(new Element\Param($param));
+            $query->addParam(is_object($param) ? $param : $this->createQueryParameter($param));
         }
         return $query;
+    }
+
+    /**
+     *
+     * @param string $name
+     * @param array $attributes
+     * @return \Bpi\RestMediaTypeBundle\Element\Param
+     */
+    public function createQueryParameter($name)
+    {
+        return new Element\Param($name);
     }
 
     /**
