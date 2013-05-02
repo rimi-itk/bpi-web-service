@@ -1,0 +1,10 @@
+Bpi\ApiBundle\Domain\Entity\Author:
+#  db: documents
+  type: embeddedDocument
+  fields:
+    agency_id:
+      type: string
+    firstname:
+      type: string
+    lastname:
+      type: string

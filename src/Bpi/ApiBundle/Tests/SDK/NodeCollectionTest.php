@@ -6,7 +6,7 @@ class NodeCollectionTest extends SDKTestCase
     public $valid_fields = array(
         'id',
         'creation',
-        'syndication',
+        'pushed',
         'editable',
         'category',
         'audience',
@@ -15,7 +15,9 @@ class NodeCollectionTest extends SDKTestCase
         'body',
         'teaser',
         'type',
-        'yearwheel'
+        'yearwheel',
+        'author',
+        'agency'
     );
 
     public function testPropertiesOfFirstItem()
@@ -23,10 +25,11 @@ class NodeCollectionTest extends SDKTestCase
         $doc = $this->createDocument($client = new \Goutte\Client());
         $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
         $doc->firstItem('name', 'node')->link('collection')->follow($doc);
+        $doc->firstItem('type', 'entity');
 
         $self = $this;
         $doc->walkProperties(function($e) use($self) {
-            $self->assertTrue(in_array($e['name'], $self->valid_fields), $e['name'] . 'is not valid property name');
+            $self->assertTrue(in_array($e['name'], $self->valid_fields), $e['name'] . ' is not valid property name');
             $self->assertTrue(isset($e['@value']));
         });
     }

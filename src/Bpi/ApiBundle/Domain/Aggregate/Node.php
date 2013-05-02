@@ -138,6 +138,7 @@ class Node implements IPresentable
         $document->appendEntity($entity);
 
         $document->setCursorOnEntity($entity);
+        $this->author->transform($document);
         $this->profile->transform($document);
         $this->resource->transform($document);
     }
