@@ -135,9 +135,8 @@ class LoadNodes implements FixtureInterface
      */
     public function load(ObjectManager $manager)
     {
-        $agency = new Agency('Aarhus Kommunes Biblioteker', 'Agency Moderator Name', 'Publickey', 'Secret');
-        $manager->persist($agency);
-        $manager->flush();
+        $repo = $manager->getRepository('Bpi\ApiBundle\Domain\Aggregate\Agency');
+        $agency  = $repo->findAll()->getNext();
 
         $service = new PushService($manager, $this->createFilesystemMap());
 

@@ -34,7 +34,7 @@ class Document
     protected $version;
 
     /**
-     * @Serializer\XmlList(inline=true, entry="entity")
+     * @Serializer\XmlList(inline=true, entry="item")
      * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\Entity>")
      */
     protected $entities = array();
@@ -74,7 +74,7 @@ class Document
     {
         return $this->router->generate($name, $parameters, $absolute);
     }
-
+    
     /**
      * Call the callback on each entity
      *
@@ -120,12 +120,29 @@ class Document
 
     /**
      *
+     * @param string $type
      * @param string $name
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
-    public function createEntity($name)
+    public function createRootEntity($type, $name = null)
     {
-        $entity = new Entity($name);
+        $entity = new Entity($type, $name);
+        $entity->attach($this);
+        $this->entities[] = $entity;
+        $this->setCursorOnEntity($entity);
+        return $entity;
+    }
+    
+    /**
+     * Create new entity instance
+     *
+     * @param string $type
+     * @param string $name
+     * @return \Bpi\RestMediaTypeBundle\Element\Entity
+     */
+    public function createEntity($type, $name = null)
+    {
+        $entity = new Entity($type, $name);
         $entity->attach($this);
         return $entity;
     }
@@ -138,10 +155,39 @@ class Document
     public function appendEntity(Entity $entity)
     {
         $this->entities[] = $entity;
+        $this->addEntity($entity);
+    }
+
+    /**
+     * Prepend entity to the beginning of document
+     *
+     * @param \Bpi\RestMediaTypeBundle\Element\Entity $entity
+     */
+    public function prependEntity(Entity $entity)
+    {
+        array_unshift($this->entities, $entity);
+        $this->addEntity($entity);
+    }
+
+    /**
+     *
+     * @param \Bpi\RestMediaTypeBundle\Element\Entity $entity
+     */
+    protected function addEntity(Entity $entity)
+    {
         $this->setCursorOnEntity($entity);
         $entity->attach($this);
     }
 
+    /**
+     * 
+     * @return \Bpi\RestMediaTypeBundle\Element\Hypermedia
+     */
+    public function createHypermediaSection()
+    {
+        return new Element\Hypermedia();
+    }
+    
     /**
      *
      * @param string $name
@@ -178,6 +224,36 @@ class Document
     }
 
     /**
+     * 
+     * @param string $rel
+     * @param string $href
+     * @param array $params
+     * @return \Bpi\RestMediaTypeBundle\Element\Query
+     */
+    public function createQuery($rel, $href, array $params, $title = null)
+    {
+        $query = new Element\Query($rel, $href, $title);
+        foreach($params as $param)
+        {
+            $query->addParam(new Element\Param($param));
+        }
+        return $query;
+    }
+
+    /**
+     *
+     * @param string $rel
+     * @param string $href
+     * @param array $fields
+     * @param string $title
+     * @return \Bpi\RestMediaTypeBundle\Element\Template
+     */
+    public function createTemplate($rel, $href, $title = null)
+    {
+        return new Element\Template($rel, $href, $title);
+    }
+
+     /**
      * Get last used entity
      *
      * @return \Bpi\RestMediaTypeBundle\Element\Entity

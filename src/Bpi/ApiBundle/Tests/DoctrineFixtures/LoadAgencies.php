@@ -14,9 +14,7 @@ class LoadAgencies implements FixtureInterface
      */
     public function load(ObjectManager $manager)
     {
-        $manager->persist(new Agency('Agency Alpha', 'Moderator Alpha', 'alpha_public_key', 'secret'));
-        $manager->persist(new Agency('Agency Bravo', 'Moderator Bravo', 'bravo_public_key', 'secret'));
-        $manager->persist(new Agency('Agency Charlie', 'Moderator Charlie', 'charlie_public_key', 'secret'));
+        $manager->persist(new Agency('Aarhus Kommunes Biblioteker', 'Moderator Arhus', 'arhus_public_key', 'secret'));
         $manager->flush();
     }
 

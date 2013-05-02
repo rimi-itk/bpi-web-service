@@ -86,6 +86,13 @@ assetic:
         #yui_css:
         #    jar: %kernel.root_dir%/Resources/java/yuicompressor-2.4.7.jar
 
+# JMSSerializerBundle has obsolete dependency on doctrine service
+doctrine:
+    orm:
+        auto_mapping: false
+    dbal:
+        default_connection: default
+
 doctrine_mongodb:
     connections:
         default:
@@ -120,7 +127,7 @@ fos_rest:
     service:
       view_handler: bpi.apibundle.rest.view_handler
     routing_loader:
-        default_format: html
+        default_format: bpi
     format_listener:
         default_priorities: ['bpi', 'xml', 'json', 'html', '*/*']
         fallback_format: xml
@@ -149,13 +156,6 @@ fos_rest:
 jms_serializer:
     metadata:
         debug: "%kernel.debug%"
-        
-        # Using auto-detection, the mapping files for each bundle will be
-        # expected in the Resources/config/serializer directory.
-        #
-        # Example:
-        # class: My\FooBundle\Entity\User
-        # expected path: @MyFooBundle/Resources/config/serializer/Entity.User.(yml|xml|php)
         auto_detection: true
 
 knp_gaufrette:

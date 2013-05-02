@@ -1,0 +1,21 @@
+<bpi version="0.2" xmlns="urn:appstate" xmlns:description="urn:description">
+	<resources>
+		<resource name="node" href="/node">
+			<link rel="collection" href="/node/collection" />
+			<link rel="template" href="/node/template" />
+			<query rel="item" href="...">
+				<param name="id"></param>
+			</query>
+		</resource>
+		<resource name="revision" url="/revision">
+			<link rel="template" href="/revision/template" />
+		</resource>
+		<resource name="asset" href="/asset" />
+		<resource name="category" href="/node/profile/category">
+			<link rel="collection" href="/node/profile/category/collection" />
+		</resource>
+		<resource name="audience" href="/node/profile/audience">
+			<link rel="collection" href="/node/profile/audience/collection" />
+		</resource>
+	</resources>
+</bpi>

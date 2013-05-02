@@ -30,7 +30,7 @@ class RestController extends FOSRestController
     /**
      * Get unserialized request body
      *
-     * @return Bpi\RestMediaTypeBundle\Document
+     * @return \Bpi\RestMediaTypeBundle\Document
      */
     protected function getDocument()
     {
@@ -55,29 +55,107 @@ class RestController extends FOSRestController
      * Main page of API redirects to human representation of entry point
      *
      * @Rest\Get("/")
+     * @Rest\View()
      */
     public function indexAction()
     {
-        return $this->redirectView($this->get('router')->generate('list').'.html', 302);
+        $document = new Document();
+
+        // Node resource
+        $node = $document->createRootEntity('resource', 'node');
+        $hypermedia = $document->createHypermediaSection();
+        $node->setHypermedia($hypermedia);
+        $hypermedia->addQuery($document->createQuery(
+            'item',
+            $this->get('router')->generate('node_resource', array(), true),
+            array('id'),
+            'Find a node by ID'
+        ));
+
+        $hypermedia->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
+        $hypermedia->addLink($document->createLink(
+            'self',
+            $this->get('router')->generate('node_resource', array(), true),
+            'Node resource'
+        ));
+
+        $hypermedia->addLink($document->createLink(
+            'collection',
+            $this->get('router')->generate('list', array(), true),
+            'Node collection'
+        ));
+
+        $hypermedia->addTemplate($template = $document->createTemplate(
+            'push',
+            $this->get('router')->generate('node_resource', array(), true),
+            'Template for pushing node content'
+        ));
+
+        $template->createField('title');
+        $template->createField('body');
+        $template->createField('teaser');
+        $template->createField('category');
+        $template->createField('audience');
+
+        // Profile resource
+        $profile = $document->createRootEntity('resource', 'profile');
+        $profile_hypermedia = $document->createHypermediaSection();
+        $profile->setHypermedia($profile_hypermedia);
+        $profile_hypermedia->addLink($document->createLink(
+            'dictionary',
+            $this->get('router')->generate('profile_dictionary', array(), true),
+            'Profile items dictionary'
+        ));
+
+        return $document;
     }
 
      /**
      * Default node listing
      *
-     * @Rest\Get("/node/list")
+     * @Rest\Get("/node/collection")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="200")
      */
     public function listAction()
     {
-        $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findLatest();
+        $node_query = new \Bpi\ApiBundle\Domain\Entity\NodeQuery();
+        $node_query->sort('ctime', 'desc');
+        $node_query->amount(20);
+        if ($amount = $this->getRequest()->query->get('amount', false)) {
+            $node_query->amount($amount);
+        }
+
+        if ($offset = $this->getRequest()->query->get('offset', false)) {
+            $node_query->offset($offset);
+        }
+
+        $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findByNodesQuery($node_query);
 
         $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
         $router = $this->get('router');
         $document->walkEntities(function($e) use ($document, $router) {
-            $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
-            $e->addLink($document->createLink('collection', $router->generate('list', array(), true)));
-            $e->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), 'filename' => ''), true)));
+            $hypermedia = $document->createHypermediaSection();
+            $e->setHypermedia($hypermedia);
+            $hypermedia->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
+            $hypermedia->addLink($document->createLink('collection', $router->generate('list', array(), true)));
+
+            // @todo: implementation
+            //$hypermedia->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), 'filename' => ''), true)));
         });
+
+        // Collection description
+        $collection = $document->createEntity('collection');
+        $document->prependEntity($collection);
+        $hypermedia = $document->createHypermediaSection();
+        $collection->setHypermedia($hypermedia);
+        $hypermedia->addLink($document->createLink('canonical', $router->generate('list', array(), true)));
+        $hypermedia->addLink($document->createLink('self', $router->generate('list', $this->getRequest()->query->all(), true)));
+        $hypermedia->addQuery($document->createQuery(
+            'pagination',
+            $this->get('router')->generate('list', array(), true),
+            array('amount', 'offset'),
+            'Amount of items and starting offset'
+        ));
 
         return $document;
     }
@@ -99,7 +177,7 @@ var_dump($this->getRequest()->headers->get('authorization'));
     /**
      * List nodes by recieved nodes_query
      *
-     * @Rest\Post("/node/list")
+     * @Rest\Post("/node/collection")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
      */
     public function postNodeListAction()
@@ -434,6 +512,77 @@ var_dump($this->getRequest()->headers->get('authorization'));
     }
 
     /**
+     * Node options
+     *
+     * @Rest\Options("/node")
+     * @Rest\View(statusCode="200")
+     */
+    public function nodeOptionsAction()
+    {
+        $options = array(
+              'POST' => array(
+                    'action' => 'Push new node',
+                    'template' => array(
+                    ),
+              ),
+              'OPTIONS' => array('action' => 'List available options'),
+        );
+        $headers = array('Allow' => implode(', ', array_keys($options)));
+        return $this->handleView($this->view($options, 200, $headers));
+    }
+    
+    /**
+     * Asset options
+     *
+     * @Rest\Get("/node")
+     * @Rest\View(template="BpiApiBundle:Rest:testinterface2.html.twig")
+     */
+    public function nodeResourceAction()
+    {
+        $document = new Document();
+        $entity = $document->createRootEntity('node');
+        $controls = $document->createHypermediaSection();
+        $entity->setHypermedia($controls);
+        $controls->addQuery($document->createQuery('search', 'abc', array('id'), 'Find a node by ID'));
+        $controls->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
+        $controls->addLink($document->createLink('self', 'abc'));
+        $controls->addLink($document->createLink('collection', 'abc'));
+        
+//        $entity->addLink($document->createLink($rel, $href));
+        
+//        $node = $document->getEntity('node');
+//        $node->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
+//        $node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+
+        return $document;
+        
+        $contnts = '<bpi version="0.2" xmlns="urn:appstate" xmlns:description="urn:description">
+	<resources>
+		<resource name="node" href="/node">
+			<link rel="collection" href="/node/collection" />
+			<link rel="template" href="/node/template" />
+			<query rel="item" href="...">
+				<param name="id"></param>
+			</query>
+		</resource>
+		<resource name="revision" url="/revision">
+			<link rel="template" href="/revision/template" />
+		</resource>
+		<resource name="asset" href="/asset" />
+		<resource name="category" href="/node/profile/category">
+			<link rel="collection" href="/node/profile/category/collection" />
+		</resource>
+		<resource name="audience" href="/node/profile/audience">
+			<link rel="collection" href="/node/profile/audience/collection" />
+		</resource>
+	</resources>
+</bpi>';
+        $view = $this->view($contnts, 200);
+        $view->setTemplate('BpiApiBundle:Rest:testinterface2.html.twig');
+        return $this->handleView($view);
+    }
+    
+    /**
      * Only for live documentation
      *
      * @Rest\Get("/node/{node_id}/asset")
@@ -489,13 +638,14 @@ var_dump($this->getRequest()->headers->get('authorization'));
     /**
      * Get profile dictionary
      *
-     * @Rest\Get("/profile_dictionary", name="profile_dictionary")
+     * @Rest\Get("/profile/dictionary", name="profile_dictionary")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
      */
     public function profileDictionaryAction()
     {
         $dictionary = $this->get('domain.profile_service')->provideDictionary();
-        return $this->get("bpi.presentation.transformer")->transform($dictionary);
+        $document = $this->get("bpi.presentation.transformer")->transform($dictionary);
+        return $document;
     }
 
     /**
