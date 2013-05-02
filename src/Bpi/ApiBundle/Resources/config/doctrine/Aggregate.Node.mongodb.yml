@@ -37,6 +37,11 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
       gedmo:
         - treeLockTime
 
+    author:
+      embedded: true
+      type: one
+      strategy: pushAll
+      targetDocument: Bpi\ApiBundle\Domain\Entity\Author
     profile:
       embedded: true
       type: one
