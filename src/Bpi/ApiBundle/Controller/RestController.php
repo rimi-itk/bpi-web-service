@@ -83,6 +83,20 @@ class RestController extends FOSRestController
     }
 
     /**
+     * Shows statictic by AgencyId
+     *
+     * @Rest\Get("/node/statistic")
+     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="200")
+     */
+    public function nodeStatisticAction()
+    {
+    //  $extractor = new Extractor($this->getDocument());
+//var_dump($exractor);
+   //   $statistic = $this->getRepository('BpiApiBundle:Aggregate\Statistic')
+   //        ->getStats($extractor->extract('dateFrom'), $extractor->exract(''));
+var_dump($this->getRequest()->headers->get('authorization'));
+    }
+    /**
      * List nodes by recieved nodes_query
      *
      * @Rest\Post("/node/list")

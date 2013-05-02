@@ -44,7 +44,6 @@ class PKListener implements ListenerInterface
 
             $request = $event->getRequest();
             $token = new PKUserToken();
-
             if ($request->isMethod('OPTIONS'))
                 return $this->skipAuthorization();
 
