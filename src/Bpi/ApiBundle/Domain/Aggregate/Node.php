@@ -121,7 +121,7 @@ class Node implements IPresentable
         ));
 
         $entity->addProperty($document->createProperty(
-            'syndication',
+            'pushed',
             'dateTime',
             $this->ctime
         ));
