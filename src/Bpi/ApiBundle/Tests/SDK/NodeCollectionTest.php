@@ -18,7 +18,7 @@ class NodeCollectionTest extends SDKTestCase
         'yearwheel'
     );
 
-    public function testNodeCollection()
+    public function testPropertiesOfFirstItem()
     {
         $doc = $this->createDocument($client = new \Goutte\Client());
         $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
@@ -27,7 +27,7 @@ class NodeCollectionTest extends SDKTestCase
         $self = $this;
         $doc->walkProperties(function($e) use($self) {
             $self->assertTrue(in_array($e['name'], $self->valid_fields), $e['name'] . 'is not valid property name');
-            $self->assertNotEmpty($e['@value']);
+            $self->assertTrue(isset($e['@value']));
         });
     }
 
