@@ -36,7 +36,7 @@ class NodeCollectionTest extends SDKTestCase
         $doc = $this->createDocument($client = new \Goutte\Client());
         $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
         $doc->firstItem('name', 'node')->link('collection')->follow($doc);
-        $query = $doc->firstItem('type', 'collection')->query('pagination');
+        $query = $doc->firstItem('type', 'collection')->query('refinement');
 
         $query->send($doc, array('amount' => 1));
         $properties2 = array();
@@ -51,5 +51,16 @@ class NodeCollectionTest extends SDKTestCase
         $doc3->walkProperties(function($e) use(&$properties3) { $properties3[] = $e; });
 
         $this->assertNotEquals($properties2, $properties3);
+    }
+
+    public function testFilterQuery()
+    {
+        $doc = $this->createDocument($client = new \Goutte\Client());
+        $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
+        $doc->firstItem('name', 'node')->link('collection')->follow($doc);
+        $query = $doc->firstItem('type', 'collection')->query('refinement');
+
+        $query->send($doc, array('filter' => array('resource.title' => 'bravo_title')));
+        $this->assertEquals(1, $doc->reduceItemsByAttr('type', 'entity')->count());
     }
 }

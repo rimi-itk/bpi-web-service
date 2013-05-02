@@ -129,6 +129,16 @@ class RestController extends FOSRestController
             $node_query->offset($offset);
         }
 
+        if ($filter = $this->getRequest()->query->get('filter', false)) {
+            foreach($filter as $field => $value)
+                $node_query->filter($field, $value);
+        }
+
+        if ($sort = $this->getRequest()->query->get('sort', false)) {
+            foreach($sort as $field => $order)
+                $node_query->sort($field, $order);
+        }
+
         $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findByNodesQuery($node_query);
 
         $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
@@ -151,10 +161,15 @@ class RestController extends FOSRestController
         $hypermedia->addLink($document->createLink('canonical', $router->generate('list', array(), true)));
         $hypermedia->addLink($document->createLink('self', $router->generate('list', $this->getRequest()->query->all(), true)));
         $hypermedia->addQuery($document->createQuery(
-            'pagination',
+            'refinement',
             $this->get('router')->generate('list', array(), true),
-            array('amount', 'offset'),
-            'Amount of items and starting offset'
+            array(
+                'amount',
+                'offset',
+                $document->createQueryParameter('filter')->setMultiple(),
+                $document->createQueryParameter('sort')->setMultiple(),
+            ),
+            'List refinements'
         ));
 
         return $document;
