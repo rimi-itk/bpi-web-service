@@ -121,7 +121,7 @@ class Node implements IPresentable
         ));
 
         $entity->addProperty($document->createProperty(
-            'syndication',
+            'pushed',
             'dateTime',
             $this->ctime
         ));
@@ -129,12 +129,16 @@ class Node implements IPresentable
         $entity->addProperty($document->createProperty(
             'editable',
             'boolean',
-            $this->params->filter(function($e){ if ($e instanceof Editable) return true; })->first()->isPositive()
+            (int) $this->params
+                ->filter(function($e){ if ($e instanceof Editable) return true; })
+                ->first()
+                ->isPositive()
         ));
 
         $document->appendEntity($entity);
 
         $document->setCursorOnEntity($entity);
+        $this->author->transform($document);
         $this->profile->transform($document);
         $this->resource->transform($document);
     }

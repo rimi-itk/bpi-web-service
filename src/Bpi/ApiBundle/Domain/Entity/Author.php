@@ -3,8 +3,9 @@ namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
+use Bpi\RestMediaTypeBundle\Document;
 
-class Author
+class Author implements \Bpi\ApiBundle\Transform\IPresentable
 {
     /**
      *
@@ -71,5 +72,30 @@ class Author
     public function setAuthorship(Copyleft $copyleft)
     {
         $copyleft->addCopyrigher($this->getFullName(), false);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transform(Document $document)
+    {
+        try {
+            $entity = $document->currentEntity();
+        } catch(\RuntimeException $e) {
+            $entity = $document->createEntity('entity', 'author');
+            $document->appendEntity($entity);
+        }
+
+        $entity->addProperty($document->createProperty(
+            'author',
+            'string',
+            $this->getFullName()
+        ));
+
+        $entity->addProperty($document->createProperty(
+            'agency',
+            'string',
+            $this->getAgencyId()
+        ));
     }
 }

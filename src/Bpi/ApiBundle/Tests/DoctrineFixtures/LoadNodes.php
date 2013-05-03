@@ -21,7 +21,6 @@ use Knp\Bundle\GaufretteBundle\FilesystemMap;
 
 class LoadNodes implements FixtureInterface
 {
-
     /**
      *
      * @return \Bpi\ApiBundle\Domain\Entity\Resource
@@ -129,7 +128,6 @@ class LoadNodes implements FixtureInterface
         return new FilesystemMap(array('assets' => new \Gaufrette\Filesystem(new \Gaufrette\Adapter\InMemory())));
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -137,7 +135,6 @@ class LoadNodes implements FixtureInterface
     {
         $repo = $manager->getRepository('Bpi\ApiBundle\Domain\Aggregate\Agency');
         $agency  = $repo->findAll()->getNext();
-
         $service = new PushService($manager, $this->createFilesystemMap());
 
         // Alpha
@@ -164,5 +161,4 @@ class LoadNodes implements FixtureInterface
             new Params(array(new Editable(0), new Authorship(1)))
         );
     }
-
 }

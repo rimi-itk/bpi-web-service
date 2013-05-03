@@ -13,7 +13,13 @@ class Param
      * @Serializer\XmlAttribute
      */
     protected $name;
-    
+
+    /**
+     * @Serializer\Type("string")
+     * @Serializer\XmlAttribute
+     */
+    protected $type = 'single';
+
     /**
      * 
      * @param string $name
@@ -21,5 +27,17 @@ class Param
     public function __construct($name)
     {
         $this->name = $name;
+    }
+
+    /**
+     * Mark this parameter as multiple value
+     *
+     * @return \Bpi\RestMediaTypeBundle\Element\Param same instance
+     */
+    public function setMultiple()
+    {
+        $this->type = 'multiple';
+
+        return $this;
     }
 }
