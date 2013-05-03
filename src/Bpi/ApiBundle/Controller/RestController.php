@@ -94,8 +94,16 @@ class RestController extends FOSRestController
         $template->createField('title');
         $template->createField('body');
         $template->createField('teaser');
+        $template->createField('type');
+        $template->createField('creation');
         $template->createField('category');
         $template->createField('audience');
+        $template->createField('editable');
+        $template->createField('authorship');
+        $template->createField('agency_id');
+        $template->createField('local_id');
+        $template->createField('firstname');
+        $template->createField('lastname');
 
         // Profile resource
         $profile = $document->createRootEntity('resource', 'profile');
@@ -171,29 +179,6 @@ class RestController extends FOSRestController
             ),
             'List refinements'
         ));
-
-        return $document;
-    }
-
-    /**
-     * List nodes by recieved nodes_query
-     *
-     * @Rest\Post("/node/collection")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
-     */
-    public function postNodeListAction()
-    {
-        $extractor = new Extractor($this->getDocument());
-        $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')
-            ->findByNodesQuery($extractor->extract('nodesQuery'));
-
-        $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
-        $router = $this->get('router');
-        $document->walkEntities(function($e) use ($document, $router) {
-            $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
-            $e->addLink($document->createLink('collection', $router->generate('list', array(), true)));
-            $e->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), "filename" => ""), true)));
-        });
 
         return $document;
     }
@@ -374,8 +359,10 @@ class RestController extends FOSRestController
     {
         // @todo move somewhere all this validation stuff
 
-        $author = new Constraints\Collection(array(
+        $node = new Constraints\Collection(array(
+            'allowExtraFields' => true,
             'fields' => array(
+                // Author
                 'agency_id' => array(
                     new Constraints\NotBlank()
                 ),
@@ -388,12 +375,7 @@ class RestController extends FOSRestController
                 'lastname' => array(
                     new Constraints\Length(array('min' => 2, 'max' => 100))
                 ),
-            )
-        ));
-
-        $resource = new Constraints\Collection(array(
-            'allowExtraFields' => true,
-            'fields' => array(
+                // Resource
                 'title' => array(
                     new Constraints\Length(array('min' => 2, 'max' => 500))
                 ),
@@ -403,32 +385,21 @@ class RestController extends FOSRestController
                 'teaser' => array(
                     new Constraints\Length(array('min' => 2, 'max' => 5000))
                 ),
-                'ctime' => array(
+                'creation' => array(
                     //@todo validate against DateTime::W3C format
                     new Constraints\NotBlank()
                 ),
                 'type' => array(
                     new Constraints\NotBlank()
                 ),
-                // assets - compulsory
-            )
-        ));
-
-        $profile = new Constraints\Collection(array(
-            'allowExtraFields' => true,
-            'fields' => array(
+                // profile; tags, yearwheel - compulsory
                 'category' => array(
                     new Constraints\Length(array('min' => 2, 'max' => 100))
                 ),
                 'audience' => array(
                     new Constraints\Length(array('min' => 2, 'max' => 100))
                 ),
-                // tags, yearwheel - compulsory
-            )
-        ));
-
-        $params = new Constraints\Collection(array(
-            'fields' => array(
+                // params
                 'editable' => array(
                     new Constraints\Range(array('min' => 0, 'max' => 1))
                 ),
@@ -438,29 +409,12 @@ class RestController extends FOSRestController
             )
         ));
 
-        $node = array(
-            'fields' => array(
-                'author' => array(
-                    $author
-                ),
-                'resource' => array(
-                    $resource
-                ),
-                'profile' => array(
-                    $profile
-                ),
-                'params' => array(
-                    $params
-                )
-            )
-        );
-
         $validator = $this->container->get('validator');
-        return $validator->validateValue($data, new Constraints\Collection($node));
+        return $validator->validateValue($data, $node);
     }
 
     /**
-     * Syndicate new content
+     * Push new content
      *
      * @Rest\Post("/node")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="201")
@@ -471,19 +425,43 @@ class RestController extends FOSRestController
         if (strlen($this->getRequest()->getContent()) > 10485760)
             throw new HttpException(413, "Request entity too large");
 
-        $document = $this->getDocument();
-
         // request validation
-        $violations = $this->_isValidForPushNode($document->dump());
+        $violations = $this->_isValidForPushNode($this->getRequest()->request->all());
         if (count($violations))
             throw new HttpException(422, (string) $violations);
 
-        $extractor = new Extractor($document);
+        $author = new \Bpi\ApiBundle\Domain\Entity\Author(
+            new \Bpi\ApiBundle\Domain\ValueObject\AgencyId($this->getRequest()->get('agency_id')),
+            $this->getRequest()->get('local_author_id'),
+            $this->getRequest()->get('firstname'),
+            $this->getRequest()->get('lastname')
+        );
+
+        $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder();
+        $resource->title('title')
+            ->body('body')
+            ->teaser('teaser')
+            ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $this->getRequest()->get('creation')))
+        ;
+
+        $profile = new \Bpi\ApiBundle\Domain\Entity\Profile(
+            new \Bpi\ApiBundle\Domain\ValueObject\Audience($this->getRequest()->get('audience')),
+            new \Bpi\ApiBundle\Domain\ValueObject\Category($this->getRequest()->get('category'))
+        );
+
+        $params = new \Bpi\ApiBundle\Domain\Aggregate\Params();
+        $params->add(new \Bpi\ApiBundle\Domain\ValueObject\Param\Authorship(
+            $this->getRequest()->get('authorship')
+        ));
+        $params->add(new \Bpi\ApiBundle\Domain\ValueObject\Param\Editable(
+            $this->getRequest()->get('editable')
+        ));
+
         $node = $this->get('domain.push_service')->push(
-            $extractor->extract('author'),
-            $extractor->extract('resource'),
-            $extractor->extract('profile'),
-            $extractor->extract('params')
+            $author,
+            $resource,
+            $profile,
+            $params
         );
 
         return $this->get("bpi.presentation.transformer")->transform($node);

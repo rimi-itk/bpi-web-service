@@ -107,7 +107,7 @@ class Profile implements IPresentable
             ));
         }
 
-        if ($this->tags->count())
+        if ($this->tags && $this->tags->count())
         {
             $entity->addProperty($document->createProperty(
                 'tags',
