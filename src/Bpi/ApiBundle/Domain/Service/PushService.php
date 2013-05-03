@@ -72,10 +72,10 @@ class PushService
             ->profile($profile)
             ->resource($resource)
             ->params($params)
-            ->build()
-        ;
+            ->build();
 
         $log = new History($node, $author->getAgencyId(), new \DateTime(), 'push');
+        $this->manager->persist($log);
 
         $this->manager->persist($node);
         $this->manager->flush();

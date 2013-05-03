@@ -47,9 +47,9 @@ class PKListener implements ListenerInterface
             if ($request->isMethod('OPTIONS'))
                 return $this->skipAuthorization();
 
-            if ($request->headers->has('Authorization')) {
-                if (!preg_match('~BPI agency="(?<agency>[^"]+)", pk="(?<pk>[^"]+)", token="(?<token>[^"]+)"~i', $request->headers->get('Authorization'), $matches))
-                    throw new AuthenticationException('Authorization credintials required');
+            if ($request->headers->has('Auth')) {
+                if (!preg_match('~BPI agency="(?<agency>[^"]+)", pk="(?<pk>[^"]+)", token="(?<token>[^"]+)"~i', $request->headers->get('Auth'), $matches))
+                    throw new AuthenticationException('Authorization credintials required (HTTP Headers)');
 
                 $token->setUser($matches['pk']);
                 $token->token = $matches['token'];
@@ -58,13 +58,13 @@ class PKListener implements ListenerInterface
 
                 $auth = $request->query->get('_authorization');
                 if (empty($auth['pk']) or empty($auth['token']))
-                    throw new AuthenticationException('Authorization credintials required');
+                    throw new AuthenticationException('Authorization credintials required (GET)');
 
                 $token->setUser($auth['pk']);
                 $token->token = $auth['token'];
 
             } else {
-                throw new AuthenticationException('Authorization required');
+                throw new AuthenticationException('Authorization required (none)');
             }
 
             $authToken = $this->authenticationManager->authenticate($token);

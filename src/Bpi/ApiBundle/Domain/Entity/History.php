@@ -10,7 +10,6 @@ class History
      */
     private $node;
     private $agency;
-    private $date;
     private $datetime;
     private $action;
 
@@ -25,7 +24,6 @@ class History
       $this->node = $node;
       $this->agency = $agency->id();
       $this->datetime = $datetime;
-      $this->date = $datetime->format('Y-m-d');
       $this->action = $action;
     }
 
@@ -93,7 +91,7 @@ class History
      */
     public function setDatetime(\Datetime $time)
     {
-        $this->datetime = $time;
+        $this->datetime = $time->getTimestamp();
 
         return $this;
     }
@@ -105,32 +103,7 @@ class History
      */
     public function getDatetime()
     {
-        return $this->datetime;
-    }
-
-    /**
-     * Set date
-     * Date in yyyy-mm-dd fromat
-     *
-     * @param string $time
-     * @return History
-     */
-    public function setDate($date)
-    {
-        $this->date = $date;
-
-        return $this;
-    }
-
-    /**
-     * Get date
-     * Date in yyyy-mm-dd fromat
-     *
-     * @return string
-     */
-    public function getDate()
-    {
-        return $this->date;
+        return new \DateTime($this->datetime);
     }
 
     /**

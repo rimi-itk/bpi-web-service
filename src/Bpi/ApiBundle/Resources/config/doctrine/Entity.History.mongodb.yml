@@ -10,8 +10,6 @@ Bpi\ApiBundle\Domain\Entity\History:
       type: one
     datetime:
       type: date
-    date:
-      type: string
     agency:
       type: string
     action:

@@ -29,8 +29,14 @@ class Statistics implements IPresentable
             $document->appendEntity($entity);
         }
 
-        foreach ($this->stats as $key => $value) {
-          $entity->addProperty($document->createProperty($key, 'string', $value));
+        $fields = array('push', 'syndicate');
+
+        foreach ($fields as $field) {
+          $value = 0;
+          if (isset($this->stats[$field])) {
+            $value = $this->stats[$field];
+          }
+          $entity->addProperty($document->createProperty($field, 'string', $value));
         }
     }
 }
