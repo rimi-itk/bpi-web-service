@@ -18,6 +18,8 @@ use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 use Bpi\ApiBundle\Domain\Factory\ProfileBuilder;
 use Bpi\ApiBundle\Domain\Service\PushService;
 use Knp\Bundle\GaufretteBundle\FilesystemMap;
+use Bpi\ApiBundle\Domain\Entity\History;
+use Bpi\RestMediaTypeBundle\Property\DateTime;
 
 class FakeData implements FixtureInterface
 {
@@ -65,7 +67,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node1 = $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -91,7 +93,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node2 = $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -117,7 +119,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node3 = $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -143,7 +145,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node4 = $service->push(
             new Author($agency['Kobenhavns']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -169,7 +171,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node5 = $service->push(
             new Author($agency['Halsnas']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -383,6 +385,44 @@ class FakeData implements FixtureInterface
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
+
+        // Add some fake history.
+        $log = array();
+        $log[] = new History(
+          $node1,
+          $node1->getAuthor()->getAgencyId(),
+          new \DateTime("2013-05-01 18:11:31"),
+          'push'
+        );
+        $log[] = new History(
+          $node2,
+          $agency['Halsnas']->getAgencyId(),
+          new \DateTime("2013-05-01 15:26:55"),
+          'syndicate'
+        );
+        $log[] = new History(
+          $node3,
+          $agency['Halsnas']->getAgencyId(),
+          new \DateTime("2013-05-02 11:11:11"),
+          'syndicate'
+        );
+        $log[] = new History(
+          $node4,
+          $node4->getAuthor()->getAgencyId(),
+          new \DateTime("2013-05-01 04:10:29"),
+          'push'
+        );
+        $log[] = new History(
+          $node5,
+          $agency['Arhus']->getAgencyId(),
+          new \DateTime("2013-05-03 15:01:27"),
+          'syndicate'
+        );
+
+        foreach ($log as $l) {
+          $manager->persist($l);
+        }
+        $manager->flush();
     }
 
 }
