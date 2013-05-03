@@ -113,7 +113,7 @@ class PushService
 
         // Set agency as default original copyrighter
         $this->manager->getRepository('BpiApiBundle:Aggregate\Agency')
-            ->find($author->getAgencyId()->id())
+            ->findOneBy(array('public_id' => $author->getAgencyId()->id()))
             ->setAuthorship($copyleft);
 
         if ($autorship->isPositive())
