@@ -5,7 +5,7 @@ class EndUserTest extends SDKTestCase
 {
     public function testNodeList()
     {
-        $bpi = new \Bpi\Sdk\Bpi('http://bpi1.inlead.dk', mt_rand(), mt_rand(), mt_rand());
+        $bpi = new \Bpi('http://bpi1.inlead.dk', mt_rand(), mt_rand(), mt_rand());
         $list = $bpi->searchNodes();
 
         $this->assertTrue((bool)$list->count());
@@ -18,7 +18,7 @@ class EndUserTest extends SDKTestCase
 
     public function testPush()
     {
-        $bpi = new \Bpi\Sdk\Bpi(self::TEST_ENDPOINT_URI, mt_rand(), mt_rand(), mt_rand());
+        $bpi = new \Bpi('http://bpi1.inlead.dk', mt_rand(), mt_rand(), mt_rand());
         $dt = new \DateTime();
 
         $node = $bpi->push(array(
