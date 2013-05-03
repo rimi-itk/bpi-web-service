@@ -5,6 +5,8 @@ Bpi\ApiBundle\Domain\Aggregate\Agency:
   fields:
     id:
       id: true
+    public_id:
+      type: string
     name:
       type: string
     moderator:
