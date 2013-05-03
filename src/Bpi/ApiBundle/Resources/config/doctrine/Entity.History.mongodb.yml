@@ -1,0 +1,18 @@
+Bpi\ApiBundle\Domain\Entity\History:
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\HistoryRepository
+  collection: History
+  fields:
+    id:
+      id: true
+    node:
+      reference: true
+      targetDocument: Bpi\ApiBundle\Domain\Aggregate\Node
+      type: one
+    datetime:
+      type: date
+    date:
+      type: string
+    agency:
+      type: string
+    action:
+      type: string

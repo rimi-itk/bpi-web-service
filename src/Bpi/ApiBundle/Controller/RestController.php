@@ -10,6 +10,10 @@ use Symfony\Component\Validator\Constraints;
 
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Extractor;
+use Bpi\ApiBundle\Domain\Aggregate\Agency;
+use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\RestMediaTypeBundle\Property\Entity;
+use Bpi\RestMediaTypeBundle\DataType\String;
 
 /**
  * Main entry point for REST requests
@@ -91,6 +95,8 @@ class RestController extends FOSRestController
             'Template for pushing node content'
         ));
 
+        $hypermedia->addQuery($document->createQuery('statistics', $this->get('router')->generate('node_statistics', array(), true), array('dateFrom', 'dateTo'), 'Statistics for date range'));
+
         $template->createField('title');
         $template->createField('body');
         $template->createField('teaser');
@@ -162,18 +168,33 @@ class RestController extends FOSRestController
 
     /**
      * Shows statictic by AgencyId
+     *  - Number of pushed nodes.
+     *  - Number of syncidated nodes.
      *
-     * @Rest\Get("/node/statistic")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="200")
+     * @Rest\Get("/node/statistics")
+     * @Rest\View(template="BpiApiBundle:Rest:statistics.html.twig", statusCode="200")
      */
-    public function nodeStatisticAction()
+    public function nodeStatisticsAction()
     {
-    //  $extractor = new Extractor($this->getDocument());
-//var_dump($exractor);
-   //   $statistic = $this->getRepository('BpiApiBundle:Aggregate\Statistic')
-   //        ->getStats($extractor->extract('dateFrom'), $extractor->exract(''));
-var_dump($this->getRequest()->headers->get('authorization'));
+      /* @var $request \Symfony\Component\HttpFoundation\Request */
+      $request = $this->getRequest();
+
+      // @todo get agency id from auth
+      $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name'=>'Aarhus Kommunes Biblioteker'));
+      $agencyId = $agency->getAgencyId()->id();
+
+      // @todo Add input validation
+      $dateFrom = $request->get('dateFrom');
+      $dateTo = $request->get('dateTo');
+
+      $repo = $this->getRepository('BpiApiBundle:Entity\History');
+      $stats = $repo->getStatisticsByDateRangeForAgency($dateFrom, $dateTo, $agencyId);
+
+      $document = $this->get("bpi.presentation.transformer")->transform($stats);
+
+      return $document;
     }
+
     /**
      * List nodes by recieved nodes_query
      *
@@ -530,7 +551,7 @@ var_dump($this->getRequest()->headers->get('authorization'));
         $headers = array('Allow' => implode(', ', array_keys($options)));
         return $this->handleView($this->view($options, 200, $headers));
     }
-    
+
     /**
      * Asset options
      *
@@ -547,15 +568,17 @@ var_dump($this->getRequest()->headers->get('authorization'));
         $controls->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
         $controls->addLink($document->createLink('self', 'abc'));
         $controls->addLink($document->createLink('collection', 'abc'));
-        
+
+        $controls->addQuery($document->createQuery('statistics', 'abc', array('id'), 'Find a node by ID'));
+
 //        $entity->addLink($document->createLink($rel, $href));
-        
+
 //        $node = $document->getEntity('node');
 //        $node->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
 //        $node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
 
         return $document;
-        
+
         $contnts = '<bpi version="0.2" xmlns="urn:appstate" xmlns:description="urn:description">
 	<resources>
 		<resource name="node" href="/node">
@@ -581,7 +604,7 @@ var_dump($this->getRequest()->headers->get('authorization'));
         $view->setTemplate('BpiApiBundle:Rest:testinterface2.html.twig');
         return $this->handleView($view);
     }
-    
+
     /**
      * Only for live documentation
      *

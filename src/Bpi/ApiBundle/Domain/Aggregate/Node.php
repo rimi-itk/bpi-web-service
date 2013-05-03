@@ -138,4 +138,8 @@ class Node implements IPresentable
         $this->profile->transform($document);
         $this->resource->transform($document);
     }
+
+    public function getAuthor() {
+      return $this->author;
+    }
 }

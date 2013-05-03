@@ -13,6 +13,7 @@ use Bpi\ApiBundle\Domain\ValueObject\NodeId;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
 use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
+use Bpi\ApiBundle\Domain\Entity\History;
 
 /**
  * Domain service for content syndication
@@ -73,6 +74,8 @@ class PushService
             ->params($params)
             ->build()
         ;
+
+        $log = new History($node, $author->getAgencyId(), new \DateTime(), 'push');
 
         $this->manager->persist($node);
         $this->manager->flush();
