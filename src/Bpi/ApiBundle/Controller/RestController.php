@@ -516,9 +516,9 @@ class RestController extends FOSRestController
         );
 
         $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder();
-        $resource->title('title')
-            ->body('body')
-            ->teaser('teaser')
+        $resource->title($this->getRequest()->get('title'))
+            ->body($this->getRequest()->get('body'))
+            ->teaser($this->getRequest()->get('teaser'))
             ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $this->getRequest()->get('creation')))
         ;
 
