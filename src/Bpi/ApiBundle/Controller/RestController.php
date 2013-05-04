@@ -96,8 +96,6 @@ class RestController extends FOSRestController
             'Template for pushing node content'
         ));
 
-        $hypermedia->addQuery($document->createQuery('statistics', $this->get('router')->generate('node_statistics', array(), true), array('dateFrom', 'dateTo'), 'Statistics for date range'));
-
         $template->createField('title');
         $template->createField('body');
         $template->createField('teaser');
@@ -134,6 +132,13 @@ class RestController extends FOSRestController
             $this->get('router')->generate('node_syndicated', array(), true),
             array('id'),
             'Notify service about node syndication'
+        ));
+
+        $hypermedia->addQuery($document->createQuery(
+            'delete',
+            $this->get('router')->generate('node_delete', array(), true),
+            array('id'),
+            'Mark node as deleted'
         ));
 
         return $document;
@@ -779,6 +784,31 @@ class RestController extends FOSRestController
       $dm->flush($log);
 
       // @todo Add check if node exists
+
+      return new Response('', 200);
+    }
+
+    /**
+     * Mark node as deleted
+     *
+     * @Rest\Get("/node/delete")
+     * @Rest\View(statusCode="200")
+     */
+    public function nodeDeleteAction()
+    {
+      // @todo Add check if node exists
+
+      $id = $this->getRequest()->get('id');
+
+      // @todo get agency id from auth
+      $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name'=>'Aarhus Kommunes Biblioteker'));
+      $agencyId = $agency->getAgencyId()->id();
+
+      $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->delete($id, $agencyId);
+
+      if ($node == null) {
+        return new Response('This node does not belong to you', 403);
+      }
 
       return new Response('', 200);
     }
