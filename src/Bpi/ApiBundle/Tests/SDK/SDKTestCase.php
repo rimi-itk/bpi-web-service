@@ -10,9 +10,20 @@ use Bpi\Sdk\Authorization;
 class SDKTestCase extends WebTestCase
 {
     const TEST_ENDPOINT_URI = 'http://bpi.dev/app_dev.php/';
+    protected $auth_agency;
+    protected $auth_secret;
+    protected $auth_pk;
+
+    public function __construct()
+    {
+        $this->auth_agency = '200100';
+        $this->auth_secret = sha1('agency_200100_secret');
+        $this->auth_pk = md5('agency_200100_public');
+        parent::__construct();
+    }
 
     protected function createDocument(\Goutte\Client $client)
     {
-        return new Document($client, new Authorization(mt_rand(), mt_rand(), mt_rand()));
+        return new Document($client, new Authorization($this->auth_agency, $this->auth_pk, $this->auth_secret));
     }
 }
