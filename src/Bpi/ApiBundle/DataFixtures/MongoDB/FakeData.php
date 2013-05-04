@@ -389,12 +389,6 @@ class FakeData implements FixtureInterface
         // Add some fake history.
         $log = array();
         $log[] = new History(
-          $node1,
-          $node1->getAuthor()->getAgencyId(),
-          new \DateTime("2013-05-01 18:11:31"),
-          'push'
-        );
-        $log[] = new History(
           $node2,
           $agency['Halsnas']->getAgencyId(),
           new \DateTime("2013-05-01 15:26:55"),
@@ -405,12 +399,6 @@ class FakeData implements FixtureInterface
           $agency['Halsnas']->getAgencyId(),
           new \DateTime("2013-05-02 11:11:11"),
           'syndicate'
-        );
-        $log[] = new History(
-          $node4,
-          $node4->getAuthor()->getAgencyId(),
-          new \DateTime("2013-05-01 04:10:29"),
-          'push'
         );
         $log[] = new History(
           $node5,

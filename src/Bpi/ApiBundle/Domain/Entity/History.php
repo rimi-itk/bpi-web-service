@@ -14,15 +14,16 @@ class History
     private $action;
 
     /**
+     * Create node history entry.
      *
-     * @param \Bpi\ApiBundle\Domain\Agregate\Node $node
-     * @param \Bpi\ApiBundle\Domain\ValueObject\AgencyId $agency
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Node $node
+     * @param string $agency Public agency ID
      * @param \Datetime $datetime
-     * @param string $action
+     * @param string $action Possible values: push, syndicate
      */
-    public function __construct($node, $agency, \Datetime $datetime, $action) {
+    public function __construct(\Bpi\ApiBundle\Domain\Aggregate\Node $node, $agency, \Datetime $datetime, $action) {
       $this->node = $node;
-      $this->agency = $agency->id();
+      $this->agency = $agency;
       $this->datetime = $datetime;
       $this->action = $action;
     }

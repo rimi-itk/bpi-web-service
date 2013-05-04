@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints;
 
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Extractor;
+use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\RestMediaTypeBundle\Property\Entity;
@@ -121,6 +122,20 @@ class RestController extends FOSRestController
             'Profile items dictionary'
         ));
 
+        $hypermedia->addQuery($document->createQuery(
+            'statistics',
+            $this->get('router')->generate('statistics', array(), true),
+            array('dateFrom', 'dateTo'),
+            'Statistics for date range')
+        );
+
+        $hypermedia->addQuery($document->createQuery(
+            'syndicated',
+            $this->get('router')->generate('node_syndicated', array(), true),
+            array('id'),
+            'Notify service about node syndication'
+        ));
+
         return $document;
     }
 
@@ -194,10 +209,10 @@ class RestController extends FOSRestController
      *  - Number of pushed nodes.
      *  - Number of syncidated nodes.
      *
-     * @Rest\Get("/node/statistics")
+     * @Rest\Get("/statistics")
      * @Rest\View(template="BpiApiBundle:Rest:statistics.html.twig", statusCode="200")
      */
-    public function nodeStatisticsAction()
+    public function statisticsAction()
     {
       /* @var $request \Symfony\Component\HttpFoundation\Request */
       $request = $this->getRequest();
@@ -341,9 +356,14 @@ class RestController extends FOSRestController
         $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
 
         $document = $this->get("bpi.presentation.transformer")->transform($_node);
-        $node = $document->getEntity('node');
-        $node->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
-        $node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+
+        $hypermedia = $document->createHypermediaSection();
+        $node = $document->currentEntity();
+        $node->setHypermedia($hypermedia);
+
+        //$node = $document->getEntity('node');
+        $hypermedia->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
+        $hypermedia->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
 
         return $document;
     }
@@ -585,8 +605,6 @@ class RestController extends FOSRestController
         $controls->addLink($document->createLink('self', 'abc'));
         $controls->addLink($document->createLink('collection', 'abc'));
 
-        $controls->addQuery($document->createQuery('statistics', 'abc', array('id'), 'Find a node by ID'));
-
 //        $entity->addLink($document->createLink($rel, $href));
 
 //        $node = $document->getEntity('node');
@@ -736,5 +754,32 @@ class RestController extends FOSRestController
         } catch (\InvalidArgumentException $e) {
             throw $this->createNotFoundException();
         }
+    }
+
+    /**
+     * Mark node as syndicated
+     *
+     * @Rest\Get("/node/syndicated")
+     * @Rest\View(statusCode="200")
+     */
+    public function nodeSyndicatedAction()
+    {
+      $id = $this->getRequest()->get('id');
+
+      // @todo get agency id from auth
+      $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name'=>'Aarhus Kommunes Biblioteker'));
+      $agencyId = $agency->getAgencyId()->id();
+
+      $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
+
+      $log = new History($node, $agencyId, new \DateTime(), 'syndicate');
+
+      $dm = $this->get('doctrine.odm.mongodb.document_manager');
+      $dm->persist($log);
+      $dm->flush($log);
+
+      // @todo Add check if node exists
+
+      return new Response('', 200);
     }
 }
