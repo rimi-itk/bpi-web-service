@@ -21,7 +21,7 @@ class EndUserTest extends SDKTestCase
         $bpi = new \Bpi('http://bpi1.inlead.dk', mt_rand(), mt_rand(), mt_rand());
         $dt = new \DateTime();
 
-        $node = $bpi->push(array(
+        $node = $bpi->push($data = array(
             'title' => 'title_' . mt_rand(),
             'body' => 'body_' . mt_rand(),
             'teaser' => 'teaser_' . mt_rand(),
@@ -31,12 +31,16 @@ class EndUserTest extends SDKTestCase
             'audience' => 'all',
             'editable' => 1,
             'authorship' => 1,
-            'agency_id' => '100200',
+            'agency_id' => '200100', // this value must exists, otherwise it will fail
             'local_id' =>  mt_rand(),
             'firstname' => 'firstname' . mt_rand(),
             'lastname' => 'lastname' . mt_rand(),
         ));
 
-        $this->assertTrue((bool) count($node->getProperties()));
+        $peoperties = $node->getProperties();
+        foreach($data as $key => $val)
+        {
+            $this->assertEquals($val, $peoperties[$key]);
+        }
     }
 }
