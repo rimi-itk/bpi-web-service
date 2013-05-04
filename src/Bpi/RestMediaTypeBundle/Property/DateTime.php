@@ -11,7 +11,7 @@ class DateTime extends Property
 {
     /**
      * @Serializer\XmlValue
-     * @Serializer\Type("DateTime")
+     * @Serializer\Type("DateTime<'Y-m-d\TH:i:sP'>")
      */
     protected $value;
 }

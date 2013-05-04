@@ -58,6 +58,17 @@ class Agency implements IPresentable
      */
     public function getAgencyId()
     {
-      return new AgencyId($this->public_id);
+        return new AgencyId($this->public_id);
+    }
+
+    /**
+     * Check auth token.
+     *
+     * @return string
+     */
+    public function checkToken($token)
+    {
+        $localToken = crypt($this->public_id . $this->public_key . $this->secret, $token);
+        return $token === $localToken;
     }
 }
