@@ -56,6 +56,24 @@ class RestController extends FOSRestController
         return $document;
     }
 
+    public function getUser()
+    {
+        if (!$this->container->has('security.context')) {
+            throw new \LogicException('The SecurityBundle is not registered in your application.');
+        }
+
+        if (null === $token = $this->container->get('security.context')->getToken()) {
+            return null;
+        }
+
+        $user = $token->getUser();
+
+        if (empty($user)) {
+            return null;
+        }
+
+        return $user;
+    }
     /**
      * Main page of API redirects to human representation of entry point
      *
@@ -222,9 +240,7 @@ class RestController extends FOSRestController
       /* @var $request \Symfony\Component\HttpFoundation\Request */
       $request = $this->getRequest();
 
-      // @todo get agency id from auth
-      $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name'=>'Aarhus Kommunes Biblioteker'));
-      $agencyId = $agency->getAgencyId()->id();
+      $agencyId = $this->getUser();
 
       // @todo Add input validation
       $dateFrom = $request->get('dateFrom');
@@ -771,9 +787,7 @@ class RestController extends FOSRestController
     {
       $id = $this->getRequest()->get('id');
 
-      // @todo get agency id from auth
-      $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name'=>'Aarhus Kommunes Biblioteker'));
-      $agencyId = $agency->getAgencyId()->id();
+      $agencyId = $this->getUser();
 
       $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
 
@@ -800,9 +814,7 @@ class RestController extends FOSRestController
 
       $id = $this->getRequest()->get('id');
 
-      // @todo get agency id from auth
-      $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name'=>'Aarhus Kommunes Biblioteker'));
-      $agencyId = $agency->getAgencyId()->id();
+      $agencyId = $this->getUser();
 
       $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->delete($id, $agencyId);
 

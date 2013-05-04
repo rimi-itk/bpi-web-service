@@ -21,19 +21,11 @@ class PKProvider implements AuthenticationProviderInterface
     {
         $user = $this->userProvider->loadUserByUsername($token->getUsername());
 
-//        if ($user && $this->validate($token->token)) {
-//            return $token;
-//        }
-
+        if (empty($user) || $user->checkToken($token->token) === false) {
+            throw new AuthenticationException('Token authentication failed.');
+        }
+        $token->setAuthenticated(true);
         return $token;
-
-        throw new AuthenticationException('The PK authentication failed.');
-    }
-
-    protected function validate($pkey, $token)
-    {
-        /** @todo implementation **/
-        return true;
     }
 
     public function supports(TokenInterface $token)

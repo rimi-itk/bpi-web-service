@@ -10,11 +10,11 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
     /**
      * {@inheritdoc}
      *
-     * @param string $publickey find agency by username=public key
+     * @param string $agencyId find agency by public id
      */
-    public function loadUserByUsername($publickey)
+    public function loadUserByUsername($agencyId)
     {
-        return $this->findOneBy(array('publickey' => $publickey));
+        return $this->findOneBy(array('public_id' => $agencyId));
     }
 
     public function refreshUser(UserInterface $user)
