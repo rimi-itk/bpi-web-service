@@ -24,7 +24,9 @@ class PKProvider implements AuthenticationProviderInterface
         if (empty($user) || $user->checkToken($token->token) === false) {
             throw new AuthenticationException('Token authentication failed.');
         }
+
         $token->setAuthenticated(true);
+        $token->setUser($user);
         return $token;
     }
 

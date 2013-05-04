@@ -56,24 +56,6 @@ class RestController extends FOSRestController
         return $document;
     }
 
-    public function getUser()
-    {
-        if (!$this->container->has('security.context')) {
-            throw new \LogicException('The SecurityBundle is not registered in your application.');
-        }
-
-        if (null === $token = $this->container->get('security.context')->getToken()) {
-            return null;
-        }
-
-        $user = $token->getUser();
-
-        if (empty($user)) {
-            return null;
-        }
-
-        return $user;
-    }
     /**
      * Main page of API redirects to human representation of entry point
      *
@@ -239,8 +221,7 @@ class RestController extends FOSRestController
     {
       /* @var $request \Symfony\Component\HttpFoundation\Request */
       $request = $this->getRequest();
-
-      $agencyId = $this->getUser();
+      $agencyId = $this->getUser()->getAgencyId()->id();
 
       // @todo Add input validation
       $dateFrom = $request->get('dateFrom');
@@ -252,29 +233,6 @@ class RestController extends FOSRestController
       $document = $this->get("bpi.presentation.transformer")->transform($stats);
 
       return $document;
-    }
-
-    /**
-     * List nodes by recieved nodes_query
-     *
-     * @Rest\Post("/node/collection")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
-     */
-    public function postNodeListAction()
-    {
-        $extractor = new Extractor($this->getDocument());
-        $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')
-            ->findByNodesQuery($extractor->extract('nodesQuery'));
-
-        $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
-        $router = $this->get('router');
-        $document->walkEntities(function($e) use ($document, $router) {
-            $e->addLink($document->createLink('self', $router->generate('node', array('id' => $e->property('id')->getValue()), true)));
-            $e->addLink($document->createLink('collection', $router->generate('list', array(), true)));
-            $e->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), "filename" => ""), true)));
-        });
-
-        return $document;
     }
 
      /**
@@ -621,7 +579,16 @@ class RestController extends FOSRestController
         // Handle query by node id
         if ($id = $this->getRequest()->get('id'))
         {
-            return $this->redirect($this->generateUrl('node', array('id' => $id)));
+            // SDK can not handle properly redirects, so query string is used
+            // @see https://github.com/symfony/symfony/issues/7929
+            $params = array(
+                'id' => $id,
+                '_authorization' => array(
+                    'agency' => $this->getUser()->getAgencyId()->id(),
+                    'token' => $this->container->get('security.context')->getToken()->token
+                )
+            );
+            return $this->redirect($this->generateUrl('node', $params));
         }
 
         $document = new Document();
@@ -793,18 +760,17 @@ class RestController extends FOSRestController
     public function nodeSyndicatedAction()
     {
       $id = $this->getRequest()->get('id');
-
-      $agencyId = $this->getUser();
+      $agencyId = $this->getUser()->getAgencyId()->id();
 
       $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
+      if (!$node)
+          throw $this->createNotFoundException();
 
       $log = new History($node, $agencyId, new \DateTime(), 'syndicate');
 
       $dm = $this->get('doctrine.odm.mongodb.document_manager');
       $dm->persist($log);
       $dm->flush($log);
-
-      // @todo Add check if node exists
 
       return new Response('', 200);
     }
@@ -821,7 +787,7 @@ class RestController extends FOSRestController
 
       $id = $this->getRequest()->get('id');
 
-      $agencyId = $this->getUser();
+      $agencyId = $this->getUser()->getAgencyId()->id();
 
       $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->delete($id, $agencyId);
 
