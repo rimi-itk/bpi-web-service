@@ -97,7 +97,7 @@ class RestController extends FOSRestController
 
         $hypermedia->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
         $hypermedia->addLink($document->createLink(
-            'self',
+            'canonical',
             $this->get('router')->generate('node_resource', array(), true),
             'Node resource'
         ));
@@ -375,6 +375,8 @@ class RestController extends FOSRestController
     public function nodeAction($id)
     {
         $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
+        if (!$_node)
+            throw $this->createNotFoundException();
 
         $document = $this->get("bpi.presentation.transformer")->transform($_node);
 
@@ -382,9 +384,8 @@ class RestController extends FOSRestController
         $node = $document->currentEntity();
         $node->setHypermedia($hypermedia);
 
-        //$node = $document->getEntity('node');
-        $hypermedia->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
-        $hypermedia->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+        $hypermedia->addLink($document->createLink('self', $this->generateUrl('node', array('id' => $node->property('id')->getValue()), true)));
+        $hypermedia->addLink($document->createLink('collection', $this->generateUrl('list', array(), true)));
 
         return $document;
     }
@@ -537,9 +538,9 @@ class RestController extends FOSRestController
         );
 
         $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder();
-        $resource->title('title')
-            ->body('body')
-            ->teaser('teaser')
+        $resource->title($this->getRequest()->get('title'))
+            ->body($this->getRequest()->get('body'))
+            ->teaser($this->getRequest()->get('teaser'))
             ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $this->getRequest()->get('creation')))
         ;
 
@@ -610,13 +611,19 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Asset options
+     * Node resource
      *
      * @Rest\Get("/node")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface2.html.twig")
      */
     public function nodeResourceAction()
     {
+        // Handle query by node id
+        if ($id = $this->getRequest()->get('id'))
+        {
+            return $this->redirect($this->generateUrl('node', array('id' => $id)));
+        }
+
         $document = new Document();
         $entity = $document->createRootEntity('node');
         $controls = $document->createHypermediaSection();
