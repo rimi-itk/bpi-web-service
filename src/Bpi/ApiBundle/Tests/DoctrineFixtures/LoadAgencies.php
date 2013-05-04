@@ -9,14 +9,14 @@ use Bpi\ApiBundle\Domain\Aggregate\Agency;
 
 class LoadAgencies implements FixtureInterface
 {
-    const AGENCY_ALPHA = '100200';
+    const AGENCY_ALPHA = '200100';
 
     /**
      * {@inheritDoc}
      */
     public function load(ObjectManager $manager)
     {
-        $manager->persist(new Agency(self::AGENCY_ALPHA, 'Aarhus Kommunes Biblioteker', 'Moderator Arhus', 'arhus_public_key', 'secret'));
+        $manager->persist(new Agency('200100', 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', md5('agency_200100_public'), sha1('agency_200100_secret')));
         $manager->flush();
     }
 
