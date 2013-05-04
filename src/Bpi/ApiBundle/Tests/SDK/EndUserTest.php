@@ -25,7 +25,7 @@ class EndUserTest extends SDKTestCase
             'title' => 'title_' . mt_rand(),
             'body' => 'body_' . mt_rand(),
             'teaser' => 'teaser_' . mt_rand(),
-            'type' => 'type' . mt_rand(),
+            'type' => 'article',
             'creation' => $dt->format(\DateTime::W3C),
             'category' => 'category',
             'audience' => 'all',
@@ -40,8 +40,30 @@ class EndUserTest extends SDKTestCase
         $peoperties = $node->getProperties();
         foreach($data as $key => $val)
         {
+            if ($key == 'body')
+                continue;
             $this->assertEquals($val, $peoperties[$key]);
         }
+    }
+
+    public function testGetNode()
+    {
+        $bpi = new \Bpi(self::TEST_ENDPOINT_URI, mt_rand(), mt_rand(), mt_rand());
+        try
+        {
+            $bpi->getNode(mt_rand());
+            $this->fail('ClientError exception expected');
+        }
+        catch(\Bpi\Sdk\Exception\HTTP\ClientError $e)
+        {
+            $this->assertTrue(true);
+        }
+
+        $list = $bpi->searchNodes(array('amount' => 1));
+        $properties = $list->current()->getProperties();
+
+        $node = $bpi->getNode($properties['id']);
+        $this->assertEquals($properties, $node->getProperties());
     }
 
     public function testStatistics()
@@ -49,7 +71,7 @@ class EndUserTest extends SDKTestCase
         $bpi = new \Bpi('http://bpi1.inlead.dk', mt_rand(), mt_rand(), mt_rand());
         $stats = $bpi->getStatistics('2013-05-01', '2013-05-05');
 
-        $results = $item->getProperties();
+        $results = $stats->getProperties();
         $this->assertTrue(isset($results['push']));
         $this->assertTrue(isset($results['syndicate']));
     }
