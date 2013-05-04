@@ -63,7 +63,7 @@ class NodeCollectionTest extends SDKTestCase
         $doc->firstItem('name', 'node')->link('collection')->follow($doc);
         $query = $doc->firstItem('type', 'collection')->query('refinement');
 
-        $query->send($doc, array('filter' => array('resource.title' => 'bravo_title')));
+        $query->send($doc, array('filter' => array('title' => 'bravo_title')));
         $this->assertEquals(1, $doc->reduceItemsByAttr('type', 'entity')->count());
     }
 }
