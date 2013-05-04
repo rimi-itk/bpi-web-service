@@ -27,6 +27,8 @@ class Node implements IPresentable
     protected $profile;
     protected $params;
 
+    protected $deleted = false;
+
     public function __construct(Author $author, Resource $resource, Profile $profile, Params $params)
     {
         $this->author = $author;
@@ -145,5 +147,21 @@ class Node implements IPresentable
 
     public function getAuthor() {
       return $this->author;
+    }
+
+    public function getAgencyId()
+    {
+      return $this->author->getAgencyId();
+    }
+
+    public function isDeleted()
+    {
+      return $this->deleted;
+    }
+
+    public function setDeleted($deleted = true)
+    {
+      $this->deleted = $deleted;
+      return $this;
     }
 }
