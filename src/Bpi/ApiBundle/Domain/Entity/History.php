@@ -1,6 +1,8 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Entity;
 
+use Bpi\ApiBundle\Domain\Aggregate\Node;
+
 class History
 {
     private $id;
@@ -21,11 +23,12 @@ class History
      * @param \Datetime $datetime
      * @param string $action Possible values: push, syndicate
      */
-    public function __construct(\Bpi\ApiBundle\Domain\Aggregate\Node $node, $agency, \Datetime $datetime, $action) {
-      $this->node = $node;
-      $this->agency = $agency;
-      $this->datetime = $datetime;
-      $this->action = $action;
+    public function __construct(Node $node, $agency, \Datetime $datetime, $action)
+    {
+        $this->node = $node;
+        $this->agency = $agency;
+        $this->datetime = $datetime;
+        $this->action = $action;
     }
 
     /**
