@@ -163,6 +163,10 @@ class RestController extends FOSRestController
             $node_query->offset($offset);
         }
 
+        if ($search = $this->getRequest()->query->get('search', false)) {
+            $node_query->search($search);
+        }
+
         if ($filter = $this->getRequest()->query->get('filter', false)) {
             foreach($filter as $field => $value)
                 $node_query->filter($field, $value);

@@ -10,10 +10,39 @@ class NodeQuery
     protected $offset = 0;
     protected $amount = 20;
     protected $reduce_strategy;
+    protected $search;
+
+    /**
+     *
+     * @var array
+     */
+    protected $field_map = array(
+        'title'    => 'resource.title',
+        'teaser'   => 'resource.teaser',
+        'body'     => 'resource.body',
+        'creation' => 'resource.creation',
+        'type'     => 'resource.type',
+        'ctime'    => 'ctime',
+        'category' => 'profile.category.name',
+        'audienece'=> 'profile.audienece.name',
+    );
+
+    /**
+     * Transform field names from presentation layer to persistense
+     *
+     * @return string
+     */
+    protected function map($field_name)
+    {
+        if (!isset($this->field_map[$field_name]))
+            throw new \InvalidArgumentException(sprintf('Field "%s" has no mapping', $field_name));
+
+        return $this->field_map[$field_name];
+    }
 
     public function filter($field, $value)
     {
-        $this->filters[$field] = $value;
+        $this->filters[$this->map($field)] = $value;
     }
 
     public function offset($value)
@@ -28,7 +57,24 @@ class NodeQuery
 
     public function sort($field, $order)
     {
-        $this->sorts[$field] = strtolower($order) == 'asc' ? 1 : -1;
+        $this->sorts[$this->map($field)] = strtolower($order) == 'asc' ? 1 : -1;
+    }
+
+    public function search($text)
+    {
+        $this->search = $text;
+    }
+
+    protected function applySearch(QueryBuilder $query)
+    {
+        if (!$this->search)
+            return;
+
+        $query
+          ->addOr($query->expr()->field($this->map('title'))->equals($this->matchAny($this->search)))
+          ->addOr($query->expr()->field($this->map('body'))->equals($this->matchAny($this->search)))
+          ->addOr($query->expr()->field($this->map('teaser'))->equals($this->matchAny($this->search))
+        );
     }
 
     public function reduce($strategy)
@@ -38,8 +84,10 @@ class NodeQuery
 
     public function executeByDoctrineQuery(QueryBuilder $query)
     {
+        $this->applySearch($query);
+
         foreach($this->filters as $field => $value)
-            $query->field($field)->equals($value);
+            $query->field($field)->equals($this->matchAny($value));
 
         $query->skip($this->offset);
         $query->limit($this->amount);
@@ -65,5 +113,10 @@ class NodeQuery
         }
 
         return $collection;
+    }
+
+    protected function matchAny($value)
+    {
+        return new \MongoRegex('/.*' . preg_quote($value) . '.*/i');
     }
 }
