@@ -65,6 +65,12 @@ class NodeCollectionTest extends SDKTestCase
 
         $query->send($doc, array('filter' => array('title' => 'bravo_title')));
         $this->assertEquals(1, $doc->reduceItemsByAttr('type', 'entity')->count());
+
+        $query->send($doc, array('filter' => array('agency_id' => $this->auth_agency)));
+        $this->assertEquals(3, $doc->reduceItemsByAttr('type', 'entity')->count());
+
+        $query->send($doc, array('filter' => array('author' => 'Potter')));
+        $this->assertEquals(2, $doc->reduceItemsByAttr('type', 'entity')->count());
     }
 
     public function testSearchQuery()
