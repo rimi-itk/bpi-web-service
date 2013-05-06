@@ -18,6 +18,8 @@ use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 use Bpi\ApiBundle\Domain\Factory\ProfileBuilder;
 use Bpi\ApiBundle\Domain\Service\PushService;
 use Knp\Bundle\GaufretteBundle\FilesystemMap;
+use Bpi\ApiBundle\Domain\Entity\History;
+use Bpi\RestMediaTypeBundle\Property\DateTime;
 
 class FakeData implements FixtureInterface
 {
@@ -37,9 +39,9 @@ class FakeData implements FixtureInterface
     {
         $service = new PushService($manager, $this->createFilesystemMap());
 
-        $agency['Arhus'] = new Agency('200100', 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', 'Publickey', 'Secret');
-        $agency['Kobenhavns'] = new Agency('200200', 'Københavns Biblioteker', 'Københavns Moderator Name', 'Publickey', 'Secret');
-        $agency['Halsnas'] = new Agency('200300', 'Halsnæs Kommune - Bibliotekerne', 'Halsnæs Moderator Name', 'Publickey', 'Secret');
+        $agency['Arhus'] = new Agency('200100', 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', md5('agency_200100_public'), sha1('agency_200100_secret'));
+        $agency['Kobenhavns'] = new Agency('200200', 'Københavns Biblioteker', 'Københavns Moderator Name', md5('agency_200200_public'), sha1('agency_200200_secret'));
+        $agency['Halsnas'] = new Agency('200300', 'Halsnæs Kommune - Bibliotekerne', 'Halsnæs Moderator Name', md5('agency_200300_public'), sha1('agency_200300_secret'));
 
         foreach($agency as $agency_item)
             $manager->persist($agency_item);
@@ -65,7 +67,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node1 = $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -91,7 +93,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node2 = $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -117,7 +119,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node3 = $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -143,7 +145,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node4 = $service->push(
             new Author($agency['Kobenhavns']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -169,7 +171,7 @@ class FakeData implements FixtureInterface
             ->build();
         ;
 
-        $service->push(
+        $node5 = $service->push(
             new Author($agency['Halsnas']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
             $profile,
@@ -383,6 +385,32 @@ class FakeData implements FixtureInterface
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
+
+        // Add some fake history.
+        $log = array();
+        $log[] = new History(
+          $node2,
+          $agency['Halsnas']->getAgencyId(),
+          new \DateTime("2013-05-01 15:26:55"),
+          'syndicate'
+        );
+        $log[] = new History(
+          $node3,
+          $agency['Halsnas']->getAgencyId(),
+          new \DateTime("2013-05-02 11:11:11"),
+          'syndicate'
+        );
+        $log[] = new History(
+          $node5,
+          $agency['Arhus']->getAgencyId(),
+          new \DateTime("2013-05-03 15:01:27"),
+          'syndicate'
+        );
+
+        foreach ($log as $l) {
+          $manager->persist($l);
+        }
+        $manager->flush();
     }
 
 }

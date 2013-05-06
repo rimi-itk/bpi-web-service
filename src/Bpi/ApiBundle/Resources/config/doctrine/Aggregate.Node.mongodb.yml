@@ -1,6 +1,6 @@
 Bpi\ApiBundle\Domain\Aggregate\Node:
 #  db: documents
-  repositoryClass: Bpi\ApiBundle\Domain\Repository\Node
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\NodeRepository
   collection: Node
   gedmo:
     tree:
@@ -32,10 +32,14 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
       cascade: all
       gedmo:
         - treeParent
+
     lock_time:
       type: date
       gedmo:
         - treeLockTime
+
+    deleted:
+       type: boolean
 
     author:
       embedded: true
