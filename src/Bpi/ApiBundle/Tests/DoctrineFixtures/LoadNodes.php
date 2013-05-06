@@ -46,7 +46,7 @@ class LoadNodes implements FixtureInterface
     {
         $resource_builder = new ResourceBuilder;
         $bravo = $resource_builder
-              ->body('bravo_body')
+              ->body('<span title="bravo">bravo_body</span>')
               ->teaser('bravo_teaser')
               ->title('bravo_title')
               ->ctime(new \DateTime("+1 day"))
