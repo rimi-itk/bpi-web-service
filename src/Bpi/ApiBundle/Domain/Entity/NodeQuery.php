@@ -5,6 +5,8 @@ use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
 
 class NodeQuery
 {
+    public $total;
+
     protected $filters = array();
     protected $sorts = array();
     protected $offset = 0;
@@ -82,22 +84,21 @@ class NodeQuery
         );
     }
 
+    protected function applyFilters(QueryBuilder $query)
+    {
+        foreach($this->filters as $field => $value)
+            $query->field($field)->equals($this->matchAny($value));
+    }
+
     public function reduce($strategy)
     {
         $this->reduce_strategy = $strategy;
     }
 
-    public function executeByDoctrineQuery(QueryBuilder $query)
+    protected function applyReduce(QueryBuilder $query)
     {
-        $this->applySearch($query);
-
-        foreach($this->filters as $field => $value)
-            $query->field($field)->equals($this->matchAny($value));
-
-        $query->skip($this->offset);
-        $query->limit($this->amount);
-
-        switch ($this->reduce_strategy) {
+        switch ($this->reduce_strategy)
+        {
             case 'initial':
                 $query->field('level')->equals(1);
             break;
@@ -106,10 +107,24 @@ class NodeQuery
                 /** @todo custom query */
             break;
         }
+    }
+
+    public function executeByDoctrineQuery(QueryBuilder $query)
+    {
+        $this->applySearch($query);
+        $this->applyFilters($query);
+        $this->applyReduce($query);
+
+        // Calculate total count of items before applying the limits
+        $this->total = $query->getQuery()->execute()->count();
+
+        $query->skip($this->offset);
+        $query->limit($this->amount);
 
         $collection = $query->getQuery()->execute();
 
-        foreach($this->sorts as $path => $order) {
+        foreach($this->sorts as $path => $order)
+        {
             $arr_coll = $collection->toArray();
             uasort($arr_coll, function($node_a, $node_b) use ($path, $order) {
                 return $node_a->compare($node_b, $path, $order);
