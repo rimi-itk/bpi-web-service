@@ -70,7 +70,10 @@ class Category implements IValueObject, IPresentable
     public function transform(\Bpi\RestMediaTypeBundle\Document $document)
     {
         $document->appendEntity(
-            $document->createEntity('category', $this->name)
+            $entity = $document->createEntity('category')
         );
+
+        $entity->addProperty($document->createProperty('group', 'string', 'category'));
+        $entity->addProperty($document->createProperty('name', 'string', $this->name));
     }
 }
