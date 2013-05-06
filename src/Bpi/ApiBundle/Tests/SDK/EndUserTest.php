@@ -3,7 +3,7 @@ namespace Bpi\ApiBundle\Tests\SDK;
 
 class EndUserTest extends SDKTestCase
 {
-    const TEST_ENDPOINT_URI = 'http://bpi1.inlead.dk';
+    const TEST_ENDPOINT_URI = 'http://bpi.dev/app_dev.php/';
 
     public function testNodeList()
     {
@@ -42,10 +42,17 @@ class EndUserTest extends SDKTestCase
         $properties = $node->getProperties();
         foreach($data as $key => $val)
         {
-            if ($key == 'body')
+            // Ignore some fields
+            if (in_array($key, array('body', 'authorship', 'local_id', 'firstname', 'lastname')))
                 continue;
+
             $this->assertEquals($val, $properties[$key]);
         }
+
+        // These fields are generated after the push
+        $this->assertTrue(!empty($properties['id']));
+        $this->assertTrue(!empty($properties['pushed']));
+        $this->assertTrue(!empty($properties['author']));
     }
 
     public function testGetNode()

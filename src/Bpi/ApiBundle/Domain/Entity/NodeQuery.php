@@ -26,6 +26,7 @@ class NodeQuery
         'pushed'   => 'ctime',
         'category' => 'profile.category.name',
         'audienece'=> 'profile.audienece.name',
+        'agency'   => 'author.agency_id'
     );
 
     /**

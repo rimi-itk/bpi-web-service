@@ -17,7 +17,7 @@ class NodeCollectionTest extends SDKTestCase
         'type',
         'yearwheel',
         'author',
-        'agency'
+        'agency_id'
     );
 
     public function testPropertiesOfFirstItem()
