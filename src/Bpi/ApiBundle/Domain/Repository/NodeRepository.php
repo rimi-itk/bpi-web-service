@@ -23,15 +23,6 @@ class NodeRepository extends DocumentRepository
         );
     }
 
-    public function findTotalCount()
-    {
-        return $this->dm->createQueryBuilder($this->getClassName())
-            ->getQuery()
-            ->execute()
-            ->count()
-        ;
-    }
-
     public function getNode($id)
     {
         return $this->findOneBy(array('id' => $id, 'deleted' => false));
