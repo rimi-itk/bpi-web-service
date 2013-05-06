@@ -77,7 +77,6 @@ class RestController extends FOSRestController
             'Find a node by ID'
         ));
 
-        $hypermedia->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
         $hypermedia->addLink($document->createLink(
             'canonical',
             $this->get('router')->generate('node_resource', array(), true),
@@ -204,6 +203,7 @@ class RestController extends FOSRestController
             array(
                 'amount',
                 'offset',
+                'search',
                 $document->createQueryParameter('filter')->setMultiple(),
                 $document->createQueryParameter('sort')->setMultiple(),
             ),

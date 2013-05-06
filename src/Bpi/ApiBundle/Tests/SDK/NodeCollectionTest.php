@@ -66,4 +66,15 @@ class NodeCollectionTest extends SDKTestCase
         $query->send($doc, array('filter' => array('title' => 'bravo_title')));
         $this->assertEquals(1, $doc->reduceItemsByAttr('type', 'entity')->count());
     }
+
+    public function testSearchQuery()
+    {
+        $doc = $this->createDocument($client = new \Goutte\Client());
+        $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
+        $doc->firstItem('name', 'node')->link('collection')->follow($doc);
+        $query = $doc->firstItem('type', 'collection')->query('refinement');
+
+        $query->send($doc, array('search' => 't'));
+        $this->assertTrue((bool) $doc->reduceItemsByAttr('type', 'entity')->count());
+    }
 }
