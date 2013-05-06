@@ -84,4 +84,13 @@ class EndUserTest extends SDKTestCase
         $this->assertTrue(isset($results['push']));
         $this->assertTrue(isset($results['syndicate']));
     }
+
+    public function testDictionaries()
+    {
+        $bpi = new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
+        $dict = $bpi->getDictionaries();
+
+        $this->assertTrue((bool) count($dict['audience']));
+        $this->assertTrue((bool) count($dict['category']));
+    }
 }

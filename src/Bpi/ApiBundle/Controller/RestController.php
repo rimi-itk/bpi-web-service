@@ -95,6 +95,27 @@ class RestController extends FOSRestController
             'Template for pushing node content'
         ));
 
+        $hypermedia->addQuery($document->createQuery(
+            'statistics',
+            $this->get('router')->generate('statistics', array(), true),
+            array('dateFrom', 'dateTo'),
+            'Statistics for date range')
+        );
+
+        $hypermedia->addQuery($document->createQuery(
+            'syndicated',
+            $this->get('router')->generate('node_syndicated', array(), true),
+            array('id'),
+            'Notify service about node syndication'
+        ));
+
+        $hypermedia->addQuery($document->createQuery(
+            'delete',
+            $this->get('router')->generate('node_delete', array(), true),
+            array('id'),
+            'Mark node as deleted'
+        ));
+
         $template->createField('title');
         $template->createField('body');
         $template->createField('teaser');
@@ -117,27 +138,6 @@ class RestController extends FOSRestController
             'dictionary',
             $this->get('router')->generate('profile_dictionary', array(), true),
             'Profile items dictionary'
-        ));
-
-        $hypermedia->addQuery($document->createQuery(
-            'statistics',
-            $this->get('router')->generate('statistics', array(), true),
-            array('dateFrom', 'dateTo'),
-            'Statistics for date range')
-        );
-
-        $hypermedia->addQuery($document->createQuery(
-            'syndicated',
-            $this->get('router')->generate('node_syndicated', array(), true),
-            array('id'),
-            'Notify service about node syndication'
-        ));
-
-        $hypermedia->addQuery($document->createQuery(
-            'delete',
-            $this->get('router')->generate('node_delete', array(), true),
-            array('id'),
-            'Mark node as deleted'
         ));
 
         return $document;

@@ -57,7 +57,10 @@ class Audience implements IValueObject, IPresentable
     public function transform(\Bpi\RestMediaTypeBundle\Document $document)
     {
         $document->appendEntity(
-            $document->createEntity('audience', $this->name)
+            $entity = $document->createEntity('audience')
         );
+
+        $entity->addProperty($document->createProperty('group', 'string', 'audience'));
+        $entity->addProperty($document->createProperty('name', 'string', $this->name));
     }
 }
