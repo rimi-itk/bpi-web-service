@@ -23,6 +23,7 @@ class NodeQuery
         'creation' => 'resource.creation',
         'type'     => 'resource.type',
         'ctime'    => 'ctime',
+        'pushed'   => 'ctime',
         'category' => 'profile.category.name',
         'audienece'=> 'profile.audienece.name',
     );
