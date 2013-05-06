@@ -83,4 +83,18 @@ class NodeCollectionTest extends SDKTestCase
         $query->send($doc, array('search' => 't'));
         $this->assertTrue((bool) $doc->reduceItemsByAttr('type', 'entity')->count());
     }
+
+    public function testCollectionMetadata()
+    {
+        $doc = $this->createDocument($client = new \Goutte\Client());
+        $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
+        $doc->firstItem('name', 'node')->link('collection')->follow($doc);
+        $coll = $doc->firstItem('type', 'collection');
+
+        $self = $this;
+        $coll->walkProperties(function($property) use($self) {
+            $self->assertEquals('total', $property['name']);
+            $self->assertEquals(3, $property['@value']);
+        });
+    }
 }

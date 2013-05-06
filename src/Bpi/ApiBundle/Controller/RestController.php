@@ -192,6 +192,11 @@ class RestController extends FOSRestController
 
         // Collection description
         $collection = $document->createEntity('collection');
+        $collection->addProperty($document->createProperty(
+            'total',
+            'integer',
+            $this->getRepository('BpiApiBundle:Aggregate\Node')->findTotalCount()
+        ));
         $document->prependEntity($collection);
         $hypermedia = $document->createHypermediaSection();
         $collection->setHypermedia($hypermedia);
