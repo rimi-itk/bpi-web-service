@@ -111,6 +111,9 @@ class NodeQuery
 
     public function executeByDoctrineQuery(QueryBuilder $query)
     {
+        // Hide deleted items
+        $query->field('deleted')->equals(false);
+
         $this->applySearch($query);
         $this->applyFilters($query);
         $this->applyReduce($query);
