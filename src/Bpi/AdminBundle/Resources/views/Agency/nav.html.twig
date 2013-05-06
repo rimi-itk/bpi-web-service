@@ -1,0 +1,11 @@
+{% set nav= {
+    'bpi_admin_agency': 'Agencies',
+    'bpi_admin_agency_new': 'Add new',
+    'bpi_admin_agency_deleted': 'Show deleted',
+} %}
+{% set route = app.request.attributes.get('_route') %}
+<ul class="nav nav-tabs">
+    {% for url, title in nav %}
+        <li{% if url == route %} class="active"{% endif %}><a href="{{ url(url) }}">{{title}}</a></li>
+    {% endfor %}
+</ul>

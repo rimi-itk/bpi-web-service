@@ -162,6 +162,40 @@ class Node implements IPresentable
     public function setDeleted($deleted = true)
     {
       $this->deleted = $deleted;
-      return $this;
     }
+
+    /// Setters and getters for forms
+    public function getTitle()
+    {
+        return $this->resource->getTitle();
+    }
+    public function setTitle($title)
+    {
+        $this->resource->setTitle($title);
+    }
+    public function getAudience()
+    {
+        return $this->profile->getAudience();
+    }
+    public function setAudience($audience)
+    {
+        $this->profile->setAudience($audience);
+    }
+    public function getCategory()
+    {
+        return $this->profile->getCategory();
+    }
+    public function setCategory($category)
+    {
+        $this->profile->setCategory($category);
+    }
+    public function getTeaser()
+    {
+        return $this->resource->getTeaser();
+    }
+    public function setTeaser($teaser)
+    {
+        $this->resource->setTeaser($teaser);
+    }
+
 }

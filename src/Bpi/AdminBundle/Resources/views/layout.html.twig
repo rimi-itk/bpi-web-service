@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>BPI Admin</title>
+        {% block metatags %}
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        {% endblock %}
+        {% block stylesheets %}
+        <link href="{{ asset('bundles/bpiapi/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet" media="screen">
+        {% endblock %}
+        {% block javascript %}
+        {% endblock %}
+        <style>
+            body { padding-top: 60px; }
+        </style>
+    </head>
+    <body>
+        {% include 'BpiAdminBundle::navigation.html.twig' %}
+        <div class="container">
+        {% block content %}
+        {% endblock %}
+        </div>
+    </body>
+</html>

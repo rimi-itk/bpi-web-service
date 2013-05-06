@@ -24,6 +24,31 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
 
     public function supportsClass($class)
     {
-        ;
+        // @todo Add a proper check?
+    }
+
+    /**
+     * Show all agencies filtered by "deleted" value.
+     *
+     * @param bool $deleted
+     * @return array
+     */
+    public function listAll($deleted = false)
+    {
+        return $this->findBy(array('deleted'=>$deleted), array('public_id'=>0));
+    }
+
+    public function delete($id)
+    {
+        $agency = $this->find($id);
+        $agency->setDeleted();
+        $this->dm->persist($agency);
+        $this->dm->flush($agency);
+    }
+
+    public function save($agency)
+    {
+        $this->dm->persist($agency);
+        $this->dm->flush($agency);
     }
 }

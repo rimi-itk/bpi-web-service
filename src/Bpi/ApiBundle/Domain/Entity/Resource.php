@@ -151,4 +151,22 @@ class Resource implements IPresentable
     {
         $this->body = new Resource\Body($this->body);
     }
+
+
+    public function getTitle()
+    {
+        return $this->title;
+    }
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+    public function getTeaser()
+    {
+        return $this->teaser;
+    }
+    public function setTeaser($teaser)
+    {
+        $this->teaser = $teaser;
+    }
 }

@@ -33,7 +33,7 @@ class NodeRepository extends DocumentRepository
       // @todo Check if node was not deleted before.
       $node = $this->find($id);
 
-      if ($node->getAgencyId() == $agencyId) {
+      if ($node->getAgencyId() == $agencyId || $agencyId == 'ADMIN') {
         $node->setDeleted();
         $this->dm->persist($node);
         $this->dm->flush($node);
@@ -41,5 +41,22 @@ class NodeRepository extends DocumentRepository
       }
 
       return null;
+    }
+
+    /**
+     * Show all nodes filtered by "deleted" value.
+     *
+     * @param bool $deleted
+     * @return array
+     */
+    public function listAll($deleted = false)
+    {
+        return $this->findBy(array('deleted'=>$deleted));
+    }
+
+    public function save($node)
+    {
+        $this->dm->persist($node);
+        $this->dm->flush($node);
     }
 }
