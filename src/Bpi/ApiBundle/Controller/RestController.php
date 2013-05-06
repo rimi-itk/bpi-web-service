@@ -246,34 +246,14 @@ class RestController extends FOSRestController
 
      /**
       * Display available options
-      * 1. HTTP verbs
-      * 2. Expected media type entities in input/output
       *
-      * @Rest\Options("/node/list")
+      * @Rest\Options("/node/collection")
       */
     public function nodeListOptionsAction()
     {
         $options = array(
               'GET' => array(
                     'action' => 'List of nodes',
-                    'output' => array(
-                          'entities' => array(
-                                'node'
-                          )
-                    )
-              ),
-              'POST' => array(
-                    'action' => 'Node list query',
-                    'input' => array(
-                          'entities' => array(
-                                'nodes_query'
-                          )
-                    ),
-                    'output' => array(
-                          'entities' => array(
-                                'node'
-                          )
-                    )
               ),
               'OPTIONS' => array('action' => 'List available options'),
         );

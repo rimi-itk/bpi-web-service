@@ -19,11 +19,11 @@ class PushServiceCopyleftTest extends \PHPUnit_Framework_TestCase
     public function __construct()
     {
         // stubs chain should return this agency
-        $agency = new \Bpi\ApiBundle\Domain\Aggregate\Agency(self::AGENCY_NAME, 'moderator', 'public_key', 'secret');
+        $agency = new \Bpi\ApiBundle\Domain\Aggregate\Agency('200100', self::AGENCY_NAME, 'moderator', 'public_key', 'secret');
 
         $repository = $this->getMock('\Doctrine\Common\Persistence\ObjectRepository');
         $repository->expects($this->once())
-           ->method('find')
+           ->method('findOneBy')
            ->will($this->returnValue($agency))
         ;
 

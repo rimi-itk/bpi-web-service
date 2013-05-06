@@ -3,8 +3,6 @@ namespace Bpi\ApiBundle\Tests\SDK;
 
 class EndUserTest extends SDKTestCase
 {
-    const TEST_ENDPOINT_URI = 'http://bpi.dev/app_dev.php/';
-
     public function testNodeList()
     {
         $bpi = new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
@@ -25,7 +23,7 @@ class EndUserTest extends SDKTestCase
 
         $node = $bpi->push($data = array(
             'title' => 'title_' . mt_rand(),
-            'body' => 'body_' . mt_rand(),
+            'body' => '<span title="zoo">body</span>_' . mt_rand(),
             'teaser' => 'teaser_' . mt_rand(),
             'type' => 'article',
             'creation' => $dt->format(\DateTime::W3C),
