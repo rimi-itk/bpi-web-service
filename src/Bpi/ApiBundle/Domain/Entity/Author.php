@@ -93,7 +93,7 @@ class Author implements \Bpi\ApiBundle\Transform\IPresentable
         ));
 
         $entity->addProperty($document->createProperty(
-            'agency',
+            'agency_id',
             'string',
             $this->getAgencyId()
         ));
