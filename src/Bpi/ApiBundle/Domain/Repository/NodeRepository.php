@@ -23,23 +23,33 @@ class NodeRepository extends DocumentRepository
         );
     }
 
+    public function findTotalCount()
+    {
+        return $this->dm->createQueryBuilder($this->getClassName())
+            ->getQuery()
+            ->execute()
+            ->count()
+        ;
+    }
+
     public function getNode($id)
     {
-      return $this->findOneBy(array('id'=>$id, 'deleted' => false));
+        return $this->findOneBy(array('id' => $id, 'deleted' => false));
     }
 
     public function delete($id, $agencyId)
     {
-      // @todo Check if node was not deleted before.
-      $node = $this->find($id);
+        // @todo Check if node was not deleted before.
+        $node = $this->find($id);
 
-      if ($node->getAgencyId() == $agencyId) {
-        $node->setDeleted();
-        $this->dm->persist($node);
-        $this->dm->flush($node);
-        return $node;
-      }
+        if ($node->getAgencyId() == $agencyId)
+        {
+            $node->setDeleted();
+            $this->dm->persist($node);
+            $this->dm->flush($node);
+            return $node;
+        }
 
-      return null;
+        return null;
     }
 }

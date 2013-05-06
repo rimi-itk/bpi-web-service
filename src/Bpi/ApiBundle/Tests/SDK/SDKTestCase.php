@@ -22,6 +22,25 @@ class SDKTestCase extends WebTestCase
         parent::__construct();
     }
 
+    public function setUp()
+    {
+        $this->reloadFixtures();
+        parent::setUp();
+    }
+
+    protected function reloadFixtures()
+    {
+        $this->console = new \Symfony\Bundle\FrameworkBundle\Console\Application($this->createKernel());
+        $this->console->setAutoExit(false);
+        $this->load_fixtures = new \Symfony\Component\Console\Input\ArrayInput(array(
+            "--env" => "test",
+            "--quiet" => true,
+            "--fixtures" => 'src/Bpi/ApiBundle/Tests/DoctrineFixtures',
+            'command' => 'doctrine:mongodb:fixtures:load'
+        ));
+        $this->console->run($this->load_fixtures);
+    }
+
     protected function createDocument(\Goutte\Client $client)
     {
         return new Document($client, new Authorization($this->auth_agency, $this->auth_pk, $this->auth_secret));
