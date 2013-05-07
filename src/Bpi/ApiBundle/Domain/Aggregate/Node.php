@@ -145,6 +145,17 @@ class Node implements IPresentable
         $this->resource->transform($document);
     }
 
+    /**
+     * Check ownership
+     *
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $agency
+     * @return boolean
+     */
+    public function isOwner(Agency $agency)
+    {
+        return $this->author->getAgencyId()->equals($agency->getAgencyId());
+    }
+
     public function getAuthor() {
       return $this->author;
     }

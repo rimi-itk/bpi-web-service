@@ -45,4 +45,37 @@ class SDKTestCase extends WebTestCase
     {
         return new Document($client, new Authorization($this->auth_agency, $this->auth_pk, $this->auth_secret));
     }
+
+    /**
+     *
+     * @return \Bpi
+     */
+    public function createBpi()
+    {
+        return new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
+    }
+
+    /**
+     *
+     * @return type
+     */
+    public function createDataForPush()
+    {
+        $dt = new \DateTime();
+        return array(
+            'title' => 'title_' . mt_rand(),
+            'body' => '<span title="zoo">body</span>_' . mt_rand(),
+            'teaser' => 'teaser_' . mt_rand(),
+            'type' => 'article',
+            'creation' => $dt->format(\DateTime::W3C),
+            'category' => 'category',
+            'audience' => 'all',
+            'editable' => 1,
+            'authorship' => 1,
+            'agency_id' => '200100', // this value must exists, otherwise it will fail
+            'local_id' =>  mt_rand(),
+            'firstname' => 'firstname' . mt_rand(),
+            'lastname' => 'lastname' . mt_rand(),
+        );
+    }
 }
