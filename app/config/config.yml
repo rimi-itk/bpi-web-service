@@ -97,6 +97,7 @@ doctrine_mongodb:
     connections:
         default:
             server: mongodb://localhost:27017
+            #server: mongodb://rockmongo.bpi1.inlead.dk:27017
             options: {}
     default_database: bpi
     document_managers:

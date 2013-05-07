@@ -61,12 +61,7 @@ class PushService
         $this->assignCopyleft($author, $resource_builder, $authorship);
         $resource = $resource_builder->build();
 
-        // copy assets from memory into storage
-        $transaction = $resource->copyAssets($this->fs_map->get('assets'));
-        if ($transaction->rollbackOnFail())
-            $transaction->throwTheReason();
-
-        $builder = new NodeBuilder;
+        $builder = new NodeBuilder();
         $node = $builder
             ->author($author)
             ->profile($profile)
@@ -125,5 +120,10 @@ class PushService
         }
 
         $builder->copyleft($copyleft);
+    }
+
+    public function getFilesystem()
+    {
+        return $this->fs_map->get('assets');
     }
 }

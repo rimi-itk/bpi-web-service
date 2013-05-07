@@ -74,7 +74,7 @@ class Document
     {
         return $this->router->generate($name, $parameters, $absolute);
     }
-    
+
     /**
      * Call the callback on each entity
      *
@@ -132,7 +132,7 @@ class Document
         $this->setCursorOnEntity($entity);
         return $entity;
     }
-    
+
     /**
      * Create new entity instance
      *
@@ -180,14 +180,14 @@ class Document
     }
 
     /**
-     * 
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Hypermedia
      */
     public function createHypermediaSection()
     {
         return new Element\Hypermedia();
     }
-    
+
     /**
      *
      * @param string $name
@@ -224,7 +224,7 @@ class Document
     }
 
     /**
-     * 
+     *
      * @param string $rel
      * @param string $href
      * @param array $params

@@ -47,6 +47,10 @@ security:
                 path:   /admin/logout
                 target: /
 
+        assets:
+            pattern: ^/asset/
+            security: false
+
         api:
             pattern:   ^/
             pk:      true

@@ -15,14 +15,15 @@ class Body
      */
     protected $dom;
 
-    protected $linked_list;
+    protected $filesystem;
+    protected $router;
 
     /**
      *
      * @param string $content
      * @throws \RuntimeException
      */
-    public function __construct($content)
+    public function __construct($content, $filesystem=null, $router=null)
     {
         $this->dom = new \DOMDocument();
         $this->dom->strictErrorChecking = false;
@@ -49,30 +50,9 @@ class Body
             throw new \RuntimeException('Unable to import content into DOMDocument');
         }
 
-        $this->linked_list = new \SplObjectStorage();
-    }
-
-    /**
-     * Consider file as attached asset if content has no elements with corresponding id
-     *
-     * @param \Gaufrette\File $file
-     * @return Asset
-     */
-    public function allocateFile(File $file)
-    {
-        $element = $this->dom->getElementById($file->getKey());
-        $asset = is_null($element) ? new Asset($file, Asset::ATTACHED) : new Asset($file, Asset::EMBEDDED);
-        $this->linked_list->attach($asset, $element);
-        return $asset;
-    }
-
-    public function replaceAssetLink(Asset $asset, $link)
-    {
-        if (!$asset->isEmbedded())
-            return;
-
-        $element = $this->linked_list->offsetGet($asset);
-        $element->setAttribute('src', $link);
+        $this->filesystem = $filesystem;
+        $this->router = $router;
+        $this->rebuildInlineAssets();
     }
 
     /**
@@ -100,5 +80,25 @@ class Body
             '<meta content="text/html; charset=utf-8" http-equiv="Content-Type" id="__wellform__"></meta>',
         );
         return str_ireplace($replaces, '', $this->dom->C14N());
+    }
+
+    protected function rebuildInlineAssets()
+    {
+        // Rebuild images
+        $images = $this->dom->getElementsByTagName('img');
+        foreach ($images as $img) {
+            $src = $img->getAttributeNode('src')->value;
+            $ext = pathinfo($src, PATHINFO_EXTENSION);
+
+            // Download file and save to db.
+            $filename = md5($src.microtime());
+            $file = $this->filesystem->createFile($filename);
+            // @todo Download files in a proper way.
+            $file->setContent(file_get_contents($src));
+
+            // Build URL for new image and replace img src.
+            $url = $this->router->generate('get_asset', array('filename'=>$file->getKey(), 'extension' => $ext), true);
+            $img->setAttribute('src', $url);
+        }
     }
 }

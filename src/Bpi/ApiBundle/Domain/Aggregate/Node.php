@@ -80,15 +80,6 @@ class Node implements IPresentable
     }
 
     /**
-     *
-     * @param \Gaufrette\File $file
-     */
-    public function allocateFile(File $file)
-    {
-        $this->resource->allocateFiles(array($file));
-    }
-
-    /**
      * Create new revision of current node
      *
      * @param Resource $resource
@@ -197,5 +188,4 @@ class Node implements IPresentable
     {
         $this->resource->setTeaser($teaser);
     }
-
 }

@@ -17,10 +17,6 @@ Bpi\ApiBundle\Domain\Entity\Resource:
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\ValueObject\Copyleft
     assets:
-      reference: true
-      type: many
-      targetDocument: Bpi\ApiBundle\Domain\Entity\Asset
-      cascade: all
-      strategy: pushAll
+      type: hash
   lifecycleCallbacks:
     postLoad: [ wakeup ]

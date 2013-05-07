@@ -26,37 +26,36 @@ class Resource implements IPresentable
 
     protected $copyleft;
 
+    /**
+     *
+     * @param string $title
+     * @param string $body
+     * @param string $teaser
+     * @param Copyleft $copyleft
+     * @param \DateTime $ctime
+     * @param array $files
+     * @param array $assets
+     * @param \Gaufrette\Filesystem $filesystem
+     * @param object $router
+     */
     public function __construct(
         $title,
         $body,
         $teaser,
         Copyleft $copyleft,
         \DateTime $ctime,
-        array $files = null
+        array $files = null,
+        array $assets = array(),
+        Filesystem $filesystem,
+        $router
     )
     {
         $this->title = $title;
-        $this->body = new Resource\Body($body);
+        $this->body = new Resource\Body($body, $filesystem, $router);
         $this->teaser = $teaser;
         $this->copyleft = $copyleft;
         $this->ctime = $ctime;
-        $this->allocateFiles($files);
-    }
-
-    /**
-     * Allocate files as embedded or attached assets
-     *
-     * @param  array $files Gaufrette\File instances
-     * @return void
-     */
-    public function allocateFiles(array $files = null)
-    {
-        if (is_null($files))
-            return;
-
-        foreach ($files as $file) {
-            $this->assets[] = $this->body->allocateFile($file);
-        }
+        $this->assets = $assets;
     }
 
     /**
@@ -111,9 +110,13 @@ class Resource implements IPresentable
             $document->appendEntity($entity);
         }
 
-        // replace embedded assets with local link
-        foreach ($this->assets as $asset)
-                $this->body->replaceAssetLink($asset, $document->generateRoute("get_asset", array('filename'=> $asset->getId())));
+        // Add assets to presentation.
+        $i = 1;
+        foreach ($this->assets as $asset) {
+            $assetUrl = $document->generateRoute("get_asset", array('filename'=> $asset['file'], 'extension'=> $asset['extension']), true);
+            $entity->addProperty($document->createProperty('asset' . $i, 'asset', $assetUrl));
+            $i++;
+        }
 
         $copyleft = '<p>' . $this->copyleft . '</p>';
 
@@ -152,7 +155,6 @@ class Resource implements IPresentable
         $this->body = new Resource\Body($this->body);
     }
 
-
     public function getTitle()
     {
         return $this->title;
@@ -168,5 +170,10 @@ class Resource implements IPresentable
     public function setTeaser($teaser)
     {
         $this->teaser = $teaser;
+    }
+
+    public function addAsset($asset)
+    {
+        $this->assets[] = $asset;
     }
 }
