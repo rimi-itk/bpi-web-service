@@ -17,3 +17,5 @@ Bpi\ApiBundle\Domain\Aggregate\Agency:
       type: string
       unique:
         order: desc
+    deleted:
+        type: boolean

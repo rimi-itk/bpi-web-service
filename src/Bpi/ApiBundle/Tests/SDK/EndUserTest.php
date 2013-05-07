@@ -3,12 +3,17 @@ namespace Bpi\ApiBundle\Tests\SDK;
 
 class EndUserTest extends SDKTestCase
 {
-    const TEST_ENDPOINT_URI = 'http://bpi.dev/app_dev.php/';
+    protected $bpi;
+
+    public function setUp()
+    {
+        parent::setUp();
+        $this->bpi = $this->createBpi();
+    }
 
     public function testNodeList()
     {
-        $bpi = new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
-        $list = $bpi->searchNodes();
+        $list = $this->bpi->searchNodes();
 
         $this->assertTrue((bool)$list->count());
 
@@ -20,24 +25,7 @@ class EndUserTest extends SDKTestCase
 
     public function testPush()
     {
-        $bpi = new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
-        $dt = new \DateTime();
-
-        $node = $bpi->push($data = array(
-            'title' => 'title_' . mt_rand(),
-            'body' => 'body_' . mt_rand(),
-            'teaser' => 'teaser_' . mt_rand(),
-            'type' => 'article',
-            'creation' => $dt->format(\DateTime::W3C),
-            'category' => 'category',
-            'audience' => 'all',
-            'editable' => 1,
-            'authorship' => 1,
-            'agency_id' => '200100', // this value must exists, otherwise it will fail
-            'local_id' =>  mt_rand(),
-            'firstname' => 'firstname' . mt_rand(),
-            'lastname' => 'lastname' . mt_rand(),
-        ));
+        $node = $this->bpi->push($data = $this->createRandomDataForPush());
 
         $properties = $node->getProperties();
         foreach($data as $key => $val)
@@ -57,10 +45,9 @@ class EndUserTest extends SDKTestCase
 
     public function testGetNode()
     {
-        $bpi = new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
         try
         {
-            $bpi->getNode(mt_rand());
+            $this->bpi->getNode(mt_rand());
             $this->fail('ClientError exception expected');
         }
         catch(\Bpi\Sdk\Exception\HTTP\ClientError $e)
@@ -68,20 +55,27 @@ class EndUserTest extends SDKTestCase
             $this->assertTrue(true);
         }
 
-        $list = $bpi->searchNodes(array('amount' => 1));
+        $list = $this->bpi->searchNodes(array('amount' => 1));
         $properties = $list->current()->getProperties();
 
-        $node = $bpi->getNode($properties['id']);
+        $node = $this->bpi->getNode($properties['id']);
         $this->assertEquals($properties, $node->getProperties());
     }
 
     public function testStatistics()
     {
-        $bpi = new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
-        $stats = $bpi->getStatistics('2013-05-01', '2013-05-05');
+        $stats = $this->bpi->getStatistics('2013-05-01', '2013-05-05');
 
         $results = $stats->getProperties();
         $this->assertTrue(isset($results['push']));
         $this->assertTrue(isset($results['syndicate']));
+    }
+
+    public function testDictionaries()
+    {
+        $dict = $this->bpi->getDictionaries();
+
+        $this->assertTrue((bool) count($dict['audience']));
+        $this->assertTrue((bool) count($dict['category']));
     }
 }

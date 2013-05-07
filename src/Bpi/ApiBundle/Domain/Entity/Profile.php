@@ -116,4 +116,22 @@ class Profile implements IPresentable
             ));
         }
     }
+
+    public function getAudience()
+    {
+        return $this->audience->name();
+    }
+    public function setAudience($audience)
+    {
+        $this->audience = new Audience($audience);
+    }
+    public function getCategory()
+    {
+        return $this->category->name();
+    }
+    public function setCategory($category)
+    {
+        $this->category = new Category($category);
+    }
+
 }

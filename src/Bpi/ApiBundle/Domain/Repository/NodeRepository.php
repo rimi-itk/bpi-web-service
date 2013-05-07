@@ -6,16 +6,6 @@ use Bpi\ApiBundle\Domain\Entity\NodeQuery;
 
 class NodeRepository extends DocumentRepository
 {
-    public function findLatest()
-    {
-        return $this->dm->createQueryBuilder($this->getClassName())
-            ->sort('ctime', 'desc')
-            ->limit(20)
-            ->getQuery()
-            ->execute()
-        ;
-    }
-
     public function findByNodesQuery(NodeQuery $query)
     {
         return $query->executeByDoctrineQuery(
@@ -25,7 +15,7 @@ class NodeRepository extends DocumentRepository
 
     public function getNode($id)
     {
-      return $this->findOneBy(array('id'=>$id, 'deleted' => false));
+        return $this->findOneBy(array('id' => $id, 'deleted' => false));
     }
 
     public function delete($id, $agencyId)
@@ -33,13 +23,31 @@ class NodeRepository extends DocumentRepository
       // @todo Check if node was not deleted before.
       $node = $this->find($id);
 
-      if ($node->getAgencyId() == $agencyId) {
-        $node->setDeleted();
-        $this->dm->persist($node);
-        $this->dm->flush($node);
-        return $node;
+      if ($node->getAgencyId() == $agencyId)
+      {
+          $node->setDeleted();
+          $this->dm->persist($node);
+          $this->dm->flush($node);
+          return $node;
       }
 
       return null;
+    }
+
+    /**
+     * Show all nodes filtered by "deleted" value.
+     *
+     * @param bool $deleted
+     * @return array
+     */
+    public function listAll($deleted = false)
+    {
+        return $this->findBy(array('deleted' => $deleted));
+    }
+
+    public function save($node)
+    {
+        $this->dm->persist($node);
+        $this->dm->flush($node);
     }
 }

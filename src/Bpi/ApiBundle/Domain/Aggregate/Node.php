@@ -145,6 +145,17 @@ class Node implements IPresentable
         $this->resource->transform($document);
     }
 
+    /**
+     * Check ownership
+     *
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $agency
+     * @return boolean
+     */
+    public function isOwner(Agency $agency)
+    {
+        return $this->author->getAgencyId()->equals($agency->getAgencyId());
+    }
+
     public function getAuthor() {
       return $this->author;
     }
@@ -162,6 +173,40 @@ class Node implements IPresentable
     public function setDeleted($deleted = true)
     {
       $this->deleted = $deleted;
-      return $this;
     }
+
+    /// Setters and getters for forms
+    public function getTitle()
+    {
+        return $this->resource->getTitle();
+    }
+    public function setTitle($title)
+    {
+        $this->resource->setTitle($title);
+    }
+    public function getAudience()
+    {
+        return $this->profile->getAudience();
+    }
+    public function setAudience($audience)
+    {
+        $this->profile->setAudience($audience);
+    }
+    public function getCategory()
+    {
+        return $this->profile->getCategory();
+    }
+    public function setCategory($category)
+    {
+        $this->profile->setCategory($category);
+    }
+    public function getTeaser()
+    {
+        return $this->resource->getTeaser();
+    }
+    public function setTeaser($teaser)
+    {
+        $this->resource->setTeaser($teaser);
+    }
+
 }

@@ -22,8 +22,84 @@ class SDKTestCase extends WebTestCase
         parent::__construct();
     }
 
+    public function setUp()
+    {
+        $this->reloadFixtures();
+        parent::setUp();
+    }
+
+    protected function reloadFixtures()
+    {
+        $this->console = new \Symfony\Bundle\FrameworkBundle\Console\Application($this->createKernel());
+        $this->console->setAutoExit(false);
+        $this->load_fixtures = new \Symfony\Component\Console\Input\ArrayInput(array(
+            "--env" => "test",
+            "--quiet" => true,
+            "--fixtures" => 'src/Bpi/ApiBundle/Tests/DoctrineFixtures',
+            'command' => 'doctrine:mongodb:fixtures:load'
+        ));
+        $this->console->run($this->load_fixtures);
+    }
+
     protected function createDocument(\Goutte\Client $client)
     {
         return new Document($client, new Authorization($this->auth_agency, $this->auth_pk, $this->auth_secret));
+    }
+
+    /**
+     *
+     * @return \Bpi
+     */
+    public function createBpi()
+    {
+        return new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
+    }
+
+    /**
+     *
+     * @return type
+     */
+    public function createRandomDataForPush()
+    {
+        $dt = new \DateTime();
+        return array(
+            'title' => 'title_' . mt_rand(),
+            'body' => '<span title="zoo">body</span>_' . mt_rand(),
+            'teaser' => 'teaser_' . mt_rand(),
+            'type' => 'article',
+            'creation' => $dt->format(\DateTime::W3C),
+            'category' => 'category',
+            'audience' => 'all',
+            'editable' => 1,
+            'authorship' => 1,
+            // this value must exists, otherwise it will fail
+            'agency_id' => $this->auth_agency,
+            'local_id' =>  mt_rand(),
+            'firstname' => 'firstname' . mt_rand(),
+            'lastname' => 'lastname' . mt_rand(),
+        );
+    }
+
+    public function getPredefinedLocalNode($id)
+    {
+        $dt = new \DateTime();
+        $nodes = array('alpha' => array(
+            'title' => 'title_alpha',
+            'body' => '<span title="zoo">body</span> alpha',
+            'teaser' => 'teaser_alpha',
+            'type' => 'article',
+            'creation' => $dt->format(\DateTime::W3C),
+            'category' => 'category',
+            'audience' => 'all',
+            'editable' => 1,
+            'authorship' => 1,
+            // this value must exists, otherwise it will fail
+            'agency_id' => $this->auth_agency,
+            'local_id' =>  '12345',
+            'firstname' => 'firstname',
+            'lastname' => 'lastname',
+        ));
+
+        return $nodes[$id];
     }
 }

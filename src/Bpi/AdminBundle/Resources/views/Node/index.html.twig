@@ -1,0 +1,18 @@
+{% extends "BpiAdminBundle::layout.html.twig" %}
+
+{% block content %}
+{% include 'BpiAdminBundle:Node:nav.html.twig' %}
+
+<table>
+{% for item in nodes %}
+	<tr>
+	<td>{{ item.title }}</td>
+	<td>
+	    <a href="{{ url('bpi_admin_node_details',{'id':item.id}) }}">Details</a>
+	    <a href="{{ url('bpi_admin_node_edit',{'id':item.id}) }}">Edit</a>
+		<a href="{{ url('bpi_admin_node_delete',{'id':item.id}) }}">Delete</a>
+	</td>
+	</tr>
+{% endfor %}
+</table>
+{% endblock %}

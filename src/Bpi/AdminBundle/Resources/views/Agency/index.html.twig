@@ -1,0 +1,19 @@
+{% extends "BpiAdminBundle::layout.html.twig" %}
+
+{% block content %}
+{% include 'BpiAdminBundle:Agency:nav.html.twig' %}
+
+<table>
+{% for item in agencies %}
+	<tr>
+	<td>{{ item.publicId }}</td>
+	<td>{{ item.name }}</td>
+	<td>
+	    <a href="{{ url('bpi_admin_agency_details',{'id':item.id}) }}">Details</a>
+	    <a href="{{ url('bpi_admin_agency_edit',{'id':item.id}) }}">Edit</a>
+		<a href="{{ url('bpi_admin_agency_delete',{'id':item.id}) }}">Delete</a>
+	</td>
+	</tr>
+{% endfor %}
+</table>
+{% endblock %}

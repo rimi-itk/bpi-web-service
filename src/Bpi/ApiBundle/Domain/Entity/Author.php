@@ -52,7 +52,7 @@ class Author implements \Bpi\ApiBundle\Transform\IPresentable
      */
     public function getAgencyId()
     {
-        return $this->agency_id;
+        return is_object($this->agency_id) ? $this->agency_id : new AgencyId($this->agency_id);
     }
 
     /**

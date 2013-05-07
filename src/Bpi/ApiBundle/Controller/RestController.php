@@ -13,6 +13,7 @@ use Bpi\ApiBundle\Transform\Extractor;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\ApiBundle\Domain\ValueObject\NodeId;
 use Bpi\RestMediaTypeBundle\Property\Entity;
 use Bpi\RestMediaTypeBundle\DataType\String;
 
@@ -95,6 +96,27 @@ class RestController extends FOSRestController
             'Template for pushing node content'
         ));
 
+        $hypermedia->addQuery($document->createQuery(
+            'statistics',
+            $this->get('router')->generate('statistics', array(), true),
+            array('dateFrom', 'dateTo'),
+            'Statistics for date range')
+        );
+
+        $hypermedia->addQuery($document->createQuery(
+            'syndicated',
+            $this->get('router')->generate('node_syndicated', array(), true),
+            array('id'),
+            'Notify service about node syndication'
+        ));
+
+        $hypermedia->addQuery($document->createQuery(
+            'delete',
+            $this->get('router')->generate('node_delete', array(), true),
+            array('id'),
+            'Mark node as deleted'
+        ));
+
         $template->createField('title');
         $template->createField('body');
         $template->createField('teaser');
@@ -117,27 +139,6 @@ class RestController extends FOSRestController
             'dictionary',
             $this->get('router')->generate('profile_dictionary', array(), true),
             'Profile items dictionary'
-        ));
-
-        $hypermedia->addQuery($document->createQuery(
-            'statistics',
-            $this->get('router')->generate('statistics', array(), true),
-            array('dateFrom', 'dateTo'),
-            'Statistics for date range')
-        );
-
-        $hypermedia->addQuery($document->createQuery(
-            'syndicated',
-            $this->get('router')->generate('node_syndicated', array(), true),
-            array('id'),
-            'Notify service about node syndication'
-        ));
-
-        $hypermedia->addQuery($document->createQuery(
-            'delete',
-            $this->get('router')->generate('node_delete', array(), true),
-            array('id'),
-            'Mark node as deleted'
         ));
 
         return $document;
@@ -192,6 +193,11 @@ class RestController extends FOSRestController
 
         // Collection description
         $collection = $document->createEntity('collection');
+        $collection->addProperty($document->createProperty(
+            'total',
+            'integer',
+            $node_query->total
+        ));
         $document->prependEntity($collection);
         $hypermedia = $document->createHypermediaSection();
         $collection->setHypermedia($hypermedia);
@@ -241,34 +247,14 @@ class RestController extends FOSRestController
 
      /**
       * Display available options
-      * 1. HTTP verbs
-      * 2. Expected media type entities in input/output
       *
-      * @Rest\Options("/node/list")
+      * @Rest\Options("/node/collection")
       */
     public function nodeListOptionsAction()
     {
         $options = array(
               'GET' => array(
                     'action' => 'List of nodes',
-                    'output' => array(
-                          'entities' => array(
-                                'node'
-                          )
-                    )
-              ),
-              'POST' => array(
-                    'action' => 'Node list query',
-                    'input' => array(
-                          'entities' => array(
-                                'nodes_query'
-                          )
-                    ),
-                    'output' => array(
-                          'entities' => array(
-                                'node'
-                          )
-                    )
               ),
               'OPTIONS' => array('action' => 'List available options'),
         );
@@ -392,26 +378,6 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Syndicate new revision of node
-     *
-     * @Rest\Post("/node/item/{id}")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="201")
-     */
-    public function postNodeRevisionAction($id)
-    {
-        $extractor = new Extractor($this->getDocument());
-
-        $revision = $this->get('domain.push_service')->pushRevision(
-            new \Bpi\ApiBundle\Domain\ValueObject\NodeId($id),
-            $extractor->extract('author'),
-            $extractor->extract('resource'),
-            $extractor->extract('params')
-        );
-
-        return $this->get("bpi.presentation.transformer")->transform($revision);
-    }
-
-    /**
      * Create form to make validation
      *
      * @param array $data
@@ -519,14 +485,31 @@ class RestController extends FOSRestController
             $this->getRequest()->get('editable')
         ));
 
-        $node = $this->get('domain.push_service')->push(
-            $author,
-            $resource,
-            $profile,
-            $params
-        );
+        try
+        {
+            // Check for BPI ID
+            if ($id = $this->getRequest()->request->get('bpi_id', false))
+            {
+                if (!$this->getRepository('BpiApiBundle:Aggregate\Node')->find($id))
+                {
+                    throw new HttpException(422, $e->getMessage(), $e);
+                }
 
-        return $this->get("bpi.presentation.transformer")->transform($node);
+                $node = $this->get('domain.push_service')
+                    ->pushRevision(new NodeId($id), $author, $resource, $params);
+
+                return $this->get("bpi.presentation.transformer")->transform($node);
+            }
+
+            $node = $this->get('domain.push_service')
+                ->push($author, $resource, $profile, $params);
+
+            return $this->get("bpi.presentation.transformer")->transform($node);
+        }
+        catch(\LogicException $e)
+        {
+            throw new HttpException(422, $e->getMessage(), $e);
+        }
     }
 
      /**
@@ -764,13 +747,20 @@ class RestController extends FOSRestController
     public function nodeSyndicatedAction()
     {
       $id = $this->getRequest()->get('id');
-      $agencyId = $this->getUser()->getAgencyId()->id();
+      $agency = $this->getUser();
 
       $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
       if (!$node)
+      {
           throw $this->createNotFoundException();
+      }
 
-      $log = new History($node, $agencyId, new \DateTime(), 'syndicate');
+      if ($node->isOwner($agency))
+      {
+          throw new HttpException(406, 'Not Acceptable: Trying to syndicate content by owner who already did that');
+      }
+
+      $log = new History($node, $agency->getAgencyId()->id(), new \DateTime(), 'syndicate');
 
       $dm = $this->get('doctrine.odm.mongodb.document_manager');
       $dm->persist($log);
