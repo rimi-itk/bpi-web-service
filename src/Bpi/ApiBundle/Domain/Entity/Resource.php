@@ -26,6 +26,8 @@ class Resource implements IPresentable
 
     protected $copyleft;
 
+    protected $hash;
+
     public function __construct(
         $title,
         $body,
@@ -40,6 +42,7 @@ class Resource implements IPresentable
         $this->teaser = $teaser;
         $this->copyleft = $copyleft;
         $this->ctime = $ctime;
+        $this->regenerateHash();
         $this->allocateFiles($files);
     }
 
@@ -152,6 +155,26 @@ class Resource implements IPresentable
         $this->body = new Resource\Body($this->body);
     }
 
+    /**
+     * Generate hash of the content
+     *
+     * @return string
+     */
+    protected function regenerateHash()
+    {
+        $this->hash = md5(strip_tags($this->title . $this->teaser . $this->body));
+    }
+
+    /**
+     * Try to find similar resources
+     *
+     * @param \Bpi\ApiBundle\Domain\Repository\ResourceRepository $repository
+     * @return array
+     */
+    public function findSimilar(\Doctrine\ODM\MongoDB\DocumentRepository $repository)
+    {
+        return $repository->findOneBy(array('resource.hash' => $this->hash));
+    }
 
     public function getTitle()
     {

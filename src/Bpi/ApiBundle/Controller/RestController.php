@@ -504,12 +504,15 @@ class RestController extends FOSRestController
             $this->getRequest()->get('editable')
         ));
 
-        $node = $this->get('domain.push_service')->push(
-            $author,
-            $resource,
-            $profile,
-            $params
-        );
+        try
+        {
+            $node = $this->get('domain.push_service')
+                ->push($author, $resource, $profile, $params);
+        }
+        catch(\LogicException $e)
+        {
+            throw new HttpException(422, $e->getMessage(), $e);
+        }
 
         return $this->get("bpi.presentation.transformer")->transform($node);
     }

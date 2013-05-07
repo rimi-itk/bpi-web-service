@@ -11,6 +11,8 @@ Bpi\ApiBundle\Domain\Entity\Resource:
       type: date
     type:
       type: string
+    hash:
+      type: string
     copyleft:
       embedded: true
       type: one

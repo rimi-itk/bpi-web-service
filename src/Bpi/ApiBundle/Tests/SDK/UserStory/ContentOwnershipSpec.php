@@ -13,10 +13,22 @@ class ContentOwnershipSpec extends \PHPUnit_Extensions_Story_TestCase
     public function syndicateByOwner()
     {
         $this->given('Clean install')
-            ->when('User pushes new node', $node_id = 100)
-            ->and('User gets a node', $node_id)
-            ->and('User syndicates a node', $node_id)
+            ->when('User pushes a node', 'alpha')
+            ->and('User gets a pushed node', 'alpha')
+            ->and('User syndicates a pushed node', 'alpha')
             ->then('WS should exit with error', 406)
+        ;
+    }
+
+    /**
+     * @scenario
+     */
+    public function pushSameNodeManyTimesByOwner()
+    {
+        $this->given('Clean install')
+            ->when('User pushes a node', 'alpha')
+            ->and('User pushes a node', 'alpha')
+            ->then('WS should exit with error', 422)
         ;
     }
 
@@ -39,28 +51,38 @@ class ContentOwnershipSpec extends \PHPUnit_Extensions_Story_TestCase
     public function runWhen(&$world, $action, $arguments)
     {
         switch($action) {
-            case 'User pushes new node': {
-                $node = $world['client']->push($world['ct']->createDataForPush());
-                $data = $node->getProperties();
-                $world['nodes'][$arguments[0]] = $data['id'];
-            }
-            break;
-
-            case 'User gets a node': {
-                $node_id = $world['nodes'][$arguments[0]];
-                $world['client']->getNode($node_id);
-            }
-            break;
-
-            case 'User syndicates a node': {
+            case 'User pushes a node': {
                 try
                 {
-                    $node_id = $world['nodes'][$arguments[0]];
-                    $world['client']->syndicateNode($node_id);
+                    $node = $world['client']->push($world['ct']->getPredefinedLocalNode($arguments[0]));
+                    $world['pushes'][$arguments[0]][] = $node;
+                    $world['status'] = $world['client']->_getCurrentDocument()->status();
                 }
-                catch (\Bpi\Sdk\Exception\HTTP\ClientError $e)
+                catch (\Bpi\Sdk\Exception\SDKException $e)
                 {
-                    $world['response_code'] = $e->getCode();
+                    $world['status'] = $world['client']->_getCurrentDocument()->status();
+                }
+            }
+            break;
+
+            case 'User gets a pushed node': {
+                $node = current($world['pushes'][$arguments[0]]);
+                $data = $node->getProperties();
+                $world['client']->getNode($data['id']);
+                $world['status'] = $world['client']->_getCurrentDocument()->status();
+            }
+            break;
+
+            case 'User syndicates a pushed node': {
+                try
+                {
+                    $node = current($world['pushes'][$arguments[0]]);
+                    $data = $node->getProperties();
+                    $world['client']->syndicateNode($data['id']);
+                }
+                catch (\Bpi\Sdk\Exception\SDKException $e)
+                {
+                    $world['status'] = $world['client']->_getCurrentDocument()->status();
                 }
             }
             break;
@@ -75,7 +97,7 @@ class ContentOwnershipSpec extends \PHPUnit_Extensions_Story_TestCase
     {
         switch($action) {
             case 'WS should exit with error': {
-                $this->assertEquals($arguments[0], $world['response_code']);
+                $this->assertEquals($arguments[0], $world['status']->getCode());
             }
             break;
 

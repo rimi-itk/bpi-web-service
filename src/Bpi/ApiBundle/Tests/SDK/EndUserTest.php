@@ -25,7 +25,7 @@ class EndUserTest extends SDKTestCase
 
     public function testPush()
     {
-        $node = $this->bpi->push($data = $this->createDataForPush());
+        $node = $this->bpi->push($data = $this->createRandomDataForPush());
 
         $properties = $node->getProperties();
         foreach($data as $key => $val)

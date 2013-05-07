@@ -59,7 +59,7 @@ class SDKTestCase extends WebTestCase
      *
      * @return type
      */
-    public function createDataForPush()
+    public function createRandomDataForPush()
     {
         $dt = new \DateTime();
         return array(
@@ -72,10 +72,34 @@ class SDKTestCase extends WebTestCase
             'audience' => 'all',
             'editable' => 1,
             'authorship' => 1,
-            'agency_id' => '200100', // this value must exists, otherwise it will fail
+            // this value must exists, otherwise it will fail
+            'agency_id' => $this->auth_agency,
             'local_id' =>  mt_rand(),
             'firstname' => 'firstname' . mt_rand(),
             'lastname' => 'lastname' . mt_rand(),
         );
+    }
+
+    public function getPredefinedLocalNode($id)
+    {
+        $dt = new \DateTime();
+        $nodes = array('alpha' => array(
+            'title' => 'title_alpha',
+            'body' => '<span title="zoo">body</span> alpha',
+            'teaser' => 'teaser_alpha',
+            'type' => 'article',
+            'creation' => $dt->format(\DateTime::W3C),
+            'category' => 'category',
+            'audience' => 'all',
+            'editable' => 1,
+            'authorship' => 1,
+            // this value must exists, otherwise it will fail
+            'agency_id' => $this->auth_agency,
+            'local_id' =>  '12345',
+            'firstname' => 'firstname',
+            'lastname' => 'lastname',
+        ));
+
+        return $nodes[$id];
     }
 }
