@@ -1,0 +1,20 @@
+{% extends "BpiAdminBundle::layout.html.twig" %}
+
+{% block content %}
+{% include 'BpiAdminBundle:Node:nav.html.twig' %}
+
+<table>
+	<tr>
+	<td>Tile</td>
+	<td>{{ node.title }}</td>
+	</tr>
+	<tr>
+	<td>Teaser</td>
+	<td>{{ node.teaser }}</td>
+	</tr>
+	<tr>
+	<td>Deleted</td>
+	<td>{% if node.deleted %}TRUE{% else %}FALSE{% endif %}</td>
+	</tr>
+</table>
+{% endblock %}

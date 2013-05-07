@@ -20,17 +20,34 @@ class NodeRepository extends DocumentRepository
 
     public function delete($id, $agencyId)
     {
-        // @todo Check if node was not deleted before.
-        $node = $this->find($id);
+      // @todo Check if node was not deleted before.
+      $node = $this->find($id);
 
-        if ($node->getAgencyId() == $agencyId)
-        {
-            $node->setDeleted();
-            $this->dm->persist($node);
-            $this->dm->flush($node);
-            return $node;
-        }
+      if ($node->getAgencyId() == $agencyId)
+      {
+          $node->setDeleted();
+          $this->dm->persist($node);
+          $this->dm->flush($node);
+          return $node;
+      }
 
-        return null;
+      return null;
+    }
+
+    /**
+     * Show all nodes filtered by "deleted" value.
+     *
+     * @param bool $deleted
+     * @return array
+     */
+    public function listAll($deleted = false)
+    {
+        return $this->findBy(array('deleted' => $deleted));
+    }
+
+    public function save($node)
+    {
+        $this->dm->persist($node);
+        $this->dm->flush($node);
     }
 }
