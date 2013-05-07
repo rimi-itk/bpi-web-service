@@ -87,7 +87,18 @@ class NodeQuery
     protected function applyFilters(QueryBuilder $query)
     {
         foreach($this->filters as $field => $value)
+        {
+            if (in_array($field, array('author.firstname', 'author.lastname')))
+            {
+                $value = str_ireplace(' ', '|', $value);
+                $query->addOr($query->expr()->field('author.firstname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
+                $query->addOr($query->expr()->field('author.lastname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
+
+                return;
+            }
+
             $query->field($field)->equals($this->matchAny($value));
+        }
     }
 
     public function reduce($strategy)
