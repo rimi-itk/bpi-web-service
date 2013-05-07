@@ -504,12 +504,15 @@ class RestController extends FOSRestController
             $this->getRequest()->get('editable')
         ));
 
-        $node = $this->get('domain.push_service')->push(
-            $author,
-            $resource,
-            $profile,
-            $params
-        );
+        try
+        {
+            $node = $this->get('domain.push_service')
+                ->push($author, $resource, $profile, $params);
+        }
+        catch(\LogicException $e)
+        {
+            throw new HttpException(422, $e->getMessage(), $e);
+        }
 
         return $this->get("bpi.presentation.transformer")->transform($node);
     }
@@ -749,13 +752,20 @@ class RestController extends FOSRestController
     public function nodeSyndicatedAction()
     {
       $id = $this->getRequest()->get('id');
-      $agencyId = $this->getUser()->getAgencyId()->id();
+      $agency = $this->getUser();
 
       $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
       if (!$node)
+      {
           throw $this->createNotFoundException();
+      }
 
-      $log = new History($node, $agencyId, new \DateTime(), 'syndicate');
+      if ($node->isOwner($agency))
+      {
+          throw new HttpException(406, 'Not Acceptable: Trying to syndicate content by owner who already did that');
+      }
+
+      $log = new History($node, $agency->getAgencyId()->id(), new \DateTime(), 'syndicate');
 
       $dm = $this->get('doctrine.odm.mongodb.document_manager');
       $dm->persist($log);

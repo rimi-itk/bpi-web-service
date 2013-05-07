@@ -49,6 +49,7 @@ class PushService
      * @param  Resource                               $resource
      * @param  \Bpi\ApiBundle\Domain\Entity\Profile   $profile
      * @param  \Bpi\ApiBundle\Domain\Aggregate\Params $params
+     * @throws \LogicException
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
     public function push(Author $author, ResourceBuilder $resource_builder, Profile $profile, Params $params)
@@ -60,6 +61,11 @@ class PushService
 
         $this->assignCopyleft($author, $resource_builder, $authorship);
         $resource = $resource_builder->build();
+
+        // Find dublicates
+        $dublicates = $resource->findSimilar($this->manager->getRepository('BpiApiBundle:Aggregate\Node'));
+        if (count($dublicates))
+            throw new \LogicException('Found similar resource');
 
         // copy assets from memory into storage
         $transaction = $resource->copyAssets($this->fs_map->get('assets'));
