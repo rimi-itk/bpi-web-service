@@ -13,6 +13,7 @@ use Bpi\ApiBundle\Transform\Extractor;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\ApiBundle\Domain\ValueObject\NodeId;
 use Bpi\RestMediaTypeBundle\Property\Entity;
 use Bpi\RestMediaTypeBundle\DataType\String;
 
@@ -377,26 +378,6 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Syndicate new revision of node
-     *
-     * @Rest\Post("/node/item/{id}")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="201")
-     */
-    public function postNodeRevisionAction($id)
-    {
-        $extractor = new Extractor($this->getDocument());
-
-        $revision = $this->get('domain.push_service')->pushRevision(
-            new \Bpi\ApiBundle\Domain\ValueObject\NodeId($id),
-            $extractor->extract('author'),
-            $extractor->extract('resource'),
-            $extractor->extract('params')
-        );
-
-        return $this->get("bpi.presentation.transformer")->transform($revision);
-    }
-
-    /**
      * Create form to make validation
      *
      * @param array $data
@@ -506,15 +487,29 @@ class RestController extends FOSRestController
 
         try
         {
+            // Check for BPI ID
+            if ($id = $this->getRequest()->request->get('bpi_id', false))
+            {
+                if (!$this->getRepository('BpiApiBundle:Aggregate\Node')->find($id))
+                {
+                    throw new HttpException(422, $e->getMessage(), $e);
+                }
+
+                $node = $this->get('domain.push_service')
+                    ->pushRevision(new NodeId($id), $author, $resource, $params);
+
+                return $this->get("bpi.presentation.transformer")->transform($node);
+            }
+
             $node = $this->get('domain.push_service')
                 ->push($author, $resource, $profile, $params);
+
+            return $this->get("bpi.presentation.transformer")->transform($node);
         }
         catch(\LogicException $e)
         {
             throw new HttpException(422, $e->getMessage(), $e);
         }
-
-        return $this->get("bpi.presentation.transformer")->transform($node);
     }
 
      /**

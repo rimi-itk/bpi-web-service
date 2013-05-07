@@ -5,7 +5,7 @@ require_once 'PHPUnit/Extensions/Story/TestCase.php';
 
 use Bpi\ApiBundle\Tests\SDK\SDKTestCase;
 
-class ContentOwnershipSpec extends \PHPUnit_Extensions_Story_TestCase
+class ContentOwnershipSpecTest extends \PHPUnit_Extensions_Story_TestCase
 {
     /**
      * @scenario
@@ -54,8 +54,9 @@ class ContentOwnershipSpec extends \PHPUnit_Extensions_Story_TestCase
             case 'User pushes a node': {
                 try
                 {
-                    $node = $world['client']->push($world['ct']->getPredefinedLocalNode($arguments[0]));
-                    $world['pushes'][$arguments[0]][] = $node;
+                    $local_node = $world['ct']->getPredefinedLocalNode($arguments[0]);
+                    $node = $world['client']->push($local_node);
+                    $world['pushes'] = $node;
                     $world['status'] = $world['client']->_getCurrentDocument()->status();
                 }
                 catch (\Bpi\Sdk\Exception\SDKException $e)
@@ -66,8 +67,7 @@ class ContentOwnershipSpec extends \PHPUnit_Extensions_Story_TestCase
             break;
 
             case 'User gets a pushed node': {
-                $node = current($world['pushes'][$arguments[0]]);
-                $data = $node->getProperties();
+                $data = $world['pushes']->getProperties();
                 $world['client']->getNode($data['id']);
                 $world['status'] = $world['client']->_getCurrentDocument()->status();
             }
@@ -76,8 +76,7 @@ class ContentOwnershipSpec extends \PHPUnit_Extensions_Story_TestCase
             case 'User syndicates a pushed node': {
                 try
                 {
-                    $node = current($world['pushes'][$arguments[0]]);
-                    $data = $node->getProperties();
+                    $data = $world['pushes']->getProperties();
                     $world['client']->syndicateNode($data['id']);
                 }
                 catch (\Bpi\Sdk\Exception\SDKException $e)
