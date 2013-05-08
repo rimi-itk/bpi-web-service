@@ -26,6 +26,9 @@ class Resource implements IPresentable
 
     protected $copyleft;
 
+    protected $router;
+    protected $filesystem;
+
     /**
      *
      * @param string $title
@@ -52,10 +55,13 @@ class Resource implements IPresentable
     {
         $this->title = $title;
         $this->body = new Resource\Body($body, $filesystem, $router);
+        $this->body->rebuildInlineAssets();
         $this->teaser = $teaser;
         $this->copyleft = $copyleft;
         $this->ctime = $ctime;
-        $this->assets = $assets;
+        $this->assets = array_merge($assets, $this->body->getAssets());
+        $this->filesystem = $filesystem;
+        $this->router = $router;
     }
 
     /**
@@ -152,7 +158,7 @@ class Resource implements IPresentable
      */
     public function wakeup()
     {
-        $this->body = new Resource\Body($this->body);
+        $this->body = new Resource\Body($this->body, $this->filesystem, $this->router);
     }
 
     public function getTitle()

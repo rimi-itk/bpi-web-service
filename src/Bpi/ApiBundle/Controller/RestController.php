@@ -11,11 +11,7 @@ use Symfony\Component\Validator\Constraints;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Extractor;
 use Bpi\ApiBundle\Domain\Entity\History;
-use Bpi\ApiBundle\Domain\Aggregate\Agency;
-use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
-use Bpi\RestMediaTypeBundle\Property\Entity;
-use Bpi\RestMediaTypeBundle\DataType\String;
-use Bpi\ApiBundle\Domain\Entity\Asset;
+
 
 /**
  * Main entry point for REST requests
@@ -812,5 +808,16 @@ class RestController extends FOSRestController
       }
 
       return new Response('', 200);
+    }
+
+    /**
+     * Get static images
+     *
+     * @Rest\Get("/images/{file}.{ext}")
+     * @Rest\View(statusCode="200")
+     */
+    public function staticImagesAction($file, $ext)
+    {
+        return new Response(file_get_contents(__DIR__.'/../Resources/public/images/'.$file. '.' . $ext), 200);
     }
 }

@@ -1,9 +1,6 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Entity\Resource;
 
-use Bpi\ApiBundle\Domain\Entity\Asset;
-use Gaufrette\File;
-
 class Body
 {
     const BASE_URL_STUB = '__embedded_asset_base_url__';
@@ -17,6 +14,7 @@ class Body
 
     protected $filesystem;
     protected $router;
+    protected $assets = array();
 
     /**
      *
@@ -50,9 +48,8 @@ class Body
             throw new \RuntimeException('Unable to import content into DOMDocument');
         }
 
-        $this->filesystem = $filesystem;
         $this->router = $router;
-        $this->rebuildInlineAssets();
+        $this->filesystem = $filesystem;
     }
 
     /**
@@ -82,13 +79,18 @@ class Body
         return str_ireplace($replaces, '', $this->dom->C14N());
     }
 
-    protected function rebuildInlineAssets()
+    public function rebuildInlineAssets()
     {
         // Rebuild images
         $images = $this->dom->getElementsByTagName('img');
+        $url = $this->router->generate('bpi_api_images', array('file'=> 'image.png'), true);
         foreach ($images as $img) {
             $src = $img->getAttributeNode('src')->value;
             $ext = pathinfo($src, PATHINFO_EXTENSION);
+
+            if ($src == $url) {
+                continue;
+            }
 
             // Download file and save to db.
             $filename = md5($src.microtime());
@@ -97,8 +99,14 @@ class Body
             $file->setContent(file_get_contents($src));
 
             // Build URL for new image and replace img src.
-            $url = $this->router->generate('get_asset', array('filename'=>$file->getKey(), 'extension' => $ext), true);
+            $this->assets[] = array('file'=>$file->getKey(), 'type'=>'embedded', 'extension'=>$ext);
+
             $img->setAttribute('src', $url);
         }
+    }
+
+    public function getAssets()
+    {
+        return $this->assets;
     }
 }
