@@ -488,11 +488,11 @@ class RestController extends FOSRestController
         try
         {
             // Check for BPI ID
-            if ($id = $this->getRequest()->request->get('bpi_id', false))
+            if ($id = $this->getRequest()->get('bpi_id', false))
             {
                 if (!$this->getRepository('BpiApiBundle:Aggregate\Node')->find($id))
                 {
-                    throw new HttpException(422, $e->getMessage(), $e);
+                    throw new HttpException(422, sprintf('Such BPI ID [%s] not found', $id), $e);
                 }
 
                 $node = $this->get('domain.push_service')
