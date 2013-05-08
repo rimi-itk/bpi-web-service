@@ -86,7 +86,7 @@ class Body
         $url = $this->router->generate('index', array(), true) . 'images/image.png';
         foreach ($images as $img) {
             $src = $img->getAttributeNode('src')->value;
-            $ext = pathinfo($src, PATHINFO_EXTENSION);
+            $ext = pathinfo(parse_url($src, PHP_URL_PATH), PATHINFO_EXTENSION);
 
             if ($src == $url) {
                 continue;
