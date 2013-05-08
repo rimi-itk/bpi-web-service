@@ -49,17 +49,20 @@ class NodeQuery
 
     public function filter($field, $value)
     {
+        if (!$value)
+            return;
+
         $this->filters[$this->map($field)] = $value;
     }
 
     public function offset($value)
     {
-        $this->offset = $value;
+        $this->offset = (int) $value;
     }
 
     public function amount($value)
     {
-        $this->amount = $value;
+        $this->amount = (int) $value;
     }
 
     public function sort($field, $order)
@@ -80,8 +83,9 @@ class NodeQuery
         $query
           ->addOr($query->expr()->field($this->map('title'))->equals($this->matchAny($this->search)))
           ->addOr($query->expr()->field($this->map('body'))->equals($this->matchAny($this->search)))
-          ->addOr($query->expr()->field($this->map('teaser'))->equals($this->matchAny($this->search))
-        );
+          ->addOr($query->expr()->field($this->map('teaser'))->equals($this->matchAny($this->search)))
+          ->addOr($query->expr()->field($this->map('category'))->equals($this->matchAny($this->search)))
+        ;
     }
 
     protected function applyFilters(QueryBuilder $query)
