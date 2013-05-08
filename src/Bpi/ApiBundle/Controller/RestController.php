@@ -729,8 +729,16 @@ class RestController extends FOSRestController
             'Content-Type' => $mime
         );
 
-        $fs = $this->get('domain.push_service')->getFilesystem();
-        $file = $fs->get($filename);
+        try
+        {
+            $fs = $this->get('domain.push_service')->getFilesystem();
+            $file = $fs->get($filename);
+        }
+        catch(\Gaufrette\Exception\FileNotFound $e)
+        {
+            throw $this->createNotFoundException();
+        }
+
         return new Response($file->getContent(), 200, $headers);
     }
 
