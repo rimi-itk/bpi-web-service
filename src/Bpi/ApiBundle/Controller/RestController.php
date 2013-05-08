@@ -500,7 +500,7 @@ class RestController extends FOSRestController
         $images = $request->get('images');
         if (!empty($images)) {
             foreach ($images as $image) {
-                $ext = pathinfo($image, PATHINFO_EXTENSION);
+                $ext = pathinfo(parse_url($image, PHP_URL_PATH), PATHINFO_EXTENSION);
                 $filename = md5($image.microtime()); // . '.' . $ext;
                 $file = $filesystem->createFile($filename);
                 // @todo Download files in a proper way.
@@ -708,9 +708,29 @@ class RestController extends FOSRestController
      */
     public function getAssetAction($filename, $extension)
     {
+        $extension = strtolower($extension);
+
+        $file = $filename . '.' . $extension;
+        $mime = 'application/octet-stream';
+
+        switch ($extension) {
+            case 'jpg':
+            case 'jpeg':
+                $mime = 'image/jpeg';
+                break;
+            case 'gif':
+                $mime = 'image/gif';
+                break;
+            case 'png':
+                $mime = 'image/png';
+        }
+        $headers = array(
+            'Content-Type' => $mime
+        );
+
         $fs = $this->get('domain.push_service')->getFilesystem();
         $file = $fs->get($filename);
-        return new Response($file->getContent(), 200);
+        return new Response($file->getContent(), 200, $headers);
     }
 
     /**
@@ -839,6 +859,11 @@ class RestController extends FOSRestController
      */
     public function staticImagesAction($file, $ext)
     {
-        return new Response(file_get_contents(__DIR__.'/../Resources/public/images/'.$file. '.' . $ext), 200);
+        $file = __DIR__.'/../Resources/public/images/'.$file. '.' . $ext;
+        $mime = mime_content_type($file);
+        $headers = array(
+            'Content-Type' => $mime
+        );
+        return new Response(file_get_contents($file), 200, $headers);
     }
 }
