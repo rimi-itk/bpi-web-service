@@ -13,7 +13,7 @@
                         {% set route = app.request.attributes.get('_route') %}
                         <ul class="nav">
                         {% for url, title in navigation %}
-                            <li{% if url == route %} class="active"{% endif %}><a href="{{ url(url) }}">{{title}}</a></li>
+                            <li{% if url in route %} class="active"{% endif %}><a href="{{ url(url) }}">{{title}}</a></li>
                         {% endfor %}
                         </ul>
                     </div>

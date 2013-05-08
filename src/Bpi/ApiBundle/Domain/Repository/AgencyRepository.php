@@ -38,10 +38,28 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
         return $this->findBy(array('deleted'=>$deleted), array('public_id'=>0));
     }
 
+    /**
+     * Delete an agency
+     *
+     * @param string $id Agency ID
+     */
     public function delete($id)
     {
         $agency = $this->find($id);
         $agency->setDeleted();
+        $this->dm->persist($agency);
+        $this->dm->flush($agency);
+    }
+
+    /**
+     * Restore deleted agency
+     *
+     * @param string $id AgencyID
+     */
+    public function restore($id)
+    {
+        $agency = $this->find($id);
+        $agency->setDeleted(false);
         $this->dm->persist($agency);
         $this->dm->flush($agency);
     }
