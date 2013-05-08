@@ -58,6 +58,18 @@ class RestController extends FOSRestController
     }
 
     /**
+     *
+     * @param string $contents
+     * @param int $code
+     * @return View
+     */
+    protected function createErrorView($contents, $code)
+    {
+        // @todo standart error format
+        return $this->view($contents, $code);
+    }
+
+    /**
      * Main page of API redirects to human representation of entry point
      *
      * @Rest\Get("/")
@@ -458,13 +470,13 @@ class RestController extends FOSRestController
 
         /** check request body size, must be smaller than 10MB **/
         if (strlen($request->getContent()) > 10485760) {
-            throw new HttpException(413, "Request entity too large");
+            return $this->createErrorView('Request entity too large', 413);
         }
 
         // request validation
         $violations = $this->_isValidForPushNode($request->request->all());
         if (count($violations)) {
-            throw new HttpException(422, (string) $violations);
+            return $this->createErrorView((string) $violations, 422);
         }
 
         $author = new \Bpi\ApiBundle\Domain\Entity\Author(
@@ -518,7 +530,7 @@ class RestController extends FOSRestController
             {
                 if (!$this->getRepository('BpiApiBundle:Aggregate\Node')->find($id))
                 {
-                    throw new HttpException(422, sprintf('Such BPI ID [%s] not found', $id), $e);
+                    return $this->createErrorView(sprintf('Such BPI ID [%s] not found', $id), 422);
                 }
 
                 $node = $this->get('domain.push_service')
@@ -533,7 +545,7 @@ class RestController extends FOSRestController
         }
         catch(\LogicException $e)
         {
-            throw new HttpException(422, $e->getMessage(), $e);
+            return $this->createErrorView($e->getMessage(), 422);
         }
     }
 
@@ -784,7 +796,7 @@ class RestController extends FOSRestController
 
       if ($node->isOwner($agency))
       {
-          throw new HttpException(406, 'Not Acceptable: Trying to syndicate content by owner who already did that');
+          return $this->createErrorView('Not Acceptable: Trying to syndicate content by owner who already did that', 406);
       }
 
       $log = new History($node, $agency->getAgencyId()->id(), new \DateTime(), 'syndicate');
