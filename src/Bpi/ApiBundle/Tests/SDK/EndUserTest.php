@@ -9,6 +9,7 @@ class EndUserTest extends SDKTestCase
     {
         parent::setUp();
         $this->bpi = $this->createBpi();
+        $this->bpi_bravo = $this->createBpiBravo();
     }
 
     public function testNodeList()
@@ -77,5 +78,21 @@ class EndUserTest extends SDKTestCase
 
         $this->assertTrue((bool) count($dict['audience']));
         $this->assertTrue((bool) count($dict['category']));
+    }
+
+    /** @todo move to user story spec */
+    public function testDeleteByNotOwner()
+    {
+        $node = $this->bpi->push($data = $this->createRandomDataForPush());
+        $data = $node->getProperties();
+
+        try {
+            $this->bpi_bravo->deleteNode($data['id']);
+            $this->fail('Exception expected');
+        }
+        catch(\Bpi\Sdk\Exception\HTTP\ClientError $e)
+        {
+            $this->assertTrue(true);
+        }
     }
 }
