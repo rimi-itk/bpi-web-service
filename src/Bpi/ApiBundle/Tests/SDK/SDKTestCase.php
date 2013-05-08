@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../../Sdk/Bpi/Sdk/Bpi.php';
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Bpi\Sdk\Document;
 use Bpi\Sdk\Authorization;
+use Bpi\ApiBundle\Tests\DoctrineFixtures\LoadAgencies;
 
 class SDKTestCase extends WebTestCase
 {
@@ -53,6 +54,15 @@ class SDKTestCase extends WebTestCase
     public function createBpi()
     {
         return new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
+    }
+
+    /**
+     *
+     * @return \Bpi
+     */
+    public function createBpiBravo()
+    {
+        return new \Bpi(self::TEST_ENDPOINT_URI, LoadAgencies::AGENCY_BRAVO, LoadAgencies::AGENCY_BRAVO_KEY, LoadAgencies::AGENCY_BRAVO_SECRET);
     }
 
     /**
