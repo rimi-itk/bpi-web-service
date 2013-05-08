@@ -4,10 +4,12 @@ namespace Bpi\AdminBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Bpi\ApiBundle\Domain\Aggregate\Node;
 
 class NodeController extends Controller
 {
+    /**
+     * @return \Bpi\ApiBundle\Domain\Repository\NodeRepository
+     */
     private function getRepository()
     {
         return $this->get('doctrine.odm.mongodb.document_manager')
@@ -31,7 +33,11 @@ class NodeController extends Controller
     public function deletedAction()
     {
         $nodes = $this->getRepository()->listAll(true);
-        return array('nodes' => $nodes);
+        return array(
+            'nodes' => $nodes,
+            'delete_lable' => 'Undelete',
+            'delete_url' => 'bpi_admin_node_restore',
+        );
     }
 
     /**
@@ -40,7 +46,7 @@ class NodeController extends Controller
     public function newAction()
     {
         $node = new \Bpi\ApiBundle\Domain\Aggregate\Node();
-        $form = $this->createNodeForm($node);
+        $form = $this->createNodeForm($node, true);
         $request = $this->getRequest();
 
         if ($request->isMethod('POST')) {
@@ -104,15 +110,26 @@ class NodeController extends Controller
         );
     }
 
-    private function createNodeForm($node)
+    public function restoreAction($id)
     {
-        $form = $this->createFormBuilder($node)
-        ->add('title', 'text')
-        ->add('teaser', 'textarea')
-        ->add('category', 'text')
-        ->add('audience', 'text')
-        ->add('deleted', 'checkbox', array('required' => false))
-        ->getForm();
-        return $form;
+        $this->getRepository()->restore($id, 'ADMIN');
+        return $this->redirect(
+            $this->generateUrl("bpi_admin_node", array())
+        );
+    }
+
+    private function createNodeForm($node, $new = false)
+    {
+        $formBuilder = $this->createFormBuilder($node)
+            ->add('title', 'text')
+            ->add('teaser', 'textarea')
+            ->add('category', 'text')
+            ->add('audience', 'text');
+
+        if (!$new) {
+            $formBuilder->add('deleted', 'checkbox', array('required' => false));
+        }
+
+        return $formBuilder->getForm();
     }
 }

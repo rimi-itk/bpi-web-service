@@ -2,18 +2,31 @@
 
 {% block content %}
 {% include 'BpiAdminBundle:Agency:nav.html.twig' %}
+{% if delete_lable is not defined %}
+    {% set delete_lable = "Delete" %}
+    {% set delete_url = "bpi_admin_agency_delete" %}
+{% endif %}
 
-<table>
-{% for item in agencies %}
-	<tr>
-	<td>{{ item.publicId }}</td>
-	<td>{{ item.name }}</td>
-	<td>
-	    <a href="{{ url('bpi_admin_agency_details',{'id':item.id}) }}">Details</a>
-	    <a href="{{ url('bpi_admin_agency_edit',{'id':item.id}) }}">Edit</a>
-		<a href="{{ url('bpi_admin_agency_delete',{'id':item.id}) }}">Delete</a>
-	</td>
-	</tr>
-{% endfor %}
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Public ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in agencies %}
+        <tr>
+            <td>{{ item.publicId }}</td>
+            <td>{{ item.name }}</td>
+            <td>
+                <a href="{{ url('bpi_admin_agency_details',{'id':item.id}) }}">Details</a>
+                <a href="{{ url('bpi_admin_agency_edit',{'id':item.id}) }}">Edit</a>
+                <a href="{{ url(delete_url,{'id':item.id}) }}">{{delete_lable}}</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
 </table>
 {% endblock %}

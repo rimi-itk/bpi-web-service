@@ -33,11 +33,28 @@ class NodeRepository extends DocumentRepository
       // @todo Check if node was not deleted before.
       $node = $this->find($id);
 
-      if ($node->getAgencyId() == $agencyId || $agencyId == 'ADMIN') {
-        $node->setDeleted();
-        $this->dm->persist($node);
-        $this->dm->flush($node);
-        return $node;
+      if ($node->getAgencyId() == $agencyId || $agencyId == 'ADMIN')
+      {
+          $node->setDeleted();
+          $this->dm->persist($node);
+          $this->dm->flush($node);
+          return $node;
+      }
+
+      return null;
+    }
+
+    public function restore($id, $agencyId)
+    {
+      // @todo Check if node was not deleted before.
+      $node = $this->find($id);
+
+      if ($node->getAgencyId() == $agencyId || $agencyId == 'ADMIN')
+      {
+          $node->setDeleted(false);
+          $this->dm->persist($node);
+          $this->dm->flush($node);
+          return $node;
       }
 
       return null;

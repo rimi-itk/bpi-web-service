@@ -7,6 +7,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
 class AgencyController extends Controller
 {
+    /**
+     * @return \Bpi\ApiBundle\Domain\Repository\AgencyRepository
+     */
     private function getRepository()
     {
         return $this->get('doctrine.odm.mongodb.document_manager')
@@ -30,7 +33,11 @@ class AgencyController extends Controller
     public function deletedAction()
     {
         $agencies = $this->getRepository()->listAll(true);
-        return array('agencies' => $agencies);
+        return array(
+            'agencies' => $agencies,
+            'delete_lable' => 'Undelete',
+            'delete_url' => 'bpi_admin_agency_restore'
+        );
     }
 
     /**
@@ -39,7 +46,7 @@ class AgencyController extends Controller
     public function newAction()
     {
         $agency = new \Bpi\ApiBundle\Domain\Aggregate\Agency();
-        $form = $this->createAgencyForm($agency);
+        $form = $this->createAgencyForm($agency, true);
         $request = $this->getRequest();
 
         if ($request->isMethod('POST')) {
@@ -104,16 +111,28 @@ class AgencyController extends Controller
         );
     }
 
-    private function createAgencyForm($agency)
+    public function restoreAction($id)
     {
-        $form = $this->createFormBuilder($agency)
-        ->add('publicId', 'text')
-        ->add('name', 'text')
-        ->add('moderator', 'text')
-        ->add('publicKey', 'text')
-        ->add('secret', 'text')
-        ->add('deleted', 'checkbox', array('required' => false))
-        ->getForm();
-        return $form;
+        $this->getRepository()->restore($id);
+        return $this->redirect(
+            $this->generateUrl("bpi_admin_agency", array())
+        );
+    }
+
+    private function createAgencyForm($agency, $new = false)
+    {
+        $formBuilder = $this->createFormBuilder($agency)
+            ->add('publicId', 'text')
+            ->add('name', 'text')
+            ->add('moderator', 'text')
+            ->add('publicKey', 'text')
+            ->add('secret', 'text')
+        ;
+
+        if (!$new) {
+            $formBuilder->add('deleted', 'checkbox', array('required' => false));
+        }
+
+        return $formBuilder->getForm();
     }
 }
