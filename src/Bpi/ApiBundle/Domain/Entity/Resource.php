@@ -161,7 +161,8 @@ class Resource implements IPresentable
      */
     public function findSimilar(\Doctrine\ODM\MongoDB\DocumentRepository $repository)
     {
-        return $repository->findOneBy(array('resource.hash' => $this->hash));
+        // @todo replace with query
+        return $repository->findOneBy(array('resource.hash' => $this->hash, 'deleted' => false));
     }
 
     public function getTitle()

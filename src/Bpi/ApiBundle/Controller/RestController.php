@@ -429,12 +429,14 @@ class RestController extends FOSRestController
                     new Constraints\Length(array('min' => 2, 'max' => 100))
                 ),
                 // params
+                /* @todo
                 'editable' => array(
-                    new Constraints\Range(array('min' => 0, 'max' => 1))
+                    new Constraints\Type(array('type' => 'boolean'))
                 ),
                 'authorship' => array(
-                    new Constraints\Range(array('min' => 0, 'max' => 1))
+                    new Constraints\Type(array('type' => 'boolean'))
                 ),
+                */
             )
         ));
 
