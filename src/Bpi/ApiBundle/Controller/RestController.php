@@ -825,6 +825,11 @@ class RestController extends FOSRestController
      */
     public function staticImagesAction($file, $ext)
     {
-        return new Response(file_get_contents(__DIR__.'/../Resources/public/images/'.$file. '.' . $ext), 200);
+        $file = __DIR__.'/../Resources/public/images/'.$file. '.' . $ext;
+        $mime = mime_content_type($file);
+        $headers = array(
+            'Content-Type' => $mime
+        );
+        return new Response(file_get_contents($file), 200, $headers);
     }
 }

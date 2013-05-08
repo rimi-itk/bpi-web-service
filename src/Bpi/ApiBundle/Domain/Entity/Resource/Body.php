@@ -83,7 +83,7 @@ class Body
     {
         // Rebuild images
         $images = $this->dom->getElementsByTagName('img');
-        $url = $this->router->generate('bpi_api_images', array('file'=> 'image', 'ext'=>'png'), true);
+        $url = $this->router->generate('index', array(), true) . 'images/image.png';
         foreach ($images as $img) {
             $src = $img->getAttributeNode('src')->value;
             $ext = pathinfo($src, PATHINFO_EXTENSION);
