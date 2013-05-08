@@ -9,6 +9,15 @@ class ResourceBuilder
 {
     protected $title, $body, $teaser, $ctime, $copyleft;
     protected $files = array();
+    protected $assets = array();
+    protected $filesystem;
+    protected $router;
+
+    public function __construct($filesystem, $router)
+    {
+        $this->filesystem = $filesystem;
+        $this->router = $router;
+    }
 
     /**
      *
@@ -101,9 +110,25 @@ class ResourceBuilder
         if (is_null($this->copyleft))
             $this->copyleft = new Copyleft('');
 
-        if (!$this->isValidForBuild())
+        if (!$this->isValidForBuild()) {
             throw new \RuntimeException('Invalid state: can not build');
+        }
 
-        return new Resource($this->title, $this->body, $this->teaser, $this->copyleft, $this->ctime, $this->files);
+        return new Resource(
+            $this->title,
+            $this->body,
+            $this->teaser,
+            $this->copyleft,
+            $this->ctime,
+            $this->files,
+            $this->assets,
+            $this->filesystem,
+            $this->router
+        );
+    }
+
+    public function addAssets($assets)
+    {
+        $this->assets = array_merge($this->assets, $assets);
     }
 }

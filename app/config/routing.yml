@@ -17,3 +17,6 @@ NelmioApiDocBundle:
 
 logout:
     pattern: /admin/logout
+
+bpi_api_images:
+    pattern: /images/{file}.{ext}

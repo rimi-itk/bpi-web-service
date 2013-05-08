@@ -130,6 +130,7 @@ class RestController extends FOSRestController
         $template->createField('local_id');
         $template->createField('firstname');
         $template->createField('lastname');
+        $template->createField('images');
 
         // Profile resource
         $profile = $document->createRootEntity('resource', 'profile');
@@ -449,46 +450,69 @@ class RestController extends FOSRestController
      */
     public function postNodeAction()
     {
+        $request = $this->getRequest();
+        $service = $this->get('domain.push_service');
+        $assets = array();
+
         /** check request body size, must be smaller than 10MB **/
-        if (strlen($this->getRequest()->getContent()) > 10485760)
+        if (strlen($request->getContent()) > 10485760) {
             throw new HttpException(413, "Request entity too large");
+        }
 
         // request validation
-        $violations = $this->_isValidForPushNode($this->getRequest()->request->all());
-        if (count($violations))
+        $violations = $this->_isValidForPushNode($request->request->all());
+        if (count($violations)) {
             throw new HttpException(422, (string) $violations);
+        }
 
         $author = new \Bpi\ApiBundle\Domain\Entity\Author(
-            new \Bpi\ApiBundle\Domain\ValueObject\AgencyId($this->getRequest()->get('agency_id')),
-            $this->getRequest()->get('local_author_id'),
-            $this->getRequest()->get('firstname'),
-            $this->getRequest()->get('lastname')
+            new \Bpi\ApiBundle\Domain\ValueObject\AgencyId($request->get('agency_id')),
+            $request->get('local_author_id'),
+            $request->get('firstname'),
+            $request->get('lastname')
         );
 
-        $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder();
-        $resource->title($this->getRequest()->get('title'))
-            ->body($this->getRequest()->get('body'))
-            ->teaser($this->getRequest()->get('teaser'))
-            ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $this->getRequest()->get('creation')))
+        $filesystem = $service->getFilesystem();
+
+        $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder($filesystem, $this->get('router'));
+        $resource
+            ->title($request->get('title'))
+            ->body($request->get('body'))
+            ->teaser($request->get('teaser'))
+            ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $request->get('creation')))
         ;
 
+        // Download files and add them to resource
+        $images = $request->get('images');
+        if (!empty($images)) {
+            foreach ($images as $image) {
+                $ext = pathinfo($image, PATHINFO_EXTENSION);
+                $filename = md5($image.microtime()); // . '.' . $ext;
+                $file = $filesystem->createFile($filename);
+                // @todo Download files in a proper way.
+                $file->setContent(file_get_contents($image));
+                $assets[] = array('file'=>$file->getKey(), 'type'=>'attachment', 'extension'=>$ext);
+            }
+        }
+        $resource->addAssets($assets);
+
         $profile = new \Bpi\ApiBundle\Domain\Entity\Profile(
-            new \Bpi\ApiBundle\Domain\ValueObject\Audience($this->getRequest()->get('audience')),
-            new \Bpi\ApiBundle\Domain\ValueObject\Category($this->getRequest()->get('category'))
+            new \Bpi\ApiBundle\Domain\ValueObject\Audience($request->get('audience')),
+            new \Bpi\ApiBundle\Domain\ValueObject\Category($request->get('category'))
         );
 
         $params = new \Bpi\ApiBundle\Domain\Aggregate\Params();
         $params->add(new \Bpi\ApiBundle\Domain\ValueObject\Param\Authorship(
-            $this->getRequest()->get('authorship')
+            $request->get('authorship')
         ));
         $params->add(new \Bpi\ApiBundle\Domain\ValueObject\Param\Editable(
-            $this->getRequest()->get('editable')
+            $request->get('editable')
         ));
 
         try
         {
             // Check for BPI ID
-            if ($id = $this->getRequest()->get('bpi_id', false))
+            if ($id = $request->get('bpi_id', false))
             {
                 if (!$this->getRepository('BpiApiBundle:Aggregate\Node')->find($id))
                 {
@@ -500,7 +524,6 @@ class RestController extends FOSRestController
 
                 return $this->get("bpi.presentation.transformer")->transform($node);
             }
-
             $node = $this->get('domain.push_service')
                 ->push($author, $resource, $profile, $params);
 
@@ -641,6 +664,8 @@ class RestController extends FOSRestController
      */
     public function putNodeAssetAction($node_id, $filename)
     {
+        /*
+         * NOT USED
         $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($node_id);
         if (is_null($node))
             throw new HttpException(404, 'No such node ID exists');
@@ -659,19 +684,19 @@ class RestController extends FOSRestController
         $dm->flush();
 
         return new Response('', 204);
+        */
     }
 
     /**
      * Output media asset
      *
-     * @Rest\Put("/asset/{filename}")
-     * @Rest\View(statusCode="200")
+     * @Rest\Get("/asset/{filename}.{extension}")
      */
-    public function getAssetAction($filename)
+    public function getAssetAction($filename, $extension)
     {
-        /**
-         * @todo implementation
-         */
+        $fs = $this->get('domain.push_service')->getFilesystem();
+        $file = $fs->get($filename);
+        return new Response($file->getContent(), 200);
     }
 
     /**
@@ -790,5 +815,16 @@ class RestController extends FOSRestController
       }
 
       return new Response('', 200);
+    }
+
+    /**
+     * Get static images
+     *
+     * @Rest\Get("/images/{file}.{ext}")
+     * @Rest\View(statusCode="200")
+     */
+    public function staticImagesAction($file, $ext)
+    {
+        return new Response(file_get_contents(__DIR__.'/../Resources/public/images/'.$file. '.' . $ext), 200);
     }
 }
