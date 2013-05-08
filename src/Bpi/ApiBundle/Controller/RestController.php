@@ -488,6 +488,7 @@ class RestController extends FOSRestController
         $images = $request->get('images');
         if (!empty($images)) {
             foreach ($images as $image) {
+                $image = $image['path'];
                 $ext = pathinfo(parse_url($image, PHP_URL_PATH), PATHINFO_EXTENSION);
                 $filename = md5($image.microtime()); // . '.' . $ext;
                 $file = $filesystem->createFile($filename);
