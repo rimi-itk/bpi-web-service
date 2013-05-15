@@ -21,8 +21,16 @@ class AgencyController extends Controller
      */
     public function indexAction()
     {
-        $agencies = $this->getRepository()->listAll();
-        return array('agencies' => $agencies);
+        $query = $this->getRepository()->listAll();
+
+        $paginator  = $this->get('knp_paginator');
+        $pagination = $paginator->paginate(
+            $query,
+            $this->get('request')->query->get('page', 1),
+            5
+        );
+
+        return array('pagination' => $pagination);
     }
 
     /**
@@ -32,9 +40,17 @@ class AgencyController extends Controller
      */
     public function deletedAction()
     {
-        $agencies = $this->getRepository()->listAll(true);
+        $query = $this->getRepository()->listAll(true);
+
+        $paginator  = $this->get('knp_paginator');
+        $pagination = $paginator->paginate(
+            $query,
+            $this->get('request')->query->get('page', 1),
+            5
+        );
+
         return array(
-            'agencies' => $agencies,
+            'pagination' => $pagination,
             'delete_lable' => 'Undelete',
             'delete_url' => 'bpi_admin_agency_restore'
         );

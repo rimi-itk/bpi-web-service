@@ -31,6 +31,9 @@
 
 
 <script>
-$('#form_dateFrom, #form_dateTo').datepicker({format: 'yyyy-mm-dd'});
+$('#form_dateFrom, #form_dateTo').datepicker({format: 'yyyy-mm-dd'})
+    .on('changeDate', function(ev){
+        $(this).datepicker('hide');
+    });
 </script>
 {% endblock %}
