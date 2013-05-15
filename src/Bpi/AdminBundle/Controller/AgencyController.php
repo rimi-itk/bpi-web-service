@@ -57,7 +57,6 @@ class AgencyController extends Controller
                     $this->generateUrl('bpi_admin_agency')
                 );
             }
-
         }
 
         return array(
@@ -83,7 +82,6 @@ class AgencyController extends Controller
                     $this->generateUrl('bpi_admin_agency')
                 );
             }
-
         }
 
         return array(

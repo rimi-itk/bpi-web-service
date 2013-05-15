@@ -1,0 +1,36 @@
+{% extends "BpiAdminBundle::layout.html.twig" %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="{{ asset('bundles/bpiadmin/css/datepicker.css') }}" rel="stylesheet" media="screen">
+{% endblock %}
+
+{% block javascript %}
+{{ parent() }}
+<script src="{{ asset('bundles/bpiadmin/js/jquery-1.9.1.min.js') }}"></script>
+<script src="{{ asset('bundles/bpiadmin/js/bootstrap-datepicker.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+
+<form action="{{ path(app.request.attributes.get('_route')) }}" method="post" {{ form_enctype(form) }}>
+
+    {{ form_widget(form) }}
+
+    <div class="form-actions">
+        <input type="submit" class="btn" value="Show" />
+    </div>
+</form>
+
+
+{% for key, stat in statistics %}
+    <span>{{key}}</span>: {{stat}}<br />
+{% else %}
+    No data
+{% endfor %}
+
+
+<script>
+$('#form_dateFrom, #form_dateTo').datepicker({format: 'yyyy-mm-dd'});
+</script>
+{% endblock %}

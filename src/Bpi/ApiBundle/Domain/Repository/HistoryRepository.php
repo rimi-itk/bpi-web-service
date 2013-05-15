@@ -16,17 +16,21 @@ class HistoryRepository extends DocumentRepository
     $dateTo = new \DateTime($dateTo . ' 23:59:59');
 
     $qb = $this->createQueryBuilder()
-    ->field('datetime')->gte($dateFrom)
-    ->field('datetime')->lte($dateTo)
-    ->field('agency')->equals($agencyId)
-    ->map('function() { emit(this.action, 1); }')
-    ->reduce('function(k, vals) {
-        var sum = 0;
-        for (var i in vals) {
-            sum += vals[i];
-        }
-        return sum;
-    }');
+        ->field('datetime')->gte($dateFrom)
+        ->field('datetime')->lte($dateTo);
+
+    if (!empty($agencyId)) {
+        $qb->field('agency')->equals($agencyId);
+    }
+
+    $qb->map('function() { emit(this.action, 1); }')
+        ->reduce('function(k, vals) {
+            var sum = 0;
+            for (var i in vals) {
+                sum += vals[i];
+            }
+            return sum;
+        }');
     $result = $qb->getQuery()->execute();
 
     $res = array();

@@ -57,3 +57,7 @@ bpi_admin_node_restore:
 bpi_admin_node_deleted:
     pattern: /node/deleted
     defaults: { _controller: BpiAdminBundle:Node:deleted }
+
+bpi_admin_statistics:
+    pattern: /statistics
+    defaults: { _controller: BpiAdminBundle:Statistics:index }
