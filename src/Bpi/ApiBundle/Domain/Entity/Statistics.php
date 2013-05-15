@@ -39,4 +39,9 @@ class Statistics implements IPresentable
           $entity->addProperty($document->createProperty($field, 'string', $value));
         }
     }
+
+    public function getStats()
+    {
+        return $this->stats;
+    }
 }

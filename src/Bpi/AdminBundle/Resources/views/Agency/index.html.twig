@@ -16,7 +16,7 @@
         </tr>
     </thead>
     <tbody>
-    {% for item in agencies %}
+    {% for item in pagination %}
         <tr>
             <td>{{ item.publicId }}</td>
             <td>{{ item.name }}</td>
@@ -29,4 +29,8 @@
     {% endfor %}
     </tbody>
 </table>
+
+<div class="navigation">
+    {{ knp_pagination_render(pagination) }}
+</div>
 {% endblock %}

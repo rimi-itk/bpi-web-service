@@ -35,8 +35,12 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
      */
     public function listAll($deleted = false)
     {
-        return $this->findBy(array('deleted'=>$deleted), array('public_id'=>0));
+        $qb = $this->createQueryBuilder();
+        $qb->field('deleted')->equals($deleted)
+            ->sort('public_id', 0);
+        return $qb;
     }
+
 
     /**
      * Delete an agency
