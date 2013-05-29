@@ -9,13 +9,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints;
 
 use Bpi\RestMediaTypeBundle\Document;
-use Bpi\ApiBundle\Transform\Extractor;
 use Bpi\ApiBundle\Domain\Entity\History;
-use Bpi\ApiBundle\Domain\Aggregate\Agency;
-use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;
-use Bpi\RestMediaTypeBundle\Property\Entity;
-use Bpi\RestMediaTypeBundle\DataType\String;
 
 /**
  * Main entry point for REST requests
@@ -168,24 +163,24 @@ class RestController extends FOSRestController
         $node_query = new \Bpi\ApiBundle\Domain\Entity\NodeQuery();
         $node_query->sort('ctime', 'desc');
         $node_query->amount(20);
-        if ($amount = $this->getRequest()->query->get('amount', false)) {
+        if (false !== ($amount = $this->getRequest()->query->get('amount', false))) {
             $node_query->amount($amount);
         }
 
-        if ($offset = $this->getRequest()->query->get('offset', false)) {
+        if (false !== ($offset = $this->getRequest()->query->get('offset', false))) {
             $node_query->offset($offset);
         }
 
-        if ($search = $this->getRequest()->query->get('search', false)) {
+        if (false !== ($search = $this->getRequest()->query->get('search', false))) {
             $node_query->search($search);
         }
 
-        if ($filter = $this->getRequest()->query->get('filter', false)) {
+        if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
             foreach($filter as $field => $value)
                 $node_query->filter($field, $value);
         }
 
-        if ($sort = $this->getRequest()->query->get('sort', false)) {
+        if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
             foreach($sort as $field => $order)
                 $node_query->sort($field, $order);
         }
