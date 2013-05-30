@@ -22,6 +22,11 @@ use Bpi\ApiBundle\Domain\Entity\History;
 
 class FakeData implements FixtureInterface
 {
+    /**
+     * FilesystemMap used in createFilesystemMap.
+     *
+     * @var \Knp\Bundle\GaufretteBundle\FilesystemMap
+     */
     protected $fsMap = NULL;
 
     /**
@@ -422,10 +427,4 @@ class FakeData implements FixtureInterface
         $manager->flush();
     }
 
-}
-
-class FakeRouter {
-    public function generate() {
-        return 'http://bpi-ws.ci.inlead.dk';
-    }
 }
