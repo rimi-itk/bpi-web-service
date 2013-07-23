@@ -26,8 +26,8 @@ class LoadNodes implements FixtureInterface
      */
     public function createAlphaResource()
     {
-        //@todo add assets
-        $resource_builder = new ResourceBuilder;
+        $map = $this->createFilesystemMap();
+        $resource_builder = new ResourceBuilder($map->get('assets'), null);
         $alpha = $resource_builder
               ->body('<p>alpha_body unicode(❶)</p>')
               ->teaser('alpha_teaser unicode(❶)')
@@ -44,7 +44,8 @@ class LoadNodes implements FixtureInterface
      */
     public function createBravoResource()
     {
-        $resource_builder = new ResourceBuilder;
+        $map = $this->createFilesystemMap();
+        $resource_builder = new ResourceBuilder($map->get('assets'), null);
         $bravo = $resource_builder
               ->body('<span title="bravo">bravo_body</span>')
               ->teaser('bravo_teaser')
@@ -61,7 +62,8 @@ class LoadNodes implements FixtureInterface
      */
     public function createCharlieResource()
     {
-        $resource_builder = new ResourceBuilder;
+        $map = $this->createFilesystemMap();
+        $resource_builder = new ResourceBuilder($map->get('assets'), null);
         $charlie = $resource_builder
               ->body('alpha_body')
               ->teaser('bravo_teaser')
