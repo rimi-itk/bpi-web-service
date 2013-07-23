@@ -13,6 +13,8 @@ class Author implements \Bpi\ApiBundle\Transform\IPresentable
      */
     protected $agency_id;
 
+    protected $agency;
+
     /**
      *
      * @var string
@@ -92,10 +94,12 @@ class Author implements \Bpi\ApiBundle\Transform\IPresentable
             $this->getFullName()
         ));
 
-        $entity->addProperty($document->createProperty(
-            'agency_id',
-            'string',
-            $this->getAgencyId()
-        ));
+        if ($this->agency instanceof \Bpi\ApiBundle\Domain\Aggregate\Agency) {
+            $this->agency->transform($document);
+        }
+    }
+
+    public function loadAgency(\Bpi\ApiBundle\Domain\Repository\AgencyRepository $repository) {
+        $this->agency = $repository->findOneBy(array('public_id' => $this->agency_id));
     }
 }

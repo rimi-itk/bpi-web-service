@@ -17,7 +17,8 @@ class NodeItemTest extends SDKTestCase
         'type',
         'yearwheel',
         'author',
-        'agency_id'
+        'agency_id',
+        'agency_name',
     );
 
     /**

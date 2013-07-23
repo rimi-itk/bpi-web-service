@@ -30,11 +30,9 @@ class Agency implements IPresentable
      */
     public function transform(Document $document)
     {
-        $document->appendEntity($entity = $document->createEntity('agency'));
-        $entity->addProperty($document->createProperty('public_id', 'string', $this->public_id));
-        $entity->addProperty($document->createProperty('name', 'string', $this->name));
-        $entity->addProperty($document->createProperty('moderator', 'string', $this->moderator));
-        $entity->addProperty($document->createProperty('public_key', 'string', $this->public_key));
+        $entity = $document->currentEntity();
+        $entity->addProperty($document->createProperty('agency_id', 'string', $this->public_id));
+        $entity->addProperty($document->createProperty('agency_name', 'string', $this->name));
     }
 
     /**
