@@ -120,11 +120,28 @@ class NodeController extends Controller
 
     private function createNodeForm($node, $new = false)
     {
+        $repo = new \Bpi\ApiBundle\Domain\Repository\CategoryRepository();
+        $categories = $repo->findAll();
+        $categoryOptions = array();
+        foreach ($categories as $category) {
+            $name = $category->name();
+            $categoryOptions[$name] = $name;
+        }
+
+        $repo = new \Bpi\ApiBundle\Domain\Repository\AudienceRepository();
+        $audiences = $repo->findAll();
+        $audienceOptions = array();
+        foreach ($audiences as $audience) {
+          $name = $audience->name();
+          $audienceOptions[$name] = $name;
+        }
+
+
         $formBuilder = $this->createFormBuilder($node)
             ->add('title', 'text')
             ->add('teaser', 'textarea')
-            ->add('category', 'text')
-            ->add('audience', 'text');
+            ->add('category', 'choice', array('choices' => $categoryOptions))
+            ->add('audience', 'choice', array('choices' => $audienceOptions));
 
         if (!$new) {
             $formBuilder->add('deleted', 'checkbox', array('required' => false));
