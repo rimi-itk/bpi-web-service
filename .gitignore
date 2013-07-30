@@ -15,6 +15,7 @@ nbproject/*
 /.settings
 /.buildpath
 /.project
+/.idea
 
 #SDK
 src/Bpi/Sdk/vendor/*
