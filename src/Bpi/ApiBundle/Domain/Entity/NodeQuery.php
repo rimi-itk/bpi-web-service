@@ -124,6 +124,13 @@ class NodeQuery
         }
     }
 
+    protected function applySort(QueryBuilder $query)
+    {
+        foreach ($this->sorts as $path => $order) {
+            $query->sort($this->map($path), $order);
+        }
+    }
+
     public function executeByDoctrineQuery(QueryBuilder $query)
     {
         // Hide deleted items
@@ -132,6 +139,7 @@ class NodeQuery
         $this->applySearch($query);
         $this->applyFilters($query);
         $this->applyReduce($query);
+        $this->applySort($query);
 
         // Calculate total count of items before applying the limits
         $this->total = $query->getQuery()->execute()->count();
@@ -139,18 +147,7 @@ class NodeQuery
         $query->skip($this->offset);
         $query->limit($this->amount);
 
-        $collection = $query->getQuery()->execute();
-
-        foreach($this->sorts as $path => $order)
-        {
-            $arr_coll = $collection->toArray();
-            uasort($arr_coll, function($node_a, $node_b) use ($path, $order) {
-                return $node_a->compare($node_b, $path, $order);
-            });
-            $collection = new \Doctrine\Common\Collections\ArrayCollection($arr_coll);
-        }
-
-        return $collection;
+        return $query->getQuery()->execute();
     }
 
     protected function matchAny($value)

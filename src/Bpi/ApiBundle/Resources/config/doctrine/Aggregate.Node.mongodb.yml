@@ -13,6 +13,8 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
         - treePathSource
     ctime:
       type: date
+      index: true
+      order: desc
     mtime:
       type: date
 

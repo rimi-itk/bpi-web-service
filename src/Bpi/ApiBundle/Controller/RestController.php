@@ -161,7 +161,6 @@ class RestController extends FOSRestController
     public function listAction()
     {
         $node_query = new \Bpi\ApiBundle\Domain\Entity\NodeQuery();
-        $node_query->sort('ctime', 'desc');
         $node_query->amount(20);
         if (false !== ($amount = $this->getRequest()->query->get('amount', false))) {
             $node_query->amount($amount);
@@ -183,6 +182,9 @@ class RestController extends FOSRestController
         if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
             foreach($sort as $field => $order)
                 $node_query->sort($field, $order);
+        }
+        else {
+          $node_query->sort('pushed', 'desc');
         }
 
         $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findByNodesQuery($node_query);
