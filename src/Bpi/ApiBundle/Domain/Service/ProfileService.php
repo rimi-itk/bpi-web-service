@@ -1,9 +1,13 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Service;
 
+// @todo delete
 use Bpi\ApiBundle\Domain\Repository\AudienceRepository;
 use Bpi\ApiBundle\Domain\Repository\CategoryRepository;
-use \Bpi\ApiBundle\Domain\Aggregate\ProfileDictionary;
+//
+
+use Doctrine\Common\Persistence\ObjectManager;
+use Bpi\ApiBundle\Domain\Aggregate\ProfileDictionary;
 
 /**
  * Domain service for profile related operations
@@ -11,18 +15,34 @@ use \Bpi\ApiBundle\Domain\Aggregate\ProfileDictionary;
 class ProfileService
 {
     /**
+     *
+     * @var \Doctrine\Common\Persistence\ObjectManager
+     */
+    protected $manager;
+
+    /**
+     *
+     * @param \Doctrine\Common\Persistence\ObjectManager $manager
+     */
+    public function __construct(ObjectManager $manager)
+    {
+        $this->manager = $manager;
+    }
+
+    /**
      * Create profile dictionary
      *
      * @return \Bpi\ApiBundle\Domain\Aggregate\ProfileDictionary
      */
     public function provideDictionary()
     {
-        $audience_repository = new AudienceRepository();
-        $audiences = $audience_repository ->findAll();
+        $dictionary = $this->manager
+            ->getRepository('BpiApiBundle:Aggregate\ProfileDictionary')
+            ->findAll();
 
-        $category_repository = new CategoryRepository();
-        $categories = $category_repository->findAll();
-
-        return new ProfileDictionary($audiences, $categories);
+        // This is kind of singleton row.
+        foreach($dictionary as $e) {
+            return $e;
+        }
     }
 }

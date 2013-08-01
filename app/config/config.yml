@@ -16,6 +16,7 @@ services:
         arguments: ["@doctrine_mongodb.odm.document_manager", "@knp_gaufrette.filesystem_map"]
     domain.profile_service:
         class: Bpi\ApiBundle\Domain\Service\ProfileService
+        arguments: ["@doctrine_mongodb.odm.document_manager"]
     #gridfs gaufrette
     bpi.gridfs.conn:
       class: Doctrine\MongoDB\Connection
