@@ -139,7 +139,7 @@ class NodeController extends Controller
 
         $formBuilder = $this->createFormBuilder($node)
             ->add('title', 'text')
-            ->add('teaser', 'textarea')
+            ->add('teaser', 'textarea')->setRequired(false)
             ->add('category', 'choice', array('choices' => $categoryOptions))
             ->add('audience', 'choice', array('choices' => $audienceOptions));
 
