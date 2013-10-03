@@ -1,0 +1,9 @@
+{% set nav= {
+    'bpi_admin_audience_new': 'Add new',
+} %}
+{% set route = app.request.attributes.get('_route') %}
+<ul class="nav nav-tabs">
+    {% for url, title in nav %}
+        <li{% if url == route %} class="active"{% endif %}><a href="{{ url(url) }}">{{title}}</a></li>
+    {% endfor %}
+</ul>

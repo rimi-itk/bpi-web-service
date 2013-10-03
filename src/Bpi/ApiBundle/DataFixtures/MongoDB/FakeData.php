@@ -51,6 +51,9 @@ class FakeData implements FixtureInterface
      */
     public function load(ObjectManager $manager)
     {
+        $this->createCategories($manager);
+        $this->createAudiences($manager);
+
         $service = new PushService($manager, $this->createFilesystemMap());
 
         $agency['Arhus'] = new Agency('200100', 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', md5('agency_200100_public'), sha1('agency_200100_secret'));
@@ -74,8 +77,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Kids'))
-            ->category(new Category('Film'))
+            ->audience('Kids')
+            ->category('Film')
             ->yearwheel(new Yearwheel('Winter'))
             ->tags('foo, bar, zoo')
             ->build();
@@ -100,8 +103,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Music'))
+            ->audience('Adult')
+            ->category('Music')
             ->yearwheel(new Yearwheel('Winter'))
             ->tags('foo, bar, zoo')
             ->build();
@@ -126,8 +129,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Campains'))
+            ->audience('Adult')
+            ->category('Campaigns')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('foo, bar, zoo')
             ->build();
@@ -152,8 +155,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Kids'))
-            ->category(new Category('Literature'))
+            ->audience('Kids')
+            ->category('Literature')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -178,8 +181,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Kids'))
-            ->category(new Category('Literature'))
+            ->audience('Kids')
+            ->category('Literature')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -204,8 +207,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Other'))
+            ->audience('Adult')
+            ->category('Other')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -230,8 +233,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Young'))
-            ->category(new Category('Other'))
+            ->audience('Young')
+            ->category('Other')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -256,8 +259,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Elders'))
-            ->category(new Category('Facts'))
+            ->audience('Elders')
+            ->category('Facts')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -282,8 +285,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Games'))
+            ->audience('Adult')
+            ->category('Games')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -308,8 +311,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Young'))
-            ->category(new Category('Games'))
+            ->audience('Young')
+            ->category('Games')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -334,8 +337,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Elders'))
-            ->category(new Category('Book'))
+            ->audience('Elders')
+            ->category('Book')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -360,8 +363,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Campains'))
+            ->audience('Adult')
+            ->category('Campaigns')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -386,8 +389,8 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Themes'))
+            ->audience('Adult')
+            ->category('Themes')
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -427,4 +430,42 @@ class FakeData implements FixtureInterface
         $manager->flush();
     }
 
+    public function createCategories(ObjectManager $manager)
+    {
+        $categories = array(
+            'Other',
+            'Event',
+            'Music',
+            'Facts',
+            'Book',
+            'Film',
+            'Literature',
+            'Themes',
+            'Markdays',
+            'Games',
+            'Campaigns',
+        );
+
+        foreach ($categories as $category) {
+            $category = new \Bpi\ApiBundle\Domain\Entity\Category($category);
+            $manager->persist($category);
+        }
+        $manager->flush();
+    }
+
+    public function createAudiences(ObjectManager $manager)
+    {
+        $audiences = array(
+            'All',
+            'Adult',
+            'Kids',
+            'Young',
+            'Elders',
+        );
+        foreach ($audiences as $audience) {
+            $audience = new \Bpi\ApiBundle\Domain\Entity\Audience($audience);
+            $manager->persist($audience);
+        }
+        $manager->flush();
+    }
 }
