@@ -1,6 +1,5 @@
 <?php
-
-namespace Bpi\ApiBundle\Tests\DoctrineFixtures;
+namespace Bpi\ApiBundle\DataFixtures\MongoDB;
 
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;

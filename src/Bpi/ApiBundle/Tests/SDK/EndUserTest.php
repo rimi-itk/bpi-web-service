@@ -32,7 +32,7 @@ class EndUserTest extends SDKTestCase
         foreach($data as $key => $val)
         {
             // Ignore some fields
-            if (in_array($key, array('body', 'authorship', 'local_id', 'firstname', 'lastname')))
+            if (in_array($key, array('body', 'authorship', 'local_id', 'firstname', 'lastname', 'agency_id', 'images', 'related_materials')))
                 continue;
 
             $this->assertEquals($val, $properties[$key]);
