@@ -41,7 +41,7 @@ class NodeQuery
      */
     protected function map($field_name)
     {
-        if (!isset($this->field_map[$field_name]))
+        if (!array_key_exists($field_name, $this->field_map))
             throw new \InvalidArgumentException(sprintf('Field "%s" has no mapping', $field_name));
 
         return $this->field_map[$field_name];
@@ -127,7 +127,7 @@ class NodeQuery
     protected function applySort(QueryBuilder $query)
     {
         foreach ($this->sorts as $path => $order) {
-            $query->sort($this->map($path), $order);
+            $query->sort($path, $order);
         }
     }
 
