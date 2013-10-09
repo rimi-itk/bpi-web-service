@@ -19,6 +19,7 @@ class NodeItemTest extends SDKTestCase
         'author',
         'agency_id',
         'agency_name',
+        'material'
     );
 
     /**

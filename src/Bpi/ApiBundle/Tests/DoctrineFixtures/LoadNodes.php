@@ -17,6 +17,7 @@ use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 use Bpi\ApiBundle\Domain\Factory\ProfileBuilder;
 use Bpi\ApiBundle\Domain\Service\PushService;
 use Knp\Bundle\GaufretteBundle\FilesystemMap;
+use Bpi\ApiBundle\DataFixtures\MongoDB\FakeRouter;
 
 class LoadNodes implements FixtureInterface
 {
@@ -27,7 +28,7 @@ class LoadNodes implements FixtureInterface
     public function createAlphaResource()
     {
         $map = $this->createFilesystemMap();
-        $resource_builder = new ResourceBuilder($map->get('assets'), null);
+        $resource_builder = new ResourceBuilder($map->get('assets'), new FakeRouter());
         $alpha = $resource_builder
               ->body('<p>alpha_body unicode(❶)</p>')
               ->teaser('alpha_teaser unicode(❶)')
@@ -35,6 +36,10 @@ class LoadNodes implements FixtureInterface
               ->ctime(new \DateTime("-1 day"))
               ->copyleft(new Copyleft('alpha_copyleft unicode(❶)'))
         ;
+
+        $alpha->addMaterial('100200:12345678');
+        $alpha->addMaterial('100200:87654321');
+
         return $alpha;
     }
 
@@ -45,7 +50,7 @@ class LoadNodes implements FixtureInterface
     public function createBravoResource()
     {
         $map = $this->createFilesystemMap();
-        $resource_builder = new ResourceBuilder($map->get('assets'), null);
+        $resource_builder = new ResourceBuilder($map->get('assets'), new FakeRouter());
         $bravo = $resource_builder
               ->body('<span title="bravo">bravo_body</span>')
               ->teaser('bravo_teaser')
@@ -63,7 +68,7 @@ class LoadNodes implements FixtureInterface
     public function createCharlieResource()
     {
         $map = $this->createFilesystemMap();
-        $resource_builder = new ResourceBuilder($map->get('assets'), null);
+        $resource_builder = new ResourceBuilder($map->get('assets'), new FakeRouter());
         $charlie = $resource_builder
               ->body('alpha_body')
               ->teaser('bravo_teaser')

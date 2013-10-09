@@ -7,6 +7,7 @@ use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
+use Bpi\ApiBundle\Tests\Domain\Util;
 
 class PushServiceCopyleftTest extends \PHPUnit_Framework_TestCase
 {
@@ -41,8 +42,8 @@ class PushServiceCopyleftTest extends \PHPUnit_Framework_TestCase
         $this->service = new PushService($om, $fsm);
         $this->author = new Author(new AgencyId(1), 1, 'Bush', 'George');
 
-        $resource_builder = new ResourceBuilder;
-        $this->resource = $resource_builder
+        $util = new Util();
+        $this->resource = $util->createResourceBuilder()
             ->body('bravo_body')
             ->teaser('bravo_teaser')
             ->title('bravo_title')
@@ -81,7 +82,7 @@ class PushServiceCopyleftTest extends \PHPUnit_Framework_TestCase
         $this->resource->build()->transform($doc);
 
         $body = $doc->getEntity('resource')->property('body')->getValue();
-        
+
         $this->assertEquals(
             1,
             preg_match('~' . $this->author->getFullName() . ', ' . self::AGENCY_NAME . '?\.$~', strip_tags($body)),

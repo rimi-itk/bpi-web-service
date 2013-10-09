@@ -1,6 +1,5 @@
 <?php
-
-namespace Bpi\ApiBundle\Tests\DoctrineFixtures;
+namespace Bpi\ApiBundle\DataFixtures\MongoDB;
 
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -65,11 +64,13 @@ class FakeData implements FixtureInterface
         // 1 -------------------------------
         $builder = $this->createResourceBuilder();
         $resource = $builder
-              ->body('<p>For de helt små børn kan de første filmoplevelser være meget overvældende. Derfor er det godt, at der findes film som fortæller historier i et roligt tempo og med en lykkelig slutning. Det Danske Filminstitut har indkøbt en række charmerende svenske tegnefilm, som trygt kan ses af børn fra 3-års alderen.</p><p><strong>Ørnen der havde højdeskræk</strong><br />I filmen &quot;Ørnen der havde højdeskræk&quot; kan kongeørnen Orla ikke lide at flyve. Han bliver så ør og svimmel af højder, men en fuglekonge lokker ham højere og højere op i luften, og til sidst opdager Orla, at han sagtens kan svæve sammen med de andre ørne.</p><p><strong>Elsa siger godnat</strong><br />I denne animationsfilm vil Elsa gerne høre en godnathistorie inden hun skal sove. Heldigvis har alle sovedyrene både lyst og tid. Alle har de oplevet usædvanlige ting og de vil meget gerne fortælle historierne. I aften er det Harry Hamster, der fortæller Elsa en historie om den mest berømte detektiv i skoven.</p><p><strong>Filmstriben.dk </strong><br />Se filmene sammen med dit barn, trygt og godt hjemme fra sofaen. Log på <a href="http://filmstriben.dk">Filmstriben.dk</a> med dit lånernr,/cpr.nr. og din pinkode!</p>')
-              ->teaser('For de helt små børn kan de første filmoplevelser være meget overvældende. Derfor er det godt, at der findes film som fortæller historier i et roligt tempo og med en lykkelig slutning. Se dem på filmstriben.dk')
-              ->title('Ti tegnefilm for de mindste på filmstriben')
-              ->ctime(new \DateTime("-10 day"))
-              ->copyleft(new Copyleft(''))
+            ->body('<p>For de helt små børn kan de første filmoplevelser være meget overvældende. Derfor er det godt, at der findes film som fortæller historier i et roligt tempo og med en lykkelig slutning. Det Danske Filminstitut har indkøbt en række charmerende svenske tegnefilm, som trygt kan ses af børn fra 3-års alderen.</p><p><strong>Ørnen der havde højdeskræk</strong><br />I filmen &quot;Ørnen der havde højdeskræk&quot; kan kongeørnen Orla ikke lide at flyve. Han bliver så ør og svimmel af højder, men en fuglekonge lokker ham højere og højere op i luften, og til sidst opdager Orla, at han sagtens kan svæve sammen med de andre ørne.</p><p><strong>Elsa siger godnat</strong><br />I denne animationsfilm vil Elsa gerne høre en godnathistorie inden hun skal sove. Heldigvis har alle sovedyrene både lyst og tid. Alle har de oplevet usædvanlige ting og de vil meget gerne fortælle historierne. I aften er det Harry Hamster, der fortæller Elsa en historie om den mest berømte detektiv i skoven.</p><p><strong>Filmstriben.dk </strong><br />Se filmene sammen med dit barn, trygt og godt hjemme fra sofaen. Log på <a href="http://filmstriben.dk">Filmstriben.dk</a> med dit lånernr,/cpr.nr. og din pinkode!</p>')
+            ->teaser('For de helt små børn kan de første filmoplevelser være meget overvældende. Derfor er det godt, at der findes film som fortæller historier i et roligt tempo og med en lykkelig slutning. Se dem på filmstriben.dk')
+            ->title('Ti tegnefilm for de mindste på filmstriben')
+            ->ctime(new \DateTime("-10 day"))
+            ->copyleft(new Copyleft(''))
+            ->addMaterial('100200:12345678')
+            ->addMaterial('100200:87654321')
         ;
 
         $builder = new ProfileBuilder();

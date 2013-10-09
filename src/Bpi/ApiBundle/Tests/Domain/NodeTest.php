@@ -26,7 +26,8 @@ class NodeTest extends \PHPUnit_Framework_TestCase
         $this->resources = new \stdClass();
         $this->authors = new \stdClass();
 
-        $resource_builder = new ResourceBuilder;
+        $util = new Util();
+        $resource_builder = $util->createResourceBuilder();
         $this->resources->alpha = $resource_builder
             ->body('alpha_body')
             ->teaser('alpha_teaser')

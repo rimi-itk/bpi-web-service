@@ -32,6 +32,8 @@ class Resource implements IPresentable
     protected $router;
     protected $filesystem;
 
+    protected $materials = array();
+
     /**
      *
      * @param string $title
@@ -53,7 +55,8 @@ class Resource implements IPresentable
         array $files = null,
         array $assets = array(),
         Filesystem $filesystem,
-        $router
+        $router,
+        array $materials = array()
     )
     {
         $this->title = $title;
@@ -66,6 +69,7 @@ class Resource implements IPresentable
         $this->assets = array_merge($assets, $this->body->getAssets());
         $this->filesystem = $filesystem;
         $this->router = $router;
+        $this->materials = $materials;
     }
 
     /**
@@ -113,6 +117,11 @@ class Resource implements IPresentable
         $entity->addProperty($document->createProperty('teaser', 'string', $this->teaser));
         $entity->addProperty($document->createProperty('creation', 'dateTime', $this->ctime));
         $entity->addProperty($document->createProperty('type', 'string', $this->type));
+
+        foreach ($this->materials as $material)
+        {
+            $entity->addProperty($document->createProperty('material', 'string', (string) $material));
+        }
     }
 
     /**
