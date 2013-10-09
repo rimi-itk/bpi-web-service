@@ -20,5 +20,8 @@ Bpi\ApiBundle\Domain\Entity\Resource:
       targetDocument: Bpi\ApiBundle\Domain\ValueObject\Copyleft
     assets:
       type: hash
+  embedMany:
+    materials:
+      targetDocument: Bpi\ApiBundle\Domain\ValueObject\Material
   lifecycleCallbacks:
     postLoad: [ wakeup ]

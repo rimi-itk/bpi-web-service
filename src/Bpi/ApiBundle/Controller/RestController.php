@@ -138,6 +138,7 @@ class RestController extends FOSRestController
         $template->createField('firstname');
         $template->createField('lastname');
         $template->createField('images');
+        $template->createField('related_materials');
 
         // Profile resource
         $profile = $document->createRootEntity('resource', 'profile');
@@ -493,18 +494,21 @@ class RestController extends FOSRestController
             ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $request->get('creation')))
         ;
 
+        // Related materials
+        foreach($request->get('related_materials', array()) as $material)
+            $resource->addMaterial($material);
+
         // Download files and add them to resource
-        $images = $request->get('images');
-        if (!empty($images)) {
-            foreach ($images as $image) {
-                $image = $image['path'];
-                $ext = pathinfo(parse_url($image, PHP_URL_PATH), PATHINFO_EXTENSION);
-                $filename = md5($image.microtime()); // . '.' . $ext;
-                $file = $filesystem->createFile($filename);
-                // @todo Download files in a proper way.
-                $file->setContent(file_get_contents($image));
-                $assets[] = array('file'=>$file->getKey(), 'type'=>'attachment', 'extension'=>$ext);
-            }
+        $images = $request->get('images', array());
+        foreach ($images as $image)
+        {
+            $image = $image['path'];
+            $ext = pathinfo(parse_url($image, PHP_URL_PATH), PATHINFO_EXTENSION);
+            $filename = md5($image.microtime()); // . '.' . $ext;
+            $file = $filesystem->createFile($filename);
+            // @todo Download files in a proper way.
+            $file->setContent(file_get_contents($image));
+            $assets[] = array('file'=>$file->getKey(), 'type'=>'attachment', 'extension'=>$ext);
         }
         $resource->addAssets($assets);
 

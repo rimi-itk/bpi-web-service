@@ -36,6 +36,10 @@ class LoadNodes implements FixtureInterface
               ->ctime(new \DateTime("-1 day"))
               ->copyleft(new Copyleft('alpha_copyleft unicode(❶)'))
         ;
+
+        $alpha->addMaterial('100200:12345678');
+        $alpha->addMaterial('100200:87654321');
+
         return $alpha;
     }
 

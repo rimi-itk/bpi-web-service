@@ -3,7 +3,9 @@ namespace Bpi\ApiBundle\Domain\Factory;
 
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
+use Bpi\ApiBundle\Domain\ValueObject\Material;
 use Gaufrette\File;
+use Symfony\Component\Routing\RouterInterface;
 
 class ResourceBuilder
 {
@@ -12,8 +14,9 @@ class ResourceBuilder
     protected $assets = array();
     protected $filesystem;
     protected $router;
+    protected $materials = array();
 
-    public function __construct($filesystem, $router)
+    public function __construct(\Gaufrette\Filesystem $filesystem, RouterInterface $router)
     {
         $this->filesystem = $filesystem;
         $this->router = $router;
@@ -86,6 +89,16 @@ class ResourceBuilder
     }
 
     /**
+     * Add material to resource
+     *
+     * @param string $material fully qualified number like 100200:1234567
+     */
+    public function addMaterial($material) {
+        $this->materials[] = Material::create($material);
+        return $this;
+    }
+
+    /**
      *
      * @return boolean
      */
@@ -123,7 +136,8 @@ class ResourceBuilder
             $this->files,
             $this->assets,
             $this->filesystem,
-            $this->router
+            $this->router,
+            $this->materials
         );
     }
 

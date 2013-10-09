@@ -42,6 +42,9 @@ class EndUserTest extends SDKTestCase
         $this->assertTrue(!empty($properties['id']));
         $this->assertTrue(!empty($properties['pushed']));
         $this->assertTrue(!empty($properties['author']));
+
+        // This indirectly checks multivalue properties
+        $this->assertEquals(2, count($properties['material']));
     }
 
     public function testGetNode()
