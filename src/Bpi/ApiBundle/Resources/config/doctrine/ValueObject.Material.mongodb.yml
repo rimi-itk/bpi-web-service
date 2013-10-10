@@ -1,0 +1,7 @@
+Bpi\ApiBundle\Domain\ValueObject\Material:
+  type: embeddedDocument
+  fields:
+    library_code:
+      type: string
+    faust_code:
+      type: string

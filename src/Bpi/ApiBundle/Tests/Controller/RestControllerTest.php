@@ -6,28 +6,16 @@ class RestControllerTest extends ControllerTestCase
     public function testAnswerBadRequestOnPostMalformedRequest()
     {
         // empty request
-        try {
-            $client = $this->doRequest('/node.bpi', '');
-            $this->fail('HTTP Exception expected');
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-            $this->assertEquals(422, $e->getStatusCode(), 'Response must be 422 Unprocessable Entity');
-        }
+        $client = $this->doRequest('/node.bpi', '');
+        $this->assertEquals(422, $client->getResponse()->getStatusCode(), 'Response must be 422 Unprocessable Entity');
 
         // bad xml request
-        try {
-            $client = $this->doRequest('/node.bpi', '<foo>');
-            $this->fail('HTTP Exception expected');
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-            $this->assertEquals(422, $e->getStatusCode(), 'Response must be 422 Unprocessable Entity');
-        }
+        $client = $this->doRequest('/node.bpi', '<foo>');
+        $this->assertEquals(422, $client->getResponse()->getStatusCode(), 'Response must be 422 Unprocessable Entity');
 
         // non xml request
-        try {
-            $client = $this->doRequest('/node.bpi', 'foo');
-            $this->fail('HTTP Exception expected');
-        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
-            $this->assertEquals(422, $e->getStatusCode(), 'Response must be 422 Unprocessable Entity');
-        }
+        $client = $this->doRequest('/node.bpi', 'foo');
+        $this->assertEquals(422, $client->getResponse()->getStatusCode(), 'Response must be 422 Unprocessable Entity');
     }
 
     public function testSkipAuthorizationForOptionsRequest()

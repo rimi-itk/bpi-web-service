@@ -87,6 +87,8 @@ class SDKTestCase extends WebTestCase
             'local_id' =>  mt_rand(),
             'firstname' => 'firstname' . mt_rand(),
             'lastname' => 'lastname' . mt_rand(),
+            'images' => array(),
+            'related_materials' => array('100200:12345678', '200100:22334455')
         );
     }
 
@@ -108,6 +110,8 @@ class SDKTestCase extends WebTestCase
             'local_id' =>  '12345',
             'firstname' => 'firstname',
             'lastname' => 'lastname',
+            'images' => array(),
+            'related_materials' => array()
         ));
 
         return $nodes[$id];
