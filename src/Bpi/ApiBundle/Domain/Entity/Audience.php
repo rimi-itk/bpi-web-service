@@ -1,7 +1,9 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Entity;
 
-class Audience
+use Bpi\ApiBundle\Transform\IPresentable;
+
+class Audience implements IPresentable
 {
     /**
      * @var mixed
@@ -49,5 +51,19 @@ class Audience
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param \Bpi\RestMediaTypeBundle\Document $document
+     */
+    public function transform(\Bpi\RestMediaTypeBundle\Document $document)
+    {
+        $entity = $document->createEntity('audience');
+        $document->appendEntity($entity);
+
+        $entity->addProperty($document->createProperty('group', 'string', 'audience'));
+        $entity->addProperty($document->createProperty('name', 'string', $this->getAudience()));
     }
 }

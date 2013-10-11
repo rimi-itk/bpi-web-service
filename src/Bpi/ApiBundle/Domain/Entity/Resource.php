@@ -34,6 +34,9 @@ class Resource implements IPresentable
 
     protected $materials = array();
 
+    protected $category;
+    protected $audience;
+
     /**
      *
      * @param string $title
@@ -52,6 +55,8 @@ class Resource implements IPresentable
         $teaser,
         Copyleft $copyleft,
         \DateTime $ctime,
+        $category,
+        $audience,
         array $files = null,
         array $assets = array(),
         Filesystem $filesystem,
@@ -70,6 +75,8 @@ class Resource implements IPresentable
         $this->filesystem = $filesystem;
         $this->router = $router;
         $this->materials = $materials;
+        $this->category = $category;
+        $this->audience = $audience;
     }
 
     /**

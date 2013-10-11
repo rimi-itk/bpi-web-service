@@ -26,8 +26,8 @@ class NodeQuery
         'type'     => 'resource.type',
         'ctime'    => 'ctime',
         'pushed'   => 'ctime',
-        'category' => 'profile.category.name',
-        'audience' => 'profile.audience.name',
+        'category' => 'category',
+        'audience' => 'audience',
         'agency_id'=> 'author.agency_id',
         'author'   => 'author.lastname',
         'firstname'=> 'author.firstname',
@@ -92,12 +92,15 @@ class NodeQuery
     {
         foreach($this->filters as $field => $value)
         {
-            if (in_array($field, array('author.firstname', 'author.lastname')))
-            {
+            if (in_array($field, array('author.firstname', 'author.lastname'))) {
                 $value = str_ireplace(' ', '|', $value);
                 $query->addOr($query->expr()->field('author.firstname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
                 $query->addOr($query->expr()->field('author.lastname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
-
+                return;
+            } elseif (in_array($field, array('category', 'audience'))) {
+                $query->addOr(array(
+                    $field . '.$id' => new \MongoId($value->getId()))
+                );
                 return;
             }
 

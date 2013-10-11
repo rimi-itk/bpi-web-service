@@ -4,6 +4,8 @@ namespace Bpi\ApiBundle\Domain\Aggregate;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
+use Bpi\ApiBundle\Domain\Entity\Category;
+use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Transform\IPresentable;
@@ -27,14 +29,25 @@ class Node implements IPresentable
     protected $profile;
     protected $params;
 
+    protected $category;
+    protected $audience;
+
     protected $deleted = false;
 
-    public function __construct(Author $author, Resource $resource, Profile $profile, Params $params)
-    {
+    public function __construct(
+        Author $author = null,
+        Resource $resource = null,
+        Profile $profile = null,
+        $category = null,
+        $audience = null,
+        Params $params = null
+    ) {
         $this->author = $author;
         $this->resource = $resource;
         $this->profile = $profile;
         $this->params = $params;
+        $this->category = $category;
+        $this->audience = $audience;
 
         $this->markTimes();
     }
@@ -132,6 +145,22 @@ class Node implements IPresentable
 
         $document->setCursorOnEntity($entity);
         $this->author->transform($document);
+
+        $entity->addProperty(
+            $document->createProperty(
+                'category',
+                'string',
+                $this->getCategory()->getCategory()
+            )
+        );
+        $entity->addProperty(
+            $document->createProperty(
+                'audience',
+                'string',
+                $this->getAudience()->getAudience()
+            )
+        );
+
         $this->profile->transform($document);
         $this->resource->transform($document);
     }
@@ -175,22 +204,17 @@ class Node implements IPresentable
     {
         $this->resource->setTitle($title);
     }
+
     public function getAudience()
     {
-        return $this->profile->getAudience();
+        return $this->audience;
     }
-    public function setAudience($audience)
-    {
-        $this->profile->setAudience($audience);
-    }
+
     public function getCategory()
     {
-        return $this->profile->getCategory();
+        return $this->category;
     }
-    public function setCategory($category)
-    {
-        $this->profile->setCategory($category);
-    }
+
     public function getTeaser()
     {
         return $this->resource->getTeaser();
@@ -199,4 +223,14 @@ class Node implements IPresentable
     {
         $this->resource->setTeaser($teaser);
     }
+
+    public function setAudience(Audience $audience)
+    {
+        $this->audience = $audience;
+    }
+    public function setCategory(Category $category)
+    {
+        $this->category = $category;
+    }
+
 }

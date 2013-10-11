@@ -1,7 +1,9 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Entity;
 
-class Category
+use Bpi\ApiBundle\Transform\IPresentable;
+
+class Category implements IPresentable
 {
     /**
      * @var mixed
@@ -48,5 +50,19 @@ class Category
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * @param \Bpi\RestMediaTypeBundle\Document $document
+     */
+    public function transform(\Bpi\RestMediaTypeBundle\Document $document)
+    {
+        $entity = $document->createEntity('category');
+        $document->appendEntity($entity);
+
+        $entity->addProperty($document->createProperty('group', 'string', 'category'));
+        $entity->addProperty($document->createProperty('name', 'string', $this->getCategory()));
     }
 }
