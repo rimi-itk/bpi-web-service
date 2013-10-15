@@ -172,7 +172,6 @@ class ContentOwnershipSpecTest extends \PHPUnit_Extensions_Story_TestCase
                 $needle = $arguments[2];
 
                 $data = $world[$agency_id]['nodes'][$local_node_key]->getProperties();
-                var_dump($data);
                 foreach ($needle as $key => $value) {
                     if (!isset($data[$key]) || $data[$key] != $value) {
                         $this->assertEquals($value, $data[$key]);

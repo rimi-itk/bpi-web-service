@@ -2,6 +2,7 @@
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
+use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -70,6 +71,26 @@ class Resource implements IPresentable
         $this->filesystem = $filesystem;
         $this->router = $router;
         $this->materials = $materials;
+    }
+
+    /**
+     * Some data like materials are dependent of syndicator context
+     *
+     * @param  AgencyID $owner
+     * @param  AgencyID $syndicator
+     * @return void
+     */
+    public function defineAgencyContext(AgencyId $owner, AgencyId $syndicator) {
+        $syndication_materials = array();
+        foreach($this->materials as $material) {
+            if ($material->isLibraryEquals($owner)) {
+                $syndication_materials[] = $material->reassignToAgency($syndicator);
+            } else {
+                $syndication_materials[] = $material;
+            }
+        }
+
+        $this->materials = $syndication_materials;
     }
 
     /**
