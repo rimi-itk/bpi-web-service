@@ -1,8 +1,6 @@
 <?php
 namespace Bpi\ApiBundle\Tests\SDK;
 
-require_once __DIR__ . '/../../../Sdk/Bpi/Sdk/Bpi.php';
-
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Bpi\Sdk\Document;
 use Bpi\Sdk\Authorization;
