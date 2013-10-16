@@ -87,8 +87,6 @@ class LoadNodes implements FixtureInterface
     {
         $builder = new ProfileBuilder();
         return $builder
-            ->audience(new Audience('audience_A'))
-            ->category(new Category('category_A'))
             ->yearwheel(new Yearwheel('Winter'))
             ->tags('foo, bar, zoo')
             ->build();
@@ -103,8 +101,6 @@ class LoadNodes implements FixtureInterface
     {
         $builder = new ProfileBuilder();
         return $builder
-            ->audience(new Audience('audience_B'))
-            ->category(new Category('category_B'))
             ->yearwheel(new Yearwheel('Winter'))
             ->build();
         ;
@@ -118,8 +114,6 @@ class LoadNodes implements FixtureInterface
     {
         $builder = new ProfileBuilder();
         return $builder
-            ->audience(new Audience('audience_A'))
-            ->category(new Category('category_B'))
             ->tags('bravo, alpha, charlie')
             ->build();
         ;
@@ -147,6 +141,8 @@ class LoadNodes implements FixtureInterface
         $service->push(
             new Author($agency->getAgencyId(), 1, 'Bush', 'George'),
             $this->createAlphaResource(),
+            'Other',
+            'All',
             $this->createAlphaProfile(),
             new Params(array(new Editable(1), new Authorship(1)))
         );
@@ -155,6 +151,8 @@ class LoadNodes implements FixtureInterface
         $service->push(
             new Author($agency->getAgencyId(), 2, 'Potter', 'Harry'),
             $this->createBravoResource(),
+            'Other',
+            'All',
             $this->createBravoProfile(),
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -163,6 +161,8 @@ class LoadNodes implements FixtureInterface
         $service->push(
             new Author($agency->getAgencyId(), 2, 'Potter'),
             $this->createCharlieResource(),
+            'Other',
+            'All',
             $this->createCharlieProfile(),
             new Params(array(new Editable(0), new Authorship(1)))
         );

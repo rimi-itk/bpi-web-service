@@ -8,7 +8,7 @@ use Bpi\ApiBundle\Tests\DoctrineFixtures\LoadAgencies;
 
 class SDKTestCase extends WebTestCase
 {
-    const TEST_ENDPOINT_URI = 'http://bpi.dev/app_dev.php/';
+    const TEST_ENDPOINT_URI = 'http://bpi-service.local/';
     protected $auth_agency;
     protected $auth_secret;
     protected $auth_pk;

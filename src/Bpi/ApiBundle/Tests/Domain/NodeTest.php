@@ -47,8 +47,8 @@ class NodeTest extends \PHPUnit_Framework_TestCase
 
         $this->authors->alpha = new Author(new AgencyId(mt_rand()), mt_rand(), 'alpha_author');
 
-        $profile_alpha = new Profile(new Audience('audience_A'), new Category('category_A'));
-        $profile_bravo = new Profile(new Audience('audience_A'), new Category('category_B'));
+        $profile_alpha = new Profile();
+        $profile_bravo = new Profile();
 
         $builder = new NodeBuilder();
 
@@ -71,11 +71,6 @@ class NodeTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals(-1, $this->nodes->alpha->compare($this->nodes->bravo, 'resource.title', 1));
         $this->assertEquals(1, $this->nodes->alpha->compare($this->nodes->bravo, 'resource.title', -1));
-
-        $this->assertEquals(-1, $this->nodes->alpha->compare($this->nodes->bravo, 'profile.category.name', 1));
-        $this->assertEquals(1, $this->nodes->alpha->compare($this->nodes->bravo, 'profile.category.name', -1));
-
-        $this->assertEquals(0, $this->nodes->alpha->compare($this->nodes->bravo, 'profile.audience.name', 1));
     }
 
     public function testRevisions()
