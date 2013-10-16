@@ -1,12 +1,15 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Service;
 
+
 use Doctrine\Common\Persistence\ObjectManager;
+
 use Knp\Bundle\GaufretteBundle\FilesystemMap;
 
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Resource;
+
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;
@@ -25,17 +28,16 @@ class PushService
      * @var \Doctrine\Common\Persistence\ObjectManager
      */
     protected $manager;
-
     /**
      *
-     * @var Gaufrette\FilesystemMap
+     * @var \Gaufrette\FilesystemMap
      */
     protected $fs_map;
 
     /**
      *
      * @param \Doctrine\Common\Persistence\ObjectManager $manager
-     * @param \Knp\Bundle\GaufretteBundle\FilesystemMap  $fs_map
+     * @param \Knp\Bundle\GaufretteBundle\FilesystemMap $fs_map
      */
     public function __construct(ObjectManager $manager, FilesystemMap $fs_map)
     {
@@ -45,51 +47,105 @@ class PushService
 
     /**
      *
-     * @param  \Bpi\ApiBundle\Domain\Entity\Author    $author
-     * @param  Resource                               $resource
-     * @param  \Bpi\ApiBundle\Domain\Entity\Profile   $profile
+     * @param  \Bpi\ApiBundle\Domain\Entity\Author $author
+     * @param  Resource $resource
+     * @param  \Bpi\ApiBundle\Domain\Entity\Profile $profile
      * @param  \Bpi\ApiBundle\Domain\Aggregate\Params $params
      * @throws \LogicException
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
-    public function push(Author $author, ResourceBuilder $resource_builder, Profile $profile, Params $params)
-    {
-        $authorship = $params->filter(function($e){
-            if ($e instanceof Authorship)
-                return true;
-        })->first();
+    public function push(
+        Author $author,
+        ResourceBuilder $resource_builder,
+        $category,
+        $audience,
+        Profile $profile,
+        Params $params
+    ) {
+        $authorship = $params->filter(
+            function ($e) {
+                if ($e instanceof Authorship) {
+                    return true;
+                }
+            }
+        )->first();
 
         $this->assignCopyleft($author, $resource_builder, $authorship);
         $resource = $resource_builder->build();
 
         // Find dublicates
         $dublicates = $resource->findSimilar($this->manager->getRepository('BpiApiBundle:Aggregate\Node'));
-        if (count($dublicates))
+        if (count($dublicates)) {
             throw new \LogicException('Found similar resource');
+        }
 
         $builder = new NodeBuilder();
-        $node = $builder
-            ->author($author)
-            ->profile($profile)
-            ->resource($resource)
-            ->params($params)
-            ->build();
+        $builder
+          ->author($author)
+          ->profile($profile)
+          ->resource($resource)
+          ->params($params);
 
+        // Set default category.
+        if (empty($category)) {
+            $category = 'Other';
+        }
+        // Find category entity.
+        $category = $this->manager->getRepository('BpiApiBundle:Entity\Category')->findOneBy(
+            array('category' => $category)
+        );
+        $builder->category($category);
+
+        // Set default audience.
+        if (empty($audience)) {
+            $audience = 'All';
+        }
+        // Find audience entity.
+        $audience = $this->manager->getRepository('BpiApiBundle:Entity\Audience')->findOneBy(
+            array('audience' => $audience)
+        );
+        $builder->audience($audience);
+
+        $node = $builder->build();
         $log = new History($node, $author->getAgencyId(), new \DateTime(), 'push');
+
+        $this->manager->getRepository('BpiApiBundle:Aggregate\Node')->save($node);
         $this->manager->persist($log);
 
-        $this->manager->persist($node);
         $this->manager->flush();
 
         return $node;
     }
 
     /**
+     * Add agency copyleft to the resource
+     *
+     * @param \Bpi\ApiBundle\Domain\Entity\Author $author
+     * @param \Bpi\ApiBundle\Domain\Factory\ResourceBuilder $builder
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Autorship $autorship
+     */
+    public function assignCopyleft(Author $author, ResourceBuilder $builder, Authorship $autorship)
+    {
+        $copyleft = new Copyleft;
+
+        // Set agency as default original copyrighter
+        $this->manager->getRepository('BpiApiBundle:Aggregate\Agency')
+          ->findOneBy(array('public_id' => $author->getAgencyId()->id()))
+          ->setAuthorship($copyleft);
+
+        if ($autorship->isPositive()) {
+            $author->setAuthorship($copyleft);
+        }
+
+        $builder->copyleft($copyleft);
+    }
+
+    /**
      *
      * @param  \Bpi\ApiBundle\Domain\ValueObject\NodeId $node_id
-     * @param  \Bpi\ApiBundle\Domain\Entity\Author      $author
-     * @param  ResourceBuilder                          $builder
-     * @param  \Bpi\ApiBundle\Domain\Aggregate\Params   $params
+     * @param  \Bpi\ApiBundle\Domain\Entity\Author $author
+     * @param  ResourceBuilder $builder
+     * @param  \Bpi\ApiBundle\Domain\Aggregate\Params $params
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
     public function pushRevision(NodeId $node_id, Author $author, ResourceBuilder $builder, Params $params)
@@ -102,30 +158,6 @@ class PushService
         $this->manager->flush();
 
         return $revision;
-    }
-
-    /**
-     * Add agency copyleft to the resource
-     *
-     * @param \Bpi\ApiBundle\Domain\Entity\Author           $author
-     * @param \Bpi\ApiBundle\Domain\Factory\ResourceBuilder $builder
-     * @param \Bpi\ApiBundle\Domain\ValueObject\Autorship   $autorship
-     */
-    public function assignCopyleft(Author $author, ResourceBuilder $builder, Authorship $autorship)
-    {
-        $copyleft = new Copyleft;
-
-        // Set agency as default original copyrighter
-        $this->manager->getRepository('BpiApiBundle:Aggregate\Agency')
-            ->findOneBy(array('public_id' => $author->getAgencyId()->id()))
-            ->setAuthorship($copyleft);
-
-        if ($autorship->isPositive())
-        {
-            $author->setAuthorship($copyleft);
-        }
-
-        $builder->copyleft($copyleft);
     }
 
     public function getFilesystem()

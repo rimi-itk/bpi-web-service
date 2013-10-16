@@ -1,0 +1,10 @@
+Bpi\ApiBundle\Domain\Entity\Audience:
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\AudienceRepository
+  collection: Audiences
+  type: document
+
+  fields:
+    id:
+      id: true
+    audience:
+      type: string

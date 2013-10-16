@@ -10,12 +10,12 @@ services:
         parent: fos_rest.view_handler.default
         calls:
           - ['registerHandler', [ 'bpi', ["@bpi.apibundle.rest.view_extension_handler", 'handleExtension'] ] ]
+
     #domain
     domain.push_service:
         class: Bpi\ApiBundle\Domain\Service\PushService
         arguments: ["@doctrine_mongodb.odm.document_manager", "@knp_gaufrette.filesystem_map"]
-    domain.profile_service:
-        class: Bpi\ApiBundle\Domain\Service\ProfileService
+
     #gridfs gaufrette
     bpi.gridfs.conn:
       class: Doctrine\MongoDB\Connection
@@ -109,12 +109,11 @@ doctrine_mongodb:
             mappings:
                 BpiApiBundle: { type: yml, prefix: Bpi\ApiBundle\Domain }
                 gedmo_tree:
-                        type: yml
-                        prefix: Gedmo\Tree\Document
-                        dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Tree/Document"
-                        alias: GedmoTree # this one is optional and will default to the name set for the mapping
-                        is_bundle: false
-#            auto_mapping: true
+                    type: yml
+                    prefix: Gedmo\Tree\Document
+                    dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Tree/Document"
+                    alias: GedmoTree # this one is optional and will default to the name set for the mapping
+                    is_bundle: false
 
 stof_doctrine_extensions:
     default_locale: en_US

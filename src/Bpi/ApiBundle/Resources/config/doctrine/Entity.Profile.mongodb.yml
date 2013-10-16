@@ -1,16 +1,6 @@
 Bpi\ApiBundle\Domain\Entity\Profile:
   type: embeddedDocument
   fields:
-    audience:
-      embedded: true
-      type: one
-      strategy: pushAll
-      targetDocument: Bpi\ApiBundle\Domain\ValueObject\Audience
-    category:
-      embedded: true
-      type: one
-      strategy: pushAll
-      targetDocument: Bpi\ApiBundle\Domain\ValueObject\Category
     yearwheel:
       embedded: true
       type: one

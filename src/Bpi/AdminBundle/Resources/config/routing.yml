@@ -61,3 +61,27 @@ bpi_admin_node_deleted:
 bpi_admin_statistics:
     pattern: /statistics
     defaults: { _controller: BpiAdminBundle:Statistics:index }
+
+bpi_admin_category:
+    pattern:  /category
+    defaults: { _controller: BpiAdminBundle:Category:index }
+
+bpi_admin_category_new:
+    pattern: /category/new
+    defaults: { _controller: BpiAdminBundle:Category:new }
+
+bpi_admin_category_edit:
+    pattern: /category/edit/{id}
+    defaults: { _controller: BpiAdminBundle:Category:edit }
+
+bpi_admin_audience:
+    pattern:  /audience
+    defaults: { _controller: BpiAdminBundle:Audience:index }
+
+bpi_admin_audience_new:
+    pattern: /audience/new
+    defaults: { _controller: BpiAdminBundle:Audience:new }
+
+bpi_admin_audience_edit:
+    pattern: /audience/edit/{id}
+    defaults: { _controller: BpiAdminBundle:Audience:edit }

@@ -14,6 +14,9 @@ class NodeBuilder
     protected $resource;
     protected $params;
 
+    protected $category;
+    protected $audience;
+
     /**
      *
      * @param \Bpi\ApiBundle\Domain\Entity\Profile $profile
@@ -58,6 +61,18 @@ class NodeBuilder
         return $this;
     }
 
+    public function category($category)
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+    public function audience($audience)
+    {
+        $this->audience = $audience;
+        return $this;
+    }
+
     /**
      *
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
@@ -65,18 +80,18 @@ class NodeBuilder
      */
     public function build()
     {
-        if (is_null($this->author))
+        if (is_null($this->author)) {
             throw new \RuntimeException('Invalid state: Author is required');
-
-        if (is_null($this->profile))
+        }
+        if (is_null($this->profile)) {
             throw new \RuntimeException('Invalid state: Profile is required');
-
-        if (is_null($this->resource))
+        }
+        if (is_null($this->resource)) {
             throw new \RuntimeException('Invalid state: Resource is required');
-
-        if (is_null($this->params))
+        }
+        if (is_null($this->params)) {
             throw new \RuntimeException('Invalid state: Params is required');
-
-        return new Node($this->author, $this->resource, $this->profile, $this->params);
+        }
+        return new Node($this->author, $this->resource, $this->profile, $this->category, $this->audience, $this->params);
     }
 }

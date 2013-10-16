@@ -7,8 +7,8 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\Entity\Author;
-use Bpi\ApiBundle\Domain\ValueObject\Audience;
-use Bpi\ApiBundle\Domain\ValueObject\Category;
+use Bpi\ApiBundle\Domain\Entity\Audience;
+use Bpi\ApiBundle\Domain\Entity\Category;
 use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
@@ -50,14 +50,19 @@ class FakeData implements FixtureInterface
      */
     public function load(ObjectManager $manager)
     {
+
+        $this->createCategories($manager);
+        $this->createAudiences($manager);
+
         $service = new PushService($manager, $this->createFilesystemMap());
 
         $agency['Arhus'] = new Agency('200100', 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', md5('agency_200100_public'), sha1('agency_200100_secret'));
         $agency['Kobenhavns'] = new Agency('200200', 'Københavns Biblioteker', 'Københavns Moderator Name', md5('agency_200200_public'), sha1('agency_200200_secret'));
         $agency['Halsnas'] = new Agency('200300', 'Halsnæs Kommune - Bibliotekerne', 'Halsnæs Moderator Name', md5('agency_200300_public'), sha1('agency_200300_secret'));
 
-        foreach($agency as $agency_item)
+        foreach($agency as $agency_item) {
             $manager->persist($agency_item);
+        }
 
         $manager->flush();
 
@@ -75,16 +80,15 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Kids'))
-            ->category(new Category('Film'))
             ->yearwheel(new Yearwheel('Winter'))
             ->tags('foo, bar, zoo')
             ->build();
-        ;
 
         $node1 = $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Film',
+            'Kids',
             $profile,
             new Params(array(new Editable(1), new Authorship(1)))
         );
@@ -101,8 +105,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Music'))
             ->yearwheel(new Yearwheel('Winter'))
             ->tags('foo, bar, zoo')
             ->build();
@@ -111,6 +113,8 @@ class FakeData implements FixtureInterface
         $node2 = $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Music',
+            'Adult',
             $profile,
             new Params(array(new Editable(1), new Authorship(1)))
         );
@@ -127,8 +131,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Campains'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('foo, bar, zoo')
             ->build();
@@ -137,6 +139,8 @@ class FakeData implements FixtureInterface
         $node3 = $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Campaigns',
+            'Adult',
             $profile,
             new Params(array(new Editable(1), new Authorship(1)))
         );
@@ -153,8 +157,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Kids'))
-            ->category(new Category('Literature'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -163,6 +165,8 @@ class FakeData implements FixtureInterface
         $node4 = $service->push(
             new Author($agency['Kobenhavns']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Literature',
+            'Kids',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -179,8 +183,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Kids'))
-            ->category(new Category('Literature'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -189,6 +191,8 @@ class FakeData implements FixtureInterface
         $node5 = $service->push(
             new Author($agency['Halsnas']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Literature',
+            'Kids',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -205,8 +209,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Other'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -215,6 +217,8 @@ class FakeData implements FixtureInterface
         $service->push(
             new Author($agency['Halsnas']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Other',
+            'Adult',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -231,8 +235,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Young'))
-            ->category(new Category('Other'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -241,6 +243,8 @@ class FakeData implements FixtureInterface
         $service->push(
             new Author($agency['Halsnas']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Other',
+            'Young',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -257,8 +261,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Elders'))
-            ->category(new Category('Facts'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -267,6 +269,8 @@ class FakeData implements FixtureInterface
         $service->push(
             new Author($agency['Halsnas']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Facts',
+            'Elders',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -283,8 +287,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Games'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -293,6 +295,8 @@ class FakeData implements FixtureInterface
         $service->push(
             new Author($agency['Halsnas']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Games',
+            'Adult',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -309,8 +313,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Young'))
-            ->category(new Category('Games'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -319,6 +321,8 @@ class FakeData implements FixtureInterface
         $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Games',
+            'Young',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -335,8 +339,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Elders'))
-            ->category(new Category('Book'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -345,6 +347,8 @@ class FakeData implements FixtureInterface
         $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Book',
+            'Elders',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -361,8 +365,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Campains'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -371,6 +373,8 @@ class FakeData implements FixtureInterface
         $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Campaigns',
+            'Adult',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -387,8 +391,6 @@ class FakeData implements FixtureInterface
 
         $builder = new ProfileBuilder();
         $profile = $builder
-            ->audience(new Audience('Adult'))
-            ->category(new Category('Themes'))
             ->yearwheel(new Yearwheel('Summer'))
             ->tags('bar, zoo')
             ->build();
@@ -397,6 +399,8 @@ class FakeData implements FixtureInterface
         $service->push(
             new Author($agency['Arhus']->getAgencyId(), 1, 'Lastname', 'Name'),
             $resource,
+            'Themes',
+            'Adult',
             $profile,
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -428,4 +432,42 @@ class FakeData implements FixtureInterface
         $manager->flush();
     }
 
+    public function createCategories(ObjectManager $manager)
+    {
+        $categories = array(
+            'Other',
+            'Event',
+            'Music',
+            'Facts',
+            'Book',
+            'Film',
+            'Literature',
+            'Themes',
+            'Markdays',
+            'Games',
+            'Campaigns',
+        );
+
+        foreach ($categories as $category) {
+            $category = new Category($category);
+            $manager->persist($category);
+        }
+        $manager->flush();
+    }
+
+    public function createAudiences(ObjectManager $manager)
+    {
+        $audiences = array(
+            'All',
+            'Adult',
+            'Kids',
+            'Young',
+            'Elders',
+        );
+        foreach ($audiences as $audience) {
+            $audience = new Audience($audience);
+            $manager->persist($audience);
+        }
+        $manager->flush();
+    }
 }
