@@ -6,6 +6,7 @@ use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
+use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -145,6 +146,16 @@ class Node implements IPresentable
     public function isOwner(Agency $agency)
     {
         return $this->author->getAgencyId()->equals($agency->getAgencyId());
+    }
+
+    /**
+     * Some data like materials are dependent of syndicator context
+     *
+     * @param  AgencyID $syndicator
+     * @return void
+     */
+    public function defineAgencyContext(AgencyID $syndicator) {
+        $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
     }
 
     public function getAuthor() {

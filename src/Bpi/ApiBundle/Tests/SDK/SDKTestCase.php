@@ -92,7 +92,7 @@ class SDKTestCase extends WebTestCase
         );
     }
 
-    public function getPredefinedLocalNode($id)
+    public function getPredefinedLocalNode($id, $agency_id = null)
     {
         $dt = new \DateTime();
         $nodes = array('alpha' => array(
@@ -106,7 +106,7 @@ class SDKTestCase extends WebTestCase
             'editable' => 1,
             'authorship' => 1,
             // this value must exists, otherwise it will fail
-            'agency_id' => $this->auth_agency,
+            'agency_id' => $agency_id ? $agency_id : $this->auth_agency,
             'local_id' =>  '12345',
             'firstname' => 'firstname',
             'lastname' => 'lastname',

@@ -1,6 +1,8 @@
 <?php
 namespace Bpi\ApiBundle\Domain\ValueObject;
 
+use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+
 class Material implements IValueObject
 {
     protected $library_code;
@@ -50,5 +52,30 @@ class Material implements IValueObject
     public function __toString()
     {
     	return $this->library_code . ':' . $this->faust_code;
+    }
+
+    /**
+     * Check if library of material equals given agency
+     *
+     * @param  AgencyID $external_library
+     * @return boolean
+     */
+    public function isLibraryEquals(AgencyID $external_library) {
+        $library = new AgencyId($this->library_code);
+
+        return $library->equals($external_library);
+    }
+
+    /**
+     * Reassign library code to given Agency
+     *
+     * @param  AgencyID $agency_id
+     * @return Material modified copy
+     */
+    public function reassignToAgency(AgencyID $agency_id) {
+        $modificated = clone $this;
+        $modificated->library_code = (string) $agency_id;
+
+        return $modificated;
     }
 }

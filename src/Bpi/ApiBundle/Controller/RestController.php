@@ -11,6 +11,7 @@ use Symfony\Component\Validator\Constraints;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;
+use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 
 /**
  * Main entry point for REST requests
@@ -189,6 +190,10 @@ class RestController extends FOSRestController
         }
 
         $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findByNodesQuery($node_query);
+        $agency_id = new AgencyId($this->getUser()->getAgencyId()->id());
+        foreach ($node_collection as $node) {
+          $node->defineAgencyContext($agency_id);
+        }
 
         $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
         $router = $this->get('router');
@@ -334,9 +339,10 @@ class RestController extends FOSRestController
     public function nodeAction($id)
     {
         $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
-        if (!$_node)
+        if (!$_node) {
             throw $this->createNotFoundException();
-
+        }
+        $_node->defineAgencyContext(new AgencyId($this->getUser()->getAgencyId()->id()));
         $document = $this->get("bpi.presentation.transformer")->transform($_node);
 
         $hypermedia = $document->createHypermediaSection();
@@ -623,41 +629,10 @@ class RestController extends FOSRestController
         $entity->setHypermedia($controls);
         $controls->addQuery($document->createQuery('search', 'abc', array('id'), 'Find a node by ID'));
         $controls->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
-        $controls->addLink($document->createLink('self', 'abc'));
-        $controls->addLink($document->createLink('collection', 'abc'));
-
-//        $entity->addLink($document->createLink($rel, $href));
-
-//        $node = $document->getEntity('node');
-//        $node->addLink($document->createLink('self', $this->get('router')->generate('node', array('id' => $node->property('id')->getValue()), true)));
-//        $node->addLink($document->createLink('collection', $this->get('router')->generate('list', array(), true)));
+        $controls->addLink($document->createLink('self', 'Self'));
+        $controls->addLink($document->createLink('collection', 'Collection'));
 
         return $document;
-
-        $contnts = '<bpi version="0.2" xmlns="urn:appstate" xmlns:description="urn:description">
-	<resources>
-		<resource name="node" href="/node">
-			<link rel="collection" href="/node/collection" />
-			<link rel="template" href="/node/template" />
-			<query rel="item" href="...">
-				<param name="id"></param>
-			</query>
-		</resource>
-		<resource name="revision" url="/revision">
-			<link rel="template" href="/revision/template" />
-		</resource>
-		<resource name="asset" href="/asset" />
-		<resource name="category" href="/node/profile/category">
-			<link rel="collection" href="/node/profile/category/collection" />
-		</resource>
-		<resource name="audience" href="/node/profile/audience">
-			<link rel="collection" href="/node/profile/audience/collection" />
-		</resource>
-	</resources>
-</bpi>';
-        $view = $this->view($contnts, 200);
-        $view->setTemplate('BpiApiBundle:Rest:testinterface2.html.twig');
-        return $this->handleView($view);
     }
 
     /**
