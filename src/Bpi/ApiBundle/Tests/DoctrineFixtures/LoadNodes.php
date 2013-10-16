@@ -2,7 +2,8 @@
 
 namespace Bpi\ApiBundle\Tests\DoctrineFixtures;
 
-use Doctrine\Common\DataFixtures\FixtureInterface;
+use Doctrine\Common\DataFixtures\AbstractFixture;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
 use Bpi\ApiBundle\Domain\Aggregate\Params;
@@ -19,7 +20,7 @@ use Bpi\ApiBundle\Domain\Service\PushService;
 use Knp\Bundle\GaufretteBundle\FilesystemMap;
 use Bpi\ApiBundle\DataFixtures\MongoDB\FakeRouter;
 
-class LoadNodes implements FixtureInterface
+class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
 {
     /**
      *
@@ -140,6 +141,7 @@ class LoadNodes implements FixtureInterface
     public function load(ObjectManager $manager)
     {
         $repo = $manager->getRepository('Bpi\ApiBundle\Domain\Aggregate\Agency');
+	var_dump($repo->findAll()->toArray());
         $agency  = $repo->findAll()->getNext();
         $service = new PushService($manager, $this->createFilesystemMap());
 
@@ -166,5 +168,13 @@ class LoadNodes implements FixtureInterface
             $this->createCharlieProfile(),
             new Params(array(new Editable(0), new Authorship(1)))
         );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getOrder()
+    {
+        return 2; // the order in which fixtures will be loaded
     }
 }
