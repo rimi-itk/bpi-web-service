@@ -44,7 +44,7 @@ class History
     /**
      * Set node
      *
-     * @param Bpi\ApiBundle\Domain\Aggregate\Node $node
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Node $node
      * @return History
      */
     public function setNode($node)
@@ -67,7 +67,7 @@ class History
     /**
      * Set agency
      *
-     * @param Bpi\ApiBundle\Domain\Aggregate\Agency $agency
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $agency
      * @return History
      */
     public function setAgency($agency)
@@ -80,7 +80,7 @@ class History
     /**
      * Get agency
      *
-     * @return Bpi\ApiBundle\Domain\Aggregate\Agency
+     * @return \Bpi\ApiBundle\Domain\Aggregate\Agency
      */
     public function getAgency()
     {

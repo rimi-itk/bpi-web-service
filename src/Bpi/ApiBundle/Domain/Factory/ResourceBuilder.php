@@ -16,6 +16,9 @@ class ResourceBuilder
     protected $router;
     protected $materials = array();
 
+    protected $category;
+    protected $audience;
+
     public function __construct(\Gaufrette\Filesystem $filesystem, RouterInterface $router)
     {
         $this->filesystem = $filesystem;
@@ -88,6 +91,18 @@ class ResourceBuilder
         return $this;
     }
 
+    public function setAudience($audience)
+    {
+        $this->audience = $audience;
+        return $this;
+    }
+
+    public function setCategory($category)
+    {
+        $this->category = $category;
+        return $this;
+    }
+
     /**
      * Add material to resource
      *
@@ -133,6 +148,8 @@ class ResourceBuilder
             $this->teaser,
             $this->copyleft,
             $this->ctime,
+            $this->category,
+            $this->audience,
             $this->files,
             $this->assets,
             $this->filesystem,

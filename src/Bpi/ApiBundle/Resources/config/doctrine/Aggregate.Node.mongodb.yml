@@ -48,18 +48,31 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\Entity\Author
+
     profile:
       embedded: true
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\Entity\Profile
+
     resource:
       embedded: true
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\Entity\Resource
+
     params:
       embedded: true
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\Aggregate\Params
+
+    category:
+      reference: true
+      type: one
+      targetDocument: Bpi\ApiBundle\Domain\Entity\Category
+
+    audience:
+      reference: true
+      type: one
+      targetDocument: Bpi\ApiBundle\Domain\Entity\Audience

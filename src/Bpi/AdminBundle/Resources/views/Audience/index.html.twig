@@ -1,0 +1,28 @@
+{% extends "BpiAdminBundle::layout.html.twig" %}
+
+{% block content %}
+{% include 'BpiAdminBundle:Audience:nav.html.twig' %}
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in pagination %}
+        <tr>
+            <td>{{ item.audience }}</td>
+            <td>
+                <a href="{{ url('bpi_admin_audience_edit',{'id':item.id}) }}">Edit</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<div class="navigation">
+    {{ knp_pagination_render(pagination) }}
+</div>
+{% endblock %}
