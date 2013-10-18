@@ -36,12 +36,12 @@ class Node implements IPresentable
     protected $deleted = false;
 
     public function __construct(
-        Author $author = null,
-        Resource $resource = null,
-        Profile $profile = null,
-        $category = null,
-        $audience = null,
-        Params $params = null
+        Author $author,
+        Resource $resource,
+        Profile $profile,
+        Category $category,
+        Audience $audience,
+        Params $params
     ) {
         $this->author = $author;
         $this->resource = $resource;
@@ -107,6 +107,8 @@ class Node implements IPresentable
             ->profile($this->profile)
             ->resource($resource)
             ->params($params)
+            ->category($this->category)
+            ->audience($this->audience)
             ->build()
         ;
 

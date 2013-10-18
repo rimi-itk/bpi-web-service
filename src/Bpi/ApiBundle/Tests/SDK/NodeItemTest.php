@@ -48,8 +48,8 @@ class NodeItemTest extends SDKTestCase
 
         $properties = $this->item->propertiesToArray();
         $this->assertEquals('Winter', $properties['yearwheel']);
-        $this->assertEquals('audience_A', $properties['audience']);
-        $this->assertEquals('category_A', $properties['category']);
+        $this->assertEquals('All', $properties['audience']);
+        $this->assertEquals('Event', $properties['category']);
         $this->assertEquals('foo, bar, zoo', $properties['tags']);
         $this->assertEquals('article', $properties['type']);
         $this->assertEquals(

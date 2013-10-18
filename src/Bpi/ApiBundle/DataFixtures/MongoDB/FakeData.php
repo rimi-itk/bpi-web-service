@@ -432,7 +432,7 @@ class FakeData implements FixtureInterface
         $manager->flush();
     }
 
-    public function createCategories(ObjectManager $manager)
+    public static function createCategories(ObjectManager $manager)
     {
         $categories = array(
             'Other',
@@ -455,7 +455,7 @@ class FakeData implements FixtureInterface
         $manager->flush();
     }
 
-    public function createAudiences(ObjectManager $manager)
+    public static function createAudiences(ObjectManager $manager)
     {
         $audiences = array(
             'All',

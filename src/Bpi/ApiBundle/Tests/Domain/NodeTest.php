@@ -4,8 +4,8 @@ namespace Bpi\ApiBundle\Tests\Domain;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
-use Bpi\ApiBundle\Domain\ValueObject\Audience;
-use Bpi\ApiBundle\Domain\ValueObject\Category;
+use Bpi\ApiBundle\Domain\Entity\Category;
+use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
@@ -47,8 +47,8 @@ class NodeTest extends \PHPUnit_Framework_TestCase
 
         $this->authors->alpha = new Author(new AgencyId(mt_rand()), mt_rand(), 'alpha_author');
 
-        $profile_alpha = new Profile(new Audience('audience_A'), new Category('category_A'));
-        $profile_bravo = new Profile(new Audience('audience_A'), new Category('category_B'));
+        $profile_alpha = new Profile();
+        $profile_bravo = new Profile();
 
         $builder = new NodeBuilder();
 
@@ -57,6 +57,8 @@ class NodeTest extends \PHPUnit_Framework_TestCase
             ->profile($profile_alpha)
             ->resource($this->resources->alpha)
             ->params(new Params(array('autorship' => new Authorship(1), 'editable' => new Editable(1))))
+            ->category(new Category('Other'))
+            ->audience(new Audience('All'))
             ->build();
 
         $this->nodes->bravo = $builder
@@ -64,6 +66,8 @@ class NodeTest extends \PHPUnit_Framework_TestCase
             ->profile($profile_bravo)
             ->resource($this->resources->bravo)
             ->params(new Params(array('autorship' => new Authorship(0), 'editable' => new Editable(1))))
+            ->category(new Category('Other'))
+            ->audience(new Audience('All'))
             ->build();
     }
 
@@ -71,11 +75,6 @@ class NodeTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals(-1, $this->nodes->alpha->compare($this->nodes->bravo, 'resource.title', 1));
         $this->assertEquals(1, $this->nodes->alpha->compare($this->nodes->bravo, 'resource.title', -1));
-
-        $this->assertEquals(-1, $this->nodes->alpha->compare($this->nodes->bravo, 'profile.category.name', 1));
-        $this->assertEquals(1, $this->nodes->alpha->compare($this->nodes->bravo, 'profile.category.name', -1));
-
-        $this->assertEquals(0, $this->nodes->alpha->compare($this->nodes->bravo, 'profile.audience.name', 1));
     }
 
     public function testRevisions()

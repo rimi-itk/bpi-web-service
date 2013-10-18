@@ -8,8 +8,8 @@ use Doctrine\Common\Persistence\ObjectManager;
 
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\Entity\Author;
-use Bpi\ApiBundle\Domain\ValueObject\Audience;
-use Bpi\ApiBundle\Domain\ValueObject\Category;
+use Bpi\ApiBundle\Domain\Entity\Audience;
+use Bpi\ApiBundle\Domain\Entity\Category;
 use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
@@ -88,8 +88,6 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
     {
         $builder = new ProfileBuilder();
         return $builder
-            ->audience(new Audience('audience_A'))
-            ->category(new Category('category_A'))
             ->yearwheel(new Yearwheel('Winter'))
             ->tags('foo, bar, zoo')
             ->build();
@@ -104,8 +102,6 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
     {
         $builder = new ProfileBuilder();
         return $builder
-            ->audience(new Audience('audience_B'))
-            ->category(new Category('category_B'))
             ->yearwheel(new Yearwheel('Winter'))
             ->build();
         ;
@@ -119,8 +115,6 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
     {
         $builder = new ProfileBuilder();
         return $builder
-            ->audience(new Audience('audience_A'))
-            ->category(new Category('category_B'))
             ->tags('bravo, alpha, charlie')
             ->build();
         ;
@@ -148,6 +142,8 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
         $service->push(
             new Author($agency->getAgencyId(), 1, 'Bush', 'George'),
             $this->createAlphaResource(),
+            'Event',
+            'All',
             $this->createAlphaProfile(),
             new Params(array(new Editable(1), new Authorship(1)))
         );
@@ -156,6 +152,8 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
         $service->push(
             new Author($agency->getAgencyId(), 2, 'Potter', 'Harry'),
             $this->createBravoResource(),
+            'Other',
+            'Adult',
             $this->createBravoProfile(),
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -164,6 +162,8 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
         $service->push(
             new Author($agency->getAgencyId(), 2, 'Potter'),
             $this->createCharlieResource(),
+            'Literature',
+            'Elders',
             $this->createCharlieProfile(),
             new Params(array(new Editable(0), new Authorship(1)))
         );

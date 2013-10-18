@@ -9,7 +9,8 @@ use Knp\Bundle\GaufretteBundle\FilesystemMap;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Resource;
-
+use Bpi\ApiBundle\Domain\Entity\Category;
+use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;

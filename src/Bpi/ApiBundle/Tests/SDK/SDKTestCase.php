@@ -85,8 +85,8 @@ class SDKTestCase extends WebTestCase
             'teaser' => 'teaser_' . mt_rand(),
             'type' => 'article',
             'creation' => $dt->format(\DateTime::W3C),
-            'category' => 'category',
-            'audience' => 'all',
+            'category' => 'Event',
+            'audience' => 'Kids',
             'editable' => 1,
             'authorship' => 1,
             // this value must exists, otherwise it will fail
@@ -108,8 +108,8 @@ class SDKTestCase extends WebTestCase
             'teaser' => 'teaser_alpha',
             'type' => 'article',
             'creation' => $dt->format(\DateTime::W3C),
-            'category' => 'category',
-            'audience' => 'all',
+            'category' => 'Film',
+            'audience' => 'All',
             'editable' => 1,
             'authorship' => 1,
             // this value must exists, otherwise it will fail
