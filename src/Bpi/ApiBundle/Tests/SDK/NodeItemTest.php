@@ -31,7 +31,7 @@ class NodeItemTest extends SDKTestCase
     public function setUp()
     {
         $doc = $this->createDocument($client = new \Goutte\Client());
-        $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
+        $doc->loadEndpoint(self::getEndpointUri());
         $doc->firstItem('name', 'node')->link('collection')->get($doc);
         $query = $doc->firstItem('type', 'collection')->query('refinement');
         $query->send($doc, array('filter' => array('title' => 'alpha_title')));

@@ -8,7 +8,7 @@ class EndpointTest extends SDKTestCase
     public function testEndpoint()
     {
         $doc = $this->createDocument($client = new \Goutte\Client());
-        $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
+        $doc->loadEndpoint(self::getEndpointUri());
 
         $doc->firstItem('name', 'node');
         $this->assertEquals(1, $doc->count());

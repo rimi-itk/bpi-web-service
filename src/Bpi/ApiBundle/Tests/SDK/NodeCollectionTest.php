@@ -6,7 +6,7 @@ class NodeCollectionTest extends SDKTestCase
     protected function getRefinementQuery()
     {
         $doc = $this->createDocument($client = new \Goutte\Client());
-        $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
+        $doc->loadEndpoint(self::getEndpointUri());
         $doc->firstItem('name', 'node')->link('collection')->follow($doc);
         return array($doc, $doc->firstItem('type', 'collection')->query('refinement'));
     }
@@ -64,7 +64,7 @@ class NodeCollectionTest extends SDKTestCase
     public function testCollectionMetadata()
     {
         $doc = $this->createDocument($client = new \Goutte\Client());
-        $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
+        $doc->loadEndpoint(self::getEndpointUri());
         $doc->firstItem('name', 'node')->link('collection')->follow($doc);
         $coll = $doc->firstItem('type', 'collection');
 

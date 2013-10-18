@@ -8,7 +8,6 @@ use Bpi\ApiBundle\Tests\DoctrineFixtures\LoadAgencies;
 
 class SDKTestCase extends WebTestCase
 {
-    const TEST_ENDPOINT_URI = 'http://bpi.dev/app_dev.php/';
     protected $auth_agency;
     protected $auth_secret;
     protected $auth_pk;
@@ -25,6 +24,16 @@ class SDKTestCase extends WebTestCase
     {
         $this->reloadFixtures();
         parent::setUp();
+    }
+
+    protected static function getEndpointUri()
+    {
+        $uri = getenv('BPI_TEST_ENDPOINT_URI');
+        if ($uri === false) {
+            throw new \RuntimeException('BPI_TEST_ENDPOINT_URI variable should be defined');
+        }
+
+        return $uri;
     }
 
     protected function reloadFixtures()
@@ -51,7 +60,7 @@ class SDKTestCase extends WebTestCase
      */
     public function createBpi()
     {
-        return new \Bpi(self::TEST_ENDPOINT_URI, $this->auth_agency, $this->auth_pk, $this->auth_secret);
+        return new \Bpi(self::getEndpointUri(), $this->auth_agency, $this->auth_pk, $this->auth_secret);
     }
 
     /**
@@ -60,7 +69,7 @@ class SDKTestCase extends WebTestCase
      */
     public function createBpiBravo()
     {
-        return new \Bpi(self::TEST_ENDPOINT_URI, LoadAgencies::AGENCY_BRAVO, LoadAgencies::AGENCY_BRAVO_KEY, LoadAgencies::AGENCY_BRAVO_SECRET);
+        return new \Bpi(self::getEndpointUri(), LoadAgencies::AGENCY_BRAVO, LoadAgencies::AGENCY_BRAVO_KEY, LoadAgencies::AGENCY_BRAVO_SECRET);
     }
 
     /**
