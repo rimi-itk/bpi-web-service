@@ -103,7 +103,7 @@ doctrine_mongodb:
             server: mongodb://localhost:27017
             #server: mongodb://rockmongo.bpi1.inlead.dk:27017
             options: {}
-    default_database: bpi
+    default_database: %mongodb_db%
     document_managers:
         default:
             mappings:
