@@ -2,6 +2,7 @@
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
+use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -26,59 +27,77 @@ class Resource implements IPresentable
 
     protected $copyleft;
 
+
+    protected $hash;
+
+    protected $router;
+    protected $filesystem;
+
+    protected $materials = array();
+
+    protected $category;
+    protected $audience;
+
+    /**
+     *
+     * @param string $title
+     * @param string $body
+     * @param string $teaser
+     * @param Copyleft $copyleft
+     * @param \DateTime $ctime
+     * @param array $files
+     * @param array $assets
+     * @param \Gaufrette\Filesystem $filesystem
+     * @param object $router
+     */
     public function __construct(
         $title,
         $body,
         $teaser,
         Copyleft $copyleft,
         \DateTime $ctime,
-        array $files = null
+        $category,
+        $audience,
+        array $files = null,
+        array $assets = array(),
+        Filesystem $filesystem,
+        $router,
+        array $materials = array()
     )
     {
         $this->title = $title;
-        $this->body = new Resource\Body($body);
+        $this->body = new Resource\Body($body, $filesystem, $router);
+        $this->body->rebuildInlineAssets();
         $this->teaser = $teaser;
         $this->copyleft = $copyleft;
         $this->ctime = $ctime;
-        $this->allocateFiles($files);
+        $this->regenerateHash();
+        $this->assets = array_merge($assets, $this->body->getAssets());
+        $this->filesystem = $filesystem;
+        $this->router = $router;
+        $this->materials = $materials;
+        $this->category = $category;
+        $this->audience = $audience;
     }
 
     /**
-     * Allocate files as embedded or attached assets
+     * Some data like materials are dependent of syndicator context
      *
-     * @param  array $files Gaufrette\File instances
+     * @param  AgencyID $owner
+     * @param  AgencyID $syndicator
      * @return void
      */
-    public function allocateFiles(array $files = null)
-    {
-        if (is_null($files))
-            return;
-
-        foreach ($files as $file) {
-            $this->assets[] = $this->body->allocateFile($file);
-        }
-    }
-
-    /**
-     * Copy assets into other filesystem in transactional way
-     * Common use case is to persists from memory to storage
-     *
-     * @param  \Gaufrette\Filesystem      $fs
-     * @return Resource\AssetsTransaction
-     */
-    public function copyAssets(Filesystem $fs)
-    {
-        $transaction = new Resource\AssetsTransaction();
-        try {
-            foreach ($this->assets as $asset) {
-                $transaction->add($asset);
-                $asset->copy($fs);
+    public function defineAgencyContext(AgencyId $owner, AgencyId $syndicator) {
+        $syndication_materials = array();
+        foreach($this->materials as $material) {
+            if ($material->isLibraryEquals($owner)) {
+                $syndication_materials[] = $material->reassignToAgency($syndicator);
+            } else {
+                $syndication_materials[] = $material;
             }
-        } catch (\RuntimeException $e) {
-            $transaction->markAsFailed($e);
         }
 
-        return $transaction;
+        $this->materials = $syndication_materials;
     }
 
     /**
@@ -111,9 +130,13 @@ class Resource implements IPresentable
             $document->appendEntity($entity);
         }
 
-        // replace embedded assets with local link
-        foreach ($this->assets as $asset)
-                $this->body->replaceAssetLink($asset, $document->generateRoute("get_asset", array('filename'=> $asset->getId())));
+        // Add assets to presentation.
+        $i = 1;
+        foreach ($this->assets as $asset) {
+            $assetUrl = $document->generateRoute("get_asset", array('filename'=> $asset['file'], 'extension'=> $asset['extension']), true);
+            $entity->addProperty($document->createProperty('asset' . $i, 'asset', $assetUrl));
+            $i++;
+        }
 
         $copyleft = '<p>' . $this->copyleft . '</p>';
 
@@ -122,6 +145,11 @@ class Resource implements IPresentable
         $entity->addProperty($document->createProperty('teaser', 'string', $this->teaser));
         $entity->addProperty($document->createProperty('creation', 'dateTime', $this->ctime));
         $entity->addProperty($document->createProperty('type', 'string', $this->type));
+
+        foreach ($this->materials as $material)
+        {
+            $entity->addProperty($document->createProperty('material', 'string', (string) $material));
+        }
     }
 
     /**
@@ -149,6 +177,50 @@ class Resource implements IPresentable
      */
     public function wakeup()
     {
-        $this->body = new Resource\Body($this->body);
+        $this->body = new Resource\Body($this->body, $this->filesystem, $this->router);
+    }
+
+    /**
+     * Generate hash of the content
+     *
+     * @return string
+     */
+    protected function regenerateHash()
+    {
+        $this->hash = md5(strip_tags($this->title . $this->teaser . $this->body));
+    }
+
+    /**
+     * Try to find similar resources
+     *
+     * @param \Bpi\ApiBundle\Domain\Repository\ResourceRepository $repository
+     * @return array
+     */
+    public function findSimilar(\Doctrine\ODM\MongoDB\DocumentRepository $repository)
+    {
+        // @todo replace with query
+        return $repository->findOneBy(array('resource.hash' => $this->hash, 'deleted' => false));
+    }
+
+    public function getTitle()
+    {
+        return $this->title;
+    }
+    public function setTitle($title)
+    {
+        $this->title = $title;
+    }
+    public function getTeaser()
+    {
+        return $this->teaser;
+    }
+    public function setTeaser($teaser)
+    {
+        $this->teaser = $teaser;
+    }
+
+    public function addAsset($asset)
+    {
+        $this->assets[] = $asset;
     }
 }

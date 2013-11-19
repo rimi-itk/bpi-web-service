@@ -14,4 +14,14 @@ class AgencyId
     {
         return $this->id;
     }
+
+    public function equals(AgencyId $agency)
+    {
+        return $this->id == $agency->id;
+    }
+
+    public function __toString()
+    {
+        return $this->id();
+    }
 }

@@ -9,21 +9,20 @@ use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 class Agency implements IPresentable
 {
     protected $id;
-
+    protected $public_id;
     protected $name;
-
     protected $moderator;
-
     protected $public_key;
-
     protected $secret;
+    protected $deleted = false;
 
-    public function __construct($name, $moderator, $public_key, $secret)
+    public function __construct($public_id = null, $name = null, $moderator = null, $public_key = null, $secret = null)
     {
+        $this->public_id = $public_id;
         $this->name = $name;
         $this->moderator = $moderator;
-        $this->public_key = $public_key;
-        $this->secret = $secret;
+        $this->setPublicKey($public_key);
+        $this->setSecret($secret);
     }
 
     /**
@@ -31,10 +30,9 @@ class Agency implements IPresentable
      */
     public function transform(Document $document)
     {
-        $document->appendEntity($entity = $document->createEntity('agency'));
-        $entity->addProperty($document->createProperty('name', 'string', $this->name));
-        $entity->addProperty($document->createProperty('moderator', 'string', $this->moderator));
-        $entity->addProperty($document->createProperty('public_key', 'string', $this->public_key));
+        $entity = $document->currentEntity();
+        $entity->addProperty($document->createProperty('agency_id', 'string', $this->public_id));
+        $entity->addProperty($document->createProperty('agency_name', 'string', $this->name));
     }
 
     /**
@@ -54,6 +52,78 @@ class Agency implements IPresentable
      */
     public function getAgencyId()
     {
-      return new AgencyId($this->id);
+        return new AgencyId($this->public_id);
     }
+
+    /**
+     * Check auth token.
+     *
+     * @return string
+     */
+    public function checkToken($token)
+    {
+        $localToken = crypt($this->public_id . $this->public_key . $this->secret, $token);
+        return $token === $localToken;
+    }
+
+    public function __toString()
+    {
+        return (string) $this->public_id;
+    }
+
+    public function setDeleted($value = true)
+    {
+        $this->deleted = $value;
+    }
+    public function getDeleted()
+    {
+        return $this->deleted;
+    }
+
+    public function getId()
+    {
+        return $this->id;
+    }
+    public function getPublicId()
+    {
+        return $this->public_id;
+    }
+    public function setPublicId($id)
+    {
+        $this->public_id = $id;
+    }
+    public function getName()
+    {
+        return $this->name;
+    }
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+    public function getModerator()
+    {
+        return $this->moderator;
+    }
+    public function setModerator($name)
+    {
+        $this->moderator = $name;
+    }
+    public function setPublicKey($key)
+    {
+        $this->public_key = empty($key) ? md5(microtime(true) . rand()) : $key;
+    }
+    public function getPublicKey()
+    {
+        return $this->public_key;
+    }
+
+    public function setSecret($secret)
+    {
+        $this->secret = empty($secret) ? sha1(microtime(true) . rand()) : $secret;
+    }
+    public function getSecret()
+    {
+        return $this->secret;
+    }
+
 }

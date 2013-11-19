@@ -10,11 +10,11 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
     /**
      * {@inheritdoc}
      *
-     * @param string $publickey find agency by username=public key
+     * @param string $agencyId find agency by public id
      */
-    public function loadUserByUsername($publickey)
+    public function loadUserByUsername($agencyId)
     {
-        return $this->findOneBy(array('publickey' => $publickey));
+        return $this->findOneBy(array('public_id' => $agencyId));
     }
 
     public function refreshUser(UserInterface $user)
@@ -24,6 +24,53 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
 
     public function supportsClass($class)
     {
-        ;
+        // @todo Add a proper check?
+    }
+
+    /**
+     * Show all agencies filtered by "deleted" value.
+     *
+     * @param bool $deleted
+     * @return array
+     */
+    public function listAll($deleted = false)
+    {
+        $qb = $this->createQueryBuilder();
+        $qb->field('deleted')->equals($deleted)
+            ->sort('public_id', 0);
+        return $qb;
+    }
+
+
+    /**
+     * Delete an agency
+     *
+     * @param string $id Agency ID
+     */
+    public function delete($id)
+    {
+        $agency = $this->find($id);
+        $agency->setDeleted();
+        $this->dm->persist($agency);
+        $this->dm->flush($agency);
+    }
+
+    /**
+     * Restore deleted agency
+     *
+     * @param string $id AgencyID
+     */
+    public function restore($id)
+    {
+        $agency = $this->find($id);
+        $agency->setDeleted(false);
+        $this->dm->persist($agency);
+        $this->dm->flush($agency);
+    }
+
+    public function save($agency)
+    {
+        $this->dm->persist($agency);
+        $this->dm->flush($agency);
     }
 }

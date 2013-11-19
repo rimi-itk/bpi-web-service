@@ -9,6 +9,15 @@ security:
     providers:
         agencies:
             id: bpi.pk.security.user_provider
+        admins:
+            memory:
+                users:
+                    admin:
+                        password: admin
+                        roles: ROLE_ADMIN
+                    sa:
+                        password: sa
+                        roles: ROLE_SUPER_ADMIN
 
     firewalls:
         dev:
@@ -18,7 +27,7 @@ security:
         documentation:
             pattern:  ^/.+\.html$
             security: false
-            
+
         schema:
             pattern: ^/shema.*
             security: false
@@ -27,7 +36,25 @@ security:
             pattern: ^/$
             security: false
 
+        admin:
+            pattern: ^/admin
+            anonymous: ~
+            stateless: true
+            http_basic:
+                realm: "BPI Admin"
+                provider: admins
+            logout:
+                path:   /admin/logout
+                target: /
+
+        assets:
+            pattern: ^/asset/
+            security: false
+
         api:
-            pattern:   ^/.*
+            pattern:   ^/
             pk:      true
             stateless: true
+
+    access_control:
+        - { path: ^/admin, roles: ROLE_ADMIN }

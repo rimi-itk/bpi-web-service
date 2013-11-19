@@ -9,9 +9,17 @@ web/uploads/*
 web/bundles/*
 # Configuration files
 app/config/parameters.ini
+
 # IDE
 nbproject/*
-/*.lock
+/.settings
+/.buildpath
+/.project
+/.idea
 
 #SDK
 src/Bpi/Sdk/vendor/*
+
+# Temp files
+*~
+/composer.phar

@@ -1,0 +1,32 @@
+{% extends "BpiAdminBundle::layout.html.twig" %}
+
+{% block content %}
+{% include 'BpiAdminBundle:Node:nav.html.twig' %}
+{% if delete_lable is not defined %}
+    {% set delete_lable = "Delete" %}
+    {% set delete_url = "bpi_admin_node_delete" %}
+{% endif %}
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Agency ID</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in nodes %}
+    <tr>
+        <td>{{ item.title }}</td>
+        <td>{{ item.agencyId }}</td>
+        <td>
+            <a href="{{ url('bpi_admin_node_details',{'id':item.id}) }}">Details</a>
+            <a href="{{ url('bpi_admin_node_edit',{'id':item.id}) }}">Edit</a>
+            <a href="{{ url(delete_url,{'id':item.id}) }}">{{delete_lable}}</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

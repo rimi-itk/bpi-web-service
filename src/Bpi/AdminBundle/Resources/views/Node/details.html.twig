@@ -1,0 +1,28 @@
+{% extends "BpiAdminBundle::layout.html.twig" %}
+
+{% block content %}
+{% include 'BpiAdminBundle:Node:nav.html.twig' %}
+
+<table class="table table-striped table-hover">
+    <tr>
+        <td>Tile</td>
+        <td>{{ node.title }}</td>
+    </tr>
+    <tr>
+        <td>Teaser</td>
+        <td>{{ node.teaser }}</td>
+    </tr>
+    <tr>
+        <td>Category</td>
+        <td>{{ node.category.category }}</td>
+    </tr>
+    <tr>
+        <td>Audience</td>
+        <td>{{ node.audience.audience }}</td>
+    </tr>
+    <tr>
+        <td>Deleted</td>
+        <td>{% if node.deleted %}TRUE{% else %}FALSE{% endif %}</td>
+    </tr>
+</table>
+{% endblock %}

@@ -1,9 +1,6 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Entity\Resource;
 
-use Bpi\ApiBundle\Domain\Entity\Asset;
-use Gaufrette\File;
-
 class Body
 {
     const BASE_URL_STUB = '__embedded_asset_base_url__';
@@ -15,15 +12,19 @@ class Body
      */
     protected $dom;
 
-    protected $linked_list;
+    protected $filesystem;
+    protected $router;
+    protected $assets = array();
 
     /**
      *
      * @param string $content
      * @throws \RuntimeException
      */
-    public function __construct($content)
+    public function __construct($content, $filesystem=null, $router=null)
     {
+        $this->dom = $content;
+        /*
         $this->dom = new \DOMDocument();
         $this->dom->strictErrorChecking = false;
 
@@ -45,34 +46,12 @@ class Body
         libxml_clear_errors();
 
         if (false === $result) {
-            /** @todo write details in log **/
+            // @todo write details in log
             throw new \RuntimeException('Unable to import content into DOMDocument');
         }
-
-        $this->linked_list = new \SplObjectStorage();
-    }
-
-    /**
-     * Consider file as attached asset if content has no elements with corresponding id
-     *
-     * @param \Gaufrette\File $file
-     * @return Asset
-     */
-    public function allocateFile(File $file)
-    {
-        $element = $this->dom->getElementById($file->getKey());
-        $asset = is_null($element) ? new Asset($file, Asset::ATTACHED) : new Asset($file, Asset::EMBEDDED);
-        $this->linked_list->attach($asset, $element);
-        return $asset;
-    }
-
-    public function replaceAssetLink(Asset $asset, $link)
-    {
-        if (!$asset->isEmbedded())
-            return;
-
-        $element = $this->linked_list->offsetGet($asset);
-        $element->setAttribute('src', $link);
+*/
+        $this->router = $router;
+        $this->filesystem = $filesystem;
     }
 
     /**
@@ -92,13 +71,76 @@ class Body
      */
     public function getFlattenContent()
     {
+        /*
         // Fixed length strings must work faster that regexp
         $replaces = array(
             '<html>', '</html>',
             '<head>', '</head>',
             '<body>', '</body>',
-            '<meta content="text/html; charset=utf-8" http-equiv="Content-Type" id="__wellform__"></meta>',
+            "<!DOCTYPE html>\n",
+            '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" id="__wellform__">', '</meta>',
         );
-        return str_ireplace($replaces, '', $this->dom->C14N());
+        $html = $this->dom->saveHTML();
+        return str_ireplace($replaces, '', $html);
+        */
+
+        return $this->dom;
+    }
+
+    public function rebuildInlineAssets()
+    {
+        // Rebuild images
+        $url = $this->router->generate('index', array(), true) . 'images/image.png';
+
+        /*
+        $images = $this->dom->getElementsByTagName('img');
+        foreach ($images as $img) {
+            $src = $img->getAttributeNode('src')->value;
+            $ext = pathinfo(parse_url($src, PHP_URL_PATH), PATHINFO_EXTENSION);
+
+            if ($src == $url) {
+                continue;
+            }
+
+            // Download file and save to db.
+            $filename = md5($src.microtime());
+            $file = $this->filesystem->createFile($filename);
+            // @todo Download files in a proper way.
+            $file->setContent(file_get_contents($src));
+
+            // Build URL for new image and replace img src.
+            $this->assets[] = array('file'=>$file->getKey(), 'type'=>'embedded', 'extension'=>$ext);
+
+            $img->setAttribute('src', $url);
+        }
+        */
+        preg_match_all('/<img[^>]+>/im', $this->dom, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $match) {
+
+            preg_match('/src=\"([^"]+)\"/i', $match[0], $src);
+
+            $srcFile = $src[1];
+            $ext = pathinfo(parse_url($srcFile, PHP_URL_PATH), PATHINFO_EXTENSION);
+
+            // Download file and save to db.
+            $filename = md5($src.microtime());
+            $file = $this->filesystem->createFile($filename);
+            // @todo Download files in a proper way.
+            $file->setContent(file_get_contents($srcFile));
+
+            // Build URL for new image and replace img src.
+            $this->assets[] = array('file'=>$file->getKey(), 'type'=>'embedded', 'extension'=>$ext);
+
+            $tag = str_replace($srcFile, $url, $match[0]);
+
+            $this->dom = str_replace($match[0], $tag, $this->dom);
+        }
+
+    }
+
+    public function getAssets()
+    {
+        return $this->assets;
     }
 }

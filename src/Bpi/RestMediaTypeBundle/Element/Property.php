@@ -61,8 +61,10 @@ class Property
      */
     protected function normalizeValue()
     {
-        if (function_exists('is_'.$this->type))
+        if (function_exists('is_'.$this->type)) {
+            // WTF??? No "@" allowed!!!
             @settype($this->value, $this->type);
+        }
     }
 
     /**

@@ -8,7 +8,7 @@ class ProfileTest extends SDKTestCase
     public function testDictionary()
     {
         $doc = $this->createDocument($client = new \Goutte\Client());
-        $doc->loadEndpoint(self::TEST_ENDPOINT_URI);
+        $doc->loadEndpoint(self::getEndpointUri());
         $doc->firstItem('name', 'profile')->link('dictionary')->follow($doc);
 
         $this->assertTrue($doc->count() > 0, 'Length of items must be greater than zero');

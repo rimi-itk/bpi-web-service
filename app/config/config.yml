@@ -8,14 +8,14 @@ services:
         class: Bpi\ApiBundle\View\BPIViewHandler
     bpi.apibundle.rest.view_handler:
         parent: fos_rest.view_handler.default
-        calls: 
+        calls:
           - ['registerHandler', [ 'bpi', ["@bpi.apibundle.rest.view_extension_handler", 'handleExtension'] ] ]
+
     #domain
     domain.push_service:
         class: Bpi\ApiBundle\Domain\Service\PushService
         arguments: ["@doctrine_mongodb.odm.document_manager", "@knp_gaufrette.filesystem_map"]
-    domain.profile_service:
-        class: Bpi\ApiBundle\Domain\Service\ProfileService
+
     #gridfs gaufrette
     bpi.gridfs.conn:
       class: Doctrine\MongoDB\Connection
@@ -34,7 +34,7 @@ services:
     #presentation
     bpi.presentation.document:
         class: Bpi\RestMediaTypeBundle\Document
-        calls: 
+        calls:
           - ['setRouter', [ "@router"] ]
     bpi.presentation.transformer:
         class: Bpi\ApiBundle\Transform\Presentation
@@ -51,6 +51,10 @@ services:
       factory_service: doctrine_mongodb
       factory_method:  getRepository
       arguments: [ 'BpiApiBundle:Aggregate\Agency' ]
+    bpi.domain.event_listener:
+        class: Bpi\ApiBundle\Domain\EventListener
+        tags:
+            -  { name: doctrine_mongodb.odm.event_listener, event: postLoad }
 
 framework:
     #esi:             ~
@@ -97,19 +101,19 @@ doctrine_mongodb:
     connections:
         default:
             server: mongodb://localhost:27017
+            #server: mongodb://rockmongo.bpi1.inlead.dk:27017
             options: {}
-    default_database: bpi
+    default_database: %mongodb_db%
     document_managers:
         default:
             mappings:
                 BpiApiBundle: { type: yml, prefix: Bpi\ApiBundle\Domain }
                 gedmo_tree:
-                        type: yml
-                        prefix: Gedmo\Tree\Document
-                        dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Tree/Document"
-                        alias: GedmoTree # this one is optional and will default to the name set for the mapping
-                        is_bundle: false
-#            auto_mapping: true
+                    type: yml
+                    prefix: Gedmo\Tree\Document
+                    dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Tree/Document"
+                    alias: GedmoTree # this one is optional and will default to the name set for the mapping
+                    is_bundle: false
 
 stof_doctrine_extensions:
     default_locale: en_US
@@ -148,11 +152,11 @@ fos_rest:
         mime_types:
             bpi:
                - 'application/vnd.bpi.api+xml'
-            json: 
+            json:
                - 'application/json'
-            xml: 
+            xml:
                - 'application/xml'
-                
+
 jms_serializer:
     metadata:
         debug: "%kernel.debug%"

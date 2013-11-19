@@ -1,0 +1,25 @@
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="brand" href="{{ url('bpi_admin_homepage') }}">BPI Admin</a>
+                    <div class="nav-collapse collapse">
+                        {# Define menu #}
+                        {% set navigation = {
+                            'bpi_admin_homepage': 'Home',
+                            'bpi_admin_agency': 'Agencies',
+                            'bpi_admin_node': 'Nodes',
+                            'bpi_admin_category': 'Categories',
+                            'bpi_admin_audience': 'Target Audiences',
+                            'bpi_admin_statistics': 'Statistics',
+                            'logout': 'Exit',
+                        } %}
+                        {% set route = app.request.attributes.get('_route') %}
+                        <ul class="nav">
+                        {% for url, title in navigation %}
+                            <li{% if url in route %} class="active"{% endif %}><a href="{{ url(url) }}">{{title}}</a></li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>

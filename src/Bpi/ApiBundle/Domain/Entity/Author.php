@@ -3,14 +3,17 @@ namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
+use Bpi\RestMediaTypeBundle\Document;
 
-class Author
+class Author implements \Bpi\ApiBundle\Transform\IPresentable
 {
     /**
      *
      * @var Bpi\ApiBundle\Domain\ValueObject\AgencyId
      */
     protected $agency_id;
+
+    protected $agency;
 
     /**
      *
@@ -51,7 +54,7 @@ class Author
      */
     public function getAgencyId()
     {
-        return $this->agency_id;
+        return is_object($this->agency_id) ? $this->agency_id : new AgencyId($this->agency_id);
     }
 
     /**
@@ -71,5 +74,32 @@ class Author
     public function setAuthorship(Copyleft $copyleft)
     {
         $copyleft->addCopyrigher($this->getFullName(), false);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transform(Document $document)
+    {
+        try {
+            $entity = $document->currentEntity();
+        } catch(\RuntimeException $e) {
+            $entity = $document->createEntity('entity', 'author');
+            $document->appendEntity($entity);
+        }
+
+        $entity->addProperty($document->createProperty(
+            'author',
+            'string',
+            $this->getFullName()
+        ));
+
+        if ($this->agency instanceof \Bpi\ApiBundle\Domain\Aggregate\Agency) {
+            $this->agency->transform($document);
+        }
+    }
+
+    public function loadAgency(\Bpi\ApiBundle\Domain\Repository\AgencyRepository $repository) {
+        $this->agency = $repository->findOneBy(array('public_id' => $this->agency_id));
     }
 }

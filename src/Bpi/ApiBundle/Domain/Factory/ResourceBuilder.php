@@ -3,12 +3,27 @@ namespace Bpi\ApiBundle\Domain\Factory;
 
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
+use Bpi\ApiBundle\Domain\ValueObject\Material;
 use Gaufrette\File;
+use Symfony\Component\Routing\RouterInterface;
 
 class ResourceBuilder
 {
     protected $title, $body, $teaser, $ctime, $copyleft;
     protected $files = array();
+    protected $assets = array();
+    protected $filesystem;
+    protected $router;
+    protected $materials = array();
+
+    protected $category;
+    protected $audience;
+
+    public function __construct(\Gaufrette\Filesystem $filesystem, RouterInterface $router)
+    {
+        $this->filesystem = $filesystem;
+        $this->router = $router;
+    }
 
     /**
      *
@@ -76,6 +91,28 @@ class ResourceBuilder
         return $this;
     }
 
+    public function setAudience($audience)
+    {
+        $this->audience = $audience;
+        return $this;
+    }
+
+    public function setCategory($category)
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+    /**
+     * Add material to resource
+     *
+     * @param string $material fully qualified number like 100200:1234567
+     */
+    public function addMaterial($material) {
+        $this->materials[] = Material::create($material);
+        return $this;
+    }
+
     /**
      *
      * @return boolean
@@ -101,9 +138,28 @@ class ResourceBuilder
         if (is_null($this->copyleft))
             $this->copyleft = new Copyleft('');
 
-        if (!$this->isValidForBuild())
+        if (!$this->isValidForBuild()) {
             throw new \RuntimeException('Invalid state: can not build');
+        }
 
-        return new Resource($this->title, $this->body, $this->teaser, $this->copyleft, $this->ctime, $this->files);
+        return new Resource(
+            $this->title,
+            $this->body,
+            $this->teaser,
+            $this->copyleft,
+            $this->ctime,
+            $this->category,
+            $this->audience,
+            $this->files,
+            $this->assets,
+            $this->filesystem,
+            $this->router,
+            $this->materials
+        );
+    }
+
+    public function addAssets($assets)
+    {
+        $this->assets = array_merge($this->assets, $assets);
     }
 }

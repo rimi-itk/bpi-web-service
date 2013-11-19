@@ -1,5 +1,0 @@
-Bpi\ApiBundle\Domain\ValueObject\Audience:
-  type: embeddedDocument
-  fields:
-    name:
-      type: string

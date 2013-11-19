@@ -8,18 +8,19 @@ class ContentNegociationTest extends WebTestCase
 {
     public function doRequest($http_accept, $file_extension)
     {
-        $client = static::createClient(array(
-              'environment' => 'test_skip_auth'
-        ));
+        $client = static::createClient();
 
-        $accept = $http_accept ? array('HTTP_ACCEPT' => $http_accept) : array();
+        $headers = $http_accept ? array('HTTP_ACCEPT' => $http_accept) : array();
+
+        $auth = new \Bpi\Sdk\Authorization('200100', md5('agency_200100_public'), sha1('agency_200100_secret'));
+        $headers['HTTP_Auth'] = $auth->toHTTPHeader();
 
         $client->request(
             'GET',
             '/tools/echo'.$file_extension,
             array(),
             array(),
-            $accept
+            $headers
         );
         return $client;
     }

@@ -11,16 +11,17 @@ Bpi\ApiBundle\Domain\Entity\Resource:
       type: date
     type:
       type: string
+    hash:
+      type: string
     copyleft:
       embedded: true
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\ValueObject\Copyleft
     assets:
-      reference: true
-      type: many
-      targetDocument: Bpi\ApiBundle\Domain\Entity\Asset
-      cascade: all
-      strategy: pushAll
+      type: hash
+  embedMany:
+    materials:
+      targetDocument: Bpi\ApiBundle\Domain\ValueObject\Material
   lifecycleCallbacks:
     postLoad: [ wakeup ]

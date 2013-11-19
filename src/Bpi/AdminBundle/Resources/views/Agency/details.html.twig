@@ -1,0 +1,32 @@
+{% extends "BpiAdminBundle::layout.html.twig" %}
+
+{% block content %}
+{% include 'BpiAdminBundle:Agency:nav.html.twig' %}
+
+<table class="table table-striped table-hover">
+	<tr>
+	<td>Public ID</td>
+	<td>{{ agency.publicId }}</td>
+	</tr>
+	<tr>
+	<td>Name</td>
+	<td>{{ agency.name }}</td>
+	</tr>
+	<tr>
+	<td>Moderator</td>
+	<td>{{ agency.moderator }}</td>
+	</tr>
+	<tr>
+	<td>Public key</td>
+	<td>{{ agency.publicKey }}</td>
+	</tr>
+	<tr>
+	<td>Secret</td>
+	<td>{{ agency.secret }}</td>
+	</tr>
+	<tr>
+	<td>Deleted</td>
+	<td>{% if agency.deleted %}TRUE{% else %} FALSE {% endif %}</td>
+	</tr>
+</table>
+{% endblock %}

@@ -56,7 +56,7 @@ class Entity implements HasLinks
      * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Hypermedia")
      */
     protected $hypermedia;
-    
+
     /**
      *
      * @param string $type
@@ -83,7 +83,7 @@ class Entity implements HasLinks
      */
     public function addProperty(Property $property)
     {
-        $this->properties[$property->getName()] = $property;
+        $this->properties[] = $property;
     }
 
     /**
@@ -110,11 +110,25 @@ class Entity implements HasLinks
     /**
      *
      * @param string $name
-     * @return Property
+     * @return Property|array|null
      */
     public function property($name)
     {
-        return $this->hasProperty($name) ? $this->properties[$name] : null;
+        $property = array();
+        foreach ($this->properties as $prop)
+        {
+            if ($prop->getName() == $name)
+                $property[] = $prop;
+        }
+
+        $count = count($property);
+        if ($count == 0)
+            return null;
+
+        if ($count == 1)
+            return current($property);
+
+        return $property;
     }
 
     /**
@@ -122,28 +136,36 @@ class Entity implements HasLinks
      */
     protected function rebuildKeys()
     {
-        // after deserialization
-        foreach ($this->properties as $key => $property) {
-            unset($this->properties[$key]);
-            $this->properties[$property->getName()] = $property;
-        }
-
         foreach ($this->entities as $key => $entity) {
             unset($this->entities[$key]);
             $this->entities[$entity->getName()] = $entity;
         }
     }
 
+    /**
+     * Check existence of property. There might be multiple properties with same name.
+     *
+     * @param  string       $name
+     * @param  string|null  $type
+     * @return boolean
+     */
     public function hasProperty($name, $type = null)
     {
-        if (!isset($this->properties[$name]))
-            return false;
+        foreach ($this->properties as $key => $prop)
+        {
+            if ($prop->getName() == $name)
+            {
+                if (!is_null($type))
+                {
+                    if (!$prop->typeOf($type))
+                        return false;
+                }
 
-        if  (!is_null($type))
-            if (!$this->properties[$name]->typeOf($type))
-                return false;
+                return true;
+            }
+        }
 
-        return true;
+        return false;
     }
 
     /**
@@ -209,7 +231,7 @@ class Entity implements HasLinks
      */
     public function walk(\Closure $callback)
     {
-        array_walk($this->properties, $callback);
+        return array_walk($this->properties, $callback);
     }
 
     /**
@@ -227,9 +249,9 @@ class Entity implements HasLinks
         }
         return $props;
     }
-    
+
     /**
-     * 
+     *
      * @param \Bpi\RestMediaTypeBundle\Element\Hypermedia $controls
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */

@@ -1,6 +1,6 @@
 Bpi\ApiBundle\Domain\Aggregate\Node:
 #  db: documents
-  repositoryClass: Bpi\ApiBundle\Domain\Repository\Node
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\NodeRepository
   collection: Node
   gedmo:
     tree:
@@ -13,6 +13,8 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
         - treePathSource
     ctime:
       type: date
+      index: true
+      order: desc
     mtime:
       type: date
 
@@ -32,23 +34,45 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
       cascade: all
       gedmo:
         - treeParent
+
     lock_time:
       type: date
       gedmo:
         - treeLockTime
+
+    deleted:
+       type: boolean
+
+    author:
+      embedded: true
+      type: one
+      strategy: pushAll
+      targetDocument: Bpi\ApiBundle\Domain\Entity\Author
 
     profile:
       embedded: true
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\Entity\Profile
+
     resource:
       embedded: true
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\Entity\Resource
+
     params:
       embedded: true
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\Aggregate\Params
+
+    category:
+      reference: true
+      type: one
+      targetDocument: Bpi\ApiBundle\Domain\Entity\Category
+
+    audience:
+      reference: true
+      type: one
+      targetDocument: Bpi\ApiBundle\Domain\Entity\Audience

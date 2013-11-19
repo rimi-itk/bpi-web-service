@@ -6,37 +6,21 @@ use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\Profile\Relation\IRelation;
 use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
-use Bpi\ApiBundle\Domain\ValueObject\Audience;
-use Bpi\ApiBundle\Domain\ValueObject\Category;
 use Bpi\ApiBundle\Domain\ValueObject\ValueObjectList as VOList;
 
 class Profile implements IPresentable
 {
     /**
-     * Mandatory attribute
-     *
-     * @var Bpi\ApiBundle\Domain\ValueObject\Audience
-     */
-    protected $audience;
-
-    /**
-     * Mandatory attribute
-     *
-     * @var Bpi\ApiBundle\Domain\ValueObject\Category
-     */
-    protected $category;
-
-    /**
      * Closed optional attribute
      *
-     * @var Bpi\ApiBundle\Domain\ValueObject\Yearwheel
+     * @var \Bpi\ApiBundle\Domain\ValueObject\Yearwheel
      */
     protected $yearwheel;
 
     /**
      * Open optional dictionary
      *
-     * @var Bpi\ApiBundle\Domain\ValueObject\ValueObjectList
+     * @var \Bpi\ApiBundle\Domain\ValueObject\ValueObjectList
      */
     protected $tags;
 
@@ -47,10 +31,8 @@ class Profile implements IPresentable
      */
     protected $relations;
 
-    public function __construct(Audience $audience, Category $category, Yearwheel $yearwheel = null, VOList $tags = null)
+    public function __construct(Yearwheel $yearwheel = null, VOList $tags = null)
     {
-        $this->audience = $audience;
-        $this->category = $category;
         $this->yearwheel = $yearwheel;
         $this->tags = $tags;
         $this->relations = new \SplObjectStorage();
@@ -85,19 +67,6 @@ class Profile implements IPresentable
             $entity = $document->createEntity('entity', 'profile');
             $document->appendEntity($entity);
         }
-
-        $entity->addProperty($document->createProperty(
-            'category',
-            'string',
-            $this->category->name()
-        ));
-
-        $entity->addProperty($document->createProperty(
-            'audience',
-            'string',
-            $this->audience->name()
-        ));
-
         if ($this->yearwheel instanceof Yearwheel)
         {
             $entity->addProperty($document->createProperty(
@@ -107,7 +76,7 @@ class Profile implements IPresentable
             ));
         }
 
-        if ($this->tags->count())
+        if ($this->tags && $this->tags->count())
         {
             $entity->addProperty($document->createProperty(
                 'tags',

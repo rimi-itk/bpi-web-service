@@ -1,9 +1,0 @@
-Bpi\ApiBundle\Domain\Entity\Asset:
-  collection: Asset
-  fields:
-    id:
-      id: true
-    type:
-      type: string
-    file:
-      type: file

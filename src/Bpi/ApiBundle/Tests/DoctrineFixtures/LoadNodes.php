@@ -2,14 +2,14 @@
 
 namespace Bpi\ApiBundle\Tests\DoctrineFixtures;
 
-use Doctrine\Common\DataFixtures\FixtureInterface;
+use Doctrine\Common\DataFixtures\AbstractFixture;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\Entity\Author;
-use Bpi\ApiBundle\Domain\ValueObject\Audience;
-use Bpi\ApiBundle\Domain\ValueObject\Category;
+use Bpi\ApiBundle\Domain\Entity\Audience;
+use Bpi\ApiBundle\Domain\Entity\Category;
 use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
@@ -18,18 +18,18 @@ use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 use Bpi\ApiBundle\Domain\Factory\ProfileBuilder;
 use Bpi\ApiBundle\Domain\Service\PushService;
 use Knp\Bundle\GaufretteBundle\FilesystemMap;
+use Bpi\ApiBundle\DataFixtures\MongoDB\FakeRouter;
 
-class LoadNodes implements FixtureInterface
+class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
 {
-
     /**
      *
      * @return \Bpi\ApiBundle\Domain\Entity\Resource
      */
     public function createAlphaResource()
     {
-        //@todo add assets
-        $resource_builder = new ResourceBuilder;
+        $map = $this->createFilesystemMap();
+        $resource_builder = new ResourceBuilder($map->get('assets'), new FakeRouter());
         $alpha = $resource_builder
               ->body('<p>alpha_body unicode(❶)</p>')
               ->teaser('alpha_teaser unicode(❶)')
@@ -37,6 +37,10 @@ class LoadNodes implements FixtureInterface
               ->ctime(new \DateTime("-1 day"))
               ->copyleft(new Copyleft('alpha_copyleft unicode(❶)'))
         ;
+
+        $alpha->addMaterial('100200:12345678');
+        $alpha->addMaterial('100200:87654321');
+
         return $alpha;
     }
 
@@ -46,9 +50,10 @@ class LoadNodes implements FixtureInterface
      */
     public function createBravoResource()
     {
-        $resource_builder = new ResourceBuilder;
+        $map = $this->createFilesystemMap();
+        $resource_builder = new ResourceBuilder($map->get('assets'), new FakeRouter());
         $bravo = $resource_builder
-              ->body('bravo_body')
+              ->body('<span title="bravo">bravo_body</span>')
               ->teaser('bravo_teaser')
               ->title('bravo_title')
               ->ctime(new \DateTime("+1 day"))
@@ -63,7 +68,8 @@ class LoadNodes implements FixtureInterface
      */
     public function createCharlieResource()
     {
-        $resource_builder = new ResourceBuilder;
+        $map = $this->createFilesystemMap();
+        $resource_builder = new ResourceBuilder($map->get('assets'), new FakeRouter());
         $charlie = $resource_builder
               ->body('alpha_body')
               ->teaser('bravo_teaser')
@@ -82,8 +88,6 @@ class LoadNodes implements FixtureInterface
     {
         $builder = new ProfileBuilder();
         return $builder
-            ->audience(new Audience('audience_A'))
-            ->category(new Category('category_A'))
             ->yearwheel(new Yearwheel('Winter'))
             ->tags('foo, bar, zoo')
             ->build();
@@ -98,8 +102,6 @@ class LoadNodes implements FixtureInterface
     {
         $builder = new ProfileBuilder();
         return $builder
-            ->audience(new Audience('audience_B'))
-            ->category(new Category('category_B'))
             ->yearwheel(new Yearwheel('Winter'))
             ->build();
         ;
@@ -113,8 +115,6 @@ class LoadNodes implements FixtureInterface
     {
         $builder = new ProfileBuilder();
         return $builder
-            ->audience(new Audience('audience_A'))
-            ->category(new Category('category_B'))
             ->tags('bravo, alpha, charlie')
             ->build();
         ;
@@ -129,7 +129,6 @@ class LoadNodes implements FixtureInterface
         return new FilesystemMap(array('assets' => new \Gaufrette\Filesystem(new \Gaufrette\Adapter\InMemory())));
     }
 
-
     /**
      * {@inheritDoc}
      */
@@ -137,13 +136,14 @@ class LoadNodes implements FixtureInterface
     {
         $repo = $manager->getRepository('Bpi\ApiBundle\Domain\Aggregate\Agency');
         $agency  = $repo->findAll()->getNext();
-
         $service = new PushService($manager, $this->createFilesystemMap());
 
         // Alpha
         $service->push(
             new Author($agency->getAgencyId(), 1, 'Bush', 'George'),
             $this->createAlphaResource(),
+            'Event',
+            'All',
             $this->createAlphaProfile(),
             new Params(array(new Editable(1), new Authorship(1)))
         );
@@ -152,6 +152,8 @@ class LoadNodes implements FixtureInterface
         $service->push(
             new Author($agency->getAgencyId(), 2, 'Potter', 'Harry'),
             $this->createBravoResource(),
+            'Other',
+            'Adult',
             $this->createBravoProfile(),
             new Params(array(new Editable(1), new Authorship(0)))
         );
@@ -160,9 +162,18 @@ class LoadNodes implements FixtureInterface
         $service->push(
             new Author($agency->getAgencyId(), 2, 'Potter'),
             $this->createCharlieResource(),
+            'Literature',
+            'Elders',
             $this->createCharlieProfile(),
             new Params(array(new Editable(0), new Authorship(1)))
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public function getOrder()
+    {
+        return 2; // the order in which fixtures will be loaded
+    }
 }

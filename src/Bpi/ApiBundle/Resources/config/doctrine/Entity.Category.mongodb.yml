@@ -1,0 +1,10 @@
+Bpi\ApiBundle\Domain\Entity\Category:
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\CategoryRepository
+  collection: Categories
+  type: document
+
+  fields:
+    id:
+      id: true
+    category:
+      type: string
