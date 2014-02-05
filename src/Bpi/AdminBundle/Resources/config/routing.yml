@@ -22,6 +22,10 @@ bpi_admin_agency_delete:
     pattern: /agency/delete/{id}
     defaults: { _controller: BpiAdminBundle:Agency:delete }
 
+bpi_admin_agency_purge:
+    pattern: /agency/purge/{id}
+    defaults: { _controller: BpiAdminBundle:Agency:purge }
+
 bpi_admin_agency_restore:
     pattern: /agency/restore/{id}
     defaults: { _controller: BpiAdminBundle:Agency:restore }

@@ -56,6 +56,18 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
     }
 
     /**
+     * Purge an agency (permanent delete).
+     *
+     * @param string $id Agency ID
+     */
+    public function purge($id)
+    {
+        $agency = $this->find($id);
+        $this->dm->remove($agency);
+        $this->dm->flush();
+    }
+
+    /**
      * Restore deleted agency
      *
      * @param string $id AgencyID

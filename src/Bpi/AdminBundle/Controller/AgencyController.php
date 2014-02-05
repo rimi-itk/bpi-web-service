@@ -13,7 +13,7 @@ class AgencyController extends Controller
     private function getRepository()
     {
         return $this->get('doctrine.odm.mongodb.document_manager')
-            ->getRepository('BpiApiBundle:Aggregate\Agency');
+          ->getRepository('BpiApiBundle:Aggregate\Agency');
     }
 
     /**
@@ -23,7 +23,7 @@ class AgencyController extends Controller
     {
         $query = $this->getRepository()->listAll();
 
-        $paginator  = $this->get('knp_paginator');
+        $paginator = $this->get('knp_paginator');
         $pagination = $paginator->paginate(
             $query,
             $this->get('request')->query->get('page', 1),
@@ -42,7 +42,7 @@ class AgencyController extends Controller
     {
         $query = $this->getRepository()->listAll(true);
 
-        $paginator  = $this->get('knp_paginator');
+        $paginator = $this->get('knp_paginator');
         $pagination = $paginator->paginate(
             $query,
             $this->get('request')->query->get('page', 1),
@@ -52,7 +52,8 @@ class AgencyController extends Controller
         return array(
             'pagination' => $pagination,
             'delete_lable' => 'Undelete',
-            'delete_url' => 'bpi_admin_agency_restore'
+            'delete_url' => 'bpi_admin_agency_restore',
+            'purge' => 1,
         );
     }
 
@@ -69,6 +70,7 @@ class AgencyController extends Controller
             $form->bind($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($agency);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_agency')
                 );
@@ -94,6 +96,7 @@ class AgencyController extends Controller
             $form->bind($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($agency);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_agency')
                 );
@@ -112,6 +115,7 @@ class AgencyController extends Controller
     public function detailsAction($id)
     {
         $agency = $this->getRepository()->find($id);
+
         return array(
             'agency' => $agency
         );
@@ -120,14 +124,25 @@ class AgencyController extends Controller
     public function deleteAction($id)
     {
         $this->getRepository()->delete($id);
+
         return $this->redirect(
             $this->generateUrl("bpi_admin_agency", array())
+        );
+    }
+
+    public function purgeAction($id)
+    {
+        $this->getRepository()->purge($id);
+
+        return $this->redirect(
+            $this->generateUrl("bpi_admin_agency_deleted", array())
         );
     }
 
     public function restoreAction($id)
     {
         $this->getRepository()->restore($id);
+
         return $this->redirect(
             $this->generateUrl("bpi_admin_agency", array())
         );
@@ -136,12 +151,11 @@ class AgencyController extends Controller
     private function createAgencyForm($agency, $new = false)
     {
         $formBuilder = $this->createFormBuilder($agency)
-            ->add('publicId', 'text')
-            ->add('name', 'text')
-            ->add('moderator', 'text')
-            ->add('publicKey', 'text')
-            ->add('secret', 'text')
-        ;
+          ->add('publicId', 'text', array('label' => 'Public ID'))
+          ->add('name', 'text')
+          ->add('moderator', 'text')
+          ->add('publicKey', 'text')
+          ->add('secret', 'text');
 
         if (!$new) {
             $formBuilder->add('deleted', 'checkbox', array('required' => false));
