@@ -38,8 +38,8 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
               ->copyleft(new Copyleft('alpha_copyleft unicode(❶)'))
         ;
 
-        $alpha->addMaterial('100200:12345678');
-        $alpha->addMaterial('100200:87654321');
+        $alpha->addMaterial('100200-track:12345678');
+        $alpha->addMaterial('100200-forfweb:87654321');
 
         return $alpha;
     }

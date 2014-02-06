@@ -47,6 +47,8 @@ class EndUserTest extends SDKTestCase
         $this->assertEquals(2, count($properties['material']));
     }
 
+    // @todo Test yield correct error when v2 material IDs was requested
+
     public function testGetNode()
     {
         try

@@ -5,3 +5,5 @@ Bpi\ApiBundle\Domain\ValueObject\Material:
       type: string
     faust_code:
       type: string
+    tag:
+      type: string
