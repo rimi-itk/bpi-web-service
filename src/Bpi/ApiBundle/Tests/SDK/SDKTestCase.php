@@ -72,10 +72,6 @@ class SDKTestCase extends WebTestCase
         return new \Bpi(self::getEndpointUri(), LoadAgencies::AGENCY_BRAVO, LoadAgencies::AGENCY_BRAVO_KEY, LoadAgencies::AGENCY_BRAVO_SECRET);
     }
 
-    /**
-     *
-     * @return type
-     */
     public function createRandomDataForPush()
     {
         $dt = new \DateTime();
