@@ -1,12 +1,14 @@
 Bpi\ApiBundle\Domain\Aggregate\Agency:
-#  db: documents
-  repositoryClass: Bpi\ApiBundle\Domain\Repository\AgencyRepository
   collection: Agency
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\AgencyRepository
+
   fields:
     id:
       id: true
     public_id:
       type: string
+      unique: true
+      order: true
     name:
       type: string
     moderator:

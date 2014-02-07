@@ -1,0 +1,5 @@
+Bpi\ApiBundle\Domain\Aggregate\Agency:
+    constraints:
+        - Doctrine\Bundle\MongoDBBundle\Validator\Constraints\Unique:
+            fields: [public_id]
+            message: This Public ID is already in use.
