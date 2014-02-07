@@ -47,7 +47,7 @@ class Document
     /**
      * @param string $version API version
      */
-    public function __construct($version)
+    public function __construct($version = '0.0.1')
     {
         $this->version = $version;
     }
