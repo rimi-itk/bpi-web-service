@@ -727,11 +727,12 @@ class RestController extends FOSRestController
         try {
             $fs = $this->get('domain.push_service')->getFilesystem();
             $file = $fs->get($filename);
+            return new Response($file->getContent(), 200, $headers);
         } catch (\Gaufrette\Exception\FileNotFound $e) {
             throw $this->createNotFoundException();
+        } catch (\Exception $e) {
+            return new Response('Bad file', 410);
         }
-
-        return new Response($file->getContent(), 200, $headers);
     }
 
     /**
