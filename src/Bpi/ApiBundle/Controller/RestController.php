@@ -26,7 +26,7 @@ class RestController extends FOSRestController
      */
     public function indexAction()
     {
-        $document = new Document();
+        $document = $this->get('bpi.presentation.document');
 
         // Node resource
         $node = $document->createRootEntity('resource', 'node');
@@ -318,7 +318,7 @@ class RestController extends FOSRestController
                 return $transformer->transform($loader->createAlphaAgency());
                 break;
             case 'nodes_query':
-                $doc = new Document;
+                $doc = $this->get('bpi.presentation.document');
                 $doc->appendEntity($entity = $doc->createEntity('nodes_query'));
                 $entity->addProperty($doc->createProperty('amount', 'number', 10));
                 $entity->addProperty($doc->createProperty('offset', 'number', 0));
@@ -653,7 +653,7 @@ class RestController extends FOSRestController
             return $this->redirect($this->generateUrl('node', $params));
         }
 
-        $document = new Document();
+        $document = $this->get('bpi.presentation.document');
         $entity = $document->createRootEntity('node');
         $controls = $document->createHypermediaSection();
         $entity->setHypermedia($controls);
@@ -754,7 +754,7 @@ class RestController extends FOSRestController
      */
     public function profileDictionaryAction()
     {
-        $document = new Document();
+        $document = $this->get('bpi.presentation.document');
 
         $audiences = $this->getRepository('BpiApiBundle:Entity\Audience')->findAll();
         $categories = $this->getRepository('BpiApiBundle:Entity\Category')->findAll();

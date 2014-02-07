@@ -44,9 +44,12 @@ class Document
      */
     protected $collection;
 
-    public function __construct()
+    /**
+     * @param string $version API version
+     */
+    public function __construct($version)
     {
-        $this->version = '0.1';
+        $this->version = $version;
     }
 
     /**
