@@ -7,6 +7,7 @@ class Material implements IValueObject
 {
     protected $library_code;
     protected $faust_code;
+    protected $tag;
 
     /**
      * This could be ID, FAUST or ISBN number
@@ -17,19 +18,18 @@ class Material implements IValueObject
     public static function create($fully_qualified_code)
     {
         // @TODO: detect ISBN and other types
-        if (!preg_match('~^\d+:.+~', $fully_qualified_code)) {
+        if (!preg_match('~^(\d+)\-([^\:]+)\:(.+)~', $fully_qualified_code, $match)) {
             throw new \InvalidArgumentException("Incorrect material number: ". $fully_qualified_code);
         }
 
-        list($library_code, $faust_code) = explode(':', $fully_qualified_code);
-
-        return new static($library_code, $faust_code);
+        return new static($match[1], $match[3], $match[2]);
     }
 
-    public function __construct($library_code, $faust_code)
+    public function __construct($library_code, $faust_code, $tag)
     {
         $this->library_code = $library_code;
         $this->faust_code = $faust_code;
+        $this->tag = $tag;
     }
 
     /**
@@ -43,7 +43,8 @@ class Material implements IValueObject
         }
 
         return $this->library_code == $material->library_code
-            && $this->faust_code == $material->faust_code;
+            && $this->faust_code == $material->faust_code
+            && $this->tag == $material->tag;
     }
 
     /**
@@ -51,7 +52,7 @@ class Material implements IValueObject
      */
     public function __toString()
     {
-    	return $this->library_code . ':' . $this->faust_code;
+        return $this->library_code . '-' . $this->tag . ':' . $this->faust_code;
     }
 
     /**
@@ -73,9 +74,9 @@ class Material implements IValueObject
      * @return Material modified copy
      */
     public function reassignToAgency(AgencyID $agency_id) {
-        $modificated = clone $this;
-        $modificated->library_code = (string) $agency_id;
+        $modified = clone $this;
+        $modified->library_code = (string) $agency_id;
 
-        return $modificated;
+        return $modified;
     }
 }

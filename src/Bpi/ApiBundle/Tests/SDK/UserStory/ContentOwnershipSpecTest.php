@@ -42,11 +42,11 @@ class ContentOwnershipSpecTest extends \PHPUnit_Extensions_Story_TestCase
                 '200100',
                 'alpha',
                 array('related_materials' => array(
-                    '200100:123456',
-                    '200100:234567',
-                    '150010:444555',
-                    '123123:asdfg',
-                    '000102:23Gas4',
+                    '200100-track:123456',
+                    '200100-track:234567',
+                    '150010-forfweb:444555',
+                    '123123-forfweb:asdfg',
+                    '000102-bibliotek:23Gas4',
                 ))
             )
             ->and('Client pushes a node', '200100', 'alpha', 'alpha_remote')
@@ -56,11 +56,11 @@ class ContentOwnershipSpecTest extends \PHPUnit_Extensions_Story_TestCase
                 '200200',
                 'alpha_local',
                 array('material' => array(
-                    '200200:123456',
-                    '200200:234567',
-                    '150010:444555',
-                    '123123:asdfg',
-                    '000102:23Gas4',
+                    '200200-track:123456',
+                    '200200-track:234567',
+                    '150010-forfweb:444555',
+                    '123123-forfweb:asdfg',
+                    '000102-bibliotek:23Gas4',
                 ))
             )
         ;

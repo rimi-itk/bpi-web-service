@@ -47,6 +47,18 @@ class EndUserTest extends SDKTestCase
         $this->assertEquals(2, count($properties['material']));
     }
 
+    /**
+     * Test openruth v2 material IDs
+     *
+     * @expectedException \Bpi\Sdk\Exception\HTTP\ClientError
+     */
+    public function testPushWithObsoleteMaterialIDs()
+    {
+        $data = $this->createRandomDataForPush();
+        $data['related_materials'] = array('810015:12345678', '150014:22334455');
+        $this->bpi->push($data);
+    }
+
     public function testGetNode()
     {
         try

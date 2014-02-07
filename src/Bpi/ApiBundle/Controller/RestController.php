@@ -445,7 +445,11 @@ class RestController extends FOSRestController
 
         // Related materials
         foreach ($request->get('related_materials', array()) as $material) {
-            $resource->addMaterial($material);
+            try {
+                $resource->addMaterial($material);
+            } catch (\Exception $e) {
+                return $this->createErrorView(sprintf('The material ID [%s] is not supported', $material), 422);
+            }
         }
 
         // Download files and add them to resource
@@ -504,8 +508,15 @@ class RestController extends FOSRestController
      */
     protected function createErrorView($contents, $code)
     {
-        // @todo standart error format
-        return $this->view($contents, $code);
+        $error = new \FOS\RestBundle\Util\ExceptionWrapper(array(
+            'status' => '',
+            'status_code' => $code,
+            'status_text' => '',
+            'currentContent' => '',
+            'message' => $contents
+        ));
+
+        return $this->view($error, $code);
     }
 
     /**

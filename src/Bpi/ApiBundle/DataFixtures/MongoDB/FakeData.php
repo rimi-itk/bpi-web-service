@@ -74,8 +74,8 @@ class FakeData implements FixtureInterface
             ->title('Ti tegnefilm for de mindste på filmstriben')
             ->ctime(new \DateTime("-10 day"))
             ->copyleft(new Copyleft(''))
-            ->addMaterial('100200:12345678')
-            ->addMaterial('100200:87654321')
+            ->addMaterial('100200-forfweb:12345678')
+            ->addMaterial('100200-track:87654321')
         ;
 
         $builder = new ProfileBuilder();

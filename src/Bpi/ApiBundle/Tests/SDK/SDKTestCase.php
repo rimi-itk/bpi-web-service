@@ -72,10 +72,6 @@ class SDKTestCase extends WebTestCase
         return new \Bpi(self::getEndpointUri(), LoadAgencies::AGENCY_BRAVO, LoadAgencies::AGENCY_BRAVO_KEY, LoadAgencies::AGENCY_BRAVO_SECRET);
     }
 
-    /**
-     *
-     * @return type
-     */
     public function createRandomDataForPush()
     {
         $dt = new \DateTime();
@@ -95,7 +91,7 @@ class SDKTestCase extends WebTestCase
             'firstname' => 'firstname' . mt_rand(),
             'lastname' => 'lastname' . mt_rand(),
             'images' => array(),
-            'related_materials' => array('100200:12345678', '200100:22334455')
+            'related_materials' => array('810015-katalog:12345678', '150014-track:22334455')
         );
     }
 
