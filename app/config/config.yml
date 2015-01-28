@@ -112,6 +112,7 @@ doctrine_mongodb:
         default:
             mappings:
                 BpiApiBundle: { type: yml, prefix: Bpi\ApiBundle\Domain }
+                BpiExtReviewsBundle: ~
                 gedmo_tree:
                     type: yml
                     prefix: Gedmo\Tree\Document
