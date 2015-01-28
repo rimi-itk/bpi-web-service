@@ -1,0 +1,13 @@
+parameters:
+#    bpi_ext_reviews.example.class: Bpi\ExtReviewsBundle\Example
+
+services:
+#    bpi_ext_reviews.example:
+#        class: %bpi_ext_reviews.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]
+#    example.client:
+#        class: %guzzle.client.class%
+#        arguments: http://anbefalinger.deichman.no/
+    bpi.extraviews.example.client:
+        class: %guzzle.client.class%
+        arguments: ["http://anbefalinger.deichman.no/"]
