@@ -47,6 +47,10 @@ security:
                 path:   /admin/logout
                 target: /
 
+        reviews:
+            pattern: ^/reviews
+            security: false
+
         assets:
             pattern: ^/asset/
             security: false

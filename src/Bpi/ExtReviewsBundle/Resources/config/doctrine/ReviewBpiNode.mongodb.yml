@@ -1,0 +1,13 @@
+Bpi\ExtReviewsBundle\Document\ReviewBpiNode:
+    repositoryClass: Bpi\ExtReviewsBundle\Repository\ReviewBpiNodeRepository
+    collection: ReviewBpiNode
+    type: document
+
+    fields:
+        id:
+            type: id
+            id: true
+        reviewUri:
+            type: string
+        bpiId:
+            type: string

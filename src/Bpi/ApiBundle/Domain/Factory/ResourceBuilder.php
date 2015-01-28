@@ -9,7 +9,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 class ResourceBuilder
 {
-    protected $title, $body, $teaser, $ctime, $copyleft;
+    protected $title, $body, $teaser, $ctime, $copyleft, $type;
     protected $files = array();
     protected $assets = array();
     protected $filesystem;
@@ -103,6 +103,12 @@ class ResourceBuilder
         return $this;
     }
 
+    public function setType($type)
+    {
+        $this->type = $type;
+        return $this;
+    }
+
     /**
      * Add material to resource
      *
@@ -154,7 +160,8 @@ class ResourceBuilder
             $this->assets,
             $this->filesystem,
             $this->router,
-            $this->materials
+            $this->materials,
+            $this->type
         );
     }
 

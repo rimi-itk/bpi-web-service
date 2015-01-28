@@ -21,7 +21,7 @@ class Resource implements IPresentable
 
     protected $ctime;
 
-    protected $type = 'article';
+    protected $type = '';
 
     protected $assets = array();
 
@@ -62,7 +62,8 @@ class Resource implements IPresentable
         array $assets = array(),
         Filesystem $filesystem,
         $router,
-        array $materials = array()
+        array $materials = array(),
+        $type
     )
     {
         $this->title = $title;
@@ -78,6 +79,7 @@ class Resource implements IPresentable
         $this->materials = $materials;
         $this->category = $category;
         $this->audience = $audience;
+        $this->type = (!empty($type)) ? $type : 'article';
     }
 
     /**

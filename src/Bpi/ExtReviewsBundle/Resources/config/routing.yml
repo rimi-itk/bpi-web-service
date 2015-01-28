@@ -1,0 +1,7 @@
+bpi_ext_reviews_homepage:
+    pattern:  /hello/{name}
+    defaults: { _controller: BpiExtReviewsBundle:Default:index }
+
+bpi_ext_reviews_collect:
+    pattern: /{offset}
+    defaults: { _controller: BpiExtReviewsBundle:Reviews:collectReviews, offset: 0 }
