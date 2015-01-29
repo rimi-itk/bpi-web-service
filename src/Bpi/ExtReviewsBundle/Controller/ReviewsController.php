@@ -22,7 +22,7 @@ class ReviewsController extends Controller
      */
     public function collectReviewsAction($offset)
     {
-        $limit = 1;
+        $limit = 100;
         $requestLink = 'http://anbefalinger.deichman.no/api/reviews?offset=' . $offset . '&limit=' . $limit;
         $client = $this->get('bpi.extraviews.example.client');
 
@@ -78,10 +78,6 @@ class ReviewsController extends Controller
             $dm->persist($reviewBpiNode);
             $dm->flush();
         }
-
-        return $this->render('BpiExtReviewsBundle:Reviews:collectReviews.html.twig', array(
-            'message' => 'All reviews was processed.',
-        ));
 
         $offset += 100;
         return $this->redirect($this->generateUrl('bpi_ext_reviews_collect', array('offset' => $offset)));
