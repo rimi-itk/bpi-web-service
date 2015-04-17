@@ -40,7 +40,6 @@ class ReviewsController extends Controller
 
         $dm = $this->get('doctrine_mongodb')->getManager();
         $category = $this->get('doctrine_mongodb')->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => 'Review'));
-        $agency = $this->get('doctrine_mongodb')->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name' => 'Reviews agency'));
 
         if (empty($category)) {
             $category = new \Bpi\ApiBundle\Domain\Entity\Category();
@@ -49,18 +48,7 @@ class ReviewsController extends Controller
             $dm->flush();
         }
 
-        if (empty($agency)) {
-            $agency = new Agency();
-            $agency->setPublicId('000000');
-            $agency->setName('Reviews agency');
-            $agency->setModerator('Automatic review');
-            $agency->setPublicKey(null);
-            $agency->setSecret(null);
-            $dm->persist($agency);
-            $dm->flush();
-        }
-
-        $mappedData = $this->mapReview($data->works, $category->getCategory(), $agency->getPublicId());
+        $mappedData = $this->mapReview($data->works, $category->getCategory());
 
         foreach ($mappedData as $review) {
             $reviewExist = $this->checkReviewExistence($review['review_uri']);
@@ -84,6 +72,46 @@ class ReviewsController extends Controller
     }
 
     /**
+     * If no agency with such name don't exist else returns id of existing.
+     * @param $agencyName string with name of agency which wrote review.
+     * @return string public agency id.
+     */
+    private function prepareAgency($agencyName) {
+        $dm = $this->get('doctrine_mongodb')->getManager();
+        $agency = $this->get('doctrine_mongodb')->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name' => $agencyName));
+        if (empty($agency)) {
+            $publicId = $this->preparePublicId();
+            $agency = new Agency();
+            $agency->setPublicId($publicId);
+            $agency->setName($agencyName);
+            $agency->setModerator('Automatic review');
+            $agency->setPublicKey(null);
+            $agency->setSecret(null);
+            $dm->persist($agency);
+            $dm->flush();
+        }
+
+        return $agency->getPublicId();
+    }
+
+    /**
+     * Determines id for new agency.
+     * @return int|string public id for new agency.
+     */
+    private function preparePublicId() {
+        $dm = $this->get('doctrine_mongodb')->getManager();
+        $agency = $dm->createQueryBuilder('BpiApiBundle:Aggregate\Agency')
+            ->sort('public_id','desc')->limit(1)->getQuery()->getSingleResult();
+
+        if (empty($agency)) {
+            return '1';
+        }
+
+        $publicId = (int)$agency->getPublicId();
+        return ++$publicId;
+    }
+
+    /**
      * @param $data raw data of fetched review.
      * @param string $category name of category for reviews.
      * @param string $agencyId id of agency for reviews.
@@ -91,7 +119,7 @@ class ReviewsController extends Controller
      *
      * * Map raw data into review.
      */
-    private function mapReview($data, $category, $agencyId)
+    private function mapReview($data, $category)
     {
         $date = new \DateTime('now');
         $date = $date->format(\DateTime::W3C);
@@ -108,7 +136,7 @@ class ReviewsController extends Controller
                 $review['creation'] = $date;
                 $review['type'] = 'review';
                 $review['category'] = $category;
-                $review['agency_id'] = $agencyId;
+                $review['agency_id'] = $this->prepareAgency($reviewItem->source->name);
                 $review['lastname'] = '';
                 $review['teaser'] = $this->truncateWordEnd(strip_tags($reviewItem->text), 200);
                 $review['images'] = (isset($work->cover_url)) ? array(array('path' => $work->cover_url)) : null;
