@@ -91,7 +91,7 @@ class ReviewsController extends Controller
             $dm->flush();
         }
 
-        return $agency->getPublicId();
+        return (string) $agency->getPublicId();
     }
 
     /**
