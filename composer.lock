@@ -2727,11 +2727,11 @@
     ],
     "packages-dev": [
         {
-            "name": "bpi-dk/bpi-client",
+            "name": "easyting/bpi-client",
             "version": "1.0",
             "source": {
                 "type": "git",
-                "url": "git@github.com:bpi-dk/bpi-client.git",
+                "url": "git@github.com:easyting/bpi-client.git",
                 "reference": "origin/develop"
             },
             "type": "library"
