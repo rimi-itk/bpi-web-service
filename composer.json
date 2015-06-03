@@ -2,17 +2,17 @@
     "name": "symfony/framework-standard-edition",
     "description": "The \"Symfony Standard Edition\" distribution",
     "autoload": {
-        "psr-0": { "": "src/", "Bpi": ["vendor/bpi-dk/bpi-client/Bpi/Sdk", "vendor/bpi-dk/bpi-client/"] }
+        "psr-0": { "": "src/", "Bpi": ["vendor/easyting/bpi-client/Bpi/Sdk", "vendor/easyting/bpi-client/"] }
     },
     "repositories": [
         {
             "type": "package",
             "package": {
-                "name": "bpi-dk/bpi-client",
+                "name": "easyting/bpi-client",
                 "version": "1.0",
                 "source": {
                     "type": "git",
-                    "url": "git@github.com:bpi-dk/bpi-client.git",
+                    "url": "git@github.com:easyting/bpi-client.git",
                     "reference": "origin/develop"
                 }
             }
@@ -47,7 +47,7 @@
         "phpunit/phpunit": "3.7.*",
         "phpunit/phpunit-story": "*",
         "fabpot/goutte": "1.0.1",
-        "bpi-dk/bpi-client": "1.0"
+        "easyting/bpi-client": "1.0"
     },
     "scripts": {
         "post-install-cmd": [
