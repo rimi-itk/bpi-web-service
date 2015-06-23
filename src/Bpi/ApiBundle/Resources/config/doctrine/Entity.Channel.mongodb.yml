@@ -1,0 +1,23 @@
+Bpi\ApiBundle\Domain\Entity\Channel:
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\ChannelRepository
+  collection: Channel
+  type: document
+
+  fields:
+    id:
+      id: true
+    name:
+      type: string
+    description:
+      type: string
+
+  referenceOne:
+    owner:
+      targetDocument: Bpi\ApiBundle\Domain\Entity\User
+  referenceMany:
+    users:
+      cascade: all
+      targetDocument: Bpi\ApiBundle\Domain\Entity\User
+    nodes:
+      cascade: all
+      targetDocument: Bpi\ApiBundle\Domain\Aggregate\Node
