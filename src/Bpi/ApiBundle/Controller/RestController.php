@@ -224,6 +224,28 @@ class RestController extends FOSRestController
     }
 
     /**
+     * List users.
+     *
+     * @Rest\Get(user/list)
+     */
+    public function listUsersAction()
+    {
+        $users = $this->getRepository('BpiApiBundle:Entity\User')->findAll();
+
+
+    }
+
+    /**
+     * Push user into service.
+     *
+     * @Rest\Post(user/add)
+     */
+    public function pushUserAction()
+    {
+        $request = $this->getRequest();
+    }
+
+    /**
      * Get entity repository
      *
      * @param string $name repository name
