@@ -1,0 +1,13 @@
+Bpi\ApiBundle\Domain\Entity\Facet:
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\FacetRepository
+  collection: Facet
+  type: document
+
+  fields:
+    id:
+      type: id
+      id: true
+    nodeId:
+      type: string
+    facetData:
+      type: hash
