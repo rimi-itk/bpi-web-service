@@ -144,7 +144,7 @@ class RestController extends FOSRestController
         if (false !== ($search = $this->getRequest()->query->get('search', false))) {
             $node_query->search($search);
         }
-
+$request = $this->getRequest()->query->get('filter');
         if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
             foreach ($filter as $field => $value) {
                 if ($field == 'category') {
@@ -416,6 +416,8 @@ class RestController extends FOSRestController
         $service = $this->get('domain.push_service');
         $assets = array();
 
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
+
         /** check request body size, must be smaller than 10MB **/
         if (strlen($request->getContent()) > 10485760) {
             return $this->createErrorView('Request entity too large', 413);
@@ -485,10 +487,14 @@ class RestController extends FOSRestController
                 $node = $this->get('domain.push_service')
                   ->pushRevision(new NodeId($id), $author, $resource, $params);
 
+                $facetRepository->prepareFacet($node);
+
                 return $this->get("bpi.presentation.transformer")->transform($node);
             }
             $node = $this->get('domain.push_service')
               ->push($author, $resource, $request->get('category'), $request->get('audience'), $profile, $params);
+
+            $facetRepository->prepareFacet($node);
 
             return $this->get("bpi.presentation.transformer")->transform($node);
         } catch (\LogicException $e) {

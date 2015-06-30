@@ -135,7 +135,8 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
     public function load(ObjectManager $manager)
     {
         $repo = $manager->getRepository('Bpi\ApiBundle\Domain\Aggregate\Agency');
-        $agency  = $repo->findAll()->getNext();
+        $agency = $repo->findAll();
+        $agency = $agency[0];
         $service = new PushService($manager, $this->createFilesystemMap());
 
         // Alpha
