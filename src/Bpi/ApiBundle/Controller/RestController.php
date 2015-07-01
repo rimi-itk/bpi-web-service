@@ -144,17 +144,32 @@ class RestController extends FOSRestController
         if (false !== ($search = $this->getRequest()->query->get('search', false))) {
             $node_query->search($search);
         }
-$request = $this->getRequest()->query->get('filter');
+
+        $filters = array();
         if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
             foreach ($filter as $field => $value) {
-                if ($field == 'category') {
-                    $value = $this->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => $value));
+                if ($field == 'category' && !empty($value)) {
+                    foreach ($value as $val) {
+                        $category = $this->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => $val));
+                        if (empty($category)) {continue; }
+                        $filters['category'][] = $category;
+                    }
                 }
-                if ($field == 'audience') {
-                    $value = $this->getRepository('BpiApiBundle:Entity\Audience')->findOneBy(array('audience' => $value));
+                if ($field == 'audience' && !empty($value)) {
+                    foreach ($value as $val) {
+                        $audience = $this->getRepository('BpiApiBundle:Entity\Audience')->findOneBy(array('audience' => $val));
+                        if (empty($audience)) {continue; }
+                        $filters['audience'][] = $audience;
+                    }
                 }
-                $node_query->filter($field, $value);
+                if ($field == 'agency_id' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['agency_id'][] = $val;
+                    }
+                }
             }
+            $node_query->filter($filters);
         }
 
         if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
