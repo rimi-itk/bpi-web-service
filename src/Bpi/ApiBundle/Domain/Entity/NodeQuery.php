@@ -99,20 +99,19 @@ class NodeQuery
                 $value = str_ireplace(' ', '|', $value);
                 $query->addOr($query->expr()->field('author.firstname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
                 $query->addOr($query->expr()->field('author.lastname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
-                return;
             } elseif ($field == 'author.agency_id') {
                 foreach ($value as $term) {
                     $query->addOr($query->expr()->field('author.agency_id')->equals($term));
                 }
-                return;
             } elseif (in_array($field, array('category', 'audience'))) {
                 foreach ($value as $term) {
                     $query->addOr(array($field . '.$id' => new \MongoId($term->getId())));
                 }
-                return;
+            } else {
+                $query->field($field)->equals($this->matchAny($value));
             }
 
-            $query->field($field)->equals($this->matchAny($value));
+            return;
         }
     }
 
