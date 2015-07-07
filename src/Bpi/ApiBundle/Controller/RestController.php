@@ -131,6 +131,7 @@ class RestController extends FOSRestController
      */
     public function listAction()
     {
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
         $node_query = new \Bpi\ApiBundle\Domain\Entity\NodeQuery();
         $node_query->amount(20);
         if (false !== ($amount = $this->getRequest()->query->get('amount', false))) {
@@ -179,6 +180,7 @@ class RestController extends FOSRestController
             $node_query->sort('pushed', 'desc');
         }
 
+        $availableFacets = $facetRepository->getFacetsByRequest($filters);
         $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findByNodesQuery($node_query);
         $agency_id = new AgencyId($this->getUser()->getAgencyId()->id());
         foreach ($node_collection as $node) {
@@ -234,6 +236,9 @@ class RestController extends FOSRestController
                 'List refinements'
             )
         );
+
+        $facets = $document->createEntity('facets');
+        $document->prependEntity($facets);
 
         return $document;
     }
