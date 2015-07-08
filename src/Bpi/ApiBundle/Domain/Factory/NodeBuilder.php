@@ -8,6 +8,8 @@ use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Category;
 use Bpi\ApiBundle\Domain\Entity\Audience;
+use Bpi\ApiBundle\Domain\Entity\Tag;
+use Doctrine\Common\Collections\ArrayCollection;
 
 class NodeBuilder
 {
@@ -18,7 +20,12 @@ class NodeBuilder
 
     protected $category;
     protected $audience;
+    protected $tags;
 
+    public function __construct()
+    {
+        $this->tags = new ArrayCollection();
+    }
     /**
      *
      * @param \Bpi\ApiBundle\Domain\Entity\Profile $profile
@@ -84,6 +91,15 @@ class NodeBuilder
     }
 
     /**
+     * @param Tag $tag
+     * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
+     */
+    public function tag(Tag $tag) {
+        $this->tags->add($tag);
+        return $this;
+    }
+
+    /**
      *
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      * @throws \RuntimeException
@@ -102,6 +118,6 @@ class NodeBuilder
         if (is_null($this->params)) {
             throw new \RuntimeException('Invalid state: Params is required');
         }
-        return new Node($this->author, $this->resource, $this->profile, $this->category, $this->audience, $this->params);
+        return new Node($this->author, $this->resource, $this->profile, $this->category, $this->audience, $this->tags, $this->params);
     }
 }
