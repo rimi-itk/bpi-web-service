@@ -123,7 +123,8 @@ class Node implements IPresentable
             ->params($params)
             ->category($this->category)
             ->audience($this->audience)
-            ->build();
+            ->build()
+        ;
 
         $node->parent = $this;
         return $node;
