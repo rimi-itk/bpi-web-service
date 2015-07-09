@@ -2,6 +2,7 @@
 
 namespace Bpi\ApiBundle\Domain\Entity;
 
+use Bpi\RestMediaTypeBundle\Document;
 
 
 /**
@@ -77,5 +78,21 @@ class Tag
     public function getTag()
     {
         return $this->tag;
+    }
+
+    public function transform(Document  $document, $tags)
+    {
+        try {
+            $entity= $document->currentEntity();
+        } catch (\RuntimeException $e) {
+            $entity = $document->createEntity('entity', 'tags');
+            $document->appendEntity($entity);
+        }
+
+        foreach ($tags as $tag) {
+            $entity->addProperty(
+                $document->createProperty('tag', 'string', $tag->getTag())
+            );
+        }
     }
 }

@@ -9,7 +9,7 @@ use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
-use Bpi\ApiBundle\Domain\ValueObject\Tag;
+use Bpi\ApiBundle\Domain\Entity\Tag;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -168,6 +168,13 @@ class Node implements IPresentable
                 $this->getAudience()->getAudience()
             )
         );
+
+        $tags = $document->createTagsSection();
+        foreach ($this->tags as $tag) {
+            $serializedTag = new \Bpi\RestMediaTypeBundle\Element\Tag($tag->getTag());
+            $tags->addTag($serializedTag);
+        }
+        $entity->setTags($tags);
 
         $this->profile->transform($document);
         $this->resource->transform($document);
