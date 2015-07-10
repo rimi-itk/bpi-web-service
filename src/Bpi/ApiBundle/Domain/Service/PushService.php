@@ -4,8 +4,6 @@ namespace Bpi\ApiBundle\Domain\Service;
 
 use Doctrine\Common\Persistence\ObjectManager;
 
-use Knp\Bundle\GaufretteBundle\FilesystemMap;
-
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Resource;
@@ -30,21 +28,15 @@ class PushService
      * @var \Doctrine\Common\Persistence\ObjectManager
      */
     protected $manager;
-    /**
-     *
-     * @var \Gaufrette\FilesystemMap
-     */
-    protected $fs_map;
+
 
     /**
      *
      * @param \Doctrine\Common\Persistence\ObjectManager $manager
-     * @param \Knp\Bundle\GaufretteBundle\FilesystemMap $fs_map
      */
-    public function __construct(ObjectManager $manager, FilesystemMap $fs_map)
+    public function __construct(ObjectManager $manager)
     {
         $this->manager = $manager;
-        $this->fs_map = $fs_map;
     }
 
     /**
@@ -81,7 +73,6 @@ class PushService
         if (count($dublicates)) {
             throw new \LogicException('Found similar resource');
         }
-
         $builder = new NodeBuilder();
         $builder
           ->author($author)
@@ -121,6 +112,8 @@ class PushService
 
         return $node;
     }
+
+    public function test() {var_dump(1);}
 
     /**
      * Add agency copyleft to the resource
@@ -163,10 +156,5 @@ class PushService
         $this->manager->flush();
 
         return $revision;
-    }
-
-    public function getFilesystem()
-    {
-        return $this->fs_map->get('assets');
     }
 }

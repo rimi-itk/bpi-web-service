@@ -13,7 +13,6 @@ class Body
      */
     protected $dom;
 
-    protected $filesystem;
     protected $router;
     protected $assets = array();
 
@@ -22,7 +21,7 @@ class Body
      * @param string $content
      * @throws \RuntimeException
      */
-    public function __construct($content, $filesystem=null, $router=null)
+    public function __construct($content, $router=null)
     {
         $this->dom = $content;
         /*
@@ -52,7 +51,6 @@ class Body
         }
 */
         $this->router = $router;
-        $this->filesystem = $filesystem;
     }
 
     /**
@@ -92,8 +90,8 @@ class Body
     {
         preg_match_all('/<img[^>]+>/im', $this->dom , $matches, PREG_SET_ORDER);
         foreach ($matches as $match) {
-
             preg_match('/src=\"([^"]+)\"/i', $match[0], $src);
+            preg_match('/title=\"([^"]+)\"/i', $match[0], $title);
             preg_match('/alt=\"([^"]+)\"/i', $match[0], $alt);
             preg_match('/width=\"([^"]+)\"/i', $match[0], $width);
             preg_match('/height=\"([^"]+)\"/i', $match[0], $height);
@@ -104,21 +102,19 @@ class Body
             $file['path'] = $src[1];
             $file['extension'] = $pathinfo['extension'];
             $file['name'] = $pathinfo['filename'];
+            $file['title'] = $title[1];
             $file['alt'] = $alt[1];
             $file['width'] = $width[1];
             $file['height'] = $height[1];
             $file['type'] = 'body';
 
             $bpi_file = new \Bpi\ApiBundle\Domain\Entity\File($file);
-            $bpi_file->createFile();
-
-            $this->assets[] = $bpi_file;
-
-            $tag = str_replace( $file['path'], $bpi_file->getPath(), $match[0]);
-
-            $this->dom = str_replace($match[0], $tag,$this->dom);
+            if($bpi_file->createFile()) {
+                $this->assets[] = $bpi_file;
+                $tag = str_replace($bpi_file->getExternal(), $bpi_file->getPath(), $match[0]);
+                $this->dom = str_replace($match[0], $tag, $this->dom);
+            }
         }
-
     }
 
     public function getAssets()
@@ -126,3 +122,4 @@ class Body
         return $this->assets;
     }
 }
+

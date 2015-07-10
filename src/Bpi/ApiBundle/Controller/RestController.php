@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints;
 
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
+use Bpi\ApiBundle\Domain\Entity\File as BpiFile;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 
@@ -415,6 +416,7 @@ class RestController extends FOSRestController
     {
         $request = $this->getRequest();
         $service = $this->get('domain.push_service');
+        BpiFile::$base_url = $this->getRequest()->getScheme() . '://' . $this->getRequest()->getHttpHost() . $this->getRequest()->getBasePath();
         $assets = array();
 
         /** check request body size, must be smaller than 10MB **/
@@ -435,9 +437,8 @@ class RestController extends FOSRestController
             $request->get('lastname')
         );
 
-        $filesystem = $service->getFilesystem();
 
-        $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder($filesystem, $this->get('router'));
+        $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder($this->get('router'));
         $resource
           ->title($request->get('title'))
           ->body($request->get('body'))

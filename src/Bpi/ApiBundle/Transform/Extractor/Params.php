@@ -31,9 +31,6 @@ class Params implements IExtractor
      */
     public function extract()
     {
-        echo "<pre>";
-        print_r(1);
-        die();
         $entity = $this->doc->getEntity('params');
         $params = new DomainParams();
         $params->add(new Editable($entity->property('editable')->getValue()));

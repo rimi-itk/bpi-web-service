@@ -6,6 +6,7 @@ use Gaufrette\Filesystem;
 use Gaufrette\Util;
 use Knp\Bundle\GaufretteBundle\FilesystemMap;
 use Bpi\RestMediaTypeBundle\Document;
+use Guzzle\Http\Client as Guzzle;
 
 
 
@@ -40,6 +41,11 @@ class File
     protected $filesystem;
 
     /**
+     * @var Filesystem $filesystem
+     */
+    public static $base_url;
+
+    /**
      * Constructor
      * @param array $params
      */
@@ -52,7 +58,6 @@ class File
         $this->type = !empty($params['type']) ? $params['type'] : null;
         $this->width = !empty($params['width']) ? $params['width'] : null;
         $this->height = !empty($params['height']) ? $params['height'] : null;
-
         $this->filesystem = new \Gaufrette\Filesystem(new \Gaufrette\Adapter\Local($this->getUploadRootDir(), true, 777));
     }
 
@@ -139,23 +144,26 @@ class File
         if (empty($this->name))
             throw new Exception("Empty filename.");
         $file = $this->filesystem->createFile($this->name, $this->filesystem);
-        $content = file_get_contents($this->external);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $this->external);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $content = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if($code == 404) {
+            return false;
+        }
+        curl_close($ch);
+
         if ($content === FALSE)
             throw new Exception("Can't download file");
-        $file->setContent($content);
-        $this->path = "{$this->getUploadRootDir()}/{$this->name}.{$this->extension}";
-    }
 
-    /**
-     * Get abosulute path to file.
-     *
-     * @return string $path
-     */
-    public function getAbsolutePath()
-    {
-        return null === $this->path
-            ? null
-            : $this->getUploadRootDir().'/'.$this->path;
+        $file->setContent($content);
+
+        $this->path = $this->getWebPath() . "/{$this->name}";
+
+        return $this;
     }
 
     /**
@@ -165,9 +173,7 @@ class File
      */
     public function getWebPath()
     {
-        return null === $this->path
-            ? null
-            : $this->getUploadDir().'/'.$this->path;
+        return self::$base_url . "/web/uploads/assets";
     }
 
     /**

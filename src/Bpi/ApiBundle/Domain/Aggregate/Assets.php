@@ -67,8 +67,9 @@ class Assets
             $document->appendEntity($entity);
         }
 
-        foreach ($this->collection as &$asset) {
-            $asset->transform($document);
+        foreach ($this->collection as $asset) {
+            $entity->addAsset($asset);
         }
+
     }
 }

@@ -6,7 +6,6 @@ use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
-use Gaufrette\Filesystem;
 
 /**
  * Remote resource like article, news item, etc
@@ -30,7 +29,6 @@ class Resource implements IPresentable
     protected $hash;
 
     protected $router;
-    protected $filesystem;
 
     protected $materials = array();
 
@@ -45,7 +43,6 @@ class Resource implements IPresentable
      * @param Copyleft $copyleft
      * @param \DateTime $ctime
      * @param array $files
-     * @param \Gaufrette\Filesystem $filesystem
      * @param object $router
      */
     public function __construct(
@@ -57,19 +54,17 @@ class Resource implements IPresentable
         $category,
         $audience,
         array $files = null,
-        Filesystem $filesystem,
         $router,
         array $materials = array()
     )
     {
         $this->title = $title;
-        $this->body = new Resource\Body($body, $filesystem, $router);
+        $this->body = new Resource\Body($body, $router);
         $this->body->rebuildInlineAssets();
         $this->teaser = $teaser;
         $this->copyleft = $copyleft;
         $this->ctime = $ctime;
         $this->regenerateHash();
-        $this->filesystem = $filesystem;
         $this->router = $router;
         $this->materials = $materials;
         $this->category = $category;
@@ -165,7 +160,7 @@ class Resource implements IPresentable
      */
     public function wakeup()
     {
-        $this->body = new Resource\Body($this->body, $this->filesystem, $this->router);
+        $this->body = new Resource\Body($this->body, $this->router);
     }
 
     /**

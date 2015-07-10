@@ -18,9 +18,8 @@ class ResourceBuilder
     protected $category;
     protected $audience;
 
-    public function __construct(\Gaufrette\Filesystem $filesystem, RouterInterface $router)
+    public function __construct(RouterInterface $router)
     {
-        $this->filesystem = $filesystem;
         $this->router = $router;
     }
 
@@ -150,7 +149,6 @@ class ResourceBuilder
             $this->category,
             $this->audience,
             $this->files,
-            $this->filesystem,
             $this->router,
             $this->materials
         );
