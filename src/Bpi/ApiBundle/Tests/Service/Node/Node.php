@@ -25,14 +25,14 @@ class Node extends BpiTest
 
         $this->console = new \Symfony\Bundle\FrameworkBundle\Console\Application(static::$kernel);
         $this->console->setAutoExit(false);
-        $this->load_fixtures = new \Symfony\Component\Console\Input\ArrayInput(array(
+        $this->loadFixtures = new \Symfony\Component\Console\Input\ArrayInput(array(
             "--env" => "test",
             "--quiet" => true,
             "--append" => true,
             "--fixtures" => 'src/Bpi/ApiBundle/Tests/Service/Fixtures/Node',
             'command' => 'doctrine:mongodb:fixtures:load'
         ));
-        $this->console->run($this->load_fixtures);
+        $this->console->run($this->loadFixtures);
 
         $this->guzzle = new Client($this->domain);
 
@@ -44,21 +44,21 @@ class Node extends BpiTest
     protected function tearDown()
     {
 
-        // $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Aggregate\Node')
-        // ->remove()
-        // ->field('author.agency_id')
-        // ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
-        // ->getQuery()
-        // ->execute();
-        // $this->em->flush();
+        $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Aggregate\Node')
+        ->remove()
+        ->field('author.agency_id')
+        ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
+        ->getQuery()
+        ->execute();
+        $this->em->flush();
 
-        //  $agencies = $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Entity\History')
-        // ->remove()
-        // ->field('agency')
-        // ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
-        // ->getQuery()
-        // ->execute();
-        // $this->em->flush();
+         $agencies = $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Entity\History')
+        ->remove()
+        ->field('agency')
+        ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
+        ->getQuery()
+        ->execute();
+        $this->em->flush();
 
         parent::tearDown();
     }
