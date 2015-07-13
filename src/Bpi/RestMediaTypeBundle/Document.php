@@ -3,7 +3,6 @@ namespace Bpi\RestMediaTypeBundle;
 
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface as Router;
-
 use Bpi\RestMediaTypeBundle\Element\Collection;
 use Bpi\RestMediaTypeBundle\Element\Entity;
 use Bpi\RestMediaTypeBundle\Element\Property as GenericProperty;

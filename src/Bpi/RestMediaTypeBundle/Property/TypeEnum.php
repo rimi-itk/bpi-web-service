@@ -7,12 +7,14 @@ class TypeEnum
     const number = 'number';
     const dateTime = 'dateTime';
     const entity = 'entity';
+    const assets = 'assets';
 
     protected $enum = array(
         self::string,
         self::number,
         self::dateTime,
         self::entity,
+        self::assets
     );
 
     protected $selected;
