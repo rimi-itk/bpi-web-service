@@ -45,8 +45,10 @@ class Node implements IPresentable
         Category $category,
         Audience $audience,
         ArrayCollection $tags,
-        Params $params
-    ) {
+        Params $params,
+        Assets $assets
+    )
+    {
         $this->author = $author;
         $this->resource = $resource;
         $this->profile = $profile;
@@ -54,6 +56,7 @@ class Node implements IPresentable
         $this->category = $category;
         $this->audience = $audience;
         $this->tags = $tags;
+        $this->assets = $assets;
 
         $this->markTimes();
     }
@@ -104,7 +107,7 @@ class Node implements IPresentable
      * @param Resource $resource
      * @return Node
      */
-    public function createRevision(Author $author, Resource $resource, Params $params)
+    public function createRevision(Author $author, Resource $resource, Params $params, Assets $assets)
     {
         $builder = new \Bpi\ApiBundle\Domain\Factory\NodeBuilder;
         $node = $builder
@@ -112,10 +115,10 @@ class Node implements IPresentable
             ->profile($this->profile)
             ->resource($resource)
             ->params($params)
+            ->assets($assets)
             ->category($this->category)
             ->audience($this->audience)
-            ->build()
-        ;
+            ->build();
 
         $node->parent = $this;
         return $node;
@@ -143,8 +146,10 @@ class Node implements IPresentable
         $entity->addProperty($document->createProperty(
             'editable',
             'boolean',
-            (int) $this->params
-                ->filter(function($e){ if ($e instanceof Editable) return true; })
+            (int)$this->params
+                ->filter(function ($e) {
+                    if ($e instanceof Editable) return true;
+                })
                 ->first()
                 ->isPositive()
         ));
@@ -178,6 +183,7 @@ class Node implements IPresentable
 
         $this->profile->transform($document);
         $this->resource->transform($document);
+        $this->assets->transform($document);
     }
 
     /**
@@ -197,27 +203,29 @@ class Node implements IPresentable
      * @param  AgencyID $syndicator
      * @return void
      */
-    public function defineAgencyContext(AgencyID $syndicator) {
+    public function defineAgencyContext(AgencyID $syndicator)
+    {
         $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
     }
 
-    public function getAuthor() {
-      return $this->author;
+    public function getAuthor()
+    {
+        return $this->author;
     }
 
     public function getAgencyId()
     {
-      return $this->author->getAgencyId();
+        return $this->author->getAgencyId();
     }
 
     public function isDeleted()
     {
-      return $this->deleted;
+        return $this->deleted;
     }
 
     public function setDeleted($deleted = true)
     {
-      $this->deleted = $deleted;
+        $this->deleted = $deleted;
     }
 
     /// Setters and getters for forms
@@ -225,6 +233,7 @@ class Node implements IPresentable
     {
         return $this->resource->getTitle();
     }
+
     public function setTitle($title)
     {
         $this->resource->setTitle($title);
@@ -244,6 +253,7 @@ class Node implements IPresentable
     {
         return $this->resource->getTeaser();
     }
+
     public function setTeaser($teaser)
     {
         $this->resource->setTeaser($teaser);
@@ -253,6 +263,7 @@ class Node implements IPresentable
     {
         $this->audience = $audience;
     }
+
     public function setCategory(Category $category)
     {
         $this->category = $category;

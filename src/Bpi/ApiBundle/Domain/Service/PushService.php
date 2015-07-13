@@ -5,14 +5,13 @@ namespace Bpi\ApiBundle\Domain\Service;
 use Bpi\ApiBundle\Domain\Entity\Tag;
 use Doctrine\Common\Persistence\ObjectManager;
 
-use Knp\Bundle\GaufretteBundle\FilesystemMap;
-
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Category;
 use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
+use Bpi\ApiBundle\Domain\Aggregate\Assets;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
@@ -31,21 +30,15 @@ class PushService
      * @var \Doctrine\Common\Persistence\ObjectManager
      */
     protected $manager;
-    /**
-     *
-     * @var \Gaufrette\FilesystemMap
-     */
-    protected $fs_map;
+
 
     /**
      *
      * @param \Doctrine\Common\Persistence\ObjectManager $manager
-     * @param \Knp\Bundle\GaufretteBundle\FilesystemMap $fs_map
      */
-    public function __construct(ObjectManager $manager, FilesystemMap $fs_map)
+    public function __construct(ObjectManager $manager)
     {
         $this->manager = $manager;
-        $this->fs_map = $fs_map;
     }
 
     /**
@@ -64,7 +57,8 @@ class PushService
         $audience,
         $tags,
         Profile $profile,
-        Params $params
+        Params $params,
+        Assets $assets
     ) {
         $authorship = $params->filter(
             function ($e) {
@@ -82,13 +76,13 @@ class PushService
         if (count($dublicates)) {
             throw new \LogicException('Found similar resource');
         }
-
         $builder = new NodeBuilder();
         $builder
           ->author($author)
           ->profile($profile)
           ->resource($resource)
-          ->params($params);
+          ->params($params)
+          ->assets($assets);
 
         // Set default category.
         if (empty($category)) {
@@ -126,6 +120,12 @@ class PushService
         return $node;
     }
 
+    /**
+     * Prepare tags.
+     *
+     * @param $tags
+     * @return array
+     */
     private function prepareTags($tags)
     {
         if (empty($tags)) {
@@ -188,20 +188,15 @@ class PushService
      * @param  \Bpi\ApiBundle\Domain\Aggregate\Params $params
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
-    public function pushRevision(NodeId $node_id, Author $author, ResourceBuilder $builder, Params $params)
+    public function pushRevision(NodeId $node_id, Author $author, ResourceBuilder $builder, Params $params, Assets $assets)
     {
         $node = $this->manager->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($node_id->id());
 
-        $revision = $node->createRevision($author, $builder->build(), $params);
+        $revision = $node->createRevision($author, $builder->build(), $params, $assets);
 
         $this->manager->persist($revision);
         $this->manager->flush();
 
         return $revision;
-    }
-
-    public function getFilesystem()
-    {
-        return $this->fs_map->get('assets');
     }
 }

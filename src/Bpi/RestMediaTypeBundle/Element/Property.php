@@ -9,7 +9,6 @@ use Bpi\RestMediaTypeBundle\Property\TypeEnum;
  */
 class Property
 {
-    const TYPE_ASSET = 'asset';
     const TYPE_NUMBER = 'number';
     const TYPE_STRING = 'string';
     const TYPE_DATETIME = 'dateTime';
