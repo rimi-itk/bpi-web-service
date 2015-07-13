@@ -40,8 +40,9 @@ class Presentation
     public function transformMany($models)
     {
         $document = clone $this->doc;
-        foreach ($models as $model)
+        foreach ($models as $model) {
             $model->transform($document);
+        }
         return $document;
     }
 }

@@ -9,9 +9,11 @@ use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\ApiBundle\Domain\Entity\Tag;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Doctrine\Common\Collections\ArrayCollection;
 use Gaufrette\File;
 
 class Node implements IPresentable
@@ -32,6 +34,7 @@ class Node implements IPresentable
 
     protected $category;
     protected $audience;
+    protected $tags;
 
     protected $deleted = false;
 
@@ -41,6 +44,7 @@ class Node implements IPresentable
         Profile $profile,
         Category $category,
         Audience $audience,
+        ArrayCollection $tags,
         Params $params
     ) {
         $this->author = $author;
@@ -49,6 +53,7 @@ class Node implements IPresentable
         $this->params = $params;
         $this->category = $category;
         $this->audience = $audience;
+        $this->tags = $tags;
 
         $this->markTimes();
     }
@@ -163,6 +168,13 @@ class Node implements IPresentable
                 $this->getAudience()->getAudience()
             )
         );
+
+        $tags = $document->createTagsSection();
+        foreach ($this->tags as $tag) {
+            $serializedTag = new \Bpi\RestMediaTypeBundle\Element\Tag($tag->getTag());
+            $tags->addTag($serializedTag);
+        }
+        $entity->setTags($tags);
 
         $this->profile->transform($document);
         $this->resource->transform($document);

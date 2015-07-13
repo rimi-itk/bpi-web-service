@@ -1,6 +1,7 @@
 <?php
 namespace Bpi\RestMediaTypeBundle;
 
+use Doctrine\ORM\Mapping\ElementCollection;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface as Router;
 
@@ -17,7 +18,7 @@ class Document
 {
     /**
      * @Serializer\Exclude
-     * @var Bpi\RestMediaTypeBundle\Element\Entity current entity
+     * @var \Bpi\RestMediaTypeBundle\Element\Entity current entity
      */
     protected $current_entity;
 
@@ -189,6 +190,14 @@ class Document
     public function createHypermediaSection()
     {
         return new Element\Hypermedia();
+    }
+
+    /**
+     * @return \Bpi\RestMediaTypeBundle\Element\Tags
+     */
+    public function createTagsSection()
+    {
+        return new Element\Tags();
     }
 
     /**
