@@ -22,8 +22,40 @@ class NodeController extends Controller
      */
     public function indexAction()
     {
-        $nodes = $this->getRepository()->listAll();
-        return array('nodes' => $nodes);
+
+        $repo = $this->getRepository();
+        $query = $repo->createQueryBuilder();
+
+        $param = $this->getRequest()->query->get('sort');
+        $direction = $this->getRequest()->query->get('direction');
+        $search = $this->getRequest()->query->get('search');
+        if ($param && $direction) {
+            $query->sort($param, $direction);
+        }
+
+        if ($search) {
+            $query->addOr($query->expr()->field('resource.title')->equals(new \MongoRegex('/.*' . $search . '.*/')));
+            $query->addOr($query->expr()->field('author.agency_id')->equals(new \MongoRegex('/.*' . $search . '.*/')));
+            $query->addOr($query->expr()->field('resource.body')->equals(new \MongoRegex('/.*' . $search . '.*/')));
+            $query->addOr($query->expr()->field('resource.teaser')->equals(new \MongoRegex('/.*' . $search . '.*/')));
+            $query->addOr($query->expr()->field('resource.type')->equals(new \MongoRegex('/.*' . $search . '.*/')));
+            $query->addOr($query->expr()->field('author.firstname')->equals(new \MongoRegex('/.*' . $search . '.*/')));
+            $query->addOr($query->expr()->field('author.lastname')->equals(new \MongoRegex('/.*' . $search . '.*/')));
+        }
+
+        $knpPaginator = $this->get('knp_paginator');
+
+        $pagination = $knpPaginator->paginate(
+            $query,
+            $this->get('request')->query->get('page', 1),
+            50,
+            array(
+                'defaultSortFieldName' => 'resource.title',
+                'defaultSortDirection' => 'desc',
+            )
+        );
+
+        return array('pagination' => $pagination);
     }
 
     /**
