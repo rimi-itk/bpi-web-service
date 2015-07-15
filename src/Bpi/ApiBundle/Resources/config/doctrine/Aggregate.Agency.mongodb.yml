@@ -13,6 +13,8 @@ Bpi\ApiBundle\Domain\Aggregate\Agency:
       type: string
     moderator:
       type: string
+    internal:
+      type: boolean
     secret:
       type: string
     public_key:
