@@ -6,6 +6,8 @@ use Bpi\RestMediaTypeBundle\Element\Property;
 use Bpi\RestMediaTypeBundle\Element\Link;
 use Bpi\RestMediaTypeBundle\Element\Scope\HasLinks;
 use Bpi\RestMediaTypeBundle\Document;
+use Bpi\RestMediaTypeBundle\Element\File as File;
+use Bpi\RestMediaTypeBundle\Element\Assets as Assets;
 
 /**
  * @Serializer\XmlRoot("item")
@@ -53,9 +55,19 @@ class Entity implements HasLinks
     protected $entities;
 
     /**
+     * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Assets")
+     */
+    protected $assets;
+
+    /**
      * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Hypermedia")
      */
     protected $hypermedia;
+
+    /**
+     * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Tags")
+     */
+    protected $tags;
 
     /**
      *
@@ -65,6 +77,7 @@ class Entity implements HasLinks
     {
         $this->type = $type;
         $this->name = $name ? $name : self::NONAME;
+        $this->assets = new Assets();
     }
 
     /**
@@ -251,6 +264,15 @@ class Entity implements HasLinks
     }
 
     /**
+     * Adds file to assets array.
+     * @param File $type
+     */
+    public function addAsset($data)
+    {
+        $this->assets->add(new File($data));
+    }
+
+    /**
      *
      * @param \Bpi\RestMediaTypeBundle\Element\Hypermedia $controls
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
@@ -258,6 +280,16 @@ class Entity implements HasLinks
     public function setHypermedia(Hypermedia $controls)
     {
         $this->hypermedia = $controls;
+        return $this;
+    }
+
+    /**
+     * @param \Bpi\RestMediaTypeBundle\Element\Tags $tags
+     * @return \Bpi\RestMediaTypeBundle\Element\Entity
+     */
+    public function setTags(Tags $tags)
+    {
+        $this->tags = $tags;
         return $this;
     }
 }

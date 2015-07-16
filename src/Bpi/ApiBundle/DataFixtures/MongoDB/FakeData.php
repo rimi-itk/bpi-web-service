@@ -4,6 +4,7 @@ namespace Bpi\ApiBundle\DataFixtures\MongoDB;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
+use Bpi\ApiBundle\Domain\Aggregate\Assets;
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\Entity\Author;
@@ -40,9 +41,8 @@ class FakeData implements FixtureInterface
     }
 
     protected function createResourceBuilder() {
-        $fs = $this->createFilesystemMap()->get('assets');
         $router = new FakeRouter();
-        return new ResourceBuilder($fs, $router);
+        return new ResourceBuilder($router);
     }
 
     /**
@@ -90,7 +90,8 @@ class FakeData implements FixtureInterface
             'Film',
             'Kids',
             $profile,
-            new Params(array(new Editable(1), new Authorship(1)))
+            new Params(array(new Editable(1), new Authorship(1))),
+            new Assets(array())
         );
 
         // 2 -------------------------------
@@ -116,7 +117,8 @@ class FakeData implements FixtureInterface
             'Music',
             'Adult',
             $profile,
-            new Params(array(new Editable(1), new Authorship(1)))
+            new Params(array(new Editable(1), new Authorship(1))),
+            new Assets(array())
         );
 
         // 3 -------------------------------
@@ -142,7 +144,8 @@ class FakeData implements FixtureInterface
             'Campaigns',
             'Adult',
             $profile,
-            new Params(array(new Editable(1), new Authorship(1)))
+            new Params(array(new Editable(1), new Authorship(1))),
+            new Assets(array())
         );
 
         // 4 -------------------------------
@@ -168,7 +171,8 @@ class FakeData implements FixtureInterface
             'Literature',
             'Kids',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 5 -------------------------------
@@ -194,7 +198,8 @@ class FakeData implements FixtureInterface
             'Literature',
             'Kids',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 6 -------------------------------
@@ -220,7 +225,8 @@ class FakeData implements FixtureInterface
             'Other',
             'Adult',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 7 -------------------------------
@@ -246,7 +252,8 @@ class FakeData implements FixtureInterface
             'Other',
             'Young',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 8 -------------------------------
@@ -272,7 +279,8 @@ class FakeData implements FixtureInterface
             'Facts',
             'Elders',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 9 -------------------------------
@@ -298,7 +306,8 @@ class FakeData implements FixtureInterface
             'Games',
             'Adult',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 10 -------------------------------
@@ -324,7 +333,8 @@ class FakeData implements FixtureInterface
             'Games',
             'Young',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 11 -------------------------------
@@ -350,7 +360,8 @@ class FakeData implements FixtureInterface
             'Book',
             'Elders',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 12 -------------------------------
@@ -376,7 +387,8 @@ class FakeData implements FixtureInterface
             'Campaigns',
             'Adult',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 13 -------------------------------
@@ -402,7 +414,8 @@ class FakeData implements FixtureInterface
             'Themes',
             'Adult',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // Add some fake history.

@@ -3,11 +3,15 @@ namespace Bpi\ApiBundle\Domain\Factory;
 
 use Bpi\ApiBundle\Domain\Aggregate\Node;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
+use Bpi\ApiBundle\Domain\Aggregate\Assets;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Category;
 use Bpi\ApiBundle\Domain\Entity\Audience;
+use Bpi\ApiBundle\Domain\Entity\Tag;
+use Doctrine\Common\Collections\ArrayCollection;
+use Bpi\ApiBundle\Domain\Entity\File;
 
 class NodeBuilder
 {
@@ -15,10 +19,16 @@ class NodeBuilder
     protected $profile;
     protected $resource;
     protected $params;
+    protected $assets;
 
     protected $category;
     protected $audience;
+    protected $tags;
 
+    public function __construct()
+    {
+        $this->tags = new ArrayCollection();
+    }
     /**
      *
      * @param \Bpi\ApiBundle\Domain\Entity\Profile $profile
@@ -64,6 +74,18 @@ class NodeBuilder
     }
 
     /**
+     *
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Assets $Assets
+     * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
+     */
+    public function assets(Assets $assets)
+    {
+        $this->assets = $assets;
+        return $this;
+    }
+
+
+    /**
      * @param  Category $category
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
@@ -80,6 +102,15 @@ class NodeBuilder
     public function audience(Audience $audience)
     {
         $this->audience = $audience;
+        return $this;
+    }
+
+    /**
+     * @param Tag $tag
+     * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
+     */
+    public function tag(Tag $tag) {
+        $this->tags->add($tag);
         return $this;
     }
 
@@ -102,6 +133,11 @@ class NodeBuilder
         if (is_null($this->params)) {
             throw new \RuntimeException('Invalid state: Params is required');
         }
-        return new Node($this->author, $this->resource, $this->profile, $this->category, $this->audience, $this->params);
+
+        $inline = $this->resource->getBody()->getAssets();
+        foreach ($inline as $asset) {
+            $this->assets->addElem($asset);
+        }
+        return new Node($this->author, $this->resource, $this->profile, $this->category, $this->audience, $this->params, $this->assets);
     }
 }

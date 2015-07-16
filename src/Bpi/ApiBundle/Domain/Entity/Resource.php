@@ -6,7 +6,6 @@ use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
-use Gaufrette\Filesystem;
 
 /**
  * Remote resource like article, news item, etc
@@ -23,7 +22,6 @@ class Resource implements IPresentable
 
     protected $type = 'article';
 
-    protected $assets = array();
 
     protected $copyleft;
 
@@ -31,7 +29,6 @@ class Resource implements IPresentable
     protected $hash;
 
     protected $router;
-    protected $filesystem;
 
     protected $materials = array();
 
@@ -46,8 +43,6 @@ class Resource implements IPresentable
      * @param Copyleft $copyleft
      * @param \DateTime $ctime
      * @param array $files
-     * @param array $assets
-     * @param \Gaufrette\Filesystem $filesystem
      * @param object $router
      */
     public function __construct(
@@ -59,21 +54,17 @@ class Resource implements IPresentable
         $category,
         $audience,
         array $files = null,
-        array $assets = array(),
-        Filesystem $filesystem,
         $router,
         array $materials = array()
     )
     {
         $this->title = $title;
-        $this->body = new Resource\Body($body, $filesystem, $router);
+        $this->body = new Resource\Body($body, $router);
         $this->body->rebuildInlineAssets();
         $this->teaser = $teaser;
         $this->copyleft = $copyleft;
         $this->ctime = $ctime;
         $this->regenerateHash();
-        $this->assets = array_merge($assets, $this->body->getAssets());
-        $this->filesystem = $filesystem;
         $this->router = $router;
         $this->materials = $materials;
         $this->category = $category;
@@ -130,14 +121,6 @@ class Resource implements IPresentable
             $document->appendEntity($entity);
         }
 
-        // Add assets to presentation.
-        $i = 1;
-        foreach ($this->assets as $asset) {
-            $assetUrl = $document->generateRoute("get_asset", array('filename'=> $asset['file'], 'extension'=> $asset['extension']), true);
-            $entity->addProperty($document->createProperty('asset' . $i, 'asset', $assetUrl));
-            $i++;
-        }
-
         $copyleft = '<p>' . $this->copyleft . '</p>';
 
         $entity->addProperty($document->createProperty('title', 'string', $this->title));
@@ -177,7 +160,7 @@ class Resource implements IPresentable
      */
     public function wakeup()
     {
-        $this->body = new Resource\Body($this->body, $this->filesystem, $this->router);
+        $this->body = new Resource\Body($this->body, $this->router);
     }
 
     /**
@@ -219,8 +202,143 @@ class Resource implements IPresentable
         $this->teaser = $teaser;
     }
 
-    public function addAsset($asset)
+    /**
+     * Set body
+     *
+     * @param string $body
+     * @return self
+     */
+    public function setBody($body)
     {
-        $this->assets[] = $asset;
+        $this->body = $body;
+        return $this;
+    }
+
+    /**
+     * Get body
+     *
+     * @return string $body
+     */
+    public function getBody()
+    {
+        return $this->body;
+    }
+
+    /**
+     * Set ctime
+     *
+     * @param date $ctime
+     * @return self
+     */
+    public function setCtime($ctime)
+    {
+        $this->ctime = $ctime;
+        return $this;
+    }
+
+    /**
+     * Get ctime
+     *
+     * @return date $ctime
+     */
+    public function getCtime()
+    {
+        return $this->ctime;
+    }
+
+    /**
+     * Set type
+     *
+     * @param string $type
+     * @return self
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return string $type
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Set hash
+     *
+     * @param string $hash
+     * @return self
+     */
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
+        return $this;
+    }
+
+    /**
+     * Get hash
+     *
+     * @return string $hash
+     */
+    public function getHash()
+    {
+        return $this->hash;
+    }
+
+    /**
+     * Set copyleft
+     *
+     * @param Bpi\ApiBundle\Domain\ValueObject\Copyleft $copyleft
+     * @return self
+     */
+    public function setCopyleft(\Bpi\ApiBundle\Domain\ValueObject\Copyleft $copyleft)
+    {
+        $this->copyleft = $copyleft;
+        return $this;
+    }
+
+    /**
+     * Get copyleft
+     *
+     * @return Bpi\ApiBundle\Domain\ValueObject\Copyleft $copyleft
+     */
+    public function getCopyleft()
+    {
+        return $this->copyleft;
+    }
+
+    /**
+     * Add material
+     *
+     * @param Bpi\ApiBundle\Domain\ValueObject\Material $material
+     */
+    public function addMaterial(\Bpi\ApiBundle\Domain\ValueObject\Material $material)
+    {
+        $this->materials[] = $material;
+    }
+
+    /**
+     * Remove material
+     *
+     * @param Bpi\ApiBundle\Domain\ValueObject\Material $material
+     */
+    public function removeMaterial(\Bpi\ApiBundle\Domain\ValueObject\Material $material)
+    {
+        $this->materials->removeElement($material);
+    }
+
+    /**
+     * Get materials
+     *
+     * @return Doctrine\Common\Collections\Collection $materials
+     */
+    public function getMaterials()
+    {
+        return $this->materials;
     }
 }
