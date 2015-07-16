@@ -45,19 +45,19 @@ class Node extends BpiTest
     {
 
         $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Aggregate\Node')
-        ->remove()
-        ->field('author.agency_id')
-        ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
-        ->getQuery()
-        ->execute();
+            ->remove()
+            ->field('author.agency_id')
+            ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
+            ->getQuery()
+            ->execute();
         $this->em->flush();
 
          $agencies = $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Entity\History')
-        ->remove()
-        ->field('agency')
-        ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
-        ->getQuery()
-        ->execute();
+            ->remove()
+            ->field('agency')
+            ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
+            ->getQuery()
+            ->execute();
         $this->em->flush();
 
         parent::tearDown();
@@ -79,6 +79,7 @@ class Node extends BpiTest
             'type' => 'news',
             'category' => 'Other',
             'audience' => 'All',
+            'tags' => '',
             'assets[0][path]' => 'http://av.easyddb.dev.inlead.dk/sites/default/files/dams_images_display_format.png',
             'assets[0][title]' => 'Assets title 1',
             'assets[0][alt]' => 'Assets alt 1',
@@ -89,9 +90,9 @@ class Node extends BpiTest
             'assets[0][width]' => '80'
         );
 
-        $headers = array('Auth' => 'BPI agency="200100", token="$1$xMbAQo9U$ggK68UsjGmmcP2IGrCyld1"');
+        $headers = array('Auth' => 'BPI agency="200100", token="$1$XJZ2RVV6$FlBN25L6TIMc3B5cPG6nC1"');
 
-        $request = $this->guzzle->post('web/app_dev.php/node', $headers, $params);
+        $request = $this->guzzle->post('app_dev.php/node', $headers, $params);
         $response = $request->send();
         $this->assertEquals('201', $response->getStatusCode(), "Push action failed. Status code wrong");
         if ($response->getStatusCode() == 201)
