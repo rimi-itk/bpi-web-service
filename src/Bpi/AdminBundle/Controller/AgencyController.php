@@ -166,6 +166,10 @@ class AgencyController extends Controller
           ->add('publicId', 'text', array('label' => 'Public ID'))
           ->add('name', 'text')
           ->add('moderator', 'text')
+          ->add('internal', 'checkbox', array(
+              'label' => 'Internal',
+              'value' => 1,
+          ))
           ->add('publicKey', 'text')
           ->add('secret', 'text');
 

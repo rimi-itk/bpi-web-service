@@ -105,8 +105,10 @@ class PushService
         $builder->audience($audience);
 
         $tags = $this->prepareTags($tags);
-        foreach ($tags as $tag) {
-            $builder->tag($tag);
+        if (!empty($tags)) {
+            foreach ($tags as $tag) {
+                $builder->tag($tag);
+            }
         }
 
         $node = $builder->build();
@@ -129,7 +131,7 @@ class PushService
     private function prepareTags($tags)
     {
         if (empty($tags)) {
-            throw new Exception('Tags not found');
+            return array();
         }
 
         $tags = explode(',', $tags);
