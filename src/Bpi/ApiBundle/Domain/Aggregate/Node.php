@@ -9,9 +9,11 @@ use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\ApiBundle\Domain\Entity\Tag;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Doctrine\Common\Collections\ArrayCollection;
 use Gaufrette\File;
 
 class Node implements IPresentable
@@ -32,6 +34,7 @@ class Node implements IPresentable
 
     protected $category;
     protected $audience;
+    protected $tags;
 
     protected $deleted = false;
 
@@ -41,15 +44,18 @@ class Node implements IPresentable
         Profile $profile,
         Category $category,
         Audience $audience,
+        ArrayCollection $tags,
         Params $params,
         Assets $assets
-    ) {
+    )
+    {
         $this->author = $author;
         $this->resource = $resource;
         $this->profile = $profile;
         $this->params = $params;
         $this->category = $category;
         $this->audience = $audience;
+        $this->tags = $tags;
         $this->assets = $assets;
 
         $this->markTimes();
@@ -112,8 +118,7 @@ class Node implements IPresentable
             ->assets($assets)
             ->category($this->category)
             ->audience($this->audience)
-            ->build()
-        ;
+            ->build();
 
         $node->parent = $this;
         return $node;
@@ -141,8 +146,10 @@ class Node implements IPresentable
         $entity->addProperty($document->createProperty(
             'editable',
             'boolean',
-            (int) $this->params
-                ->filter(function($e){ if ($e instanceof Editable) return true; })
+            (int)$this->params
+                ->filter(function ($e) {
+                    if ($e instanceof Editable) return true;
+                })
                 ->first()
                 ->isPositive()
         ));
@@ -167,6 +174,13 @@ class Node implements IPresentable
             )
         );
 
+        $tags = $document->createTagsSection();
+        foreach ($this->tags as $tag) {
+            $serializedTag = new \Bpi\RestMediaTypeBundle\Element\Tag($tag->getTag());
+            $tags->addTag($serializedTag);
+        }
+        $entity->setTags($tags);
+
         $this->profile->transform($document);
         $this->resource->transform($document);
         $this->assets->transform($document);
@@ -189,27 +203,29 @@ class Node implements IPresentable
      * @param  AgencyID $syndicator
      * @return void
      */
-    public function defineAgencyContext(AgencyID $syndicator) {
+    public function defineAgencyContext(AgencyID $syndicator)
+    {
         $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
     }
 
-    public function getAuthor() {
-      return $this->author;
+    public function getAuthor()
+    {
+        return $this->author;
     }
 
     public function getAgencyId()
     {
-      return $this->author->getAgencyId();
+        return $this->author->getAgencyId();
     }
 
     public function isDeleted()
     {
-      return $this->deleted;
+        return $this->deleted;
     }
 
     public function setDeleted($deleted = true)
     {
-      $this->deleted = $deleted;
+        $this->deleted = $deleted;
     }
 
     /// Setters and getters for forms
@@ -217,6 +233,7 @@ class Node implements IPresentable
     {
         return $this->resource->getTitle();
     }
+
     public function setTitle($title)
     {
         $this->resource->setTitle($title);
@@ -236,6 +253,7 @@ class Node implements IPresentable
     {
         return $this->resource->getTeaser();
     }
+
     public function setTeaser($teaser)
     {
         $this->resource->setTeaser($teaser);
@@ -245,256 +263,10 @@ class Node implements IPresentable
     {
         $this->audience = $audience;
     }
+
     public function setCategory(Category $category)
     {
         $this->category = $category;
     }
 
-
-    /**
-     * Set ctime
-     *
-     * @param date $ctime
-     * @return self
-     */
-    public function setCtime($ctime)
-    {
-        $this->ctime = $ctime;
-        return $this;
-    }
-
-    /**
-     * Get ctime
-     *
-     * @return date $ctime
-     */
-    public function getCtime()
-    {
-        return $this->ctime;
-    }
-
-    /**
-     * Set mtime
-     *
-     * @param date $mtime
-     * @return self
-     */
-    public function setMtime($mtime)
-    {
-        $this->mtime = $mtime;
-        return $this;
-    }
-
-    /**
-     * Get mtime
-     *
-     * @return date $mtime
-     */
-    public function getMtime()
-    {
-        return $this->mtime;
-    }
-
-    /**
-     * Set path
-     *
-     * @param string $path
-     * @return self
-     */
-    public function setPath($path)
-    {
-        $this->path = $path;
-        return $this;
-    }
-
-    /**
-     * Get path
-     *
-     * @return string $path
-     */
-    public function getPath()
-    {
-        return $this->path;
-    }
-
-    /**
-     * Set level
-     *
-     * @param int $level
-     * @return self
-     */
-    public function setLevel($level)
-    {
-        $this->level = $level;
-        return $this;
-    }
-
-    /**
-     * Get level
-     *
-     * @return int $level
-     */
-    public function getLevel()
-    {
-        return $this->level;
-    }
-
-    /**
-     * Set parent
-     *
-     * @param Bpi\ApiBundle\Domain\Aggregate\Node $parent
-     * @return self
-     */
-    public function setParent(\Bpi\ApiBundle\Domain\Aggregate\Node $parent)
-    {
-        $this->parent = $parent;
-        return $this;
-    }
-
-    /**
-     * Get parent
-     *
-     * @return Bpi\ApiBundle\Domain\Aggregate\Node $parent
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * Set lockTime
-     *
-     * @param date $lockTime
-     * @return self
-     */
-    public function setLockTime($lockTime)
-    {
-        $this->lock_time = $lockTime;
-        return $this;
-    }
-
-    /**
-     * Get lockTime
-     *
-     * @return date $lockTime
-     */
-    public function getLockTime()
-    {
-        return $this->lock_time;
-    }
-
-    /**
-     * Get deleted
-     *
-     * @return boolean $deleted
-     */
-    public function getDeleted()
-    {
-        return $this->deleted;
-    }
-
-    /**
-     * Set author
-     *
-     * @param Bpi\ApiBundle\Domain\Entity\Author $author
-     * @return self
-     */
-    public function setAuthor(\Bpi\ApiBundle\Domain\Entity\Author $author)
-    {
-        $this->author = $author;
-        return $this;
-    }
-
-    /**
-     * Set profile
-     *
-     * @param Bpi\ApiBundle\Domain\Entity\Profile $profile
-     * @return self
-     */
-    public function setProfile(\Bpi\ApiBundle\Domain\Entity\Profile $profile)
-    {
-        $this->profile = $profile;
-        return $this;
-    }
-
-    /**
-     * Get profile
-     *
-     * @return Bpi\ApiBundle\Domain\Entity\Profile $profile
-     */
-    public function getProfile()
-    {
-        return $this->profile;
-    }
-
-    /**
-     * Set resource
-     *
-     * @param Bpi\ApiBundle\Domain\Entity\Resource $resource
-     * @return self
-     */
-    public function setResource(\Bpi\ApiBundle\Domain\Entity\Resource $resource)
-    {
-        $this->resource = $resource;
-        return $this;
-    }
-
-    /**
-     * Get resource
-     *
-     * @return Bpi\ApiBundle\Domain\Entity\Resource $resource
-     */
-    public function getResource()
-    {
-        return $this->resource;
-    }
-
-    /**
-     * Set params
-     *
-     * @param Bpi\ApiBundle\Domain\Aggregate\Params $params
-     * @return self
-     */
-    public function setParams(\Bpi\ApiBundle\Domain\Aggregate\Params $params)
-    {
-        $this->params = $params;
-        return $this;
-    }
-
-    /**
-     * Get params
-     *
-     * @return Bpi\ApiBundle\Domain\Aggregate\Params $params
-     */
-    public function getParams()
-    {
-        return $this->params;
-    }
-    /**
-     * @var one $assets
-     */
-    protected $assets;
-
-
-    /**
-     * Set assets
-     *
-     * @param \Bpi\ApiBundle\Domain\Aggregate\Assets $assets
-     * @return self
-     */
-    public function setAssets(\Bpi\ApiBundle\Domain\Aggregate\Assets $assets)
-    {
-        $this->assets = $assets;
-        return $this;
-    }
-
-    /**
-     * Get assets
-     *
-     * @return one $assets
-     */
-    public function getAssets()
-    {
-        return $this->assets;
-    }
 }

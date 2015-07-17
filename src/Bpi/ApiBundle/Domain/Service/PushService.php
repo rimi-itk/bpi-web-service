@@ -2,6 +2,7 @@
 namespace Bpi\ApiBundle\Domain\Service;
 
 
+use Bpi\ApiBundle\Domain\Entity\Tag;
 use Doctrine\Common\Persistence\ObjectManager;
 
 use Bpi\ApiBundle\Domain\Entity\Profile;
@@ -17,6 +18,7 @@ use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
 use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 use Bpi\ApiBundle\Domain\Entity\History;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Domain service for content syndication
@@ -53,6 +55,7 @@ class PushService
         ResourceBuilder $resource_builder,
         $category,
         $audience,
+        $tags,
         Profile $profile,
         Params $params,
         Assets $assets
@@ -101,6 +104,10 @@ class PushService
         );
         $builder->audience($audience);
 
+        $tags = $this->prepareTags($tags);
+        foreach ($tags as $tag) {
+            $builder->tag($tag);
+        }
 
         $node = $builder->build();
         $log = new History($node, $author->getAgencyId(), new \DateTime(), 'push');
@@ -113,7 +120,42 @@ class PushService
         return $node;
     }
 
-    public function test() {var_dump(1);}
+    /**
+     * Prepare tags.
+     *
+     * @param $tags
+     * @return array
+     */
+    private function prepareTags($tags)
+    {
+        if (empty($tags)) {
+            throw new Exception('Tags not found');
+        }
+
+        $tags = explode(',', $tags);
+        $readyTags = array();
+        foreach ($tags as $tag) {
+            $tag = trim($tag);
+            $savedTag = $this->manager
+                ->getRepository('BpiApiBundle:Entity\Tag')
+                ->findOneBy(array('tag' => $tag));
+
+            if (null === $savedTag) {
+                $newTag = new Tag();
+                $newTag->setTag($tag);
+
+                $this->manager->persist($newTag);
+                $this->manager->flush();
+
+                $readyTags[] = $newTag;
+                continue;
+            }
+
+            $readyTags[] = $savedTag;
+        }
+
+        return $readyTags;
+    }
 
     /**
      * Add agency copyleft to the resource
