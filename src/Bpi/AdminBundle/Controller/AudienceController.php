@@ -21,14 +21,11 @@ class AudienceController extends Controller
      */
     public function indexAction()
     {
-       $repo = $this->getRepository();
-        $query = $repo->createQueryBuilder();
 
         $param = $this->getRequest()->query->get('sort');
         $direction = $this->getRequest()->query->get('direction');
-        if ($param && $direction) {
-            $query->sort($param, $direction);
-        }
+
+        $query = $this->getRepository()->listAll($param, $direction);
 
         $knpPaginator = $this->get('knp_paginator');
 
