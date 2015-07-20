@@ -109,9 +109,15 @@ class NodeBuilder
      * @param Tag $tag
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
-    public function tag(Tag $tag) {
+    public function tag(Tag $tag)
+    {
         $this->tags->add($tag);
         return $this;
+    }
+
+    public function getTags()
+    {
+        return $this->tags;
     }
 
     /**
@@ -138,6 +144,6 @@ class NodeBuilder
         foreach ($inline as $asset) {
             $this->assets->addElem($asset);
         }
-        return new Node($this->author, $this->resource, $this->profile, $this->category, $this->audience, $this->params, $this->assets);
+        return new Node($this->author, $this->resource, $this->profile, $this->category, $this->audience, $this->tags, $this->params, $this->assets);
     }
 }

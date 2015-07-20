@@ -12,8 +12,8 @@
 <table class="table table-striped table-hover">
     <thead>
         <tr>
-            <th>Public ID</th>
-            <th>Name</th>
+            <th{% if pagination.isSorted('public_id') %} class="sorted"{% endif %}> {{ knp_pagination_sortable(pagination, 'Public ID', 'public_id', {'defaultDirection' : 'asc'}) }}</th>
+            <th{% if pagination.isSorted('name') %} class="sorted"{% endif %}> {{ knp_pagination_sortable(pagination, 'Name', 'name', {'defaultDirection' : 'asc'}) }}</th>
             <th>Actions</th>
         </tr>
     </thead>
