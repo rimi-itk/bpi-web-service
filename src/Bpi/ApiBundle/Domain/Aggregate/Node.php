@@ -272,6 +272,7 @@ class Node implements IPresentable
     {
         return $this->resource->getTitle();
     }
+
     public function setTitle($title)
     {
         $this->resource->setTitle($title);

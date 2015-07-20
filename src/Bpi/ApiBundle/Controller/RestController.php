@@ -399,6 +399,9 @@ class RestController extends FOSRestController
     public function nodeAction($id)
     {
         $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
+        $count = $this->getRepository('BpiApiBundle:Entity\History')->getSyndicatedCount($id);
+        $_node->setSyndicated($count);
+
         if (!$_node) {
             throw $this->createNotFoundException();
         }
@@ -579,7 +582,6 @@ class RestController extends FOSRestController
     protected function _isValidForPushNode(array $data)
     {
         // @todo move somewhere all this validation stuff
-
         $node = new Constraints\Collection(array(
             'allowExtraFields' => true,
             'fields' => array(
@@ -700,7 +702,6 @@ class RestController extends FOSRestController
                     'token' => $this->container->get('security.context')->getToken()->token
                 )
             );
-
             return $this->redirect($this->generateUrl('node', $params));
         }
 
