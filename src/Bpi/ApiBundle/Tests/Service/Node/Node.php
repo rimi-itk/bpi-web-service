@@ -41,23 +41,23 @@ class Node extends BpiTest
     protected function tearDown()
     {
 
-        // $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Aggregate\Node')
-        //     ->remove()
-        //     ->field('author.agency_id')
-        //     ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
-        //     ->getQuery()
-        //     ->execute();
-        // $this->em->flush();
+        $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Aggregate\Node')
+            ->remove()
+            ->field('author.agency_id')
+            ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
+            ->getQuery()
+            ->execute();
+        $this->em->flush();
 
-        //  $agencies = $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Entity\History')
-        //     ->remove()
-        //     ->field('agency')
-        //     ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
-        //     ->getQuery()
-        //     ->execute();
-        // $this->em->flush();
+         $agencies = $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Entity\History')
+            ->remove()
+            ->field('agency')
+            ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))
+            ->getQuery()
+            ->execute();
+        $this->em->flush();
 
-        // parent::tearDown();
+        parent::tearDown();
     }
 
     public function testAssetsPostAction()
