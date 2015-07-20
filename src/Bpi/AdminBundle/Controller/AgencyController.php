@@ -21,13 +21,20 @@ class AgencyController extends Controller
      */
     public function indexAction()
     {
-        $query = $this->getRepository()->listAll();
+        $param = $this->getRequest()->query->get('sort');
+        $direction = $this->getRequest()->query->get('direction');
+        $query = $this->getRepository()->listAll($param, $direction);
 
-        $paginator = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
+        $knpPaginator = $this->get('knp_paginator');
+
+        $pagination = $knpPaginator->paginate(
             $query,
             $this->get('request')->query->get('page', 1),
-            5
+            50,
+            array(
+                'defaultSortFieldName' => 'public_id',
+                'defaultSortDirection' => 'asc',
+            )
         );
 
         return array('pagination' => $pagination);
@@ -154,6 +161,10 @@ class AgencyController extends Controller
           ->add('publicId', 'text', array('label' => 'Public ID'))
           ->add('name', 'text')
           ->add('moderator', 'text')
+          ->add('internal', 'checkbox', array(
+              'label' => 'Internal',
+              'value' => 1,
+          ))
           ->add('publicKey', 'text')
           ->add('secret', 'text');
 

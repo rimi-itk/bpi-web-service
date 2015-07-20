@@ -109,9 +109,15 @@ class NodeBuilder
      * @param Tag $tag
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
-    public function tag(Tag $tag) {
+    public function tag(Tag $tag)
+    {
         $this->tags->add($tag);
         return $this;
+    }
+
+    public function getTags()
+    {
+        return $this->tags;
     }
 
     /**

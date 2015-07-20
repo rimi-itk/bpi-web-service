@@ -21,8 +21,25 @@ class NodeController extends Controller
      */
     public function indexAction()
     {
-        $nodes = $this->getRepository()->listAll();
-        return array('nodes' => $nodes);
+
+        $param = $this->getRequest()->query->get('sort');
+        $direction = $this->getRequest()->query->get('direction');
+        $search = $this->getRequest()->query->get('search');
+        $query = $this->getRepository()->listAll($param, $direction, $search);
+
+        $knpPaginator = $this->get('knp_paginator');
+
+        $pagination = $knpPaginator->paginate(
+            $query,
+            $this->get('request')->query->get('page', 1),
+            50,
+            array(
+                'defaultSortFieldName' => 'resource.title',
+                'defaultSortDirection' => 'desc',
+            )
+        );
+
+        return array('pagination' => $pagination);
     }
 
     /**

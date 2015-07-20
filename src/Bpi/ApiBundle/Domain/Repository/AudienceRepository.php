@@ -8,12 +8,18 @@ class AudienceRepository extends DocumentRepository
     /**
      * Show all audiences.
      *
+     * @param string $param
+     * @param string $direction
      * @return array
      */
-    public function listAll()
+    public function listAll($param = null, $direction = null)
     {
         $qb = $this->createQueryBuilder();
-        $qb->sort('audience', 0);
+
+        if ($param && $direction)
+        {
+            $qb->sort($param, $direction);
+        }
 
         return $qb;
     }

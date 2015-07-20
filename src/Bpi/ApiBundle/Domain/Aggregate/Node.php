@@ -274,4 +274,10 @@ class Node implements IPresentable
     {
         return $this->tags;
     }
+
+    public function getAssets()
+    {
+        return $this->assets;
+    }
+
 }

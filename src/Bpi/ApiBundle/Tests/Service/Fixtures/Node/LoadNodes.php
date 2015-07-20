@@ -147,11 +147,11 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
             $this->createAlphaResource(),
             'Event',
             'All',
+            array(),
             $this->createAlphaProfile(),
             new Params(array(new Editable(1), new Authorship(1))),
             $this->createAssets()
         );
-
     }
 
     /**

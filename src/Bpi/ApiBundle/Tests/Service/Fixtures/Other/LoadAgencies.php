@@ -16,8 +16,8 @@ class LoadAgencies extends AbstractFixture implements OrderedFixtureInterface
      */
     public function load(ObjectManager $manager)
     {
-        $manager->persist(new Agency(self::AGENCY_ALPHA, 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', md5('agency_200100_public'), sha1('agency_200100_secret')));
-        $manager->persist(new Agency(self::AGENCY_BRAVO, 'Bbbb Kommunes Biblioteker', 'Bravo Agency Moderator Name', md5('agency_200200_public'), sha1('agency_200200_secret')));
+        $manager->persist(new Agency(self::AGENCY_ALPHA, 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', true, md5('agency_200100_public'), sha1('agency_200100_secret')));
+        $manager->persist(new Agency(self::AGENCY_BRAVO, 'Bbbb Kommunes Biblioteker', 'Bravo Agency Moderator Name', false, md5('agency_200200_public'), sha1('agency_200200_secret')));
         $manager->flush();
     }
 
