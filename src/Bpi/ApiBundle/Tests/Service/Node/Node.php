@@ -12,10 +12,10 @@ use BpiTestArgs;
 
 class Node extends BpiTest
 {
-   protected $domain;
-   protected $guzzle;
+    protected $domain;
+    protected $guzzle;
 
-   public function setUp()
+    public function setUp()
     {
         parent::setUp();
 
@@ -153,8 +153,6 @@ class Node extends BpiTest
                     $this->assertEquals($assets[0]->getHeight(), (string)$file['height'], "Height value");
                 }
             }
-
-
         }
     }
 }
