@@ -9,9 +9,11 @@ use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\ApiBundle\Domain\Entity\Tag;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Doctrine\Common\Collections\ArrayCollection;
 use Gaufrette\File;
 
 class Node implements IPresentable
@@ -32,6 +34,7 @@ class Node implements IPresentable
 
     protected $category;
     protected $audience;
+    protected $tags;
 
     protected $deleted = false;
 
@@ -41,14 +44,17 @@ class Node implements IPresentable
         Profile $profile,
         Category $category,
         Audience $audience,
-        Params $params
-    ) {
+        ArrayCollection $tags,
+        Params $params,
+    )
+    {
         $this->author = $author;
         $this->resource = $resource;
         $this->profile = $profile;
         $this->params = $params;
         $this->category = $category;
         $this->audience = $audience;
+        $this->tags = $tags;
 
         $this->markTimes();
     }
@@ -164,6 +170,13 @@ class Node implements IPresentable
             )
         );
 
+        $tags = $document->createTagsSection();
+        foreach ($this->tags as $tag) {
+            $serializedTag = new \Bpi\RestMediaTypeBundle\Element\Tag($tag->getTag());
+            $tags->addTag($serializedTag);
+        }
+        $entity->setTags($tags);
+
         $this->profile->transform($document);
         $this->resource->transform($document);
     }
@@ -185,27 +198,29 @@ class Node implements IPresentable
      * @param  AgencyID $syndicator
      * @return void
      */
-    public function defineAgencyContext(AgencyID $syndicator) {
+    public function defineAgencyContext(AgencyID $syndicator)
+    {
         $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
     }
 
-    public function getAuthor() {
-      return $this->author;
+    public function getAuthor()
+    {
+        return $this->author;
     }
 
     public function getAgencyId()
     {
-      return $this->author->getAgencyId();
+        return $this->author->getAgencyId();
     }
 
     public function isDeleted()
     {
-      return $this->deleted;
+        return $this->deleted;
     }
 
     public function setDeleted($deleted = true)
     {
-      $this->deleted = $deleted;
+        $this->deleted = $deleted;
     }
 
     /// Setters and getters for forms
@@ -246,4 +261,8 @@ class Node implements IPresentable
         $this->category = $category;
     }
 
+    public function getTags()
+    {
+        return $this->tags;
+    }
 }
