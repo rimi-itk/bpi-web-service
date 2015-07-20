@@ -35,6 +35,7 @@ class Node implements IPresentable
     protected $category;
     protected $audience;
     protected $tags;
+    protected $assets;
 
     protected $deleted = false;
 
@@ -269,4 +270,8 @@ class Node implements IPresentable
         $this->category = $category;
     }
 
+    public function getTags()
+    {
+        return $this->tags;
+    }
 }

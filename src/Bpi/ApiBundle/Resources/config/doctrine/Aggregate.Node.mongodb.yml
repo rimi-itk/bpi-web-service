@@ -77,16 +77,14 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
       type: one
       targetDocument: Bpi\ApiBundle\Domain\Entity\Audience
 
-<<<<<<< HEAD
     tags:
       reference: true
       type: many
       targetDocument: Bpi\ApiBundle\Domain\Entity\Tag
       cascade: all
-=======
+
     assets:
       embedded: true
       type: one
       strategy: pushAll
       targetDocument: Bpi\ApiBundle\Domain\Aggregate\Assets
->>>>>>> 585de843510b0183bb17b9205691021185885364

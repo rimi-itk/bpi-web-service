@@ -47,11 +47,18 @@ class FacetRepository extends DocumentRepository
             ->getAudience()
         ;
 
+        $tags = array();
+        $nodeTags = $node->getTags();
+        foreach ($nodeTags as $key => $tag) {
+            $tags[] = $tag->getTag();
+        }
+
+
         $facets = array(
             'agency_id' => array($agencyId->id()),
             'category' => array($category),
             'audience' => array($audience),
-            'tags' => '',
+            'tags' => array($tags),
             'contentType' => '',
         );
 
@@ -78,8 +85,17 @@ class FacetRepository extends DocumentRepository
         $facets = array();
         $qb = $this->createQueryBuilder('Entity\Facet')
             ->map('
-                    function() {
-                        for (var i in this.facetData) {
+                function() {
+                    for (var i in this.facetData) {
+                        if (i == "tags") {
+                            for (var j in this.facetData[i]) {
+                                var key = {
+                                    facetName: "tags",
+                                    facetValue: this.facetData[i][j]
+                                }
+                                emit(key, 1);
+                            }
+                        } else {
                             var key = {
                                 facetName: i,
                                 facetValue: this.facetData[i]
@@ -87,16 +103,17 @@ class FacetRepository extends DocumentRepository
                             emit(key, 1);
                         }
                     }
-                ')
+                }
+            ')
             ->reduce('
-                    function(key, values) {
-                        var sum = 0;
-                        for(var i in values) {
-                            sum += values[i];
-                        }
-                        return sum;
-                    };
-                ')
+                function(key, values) {
+                    var sum = 0;
+                    for(var i in values) {
+                        sum += values[i];
+                    }
+                    return sum;
+                };
+            ')
         ;
 
         if (empty($filters)) {
