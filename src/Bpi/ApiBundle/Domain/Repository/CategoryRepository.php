@@ -8,15 +8,22 @@ class CategoryRepository extends DocumentRepository
     /**
      * Show all categories.
      *
+     * @param string $param
+     * @param string $direction
      * @return array
      */
-    public function listAll()
+    public function listAll($param = null, $direction = null)
     {
         $qb = $this->createQueryBuilder();
-        $qb->sort('category', 0);
+
+        if ($param && $direction)
+        {
+            $qb->sort($param, $direction);
+        }
 
         return $qb;
     }
+
 
     public function save($category)
     {
