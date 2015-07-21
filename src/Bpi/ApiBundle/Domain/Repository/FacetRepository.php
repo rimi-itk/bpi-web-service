@@ -134,7 +134,8 @@ class FacetRepository extends DocumentRepository
                             $terms[] = $value->getAudience();
                             break;
 
-                        case 'agency_id' :
+                        // Agency, tags
+                        default :
                             $terms[] = $value;
                             break;
                     }
