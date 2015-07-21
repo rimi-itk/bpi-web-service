@@ -67,6 +67,7 @@ class Syndicated extends BpiTest
             ->equals("alpha_title unicode(❶)")
             ->getQuery()
             ->getSingleResult();
+        $this->assertNotNull($node, 'Fixtures not loaded.');
         if ($node != null) {
             $id = $node->getId();
 
@@ -93,7 +94,7 @@ class Syndicated extends BpiTest
             $response = $request->send();
             $this->assertEquals('200', $response->getStatusCode(), "Syndication action failed(2). Marking node as syndicated failed.");
 
-             $url = "app_dev.php/node?id={$id}&type=single";
+            $url = "app_dev.php/node?id={$id}&type=single";
             $request = $this->guzzle->get($url, $headers);
             $response = $request->send();
             $this->assertEquals('200', $response->getStatusCode(), "Syndication action failed(2). Getting xml failed.");
