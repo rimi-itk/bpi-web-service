@@ -169,6 +169,12 @@ class RestController extends FOSRestController
                         $filters['agency_id'][] = $val;
                     }
                 }
+                if ($field == 'tags' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['tags'][] = $val;
+                    }
+                }
             }
         }
         $availableFacets = $facetRepository->getFacetsByRequest($filters);
