@@ -171,8 +171,9 @@ class RestController extends FOSRestController
                     }
                 }
             }
-            $node_query->filter($filters);
         }
+        $availableFacets = $facetRepository->getFacetsByRequest($filters);
+        $node_query->filter($filters);
 
         if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
             foreach ($sort as $field => $order)
@@ -181,7 +182,6 @@ class RestController extends FOSRestController
             $node_query->sort('pushed', 'desc');
         }
 
-        $availableFacets = $facetRepository->getFacetsByRequest($filters);
         $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findByNodesQuery($node_query);
         $agency_id = new AgencyId($this->getUser()->getAgencyId()->id());
         foreach ($node_collection as $node) {
@@ -238,8 +238,31 @@ class RestController extends FOSRestController
             )
         );
 
-        $facets = $document->createEntity('facets');
-        $document->prependEntity($facets);
+        // Prepare facets for xml.
+        foreach ($availableFacets as $facetName => $facet) {
+            $facetsXml = $document->createEntity('facet', $facetName);
+            $result = array();
+            foreach ($facet as $key => $term) {
+                if ($facetName == 'agency_id') {
+                    $result[] = $document->createProperty(
+                        $key,
+                        'string',
+                        $term['count'],
+                        $term['agencyName']
+                    );
+                } else {
+                    $result[] = $document->createProperty(
+                        $key,
+                        'string',
+                        $term
+                    );
+                }
+            }
+
+            $facetsXml->addProperties($result);
+            $document->prependEntity($facetsXml);
+        }
+
 
         return $document;
     }
