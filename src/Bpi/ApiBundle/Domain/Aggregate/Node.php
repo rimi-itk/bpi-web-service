@@ -37,6 +37,9 @@ class Node implements IPresentable
     protected $tags;
     protected $assets;
 
+
+    protected $syndicated = 0;
+
     protected $deleted = false;
 
     public function __construct(
@@ -175,6 +178,14 @@ class Node implements IPresentable
             )
         );
 
+         $entity->addProperty(
+            $document->createProperty(
+                'syndicated',
+                'string',
+                $this->getSyndicated()
+            )
+        );
+
         $tags = $document->createTagsSection();
         foreach ($this->tags as $tag) {
             $serializedTag = new \Bpi\RestMediaTypeBundle\Element\Tag($tag->getTag());
@@ -275,4 +286,13 @@ class Node implements IPresentable
         return $this->assets;
     }
 
+    public function setSyndicated($syndicated)
+    {
+        $this->syndicated = $syndicated;
+    }
+
+    public function getSyndicated()
+    {
+        return $this->syndicated;
+    }
 }
