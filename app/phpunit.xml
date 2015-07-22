@@ -15,6 +15,7 @@
         <testsuite name="BpiTests">
             <file>../src/Bpi/ApiBundle/Tests/Service/Agency/Agency.php</file>
             <file>../src/Bpi/ApiBundle/Tests/Service/Node/Node.php</file>
+            <file>../src/Bpi/ApiBundle/Tests/Service/Node/Syndicated.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
