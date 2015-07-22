@@ -229,6 +229,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Other',
             'Adult',
+            'tag8,tag9',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
@@ -256,6 +257,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Other',
             'Young',
+            'tag1,tag7',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
@@ -283,6 +285,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Facts',
             'Elders',
+            'tag4,tag9',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
@@ -310,6 +313,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Games',
             'Adult',
+            'tag2,tag6',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
@@ -337,6 +341,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Games',
             'Young',
+            'tag9,tag5',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
@@ -364,6 +369,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Book',
             'Elders',
+            'tag10,tag8',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
@@ -391,6 +397,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Campaigns',
             'Adult',
+            'tag5,tag8',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
@@ -418,6 +425,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Themes',
             'Adult',
+            'tag',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
