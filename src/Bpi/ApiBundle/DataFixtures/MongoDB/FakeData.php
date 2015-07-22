@@ -89,6 +89,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Film',
             'Kids',
+            'tag1,tag2,tag3',
             $profile,
             new Params(array(new Editable(1), new Authorship(1))),
             new Assets(array())
@@ -116,6 +117,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Music',
             'Adult',
+            'tag3,tag4',
             $profile,
             new Params(array(new Editable(1), new Authorship(1))),
             new Assets(array())
@@ -143,6 +145,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Campaigns',
             'Adult',
+            'tag4,tag6',
             $profile,
             new Params(array(new Editable(1), new Authorship(1))),
             new Assets(array())
@@ -170,6 +173,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Literature',
             'Kids',
+            'tag5,tag7',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
@@ -197,6 +201,7 @@ class FakeData implements FixtureInterface
             $resource,
             'Literature',
             'Kids',
+            'tag8',
             $profile,
             new Params(array(new Editable(1), new Authorship(0))),
             new Assets(array())
