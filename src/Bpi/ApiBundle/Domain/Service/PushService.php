@@ -114,6 +114,7 @@ class PushService
         $node = $builder->build();
         $log = new History($node, $author->getAgencyId(), new \DateTime(), 'push');
 
+        $this->manager->prepareFacet($node);
         $this->manager->getRepository('BpiApiBundle:Aggregate\Node')->save($node);
         $this->manager->persist($log);
 
