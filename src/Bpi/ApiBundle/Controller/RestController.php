@@ -132,6 +132,7 @@ class RestController extends FOSRestController
      */
     public function listAction()
     {
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
         $node_query = new \Bpi\ApiBundle\Domain\Entity\NodeQuery();
         $node_query->amount(20);
         if (false !== ($amount = $this->getRequest()->query->get('amount', false))) {
@@ -146,17 +147,39 @@ class RestController extends FOSRestController
             $node_query->search($search);
         }
 
+        $filters = array();
         if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
             foreach ($filter as $field => $value) {
-                if ($field == 'category') {
-                    $value = $this->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => $value));
+                if ($field == 'category' && !empty($value)) {
+                    foreach ($value as $val) {
+                        $category = $this->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => $val));
+                        if (empty($category)) {continue; }
+                        $filters['category'][] = $category;
+                    }
                 }
-                if ($field == 'audience') {
-                    $value = $this->getRepository('BpiApiBundle:Entity\Audience')->findOneBy(array('audience' => $value));
+                if ($field == 'audience' && !empty($value)) {
+                    foreach ($value as $val) {
+                        $audience = $this->getRepository('BpiApiBundle:Entity\Audience')->findOneBy(array('audience' => $val));
+                        if (empty($audience)) {continue; }
+                        $filters['audience'][] = $audience;
+                    }
                 }
-                $node_query->filter($field, $value);
+                if ($field == 'agency_id' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['agency_id'][] = $val;
+                    }
+                }
+                if ($field == 'tags' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['tags'][] = $val;
+                    }
+                }
             }
         }
+        $availableFacets = $facetRepository->getFacetsByRequest($filters);
+        $node_query->filter($filters);
 
         if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
             foreach ($sort as $field => $order)
@@ -220,6 +243,32 @@ class RestController extends FOSRestController
                 'List refinements'
             )
         );
+
+        // Prepare facets for xml.
+        foreach ($availableFacets as $facetName => $facet) {
+            $facetsXml = $document->createEntity('facet', $facetName);
+            $result = array();
+            foreach ($facet as $key => $term) {
+                if ($facetName == 'agency_id') {
+                    $result[] = $document->createProperty(
+                        $key,
+                        'string',
+                        $term['count'],
+                        $term['agencyName']
+                    );
+                } else {
+                    $result[] = $document->createProperty(
+                        $key,
+                        'string',
+                        $term
+                    );
+                }
+            }
+
+            $facetsXml->addProperties($result);
+            $document->prependEntity($facetsXml);
+        }
+
 
         return $document;
     }
@@ -421,6 +470,8 @@ class RestController extends FOSRestController
         BpiFile::$base_url = $this->getRequest()->getScheme() . '://' . $this->getRequest()->getHttpHost() . $this->getRequest()->getBasePath();
         $assets = array();
 
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
+
         /** check request body size, must be smaller than 10MB **/
         if (strlen($request->getContent()) > 10485760) {
             return $this->createErrorView('Request entity too large', 413);
@@ -485,10 +536,14 @@ class RestController extends FOSRestController
                 $node = $this->get('domain.push_service')
                   ->pushRevision(new NodeId($id), $author, $resource, $params, $assets);
 
+                $facetRepository->prepareFacet($node);
+
                 return $this->get("bpi.presentation.transformer")->transform($node);
             }
             $node = $this->get('domain.push_service')
               ->push($author, $resource, $request->get('category'), $request->get('audience'), $request->get('tags'), $profile, $params, $assets);
+
+            $facets = $facetRepository->prepareFacet($node);
 
             return $this->get("bpi.presentation.transformer")->transform($node);
         } catch (\LogicException $e) {

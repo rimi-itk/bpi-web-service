@@ -281,6 +281,11 @@ class Node implements IPresentable
         $this->category = $category;
     }
 
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
     public function getAssets()
     {
         return $this->assets;
