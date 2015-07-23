@@ -162,7 +162,6 @@ class Node implements IPresentable
 
         $document->setCursorOnEntity($entity);
         $this->author->transform($document);
-
         $entity->addProperty(
             $document->createProperty(
                 'category',
@@ -299,5 +298,15 @@ class Node implements IPresentable
     public function getSyndicated()
     {
         return $this->syndicated;
+    }
+
+    public function setCtime($ctime)
+    {
+        $this->ctime = $ctime;
+    }
+
+    public function getCtime()
+    {
+        return $this->ctime;
     }
 }

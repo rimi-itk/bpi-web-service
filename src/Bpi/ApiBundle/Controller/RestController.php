@@ -187,11 +187,12 @@ class RestController extends FOSRestController
         } else {
             $node_query->sort('pushed', 'desc');
         }
-
         $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findByNodesQuery($node_query);
         $agency_id = new AgencyId($this->getUser()->getAgencyId()->id());
         foreach ($node_collection as $node) {
           $node->defineAgencyContext($agency_id);
+          $count = $this->getRepository('BpiApiBundle:Entity\History')->getSyndicatedCount($node->getId());
+          $node->setSyndicated($count);
         }
 
         $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
@@ -212,7 +213,6 @@ class RestController extends FOSRestController
                 //$hypermedia->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), 'filename' => ''), true)));
             }
         );
-
         // Collection description
         $collection = $document->createEntity('collection');
         $collection->addProperty(
