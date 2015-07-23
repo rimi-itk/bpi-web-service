@@ -7,6 +7,7 @@ use Guzzle\Http\Client;
 use Bpi\ApiBundle\Tests\Service\BpiTest as BpiTest;
 use Bpi\ApiBundle\Tests\Service\Fixtures\Other\LoadAgencies;
 use Bpi\ApiBundle\Tests\Service\Fixtures\Other\LoadNodes;
+use Bpi\ApiBundle\Domain\Entity\File as BpiFile;
 
 use BpiTestArgs;
 
@@ -20,6 +21,7 @@ class Node extends BpiTest
         parent::setUp();
 
         $this->domain = 'http://' . bpitest_domain;
+        BpiFile::$base_url = $this->domain;
 
         $this->console = new \Symfony\Bundle\FrameworkBundle\Console\Application(static::$kernel);
         $this->console->setAutoExit(false);
