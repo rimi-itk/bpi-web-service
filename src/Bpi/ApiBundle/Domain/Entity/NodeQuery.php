@@ -48,12 +48,15 @@ class NodeQuery
         return $this->field_map[$field_name];
     }
 
-    public function filter($field, $value)
+    public function filter($value)
     {
-        if (!$value)
+        if (!$value) {
             return;
+        }
 
-        $this->filters[$this->map($field)] = $value;
+        foreach ($value as $field => $terms) {
+            $this->filters[$this->map($field)] = $terms;
+        }
     }
 
     public function offset($value)
@@ -97,15 +100,19 @@ class NodeQuery
                 $value = str_ireplace(' ', '|', $value);
                 $query->addOr($query->expr()->field('author.firstname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
                 $query->addOr($query->expr()->field('author.lastname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
-                return;
+            } elseif ($field == 'author.agency_id') {
+                foreach ($value as $term) {
+                    $query->addOr($query->expr()->field('author.agency_id')->equals($term));
+                }
             } elseif (in_array($field, array('category', 'audience'))) {
-                $query->addOr(array(
-                    $field . '.$id' => new \MongoId($value->getId()))
-                );
-                return;
+                foreach ($value as $term) {
+                    $query->addOr(array($field . '.$id' => new \MongoId($term->getId())));
+                }
+            } else {
+                $query->field($field)->equals($this->matchAny($value));
             }
 
-            $query->field($field)->equals($this->matchAny($value));
+            return;
         }
     }
 
