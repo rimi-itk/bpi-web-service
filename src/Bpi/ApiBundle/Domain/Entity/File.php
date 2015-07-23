@@ -143,7 +143,7 @@ class File
     public function createFile() {
         if (empty($this->name))
             throw new Exception("Empty filename.");
-        $file = $this->filesystem->createFile($this->name, $this->filesystem);
+        $file = $this->filesystem->createFile("{$this->name}.{$this->extension}" , $this->filesystem);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->external);
@@ -161,7 +161,7 @@ class File
 
         $file->setContent($content);
 
-        $this->path = $this->getWebPath() . "/{$this->name}";
+        $this->path = $this->getWebPath() . "/{$this->name}.{$this->extension}";
 
         return $this;
     }
@@ -173,7 +173,7 @@ class File
      */
     public function getWebPath()
     {
-        return self::$base_url . "/web/uploads/assets";
+        return self::$base_url . "/uploads/assets";
     }
 
     /**
