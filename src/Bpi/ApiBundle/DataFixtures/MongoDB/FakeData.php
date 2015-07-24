@@ -56,9 +56,9 @@ class FakeData implements FixtureInterface
 
         $service = new PushService($manager, $this->createFilesystemMap());
 
-        $agency['Arhus'] = new Agency('200100', 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', md5('agency_200100_public'), sha1('agency_200100_secret'));
-        $agency['Kobenhavns'] = new Agency('200200', 'Københavns Biblioteker', 'Københavns Moderator Name', md5('agency_200200_public'), sha1('agency_200200_secret'));
-        $agency['Halsnas'] = new Agency('200300', 'Halsnæs Kommune - Bibliotekerne', 'Halsnæs Moderator Name', md5('agency_200300_public'), sha1('agency_200300_secret'));
+        $agency['Arhus'] = new Agency('200100', 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', true, md5('agency_200100_public'), sha1('agency_200100_secret'));
+        $agency['Kobenhavns'] = new Agency('200200', 'Københavns Biblioteker', 'Københavns Moderator Name', true, md5('agency_200200_public'), sha1('agency_200200_secret'));
+        $agency['Halsnas'] = new Agency('200300', 'Halsnæs Kommune - Bibliotekerne', 'Halsnæs Moderator Name', true, md5('agency_200300_public'), sha1('agency_200300_secret'));
 
         foreach($agency as $agency_item) {
             $manager->persist($agency_item);
