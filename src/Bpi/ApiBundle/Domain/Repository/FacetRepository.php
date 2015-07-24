@@ -14,7 +14,20 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
  */
 class FacetRepository extends DocumentRepository
 {
+
     /**
+     * @var array of applied filters
+     */
+    private $filters;
+
+    /**
+     * @var string applied logical operator
+     */
+    private $logicalOperator;
+
+    /**
+     * Prepare facets for each pushed node
+     *
      * @param $node
      */
     public function prepareFacet($node) {
@@ -23,6 +36,12 @@ class FacetRepository extends DocumentRepository
         $agencyId = $node
             ->getAuthor()
             ->getAgencyId()
+        ;
+
+        $agency = $this
+            ->dm
+            ->getRepository('BpiApiBundle:Aggregate\Agency')
+            ->findOneBy(array('public_id' => $agencyId->id()))
         ;
 
         $categoryId = $node
@@ -56,10 +75,10 @@ class FacetRepository extends DocumentRepository
 
         $facets = array(
             'agency_id' => array($agencyId->id()),
+            'agency_internal' => array($agency->getInternal()),
             'category' => array($category),
             'audience' => array($audience),
             'tags' => array($tags),
-            'contentType' => '',
         );
 
         $setFacets = new \stdClass();
@@ -77,14 +96,32 @@ class FacetRepository extends DocumentRepository
     }
 
     /**
-     * @param array $filters
-     * @return array
+     * Build facets and get node ids by which will be made request to DB
+     *
+     * @param array $filters applied filters
+     * @param string $logicalOperator by default OR could be AND
+     * @return \StdClass
+     *  contain array of built facets and array of node ids
      */
-    public function getFacetsByRequest($filters = array())
+    public function getFacetsByRequest($filters = array(), $logicalOperator = 'OR')
     {
         $facets = array();
-        $qb = $this->createQueryBuilder('Entity\Facet')
-            ->map('
+        $nodeIds = array();
+
+        $this->filters = $filters;
+        $this->logicalOperator = $logicalOperator;
+
+        $qb = $this->createQueryBuilder('Entity\Facet');
+
+        $filteredNodes = $this->iterateTerms($qb);
+        foreach ($filteredNodes as $key => $node) {
+            $nid = $node->getNodeId();
+            if (isset($nid) && !empty($nid)) {
+                $nodeIds[] = $nid;
+            }
+        }
+
+        $qb->map('
                 function() {
                     for (var i in this.facetData) {
                         if (i == "tags") {
@@ -116,13 +153,35 @@ class FacetRepository extends DocumentRepository
             ')
         ;
 
-        if (empty($filters)) {
-            $result = $qb
-                ->getQuery()
-                ->execute()
-            ;
-        } else {
-            foreach ($filters as $filter_name => $values) {
+
+        $result = $this->iterateTerms($qb);
+        foreach ($result as $facet) {
+            if ($facet['_id']['facetName'] == 'agency_id') {
+                $agency = $this->dm->getRepository('BpiApiBundle:Aggregate\Agency')->loadUserByUsername($facet['_id']['facetValue']);
+                $facets['agency_id'][$facet['_id']['facetValue']]['agencyName'] = $agency->getName();
+                $facets['agency_id'][$facet['_id']['facetValue']]['count'] = $facet['value'];
+            } else {
+                $facets[$facet['_id']['facetName']][$facet['_id']['facetValue']] = $facet['value'];
+            }
+        }
+
+        $nodeFacets = new \StdClass();
+        $nodeFacets->facets = $facets;
+        $nodeFacets->nodeIds = $nodeIds;
+
+        return $nodeFacets;
+    }
+
+    /**
+     * Iterate over applied filters and make request to db
+     * @param $qb object of query builder
+     * @return mixed
+     *  array of facets or facet entities
+     */
+    private function iterateTerms($qb)
+    {
+        if (!empty($this->filters)) {
+            foreach ($this->filters as $filter_name => $values) {
                 $terms = array();
                 foreach ($values as $value) {
                     switch ($filter_name) {
@@ -141,25 +200,27 @@ class FacetRepository extends DocumentRepository
                     }
                 }
 
-                $qb->addOr($qb->expr()->field('facetData.' . $filter_name)->in($terms));
-            }
+                switch (strtoupper($this->logicalOperator)) {
+                    case 'OR' :
+                        $qb->addOr($qb->expr()->field('facetData.' . $filter_name)->in($terms));
+                        break;
 
-            $result = $qb
-                ->getQuery()
-                ->execute()
-            ;
-        }
+                    case 'AND' :
+                        $qb->addAnd($qb->expr()->field('facetData.' . $filter_name)->in($terms));
+                        break;
 
-        foreach ($result as $facet) {
-            if ($facet['_id']['facetName'] == 'agency_id') {
-                $agency = $this->dm->getRepository('BpiApiBundle:Aggregate\Agency')->loadUserByUsername($facet['_id']['facetValue']);
-                $facets['agency_id'][$facet['_id']['facetValue']]['agencyName'] = $agency->getName();
-                $facets['agency_id'][$facet['_id']['facetValue']]['count'] = $facet['value'];
-            } else {
-                $facets[$facet['_id']['facetName']][$facet['_id']['facetValue']] = $facet['value'];
+                    default :
+                        $qb->addOr($qb->expr()->field('facetData.' . $filter_name)->in($terms));
+                        break;
+                }
             }
         }
 
-        return $facets;
+        $result = $qb
+            ->getQuery()
+            ->execute()
+        ;
+
+        return $result;
     }
 }
