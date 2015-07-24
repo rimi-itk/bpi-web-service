@@ -148,6 +148,7 @@ class RestController extends FOSRestController
         }
 
         $filters = array();
+        $logicalOperator = '';
         if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
             foreach ($filter as $field => $value) {
                 if ($field == 'category' && !empty($value)) {
@@ -177,9 +178,15 @@ class RestController extends FOSRestController
                     }
                 }
             }
+            if (!empty($filter['agencyInternal'])) {
+                $filters['agency_internal'][] = $filter['agencyInternal'];
+            }
+            if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {
+                $logicalOperator = $filter['logicalOperator'];
+            }
         }
-        $availableFacets = $facetRepository->getFacetsByRequest($filters);
-        $node_query->filter($filters);
+        $availableFacets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
+        $node_query->filter($availableFacets->nodeIds);
 
         if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
             foreach ($sort as $field => $order)
@@ -245,7 +252,7 @@ class RestController extends FOSRestController
         );
 
         // Prepare facets for xml.
-        foreach ($availableFacets as $facetName => $facet) {
+        foreach ($availableFacets->facets as $facetName => $facet) {
             $facetsXml = $document->createEntity('facet', $facetName);
             $result = array();
             foreach ($facet as $key => $term) {
