@@ -108,7 +108,8 @@ class ReviewsController extends Controller
         }
 
         $publicId = (int)$agency->getPublicId();
-        return ++$publicId;
+        $nextId = ++$publicId;
+        return (string) $nextId;
     }
 
     /**
