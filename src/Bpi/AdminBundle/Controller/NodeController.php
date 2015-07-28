@@ -2,6 +2,7 @@
 
 namespace Bpi\AdminBundle\Controller;
 
+use Bpi\ApiBundle\Domain\Form\TagType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
@@ -121,8 +122,54 @@ class NodeController extends Controller
     private function createNodeForm($node, $new = false)
     {
         $formBuilder = $this->createFormBuilder($node)
+            ->add(
+                'authorFirstName',
+                'text',
+                array(
+                    'label' => 'Author first name',
+                    'required' => true
+                )
+            )
+            ->add(
+                'authorLastName',
+                'text',
+                array(
+                    'label' => 'Author last name',
+                    'required' => false
+                )
+            )
+            ->add(
+                'authorAgencyId',
+                'text',
+                array(
+                    'label' => 'Author agency id',
+                    'required' => true
+                )
+            )
+            ->add(
+                'ctime',
+                'datetime',
+                array(
+                    'label' => 'Creation time',
+                    'required' => true,
+                    'date_widget' => 'single_text',
+                    'time_widget' => 'single_text',
+                    'disabled' => true
+                )
+            )
+            ->add(
+                'mtime',
+                'datetime',
+                array(
+                    'label' => 'Modify time',
+                    'required' => true,
+                    'date_widget' => 'single_text',
+                    'time_widget' => 'single_text'
+                )
+            )
             ->add('title', 'text')
             ->add('teaser', 'textarea')->setRequired(false)
+            ->add('body', 'textarea')->setRequired(false)
             ->add(
                 'category',
                 'document',
@@ -138,7 +185,20 @@ class NodeController extends Controller
                     'class' => 'BpiApiBundle:Entity\Audience',
                     'property' => 'audience'
                 )
-            );
+            )
+            ->add(
+                'tags',
+                'collection',
+                array(
+                    'type' => new TagType(),
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'options' => array(
+                        'required' => false
+                    )
+                )
+            )
+        ;
 
         if (!$new) {
             $formBuilder->add('deleted', 'checkbox', array('required' => false));
