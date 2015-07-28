@@ -224,9 +224,42 @@ class Node implements IPresentable
         return $this->author;
     }
 
+    public function getAuthorFirstName()
+    {
+        return $this->author->getFirstname();
+    }
+
+    public function setAuthorFirstName($authorFirstName)
+    {
+        $this->author->setFirstname($authorFirstName);
+        return $this;
+    }
+
+    public function getAuthorLastName()
+    {
+        return $this->author->getLastname();
+    }
+
+    public function setAuthorLastName($authorLastName)
+    {
+        $this->author->setLastname($authorLastName);
+        return $this;
+    }
+
     public function getAgencyId()
     {
         return $this->author->getAgencyId();
+    }
+
+    public function getAuthorAgencyId()
+    {
+        return $this->author->getAgencyId()->id();
+    }
+
+    public function setAuthorAgencyId($authorAgencyId)
+    {
+        $this->author->setAgencyId($authorAgencyId);
+        return $this;
     }
 
     public function isDeleted()
@@ -270,11 +303,21 @@ class Node implements IPresentable
         $this->resource->setTeaser($teaser);
     }
 
+    public function getBody()
+    {
+        $nodeBodyObj = $this->resource->getBody();
+        return $nodeBodyObj->getFlattenContent();
+    }
+
+    public function setBody($body)
+    {
+        $this->resource->setBody($body);
+    }
+
     public function setAudience(Audience $audience)
     {
         $this->audience = $audience;
     }
-
     public function setCategory(Category $category)
     {
         $this->category = $category;
@@ -308,5 +351,21 @@ class Node implements IPresentable
     public function getCtime()
     {
         return $this->ctime;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMtime()
+    {
+        return $this->mtime;
+    }
+
+    /**
+     * @param mixed $mtime
+     */
+    public function setMtime($mtime)
+    {
+        $this->mtime = $mtime;
     }
 }
