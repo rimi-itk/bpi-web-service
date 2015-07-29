@@ -103,9 +103,13 @@ class NodeController extends Controller
             }
         }
 
+        $nodeAssets = $node->getAssets()->getCollection();
+        $assets = $this->prepareAssets($nodeAssets);
+
         return array(
             'form' => $form->createView(),
             'id' => $id,
+            'assets' => $assets
         );
     }
 
@@ -138,7 +142,7 @@ class NodeController extends Controller
 
     private function createNodeForm($node, $new = false)
     {
-        $formBuilder = $this->createFormBuilder($node)
+        $formBuilder = $this->createFormBuilder($node, array('csrf_protection' => false))
             ->add(
                 'authorFirstName',
                 'text',
@@ -222,5 +226,27 @@ class NodeController extends Controller
         }
 
         return $formBuilder->getForm();
+    }
+
+    /**
+     * Filter assets on images and documents
+     *
+     * @param $nodeAssets
+     * @return array
+     */
+    protected function prepareAssets($nodeAssets)
+    {
+        $imageExtensions = array('jpg', 'jpeg', 'png', 'gif');
+        $assets =array();
+        foreach ($nodeAssets as $asset) {
+            if (in_array($asset->getExtension(), $imageExtensions)){
+                $assets['images'][] = $asset;
+            } else {
+                $assets['documents'][] = $asset;
+            }
+        }
+
+        return $assets;
+
     }
 }

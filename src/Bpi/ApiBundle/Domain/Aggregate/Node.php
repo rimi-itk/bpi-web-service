@@ -368,4 +368,14 @@ class Node implements IPresentable
     {
         $this->mtime = $mtime;
     }
+
+    public function addTag($tag)
+    {
+        $this->tags->add($tag);
+    }
+
+    public function removeTag($tag)
+    {
+        $this->tags->removeElement($tag);
+    }
 }
