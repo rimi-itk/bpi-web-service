@@ -1,11 +1,68 @@
 {% extends "BpiAdminBundle::layout.html.twig" %}
 
+{% block javascript %}
+    {{ parent() }}
+    <script src="{{ asset('bundles/bpiadmin/js/nodeEdit.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 {% include 'BpiAdminBundle:Node:nav.html.twig' %}
 
 <form action="{{ path(app.request.attributes.get('_route'), {'id': id}) }}" method="post" {{ form_enctype(form) }}>
 
-    {{ form_widget(form) }}
+    {{ form_errors(form) }}
+
+    <div class="row">
+        <div class="span6">
+            <h3>Author</h3>
+            {{ form_row(form.authorFirstName) }}
+            {{ form_row(form.authorLastName) }}
+            {{ form_row(form.authorAgencyId) }}
+        </div>
+        <div class="span6">
+            <h3>Creation & modification time</h3>
+            {{ form_row(form.ctime) }}
+            {{ form_row(form.mtime) }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="span6">
+            <h3>Node data</h3>
+            {{ form_row(form.title) }}
+            {{ form_row(form.teaser) }}
+            {{ form_row(form.body) }}
+        </div>
+        <div class="span6">
+            <h3>Node vocabularies</h3>
+            {{ form_row(form.category) }}
+            {{ form_row(form.audience) }}
+
+            <p>Tags</p>
+            <ul class="tags" data-prototype="{{ form_widget(form.tags.vars.prototype)|e }}">
+                {% for tag in form.tags %}
+                    <li>{{ form_widget(tag.tag) }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="span12">
+            <h3>Node assets</h3>
+            {% if assets.images is defined %}
+                {% for image in assets.images %}
+                    <a href="{{ image.path }}">
+                        <img src="{{ image.path }}" alt="{{ image.title }}">
+                    </a>
+                {% endfor %}
+            {% endif %}
+
+            {% if assets.documents is defined %}
+                {% for document in asset.documents %}
+                    <a href="{{ document.path }}">{{ document.title }}</a>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
 
     <div class="form-actions">
         <input type="submit" class="btn" value="Save" />
