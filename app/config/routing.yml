@@ -11,6 +11,11 @@ bpi_api_channels:
     type: rest
     prefix: /channel
 
+bpi_api_users:
+    resource: Bpi\ApiBundle\Controller\UserController
+    type: rest
+    prefix: /user
+
 # Internal routing configuration to handle ESI
 #_internal:
 #    resource: "@FrameworkBundle/Resources/config/routing/internal.xml"
