@@ -2,7 +2,8 @@
 
 namespace Bpi\ApiBundle\Domain\Entity;
 
-
+use Doctrine\Common\Collections\ArrayCollection;
+use Bpi\ApiBundle\Domain\Entity\User;
 
 /**
  * Bpi\ApiBundle\Domain\Entity\Channel
@@ -30,7 +31,7 @@ class Channel
     protected $channelDeleted = false;
 
     /**
-     * @var Bpi\ApiBundle\Domain\Entity\User
+     * @var \Bpi\ApiBundle\Domain\Entity\User
      */
     protected $channelAdmin;
 
@@ -46,14 +47,14 @@ class Channel
 
     public function __construct()
     {
-        $this->channelEditors = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->channelNodes = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->channelEditors = new ArrayCollection();
+        $this->channelNodes = new ArrayCollection();
     }
-    
+
     /**
      * Get id
      *
-     * @return id $id
+     * @return string $id of entity
      */
     public function getId()
     {
@@ -129,10 +130,10 @@ class Channel
     /**
      * Set channelAdmin
      *
-     * @param Bpi\ApiBundle\Domain\Entity\User $channelAdmin
+     * @param \Bpi\ApiBundle\Domain\Entity\User $channelAdmin
      * @return self
      */
-    public function setChannelAdmin(\Bpi\ApiBundle\Domain\Entity\User $channelAdmin)
+    public function setChannelAdmin(User $channelAdmin)
     {
         $this->channelAdmin = $channelAdmin;
         return $this;
@@ -141,7 +142,7 @@ class Channel
     /**
      * Get channelAdmin
      *
-     * @return Bpi\ApiBundle\Domain\Entity\User $channelAdmin
+     * @return \Bpi\ApiBundle\Domain\Entity\User $channelAdmin
      */
     public function getChannelAdmin()
     {
@@ -171,7 +172,7 @@ class Channel
     /**
      * Get channelEditors
      *
-     * @return Doctrine\Common\Collections\Collection $channelEditors
+     * @return \Doctrine\Common\Collections\Collection $channelEditors
      */
     public function getChannelEditors()
     {
@@ -201,7 +202,7 @@ class Channel
     /**
      * Get channelNodes
      *
-     * @return Doctrine\Common\Collections\Collection $channelNodes
+     * @return \Doctrine\Common\Collections\Collection $channelNodes
      */
     public function getChannelNodes()
     {
