@@ -1,0 +1,28 @@
+Bpi\ApiBundle\Domain\Entity\User:
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\UserRepository
+  collection: User
+  type: document
+
+  fields:
+    id:
+      id: true
+
+    externalId:
+      type: string
+      required: true
+
+    internalUserName:
+      type: string
+      required: true
+
+    email:
+      type: string
+      required: true
+
+    userFirstName:
+      type: string
+      required: false
+
+    userLastName:
+      type: string
+      required: false
