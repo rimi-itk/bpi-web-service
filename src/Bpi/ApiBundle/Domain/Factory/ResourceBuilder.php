@@ -11,7 +11,6 @@ class ResourceBuilder
 {
     protected $title, $body, $teaser, $ctime, $copyleft;
     protected $files = array();
-    protected $assets = array();
     protected $filesystem;
     protected $router;
     protected $materials = array();
@@ -19,9 +18,8 @@ class ResourceBuilder
     protected $category;
     protected $audience;
 
-    public function __construct(\Gaufrette\Filesystem $filesystem, RouterInterface $router)
+    public function __construct(RouterInterface $router)
     {
-        $this->filesystem = $filesystem;
         $this->router = $router;
     }
 
@@ -151,15 +149,8 @@ class ResourceBuilder
             $this->category,
             $this->audience,
             $this->files,
-            $this->assets,
-            $this->filesystem,
             $this->router,
             $this->materials
         );
-    }
-
-    public function addAssets($assets)
-    {
-        $this->assets = array_merge($this->assets, $assets);
     }
 }

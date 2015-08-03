@@ -21,13 +21,21 @@ class CategoryController extends Controller
      */
     public function indexAction()
     {
-        $query = $this->getRepository()->listAll();
+        $param = $this->getRequest()->query->get('sort');
+        $direction = $this->getRequest()->query->get('direction');
 
-        $paginator  = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
+        $query = $this->getRepository()->listAll($param, $direction);
+
+        $knpPaginator = $this->get('knp_paginator');
+
+        $pagination = $knpPaginator->paginate(
             $query,
             $this->get('request')->query->get('page', 1),
-            5
+            50,
+            array(
+                'defaultSortFieldName' => 'category',
+                'defaultSortDirection' => 'asc',
+            )
         );
 
         return array('pagination' => $pagination);
