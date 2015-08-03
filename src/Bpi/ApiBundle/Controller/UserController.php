@@ -97,7 +97,7 @@ class UserController extends BPIController
         $user->setInternalUserName();
 
         // Check if user with such internal name exist
-        if ($userRepository->findSimilarByInternalName($user->getInternalUserName()))
+        if ($userRepository->findSimilarUserByInternalName($user->getInternalUserName()))
         {
             // If user with internal name exist, try to create from email
             $user->setInternalUserName(true);
