@@ -7,9 +7,9 @@
 namespace Bpi\ApiBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Constraints;
 
-use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 
 use Bpi\ApiBundle\Domain\Entity\Channel;
@@ -22,7 +22,7 @@ use Bpi\ApiBundle\Domain\Entity\History;
  *
  * Rest controller for Channels
  */
-class ChannelController extends FOSRestController
+class ChannelController extends BPIController
 {
     /**
      * List all channels
@@ -59,23 +59,71 @@ class ChannelController extends FOSRestController
         $dm = $this->getDoctrineManager();
         $serializer = $this->getSerialilzer();
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $agencyRepository = $this->getRepository('BpiApiBundle:Aggregate\Agency');
         $channelData = $this->getRequestParameter('channel');
         $channelName = $channelData['name'];
 
+        $requiredChannelData = array(
+            'name',
+            'agencyPublicId',
+            'userExternalId'
+        );
+
+        foreach ($requiredChannelData as $dataName) {
+            if (!isset($channelData[$dataName]) || empty($channelData[$dataName])) {
+                $errorMessage = sprintf('%s required for channel creation.', $dataName);
+                $statusCode = 400;
+                throw new HttpException($statusCode, $errorMessage);
+            }
+        }
+
         $similarTitle = $channelRepository->findSimilarByName($channelName);
         if ($similarTitle) {
-            // HTTP error 409 Conflict
-            return new Response('Found channel with similar name.', 409);
+            $errorMessage = 'Found channel with similar name.';
+            $statusCode  = 409;
+            throw new HttpException($statusCode, $errorMessage);
+        }
+
+        $agency = $agencyRepository->loadUserByUsername($channelData['agencyPublicId']);
+        if (null === $agency) {
+            $errorMessage = 'Agency with provided public id not found.';
+            $statusCode = 404;
+            throw new HttpException($statusCode, $errorMessage);
+        }
+
+        $user = $userRepository->findBy(array('externalId' => $channelData['userExternalId']));
+        if (null === $user) {
+            $errorMessage = 'User with provided external id not found.';
+            $statusCode = 404;
+            throw new HttpException($statusCode, $errorMessage);
+        }
+
+        $foundUser = null;
+        if (count($user) > 1) {
+            foreach ($user as $key => $u) {
+                if ($u->getExternalId() === $channelData['userExternalId'] && $u->getUserAgency()->getId() === $channelData['agencyPublicId']) {
+                    $foundUser = $u;
+                    break;
+                }
+            }
+        } else {
+            $foundUser = $user[0];
+        }
+        if (null === $foundUser) {
+            $errorMessage = 'User with provided external id and public agency id not found.';
+            $statusCode = 404;
+            throw new HttpException($statusCode, $errorMessage);
         }
 
         $channel = new Channel();
         $channel->setChannelName($channelName);
-
-        $responseContent = $serializer->serialize($channel, 'xml');
+        $channel->setChannelAdmin($foundUser);
 
         $dm->persist($channel);
         $dm->flush();
 
+        $responseContent = sprintf('Channel with name %s and admin user %s created', $channel->getChannelName(), $channel->getChannelAdmin()->getInternalUserName());
         return new Response($responseContent, 201);
     }
 }
