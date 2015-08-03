@@ -39,6 +39,11 @@ class User
      */
     protected $userLastName;
 
+    /**
+     * @var \Bpi\ApiBundle\Domain\Aggregate\Agency
+     */
+    protected $userAgency;
+
 
     /**
      * Get id
@@ -75,11 +80,20 @@ class User
     /**
      * Set internalUserName
      *
-     * @param string $internalUserName
+     * @param bool $byEmail
      * @return self
      */
-    public function setInternalUserName($internalUserName)
+    public function setInternalUserName($byEmail = false)
     {
+        $nameFromEmail = explode('@', $this->email);
+        $internalUserName = $nameFromEmail[0];
+
+        if(!empty($this->userFirstName) || $this->userLastName && !$byEmail) {
+            $internalUserName = $this->userFirstName . $this->userLastName;
+        }
+
+        $internalUserName = preg_replace('/[^a-zA-Z0-9]/', '', $internalUserName);
+
         $this->internalUserName = $internalUserName;
         return $this;
     }
@@ -158,5 +172,27 @@ class User
     public function getUserLastName()
     {
         return $this->userLastName;
+    }
+
+    /**
+     * Set userAgency
+     *
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $userAgency
+     * @return self
+     */
+    public function setUserAgency(\Bpi\ApiBundle\Domain\Aggregate\Agency $userAgency)
+    {
+        $this->userAgency = $userAgency;
+        return $this;
+    }
+
+    /**
+     * Get userAgency
+     *
+     * @return \Bpi\ApiBundle\Domain\Aggregate\Agency $userAgency
+     */
+    public function getUserAgency()
+    {
+        return $this->userAgency;
     }
 }

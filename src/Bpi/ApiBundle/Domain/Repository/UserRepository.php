@@ -12,4 +12,24 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
  */
 class UserRepository extends DocumentRepository
 {
+    /**
+     * Check if User with such internal name exitst
+     *
+     * @param string $internalName
+     * @return bool
+     */
+    public function findSimilarUserByInternalName($internalName)
+    {
+        $query = $this->createQueryBuilder('Entity\Channel')
+            ->field('internalUserName')
+            ->equals($internalName)
+        ;
+
+        $result = $query
+            ->getQuery()
+            ->getSingleResult()
+        ;
+
+        return ($result) ? true : false;
+    }
 }
