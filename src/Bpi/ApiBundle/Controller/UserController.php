@@ -9,7 +9,6 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Constraints;
 use Symfony\Component\HttpFoundation\Response;
 
-use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 
 use Bpi\RestMediaTypeBundle\Document;
@@ -24,8 +23,6 @@ use Bpi\ApiBundle\Domain\Entity\User;
  */
 class UserController extends BPIController
 {
-    private $userData = array();
-
     /**
      * List all users
      *
@@ -40,6 +37,7 @@ class UserController extends BPIController
 
         $allUsers = $userRepository->findAll();
 
+        // TODO: Output xml using RestMediaTypeBundle
         return new Response('All users', 200);
     }
 
@@ -53,7 +51,6 @@ class UserController extends BPIController
     {
         $statusCode = 201;
         $dm = $this->getDoctrineManager();
-        $serializer = $this->getSerialilzer();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $agencyRepository = $this->getRepository('BpiApiBundle:Aggregate\Agency');
         $userData = $this->getAllRequestParameters();

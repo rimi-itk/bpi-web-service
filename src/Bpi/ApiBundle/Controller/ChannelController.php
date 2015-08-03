@@ -39,12 +39,8 @@ class ChannelController extends BPIController
         $allChannels = $channelRepository->findAll();
 
         $serializedData = '';
-        foreach ($allChannels as $channel) {
-            $serializedData .= $serializer->serialize($channel, 'xml');
-        }
 
-//        $serializedData = $serializer->serialize($allChannels, 'xml');
-
+        // TODO: Output xml using RestMediaTypeBundle
         return new Response($serializedData, 200);
     }
 
@@ -57,7 +53,6 @@ class ChannelController extends BPIController
     public function createChannelAction()
     {
         $dm = $this->getDoctrineManager();
-        $serializer = $this->getSerialilzer();
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $agencyRepository = $this->getRepository('BpiApiBundle:Aggregate\Agency');
@@ -123,6 +118,7 @@ class ChannelController extends BPIController
         $dm->persist($channel);
         $dm->flush();
 
+        // TODO: Output xml using RestMediaTypeBundle
         $responseContent = sprintf('Channel with name %s and admin user %s created', $channel->getChannelName(), $channel->getChannelAdmin()->getInternalUserName());
         return new Response($responseContent, 201);
     }
