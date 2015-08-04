@@ -38,4 +38,8 @@ class Version20150804143240 extends AbstractMigration implements ContainerAwareI
             $facetRepository->prepareFacet($node);
         }
     }
+
+    public function down(Database $db)
+    {
+    }
 }
