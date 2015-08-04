@@ -32,4 +32,32 @@ class UserRepository extends DocumentRepository
 
         return ($result) ? true : false;
     }
+
+    /**
+     * Find user by external id and agency public id
+     *
+     * @param string $externalId
+     * @param string $agencyPublicId
+     * @return array|null|object
+     */
+    public function findByExternalIdAgency($externalId, $agencyPublicId)
+    {
+        $agency = $this->dm
+            ->getRepository('BpiApiBundle:Aggregate\Agency')
+            ->findOneBy(array('public_id' => $agencyPublicId))
+        ;
+        $query = $this->createQueryBuilder('Entity\User')
+            ->field('externalId')
+            ->equals($externalId)
+            ->field('userAgency.id')
+            ->equals($agency->getId())
+        ;
+
+        $result = $query
+            ->getQuery()
+            ->getSingleResult()
+        ;
+
+        return $result;
+    }
 }
