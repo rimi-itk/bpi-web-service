@@ -185,4 +185,17 @@ class ChannelController extends BPIController
         // TODO: Output xml using RestMediaTypeBundle
         return new Response('Editor added to channel', 200);
     }
+
+    /**
+     * Remove user from channel
+     *
+     * @param string $channelId
+     *
+     * @Rest\Delete("/user/{channelId}")
+     * @Rest\View()
+     */
+    public function removeEditorFromChannelAction($channelId)
+    {
+
+    }
 }
