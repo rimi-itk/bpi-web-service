@@ -196,6 +196,13 @@ class ChannelController extends BPIController
      */
     public function removeEditorFromChannelAction($channelId)
     {
+        $incomingData = $this->getAllQueryParameters();
+        $requiredData = array(
 
+        );
+
+        if (!$channelId) {
+            throw new HttpException(404, 'Test');
+        }
     }
 }
