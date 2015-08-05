@@ -88,7 +88,7 @@ class User
         $nameFromEmail = explode('@', $this->email);
         $internalUserName = $nameFromEmail[0];
 
-        if(!empty($this->userFirstName) || $this->userLastName && !$byEmail) {
+        if((!empty($this->userFirstName) || !empty($this->userLastName)) && !$byEmail) {
             $internalUserName = $this->userFirstName . $this->userLastName;
         }
 
