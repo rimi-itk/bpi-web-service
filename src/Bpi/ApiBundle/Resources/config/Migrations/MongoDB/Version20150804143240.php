@@ -75,6 +75,10 @@ class Version20150804143240 extends AbstractMigration implements ContainerAwareI
                 $tags[] = $tag->getTag();
             }
 
+            if (null === $agency || null === $category || null === $audience || null === $tags) {
+                continue;
+            }
+
             $facets = array(
                 'agency_id' => array($agencyId->id()),
                 'agency_internal' => array($agency->getInternal()),
