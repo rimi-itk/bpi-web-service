@@ -67,7 +67,7 @@ class ChannelController extends BPIController
 
         foreach ($requiredChannelData as $dataName) {
             if (!isset($channelData[$dataName]) || empty($channelData[$dataName])) {
-                $errorMessage = sprintf('%s required for channel creation.', $dataName);
+                $errorMessage = sprintf('%s required for channel creation.', filter_var($dataName, FILTER_SANITIZE_STRING));
                 $statusCode = 400;
                 throw new HttpException($statusCode, $errorMessage);
             }
@@ -144,7 +144,7 @@ class ChannelController extends BPIController
 
         // Check if channel exist
         if (!isset($channelId) || empty($channelId)) {
-            $errorMessage = sprintf('%s required to add editor to channel.', $channelId);
+            $errorMessage = sprintf('%s required to add editor to channel.', filter_var($channelId, FILTER_SANITIZE_STRING));
             $statusCode = 400;
             throw new HttpException($statusCode, $errorMessage);
         }
@@ -153,7 +153,7 @@ class ChannelController extends BPIController
         foreach ($incomingData as $key => $data) {
             foreach ($requiredData as $reqData) {
                 if (!isset($data[$reqData]) || empty($data[$reqData])) {
-                    $errorMessage = sprintf('%s required to add editor to channel.', $data[$reqData]);
+                    $errorMessage = sprintf('%s required to add editor to channel.', filter_var($data[$reqData], FILTER_SANITIZE_STRING));
                     $statusCode = 400;
                     throw new HttpException($statusCode, $errorMessage);
                 }
@@ -163,7 +163,7 @@ class ChannelController extends BPIController
         // Check channel exist, load it
         $channel = $channelRepository->find($channelId);
         if (null === $channel) {
-            $errorMessage = sprintf('Channel with id %s not found.', $channelId);
+            $errorMessage = sprintf('Channel with id %s not found.', filter_var($channelId, FILTER_SANITIZE_STRING));
             $statusCode = 404;
             throw new HttpException($statusCode, $errorMessage);
         }
@@ -172,7 +172,11 @@ class ChannelController extends BPIController
         foreach ($incomingData as $user) {
             $u = $userRepository->findByExternalIdAgency($user['externalEditorId'], $user['agencyPublicId']);
             if (null === $u) {
-                $errorMessage = sprintf('User with external id %s and agency public id %s not found.', $user['externalEditorId'], $user['agencyPublicId']);
+                $errorMessage = sprintf(
+                    'User with external id %s and agency public id %s not found.',
+                    filter_var($user['externalEditorId'], FILTER_SANITIZE_STRING),
+                    filter_var($user['agencyPublicId'], FILTER_SANITIZE_STRING)
+                );
                 $statusCode = 404;
                 throw new HttpException($statusCode, $errorMessage);
             }
