@@ -13,6 +13,8 @@ use Guzzle;
 
 class ReviewsController extends Controller
 {
+    private $dm;
+
     /**
      * @param int $offset offset value that will be used in request.
      * @return \Symfony\Component\HttpFoundation\Response
@@ -23,6 +25,8 @@ class ReviewsController extends Controller
     public function collectReviewsAction($offset)
     {
         $limit = 100;
+        $batchSize = 20;
+        $i = 0;
         $requestLink = 'http://anbefalinger.deichman.no/api/reviews?offset=' . $offset . '&limit=' . $limit;
         $client = $this->get('bpi.extraviews.example.client');
 
@@ -38,24 +42,28 @@ class ReviewsController extends Controller
             ));
         }
 
-        $dm = $this->get('doctrine_mongodb')->getManager();
+        $this->dm = $this->get('doctrine_mongodb')->getManager();
         $category = $this->get('doctrine_mongodb')->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => 'Review'));
 
         if (empty($category)) {
             $category = new \Bpi\ApiBundle\Domain\Entity\Category();
             $category->setCategory('Review');
-            $dm->persist($category);
-            $dm->flush();
+            $this->dm->persist($category);
+            $this->dm->flush();
         }
 
         $mappedData = $this->mapReview($data->works, $category->getCategory());
 
+        $nodeRepository = $this->dm->getRepository('BpiApiBundle:Aggregate\Node');
         foreach ($mappedData as $review) {
+            if ($nodeRepository->findOneBy(array('resource.hash' => $review['resource_hash'], 'deleted' => false))) {
+                continue;
+            }
             $reviewExist = $this->checkReviewExistence($review['review_uri']);
             if (is_object($reviewExist) && $reviewExist instanceof ReviewBpiNode) {
                 $review['local_id'] = $reviewExist->getBpiId();
-                $dm->remove($reviewExist);
-                $dm->flush();
+                $this->dm->remove($reviewExist);
+                $this->dm->flush();
             }
             $document = $this->postNodeAction($review);
             $nodeId = $document->currentEntity()->property('id');
@@ -63,8 +71,13 @@ class ReviewsController extends Controller
             $reviewBpiNode = new ReviewBpiNode();
             $reviewBpiNode->setBpiId($nodeId->getValue());
             $reviewBpiNode->setReviewUri($review['review_uri']);
-            $dm->persist($reviewBpiNode);
-            $dm->flush();
+            $this->dm->persist($reviewBpiNode);
+            $this->dm->flush();
+
+            if (($i % $batchSize) === 0) {
+                $this->dm->clear();
+            }
+            ++$i;
         }
 
         $offset += 100;
@@ -77,7 +90,6 @@ class ReviewsController extends Controller
      * @return string public agency id.
      */
     private function prepareAgency($agencyName) {
-        $dm = $this->get('doctrine_mongodb')->getManager();
         $agency = $this->get('doctrine_mongodb')->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name' => $agencyName));
         if (empty($agency)) {
             $publicId = $this->preparePublicId();
@@ -87,8 +99,8 @@ class ReviewsController extends Controller
             $agency->setModerator('Automatic review');
             $agency->setPublicKey(null);
             $agency->setSecret(null);
-            $dm->persist($agency);
-            $dm->flush();
+            $this->dm->persist($agency);
+            $this->dm->flush();
         }
 
         return (string) $agency->getPublicId();
@@ -99,8 +111,7 @@ class ReviewsController extends Controller
      * @return int|string public id for new agency.
      */
     private function preparePublicId() {
-        $dm = $this->get('doctrine_mongodb')->getManager();
-        $agency = $dm->createQueryBuilder('BpiApiBundle:Aggregate\Agency')
+        $agency = $this->dm->createQueryBuilder('BpiApiBundle:Aggregate\Agency')
             ->sort('public_id','desc')->limit(1)->getQuery()->getSingleResult();
 
         if (empty($agency)) {
@@ -144,6 +155,7 @@ class ReviewsController extends Controller
                 $review['authorship'] = 1;
                 $review['editable'] = 0;
                 $review['review_uri'] = $reviewItem->uri;
+                $review['resource_hash'] = md5(strip_tags($review['title'] . $review['teaser'] . $review['body']));
 
                 $mappedData[] = $review;
             }
@@ -247,10 +259,9 @@ class ReviewsController extends Controller
         $id = $data['local_id'];
         if ($id !== false) {
             $node = $this->get('doctrine.odm.mongodb.document_manager')->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
-            $dm = $this->get('doctrine_mongodb')->getManager();
 
-            $dm->remove($node);
-            $dm->flush();
+            $this->dm->remove($node);
+            $this->dm->flush();
         }
 
         $node = $this->get('domain.push_service')
