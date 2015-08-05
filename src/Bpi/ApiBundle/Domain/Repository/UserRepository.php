@@ -20,7 +20,7 @@ class UserRepository extends DocumentRepository
      */
     public function findSimilarUserByInternalName($internalName)
     {
-        $query = $this->createQueryBuilder('Entity\Channel')
+        $query = $this->createQueryBuilder('Entity\User')
             ->field('internalUserName')
             ->equals($internalName)
         ;

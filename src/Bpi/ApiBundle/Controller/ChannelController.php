@@ -118,8 +118,11 @@ class ChannelController extends BPIController
         $dm->persist($channel);
         $dm->flush();
 
+        $chName = filter_var($channel->getChannelName(), FILTER_SANITIZE_STRING);
+        $internalUserName = filter_var($channel->getChannelAdmin()->getInternalUserName(), FILTER_SANITIZE_STRING);
+
         // TODO: Output xml using RestMediaTypeBundle
-        $responseContent = sprintf('Channel with name %s and admin user %s created', $channel->getChannelName(), $channel->getChannelAdmin()->getInternalUserName());
+        $responseContent = sprintf('Channel with name %s and admin user %s created', $chName, $internalUserName);
         return new Response($responseContent, 201);
     }
 }
