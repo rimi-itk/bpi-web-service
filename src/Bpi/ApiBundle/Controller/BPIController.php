@@ -97,4 +97,31 @@ class BPIController extends FOSRestController
 
         return $serializer;
     }
+
+    /**
+     * @param $data
+     * @param $requiredData
+     * @param bool|false $multiDimensional
+     * @return bool
+     */
+    protected function checkIncomingData($data, $requiredData, $multiDimensional = false)
+    {
+        if ($multiDimensional) {
+            foreach ($requiredData as $require) {
+                foreach ($data as $d) {
+                    if (!isset($d[$require]) || empty($d[$require])) {
+                        return $require;
+                    }
+                }
+            }
+        } else {
+            foreach ($requiredData as $require) {
+                if (!isset($data[$require]) || empty($data[$require])) {
+                    return $require;
+                }
+            }
+        }
+
+        return false;
+    }
 }
