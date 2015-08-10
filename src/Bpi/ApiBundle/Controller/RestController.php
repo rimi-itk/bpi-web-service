@@ -178,7 +178,7 @@ class RestController extends FOSRestController
                     }
                 }
             }
-            if (!empty($filter['agencyInternal'])) {
+            if (isset($filter['agencyInternal'])) {
                 $filters['agency_internal'][] = $filter['agencyInternal'];
             }
             if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {
