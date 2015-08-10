@@ -193,6 +193,10 @@ class FacetRepository extends DocumentRepository
                             $terms[] = $value->getAudience();
                             break;
 
+                        case 'agency_internal':
+                            $terms[] = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                            break;
+
                         // Agency, tags
                         default :
                             $terms[] = $value;
