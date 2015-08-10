@@ -192,4 +192,73 @@ class ChannelController extends BPIController
         // TODO: Output xml using RestMediaTypeBundle
         return new Response('Editor added to channel', 200);
     }
+
+    /**
+     * Remove user from channel
+     *
+     * @param string $channelId
+     *
+     * @Rest\Delete("/user/{channelId}")
+     * @Rest\View()
+     *
+     * @return Response
+     */
+    public function removeEditorFromChannelAction($channelId)
+    {
+        $dm = $this->getDoctrineManager();
+        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+        $incomingData = $this->getAllQueryParameters();
+        $requestingUser = $incomingData['requestingUser'];
+
+        $requiredData = array(
+            'externalEditorId',
+            'agencyPublicId'
+        );
+
+        if (!isset($requestingUser) || empty($requestingUser)) {
+            $errorMessage = 'External id of user making request is required.';
+            $statusCode = 400;
+            throw new HttpException($statusCode, $errorMessage);
+        }
+
+        $error = $this->checkIncomingData($incomingData['user'], $requiredData, true);
+        if ($error) {
+            $errorMessage = $error . ' required for remove user from channel.';
+            $statusCode = 400;
+            throw new HttpException($statusCode, $errorMessage);
+        }
+
+        $countUserToDelete = count($incomingData['user']);
+        $channel = $channelRepository->find($channelId);
+        $channelEditors = $channel->getChannelEditors();
+        $countChannelEditors = $channelEditors->count();
+
+        if ($channelEditors->count() === 0) {
+            throw new HttpException(404, 'No editors in this channels.');
+        }
+
+        $checksAmount = $countUserToDelete * $countChannelEditors;
+        $isAdmin = $channel->getChannelAdmin()->getExternalId() == $requestingUser;
+        foreach ($incomingData['user'] as $user) {
+            foreach ($channelEditors as $channelEditor) {
+                $checkUser = ($user['externalEditorId'] == $channelEditor->getExternalId()) &&
+                    ($user['agencyPublicId'] == $channelEditor->getUserAgency());
+                $checkUserLeave = $channelEditor->getExternalId() == $requestingUser;
+                if (($checkUser && $checkUserLeave) || ($checkUser && $isAdmin)) {
+                    $channelEditors->removeElement($channelEditor);
+                } else {
+                    $checksAmount--;
+                }
+            }
+        }
+
+        if ($checksAmount === 0) {
+            throw new HttpException(403, 'Only channel administrator can remove other users.');
+        }
+
+        $dm->persist($channel);
+        $dm->flush();
+
+        return new Response('Users was removed from channel.', 200);
+    }
 }
