@@ -15,6 +15,9 @@ class ReviewsController extends Controller
 {
     private $dm;
 
+    private $availableAgencies;
+    private $agencyNames = array();
+
     /**
      * @param int $offset offset value that will be used in request.
      * @return \Symfony\Component\HttpFoundation\Response
@@ -24,7 +27,18 @@ class ReviewsController extends Controller
      */
     public function collectReviewsAction($offset)
     {
-        $limit = 100;
+        $this->dm = $this->get('doctrine_mongodb')->getManager();
+        $this->availableAgencies = $this
+            ->dm
+            ->getRepository('BpiApiBundle:Aggregate\Agency')
+            ->findBy(array('moderator' => 'Automatic review'));
+        if (null !== $this->availableAgencies) {
+            foreach ($this->availableAgencies as $key => $agency) {
+                $this->agencyNames[$key] = $agency->getName();
+            }
+        }
+
+        $limit = 2;
         $batchSize = 20;
         $i = 0;
         $requestLink = 'http://anbefalinger.deichman.no/api/reviews?offset=' . $offset . '&limit=' . $limit;
@@ -42,7 +56,6 @@ class ReviewsController extends Controller
             ));
         }
 
-        $this->dm = $this->get('doctrine_mongodb')->getManager();
         $category = $this->get('doctrine_mongodb')->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => 'Review'));
 
         if (empty($category)) {
@@ -80,6 +93,8 @@ class ReviewsController extends Controller
             ++$i;
         }
 
+        return $this->render('BpiAdminBundle::layout.html.twig');
+
         $offset += 100;
         return $this->redirect($this->generateUrl('bpi_ext_reviews_collect', array('offset' => $offset)));
     }
@@ -90,18 +105,25 @@ class ReviewsController extends Controller
      * @return string public agency id.
      */
     private function prepareAgency($agencyName) {
-        $agency = $this->get('doctrine_mongodb')->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('name' => $agencyName));
-        if (empty($agency)) {
-            $publicId = $this->preparePublicId();
-            $agency = new Agency();
-            $agency->setPublicId($publicId);
-            $agency->setName($agencyName);
-            $agency->setModerator('Automatic review');
-            $agency->setPublicKey(null);
-            $agency->setSecret(null);
-            $this->dm->persist($agency);
-            $this->dm->flush();
+        foreach ($this->agencyNames as $key => $name) {
+            if (strcmp($agencyName, $name)) {
+                $agency = $this->availableAgencies[$key];
+                return $agency->getPublicId();
+            }
         }
+
+        $publicId = $this->preparePublicId();
+        $agency = new Agency();
+        $agency->setPublicId($publicId);
+        $agency->setName($agencyName);
+        $agency->setModerator('Automatic review');
+        $agency->setPublicKey(null);
+        $agency->setSecret(null);
+        $this->dm->persist($agency);
+        $this->dm->flush();
+
+        $this->availableAgencies[] = $agency;
+        $this->agencyNames[] = $agencyName;
 
         return (string) $agency->getPublicId();
     }
