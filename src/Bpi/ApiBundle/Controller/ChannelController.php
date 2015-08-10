@@ -45,6 +45,53 @@ class ChannelController extends BPIController
     }
 
     /**
+     * List channels of given user
+     *
+     * @param $userExternalId
+     * @param $userAgencyId
+     *
+     * @Rest\Get("/user/{userExternalId}/{userAgencyId}")
+     * @Rest\View()
+     */
+    public function listUsersChannelsAction($userExternalId, $userAgencyId)
+    {
+        if (!isset($userExternalId) || empty($userExternalId)) {
+            throw new HttpException(400, 'User external id required for listing channels.');
+        }
+
+        if (!isset($userAgencyId) || empty($userAgencyId)) {
+            throw new HttpException(400, 'User agency required for listing channels.');
+        }
+
+        $dm = $this->getDoctrineManager();
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+        $agencyRepository = $this->getRepository('BpiApiBundle:Aggregate\Agency');
+
+        $userAgency = $agencyRepository->findOneBy(array('public_id' => $userAgencyId));
+
+        if (null === $userAgency) {
+            throw new HttpException(404, 'Agency with external id ' . $userAgencyId . ' not found.');
+        }
+
+        $user = $userRepository->findOneBy(
+            array(
+                'externalId' => $userExternalId,
+                'userAgency.$id' => new \MongoId($userAgency->getId())
+            )
+        );
+
+        if (null === $user) {
+            $message = 'User with given externalId: ' . $userExternalId . ' and agency public_id: ' . $userAgencyId . ' not found.';
+            throw new HttpException(404, $message);
+        }
+
+        $channels = $channelRepository->findChannelsByUser($user);
+
+
+    }
+
+    /**
      * Create new channel
      *
      * @Rest\Post("/")
