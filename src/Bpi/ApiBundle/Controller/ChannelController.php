@@ -317,8 +317,7 @@ class ChannelController extends BPIController
             }
 
             $nodes = $channel->getChannelNodes();
-            if (!$nodes->contains($node))
-            {
+            if (!$nodes->contains($node)) {
                 $skipped[] = $node->getId();
                 continue;
             }
@@ -328,7 +327,7 @@ class ChannelController extends BPIController
                 $channel->removeChannelNode($node);
                 $count++;
             } catch (Exception $e) {
-                return new Response('Internal error on adding node.', 500);
+                return new Response('Internal error on removing node.', 500);
             }
         }
 
