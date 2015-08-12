@@ -48,12 +48,13 @@ class NodeQuery
         return $this->field_map[$field_name];
     }
 
-    public function filter($field, $value)
+    public function filter($value)
     {
-        if (!$value)
+        if (!$value) {
             return;
+        }
 
-        $this->filters[$this->map($field)] = $value;
+        $this->filters = $value;
     }
 
     public function offset($value)
@@ -91,22 +92,9 @@ class NodeQuery
 
     protected function applyFilters(QueryBuilder $query)
     {
-        foreach($this->filters as $field => $value)
-        {
-            if (in_array($field, array('author.firstname', 'author.lastname'))) {
-                $value = str_ireplace(' ', '|', $value);
-                $query->addOr($query->expr()->field('author.firstname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
-                $query->addOr($query->expr()->field('author.lastname')->equals(new \MongoRegex('/.*'. $value .'.*/i')));
-                return;
-            } elseif (in_array($field, array('category', 'audience'))) {
-                $query->addOr(array(
-                    $field . '.$id' => new \MongoId($value->getId()))
-                );
-                return;
-            }
-
-            $query->field($field)->equals($this->matchAny($value));
-        }
+        $query
+            ->field('_id')
+            ->in($this->filters);
     }
 
     public function reduce($strategy)

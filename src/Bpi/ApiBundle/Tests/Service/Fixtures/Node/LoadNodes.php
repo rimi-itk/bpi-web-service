@@ -79,9 +79,9 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
             'type' => 'list_image',
           ),
           array(
-            'path' => 'http://av.storage.dev.inlead.dk/bpi/test/text.xlsx',
+            'path' => 'http://av.storage.dev.inlead.dk/bpi/test/pdf.pdf',
             'name' => 'text',
-            'extension' => 'xlsx',
+            'extension' => 'pdf',
             'width' => '100',
             'height' => '100',
             'alt' => 'text',
@@ -147,11 +147,11 @@ class LoadNodes extends AbstractFixture implements OrderedFixtureInterface
             $this->createAlphaResource(),
             'Event',
             'All',
+            array(),
             $this->createAlphaProfile(),
             new Params(array(new Editable(1), new Authorship(1))),
             $this->createAssets()
         );
-
     }
 
     /**

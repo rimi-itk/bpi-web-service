@@ -6,7 +6,7 @@
 <table class="table table-striped table-hover">
     <thead>
         <tr>
-            <th>Name</th>
+            <th{% if pagination.isSorted('audience') %} class="sorted"{% endif %}> {{ knp_pagination_sortable(pagination, 'Name', 'audience', {'defaultDirection' : 'asc'}) }}</th>
             <th>Actions</th>
         </tr>
     </thead>

@@ -6,14 +6,12 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Bpi\ApiBundle\Tests\Service\Fixtures\Other\LoadAgencies;
 use Bpi\ApiBundle\Tests\Service\Fixtures\Other\LoadProfile;
 
-
-class BpiTest extends WebTestCase
+abstract class BpiTest extends WebTestCase
 {
     protected $console;
     protected $loadFixtures;
 
     protected $em;
-    protected $_kernel;
 
     public function setUp()
     {

@@ -82,6 +82,7 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
       type: many
       targetDocument: Bpi\ApiBundle\Domain\Entity\Tag
       cascade: all
+
     assets:
       embedded: true
       type: one
