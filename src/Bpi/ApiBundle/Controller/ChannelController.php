@@ -279,37 +279,42 @@ class ChannelController extends BPIController
 
         $params = $this->getAllRequestParameters();
         // Strip all params.
-        $this->stripParams($params);
+               $this->stripParams($params);
 
         $requiredParams = array(
             'nodeId' => 0,
-            'editorExtId' => 0,
+            'editorId' => 0,
             'channelId' => 0,
         );
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
-            if ($count  == 0)
+            if ($count  == 0) {
                 throw new HttpException(400, "Param '{$param}' is required.");
+            }
         }
 
         // Try to load channel.
         $channel = $channelRepository->findOneById($params['channelId']);
-        if ($channel === null)
+        if ($channel === null) {
             throw new HttpException(404, "Channel with id  = '{$params['channelId']}' not found.");
+        }
 
         // Check if user have permission to add node to channel.
         $admin = $channel->getChannelAdmin();
-        if ($admin == $params['editorExtId'])
-            throw new HttpException(404, "User with id  = '{$params['editorExtId']}' can't push to this channel.");
+        $editors = $channel->getChannelEditors();
+        if ($admin->getId() != $params['editorId'] && !$editors->contains($params['editorId'])) {
+            throw new HttpException(404, "User with id  = '{$params['editorId']}' can't push to this channel.");
+        }
 
         $count = 0;
         $skipped = array();
         foreach ($params['nodes'] as $data) {
             // Check node exist, load it.
             $node = $nodeRepository->findOneById($data['nodeId']);
-            if ($node === null)
+            if ($node === null) {
                 throw new HttpException(404, "Node with id  = '{$data['nodeId']}' not found.");
+            }
 
             $nodes = $channel->getChannelNodes();
             if ($nodes->contains($node))
@@ -331,8 +336,9 @@ class ChannelController extends BPIController
         $dm->flush();
 
         $message = "{$count} node(s) was successfully added to channel.";
-        if (!empty($skipped))
+        if (!empty($skipped)) {
             $message = $message . " " . count($skipped). " node(s)  already added to channel (" . implode(', ', $skipped) . ").";
+        }
         return new Response($message, 200);
     }
 }
