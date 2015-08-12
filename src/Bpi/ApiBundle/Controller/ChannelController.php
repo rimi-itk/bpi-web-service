@@ -261,4 +261,83 @@ class ChannelController extends BPIController
 
         return new Response('Users was removed from channel.', 200);
     }
+
+    /**
+     * Add node to channel.
+     *
+     * @Rest\Post("/add/node")
+     * @Rest\View()
+     *
+     * @return Response
+     */
+    public function addNodeToChannelAction()
+    {
+        $dm = $this->getDoctrineManager();
+        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+        $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+
+        $params = $this->getAllRequestParameters();
+        // Strip all params.
+               $this->stripParams($params);
+
+        $requiredParams = array(
+            'nodeId' => 0,
+            'editorId' => 0,
+            'channelId' => 0,
+        );
+        $this->checkParams($params, $requiredParams);
+
+        foreach ($requiredParams as $param => $count) {
+            if ($count  == 0) {
+                throw new HttpException(400, "Param '{$param}' is required.");
+            }
+        }
+
+        // Try to load channel.
+        $channel = $channelRepository->findOneById($params['channelId']);
+        if ($channel === null) {
+            throw new HttpException(404, "Channel with id  = '{$params['channelId']}' not found.");
+        }
+
+        // Check if user have permission to add node to channel.
+        $admin = $channel->getChannelAdmin();
+        $editors = $channel->getChannelEditors();
+        if ($admin->getId() != $params['editorId'] && !$editors->contains($params['editorId'])) {
+            throw new HttpException(404, "User with id  = '{$params['editorId']}' can't push to this channel.");
+        }
+
+        $count = 0;
+        $skipped = array();
+        foreach ($params['nodes'] as $data) {
+            // Check node exist, load it.
+            $node = $nodeRepository->findOneById($data['nodeId']);
+            if ($node === null) {
+                throw new HttpException(404, "Node with id  = '{$data['nodeId']}' not found.");
+            }
+
+            $nodes = $channel->getChannelNodes();
+            if ($nodes->contains($node)) {
+                $skipped[] = $node->getId();
+                continue;
+            }
+
+            // Try to add node.
+            try {
+                $channel->addChannelNode($node);
+                $count++;
+            } catch (Exception $e) {
+                return new Response('Internal error on adding node.', 500);
+            }
+        }
+
+        $dm->persist($channel);
+        $dm->flush();
+
+        $message = "{$count} node(s) was successfully added to channel.";
+        if (!empty($skipped)) {
+            $message = $message . " " . count($skipped). " node(s)  already added to channel (" . implode(', ', $skipped) . ").";
+        }
+        return new Response($message, 200);
+    }
 }
