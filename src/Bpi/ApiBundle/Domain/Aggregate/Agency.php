@@ -32,10 +32,11 @@ class Agency implements IPresentable
      */
     public function transform(Document $document)
     {
+        $agencyInternal = (false === $this->internal) ? '0' : '1';
         $entity = $document->currentEntity();
         $entity->addProperty($document->createProperty('agency_id', 'string', $this->public_id));
         $entity->addProperty($document->createProperty('agency_name', 'string', $this->name));
-        $entity->addProperty($document->createProperty('agency_internal', 'boolean', $this->internal));
+        $entity->addProperty($document->createProperty('agency_internal', 'boolean', $agencyInternal));
     }
 
     /**
