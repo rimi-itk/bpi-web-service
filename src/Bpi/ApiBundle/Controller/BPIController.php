@@ -99,29 +99,30 @@ class BPIController extends FOSRestController
     }
 
     /**
-     * @param $data
-     * @param $requiredData
-     * @param bool|false $multiDimensional
+     * Chekc if params is presented and how many times.
+     *
+     * @param $input
+     * @param $required
      * @return bool
      */
-    protected function checkIncomingData($data, $requiredData, $multiDimensional = false)
+    protected function checkParams($input, &$required)
     {
-        if ($multiDimensional) {
-            foreach ($requiredData as $require) {
-                foreach ($data as $d) {
-                    if (!isset($d[$require]) || empty($d[$require])) {
-                        return $require;
-                    }
-                }
-            }
-        } else {
-            foreach ($requiredData as $require) {
-                if (!isset($data[$require]) || empty($data[$require])) {
-                    return $require;
-                }
-            }
-        }
+        array_walk_recursive($input, function($i, $k) use (&$required)  {
+            if (in_array($k, array_keys($required)) && !empty($i))
+                $required[$k]++;
+        });
 
-        return false;
     }
+    /**
+     * Strips all params.
+     *
+     * @param $input
+     */
+    protected function stripParams(&$input)
+    {
+        array_walk_recursive($input, function(&$i, $k) {
+            $i = htmlspecialchars($i, ENT_QUOTES, 'UTF-8');
+        });
+    }
+
 }
