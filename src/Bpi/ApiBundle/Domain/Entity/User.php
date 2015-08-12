@@ -2,12 +2,14 @@
 
 namespace Bpi\ApiBundle\Domain\Entity;
 
+use Bpi\ApiBundle\Transform\IPresentable;
+use Bpi\RestMediaTypeBundle\Document;
 
 
 /**
  * Bpi\ApiBundle\Domain\Entity\User
  */
-class User
+class User implements IPresentable
 {
     /**
      * @var MongoId $id
@@ -194,5 +196,19 @@ class User
     public function getUserAgency()
     {
         return $this->userAgency;
+    }
+
+    public function transform(Document $document)
+    {
+        $entity = $document->createEntity('entity', 'user');
+        $document->appendEntity($entity);
+
+        $entity->addProperty(
+            $document->createProperty(
+                'internalUserName',
+                'string',
+                $this->getInternalUserName()
+            )
+        );
     }
 }

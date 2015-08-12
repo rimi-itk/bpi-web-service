@@ -35,14 +35,21 @@ class ChannelRepository extends DocumentRepository
 
     public function findChannelsByUser($user)
     {
-        $em = $this->createQueryBuilder('Entity\Channel')
-            ->field('channelAdmin.$id')
-            ->equals(new \MongoId($user->getId()))
-            ->field('channelEditors.$id')
-            ->equals(new \MongoId($user->getId()))
-        ;
+        $qb = $this->createQueryBuilder('Entity\Channel');
+        $qb->addOr(
+            $qb
+                ->expr()
+                ->field('channelAdmin')
+                ->references($user)
+        );
+        $qb->addOr(
+            $qb
+                ->expr()
+                ->field('channelEditors')
+                ->includesReferenceTo($user)
+        );
 
-        $result = $em
+        $result = $qb
             ->getQuery()
             ->execute()
         ;

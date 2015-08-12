@@ -52,6 +52,8 @@ class ChannelController extends BPIController
      *
      * @Rest\Get("/user/{userExternalId}/{userAgencyId}")
      * @Rest\View()
+     *
+     * @return Document $document
      */
     public function listUsersChannelsAction($userExternalId, $userAgencyId)
     {
@@ -88,7 +90,26 @@ class ChannelController extends BPIController
 
         $channels = $channelRepository->findChannelsByUser($user);
 
+        $document = $this->get('bpi.presentation.transformer')->transformMany($channels);
+        $router = $this->get('router');
+        $document->walkEntities(
+            function($e) use ($document, $router, $userExternalId, $userAgencyId) {
+                $hypermedia = $document->createHypermediaSection();
+                $e->setHypermedia($hypermedia);
+                $hypermedia->addLink(
+                    $document->createLink(
+                        'self',
+                        $router->generate('list_users_channels', array(
+                            'userExternalId' => $userExternalId,
+                            'userAgencyId' => $userAgencyId
+                        ), true)
+                    )
+                );
+                $hypermedia->addLink($document->createLink('channel', $router->generate('list_channels', array(), true)));
+            }
+        );
 
+        return $document;
     }
 
     /**
