@@ -111,16 +111,11 @@ class ReviewsController extends Controller
      * @return int|string public id for new agency.
      */
     private function preparePublicId() {
-        $agency = $this->dm->createQueryBuilder('BpiApiBundle:Aggregate\Agency')
-            ->sort('public_id','desc')->limit(1)->getQuery()->getSingleResult();
+        $string = str_shuffle("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        $hash  = md5($string);
+        $agencyPublicId = substr($hash, 0, 8);
 
-        if (empty($agency)) {
-            return '1';
-        }
-
-        $publicId = (int)$agency->getPublicId();
-        $nextId = ++$publicId;
-        return (string) $nextId;
+        return $agencyPublicId;
     }
 
     /**
