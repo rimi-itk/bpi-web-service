@@ -176,6 +176,12 @@ class RestController extends FOSRestController
                         $filters['tags'][] = $val;
                     }
                 }
+                if ($field == 'author' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['author'][] = $val;
+                    }
+                }
             }
             if (isset($filter['agencyInternal'])) {
                 $filters['agency_internal'][] = $filter['agencyInternal'];

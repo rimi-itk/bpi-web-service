@@ -159,6 +159,8 @@ class PushService
         $this->manager->persist($revision);
         $this->manager->flush();
 
+        $this->manager->getRepository('BpiApiBundle:Entity\Facet')->prepareFacet($revision);
+
         return $revision;
     }
 
