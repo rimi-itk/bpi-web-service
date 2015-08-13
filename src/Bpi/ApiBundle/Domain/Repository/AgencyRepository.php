@@ -91,4 +91,14 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
         $this->dm->persist($agency);
         $this->dm->flush($agency);
     }
+
+    /**
+     * Finds agency by publicId.
+     *
+     * @param string $agencyId
+     */
+    public function findByPublicId($publicId)
+    {
+        return $this->findOneBy(array('public_id' => $publicId));
+    }
 }

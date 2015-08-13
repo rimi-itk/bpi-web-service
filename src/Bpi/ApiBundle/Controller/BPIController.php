@@ -103,7 +103,6 @@ class BPIController extends FOSRestController
      *
      * @param $input
      * @param $required
-     * @return bool
      */
     protected function checkParams($input, &$required)
     {
@@ -125,4 +124,18 @@ class BPIController extends FOSRestController
         });
     }
 
+    /**
+     * Gets agencyExternalId from headers of request.
+     *
+     * @return mixed agency
+     */
+    public function getAgencyFromHeader() {
+        $request = $this->getRequest();
+        $agency = null;
+        if ($request->headers->has('Auth')) {
+            preg_match('~BPI agency="(?<agency>[^"]+)", token="(?<token>[^"]+)"~i', $request->headers->get('Auth'), $matches);
+            $agency = $matches['agency'];
+        }
+        return $agency;
+    }
 }
