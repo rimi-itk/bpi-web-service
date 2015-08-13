@@ -64,7 +64,7 @@ class UserController extends BPIController
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
-            if ($count  == 0) {
+            if ($count == 0) {
                 throw new HttpException(400, "Param '{$param}' is required.");
             }
         }
@@ -74,12 +74,11 @@ class UserController extends BPIController
         }
 
         // Get agency.
-        $agencyPublicId = $this->getAgencyFromHeader();
-        $agency = $agencyRepository->findByPublicId($agencyPublicId);
-
+        $agency = $this->getAgencyFromHeader();
         $user = $userRepository->findByExternalIdAgency($params['externalId'], $agency->getId());
         if ($user) {
-            throw new HttpException(400, "User with externalId = '{$params['externalId']}' and agency = '{$agencyPublicId}' already exits.");
+            $id = $agency->getAgencyId();
+            throw new HttpException(400, "User with externalId = '{$params['externalId']}' and agency = '{$id}' already exits.");
         }
 
         $user = new User();

@@ -131,11 +131,13 @@ class BPIController extends FOSRestController
      */
     public function getAgencyFromHeader() {
         $request = $this->getRequest();
-        $agency = null;
+        $id = null;
         if ($request->headers->has('Auth')) {
             preg_match('~BPI agency="(?<agency>[^"]+)", token="(?<token>[^"]+)"~i', $request->headers->get('Auth'), $matches);
-            $agency = $matches['agency'];
+            $id = $matches['agency'];
         }
+
+        $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findByPublicId($id);
         return $agency;
     }
 }
