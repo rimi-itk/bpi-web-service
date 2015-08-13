@@ -66,6 +66,8 @@ class FacetRepository extends DocumentRepository
             ->getAudience()
         ;
 
+        $author = $node->getAuthor()->getFullName();
+
         $tags = array();
         $nodeTags = $node->getTags();
         foreach ($nodeTags as $key => $tag) {
@@ -74,6 +76,7 @@ class FacetRepository extends DocumentRepository
 
 
         $facets = array(
+            'author' => array($author),
             'agency_id' => array($agencyId->id()),
             'agency_internal' => array($agency->getInternal()),
             'category' => array($category),
