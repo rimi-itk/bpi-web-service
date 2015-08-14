@@ -887,7 +887,8 @@ class RestController extends FOSRestController
         $id = $this->getRequest()->get('id');
         $agency = $this->getUser();
 
-        $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
+        $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
+        $node = $nodeRepository->find($id);
         if (!$node) {
             throw $this->createNotFoundException();
         }
@@ -904,6 +905,8 @@ class RestController extends FOSRestController
         $dm = $this->get('doctrine.odm.mongodb.document_manager');
         $dm->persist($log);
         $dm->flush($log);
+
+        $nodeRepository->incrementSyndications($id);
 
         return new Response('', 200);
     }
