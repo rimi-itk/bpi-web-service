@@ -109,4 +109,33 @@ class UserController extends BPIController
         $responseMessage = sprintf('User with internal BPI name %s created', $user->getInternalUserName());
         return new Response($responseMessage, $statusCode);
     }
+
+     /**
+     * Create new user
+     *
+     * @Rest\Post("/autocompletions")
+     * @Rest\View()
+     */
+    public function autocompletionsUserAction()
+    {
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $params = $this->getAllRequestParameters();
+        // Strip all params.
+        $this->stripParams($params);
+
+        $agencyId = null;
+        if (isset($params['agencyId']) && !empty($params['agencyId'])) {
+            $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('public_id' => $params['agencyId']));
+            $agencyId = $agency ? $agency->getId() : 1;
+        }
+
+        $userIternalname = null;
+        if (isset($params['userIternalName']) && !empty($params['userIternalName'])) {
+            $userIternalname = $params['userIternalName'];
+        }
+
+        $users = $userRepository->getListAutocompletions($userIternalname, $agencyId);
+        $document = $this->get("bpi.presentation.transformer")->transformMany($users);
+        return $document;
+    }
 }

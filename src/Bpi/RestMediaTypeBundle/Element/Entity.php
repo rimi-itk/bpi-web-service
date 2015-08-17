@@ -265,7 +265,7 @@ class Entity implements HasLinks
 
     /**
      * Adds file to assets array.
-     * @param File $type
+     * @param mixed $data
      */
     public function addAsset($data)
     {
