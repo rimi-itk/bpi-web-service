@@ -40,6 +40,11 @@ class Node implements IPresentable
 
     protected $deleted = false;
 
+    /**
+     * @var int $syndications
+     */
+    protected $syndications;
+
     public function __construct(
         Author $author,
         Resource $resource,
@@ -173,11 +178,11 @@ class Node implements IPresentable
             )
         );
 
-         $entity->addProperty(
+        $entity->addProperty(
             $document->createProperty(
-                'syndicated',
+                'syndicates',
                 'string',
-                $this->getSyndicated()
+                (null === $this->getSyndications()) ? 0 : $this->getSyndications()
             )
         );
 
@@ -324,14 +329,26 @@ class Node implements IPresentable
         return $this->tags;
     }
 
-    public function setSyndicated($syndicated)
+    /**
+     * Set syndications
+     *
+     * @param int $syndications
+     * @return self
+     */
+    public function setSyndications($syndications)
     {
-        $this->syndicated = $syndicated;
+        $this->syndications = $syndications;
+        return $this;
     }
 
-    public function getSyndicated()
+    /**
+     * Get syndications
+     *
+     * @return int $syndications
+     */
+    public function getSyndications()
     {
-        return $this->syndicated;
+        return $this->syndications;
     }
 
     public function setCtime($ctime)
