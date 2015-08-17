@@ -82,10 +82,9 @@ class Syndicated extends BpiTest
             $response = $request->send();
             $this->assertEquals('200', $response->getStatusCode(), "Syndication action failed(2). Getting xml failed.");
 
-            if ($response->getStatusCode() == 200)
-            {
+            if ($response->getStatusCode() == 200) {
                 $xml = $response->xml();
-                $this->assertEquals('1', (string)$xml->item->properties->xpath('//property[@name="syndicated"]')[0], "Value in xml wrong(1).");
+                $this->assertEquals('1', (string)$xml->item->properties->xpath('//property[@name="syndicates"]')[0], "Value in xml wrong(1).");
             }
 
             $headers = array('Auth' => 'BPI agency="200200", token="$1$xMbAQo9U$5Qbn.36W21W4F6l6VwE.y0"');
@@ -99,10 +98,9 @@ class Syndicated extends BpiTest
             $response = $request->send();
             $this->assertEquals('200', $response->getStatusCode(), "Syndication action failed(2). Getting xml failed.");
 
-            if ($response->getStatusCode() == 200)
-            {
+            if ($response->getStatusCode() == 200) {
                 $xml = $response->xml();
-                $this->assertEquals('2', (string)$xml->item->properties->xpath('//property[@name="syndicated"]')[0], "Value in xml wrong(2).");
+                $this->assertEquals('2', (string)$xml->item->properties->xpath('//property[@name="syndicates"]')[0], "Value in xml wrong(2).");
             }
         }
     }
