@@ -19,19 +19,21 @@ class NodeQuery
      * @var array
      */
     protected $field_map = array(
-        'title'    => 'resource.title',
-        'teaser'   => 'resource.teaser',
-        'body'     => 'resource.body',
-        'creation' => 'resource.creation',
-        'type'     => 'resource.type',
-        'ctime'    => 'ctime',
-        'pushed'   => 'ctime',
-        'category' => 'category',
-        'audience' => 'audience',
-        'agency_id'=> 'author.agency_id',
-        'author'   => 'author.lastname',
-        'firstname'=> 'author.firstname',
-        'lastname' => 'author.lastname',
+        'title'        => 'resource.title',
+        'teaser'       => 'resource.teaser',
+        'body'         => 'resource.body',
+        'creation'     => 'resource.creation',
+        'type'         => 'resource.type',
+        'ctime'        => 'ctime',
+        'pushed'       => 'ctime',
+        'category'     => 'category',
+        'audience'     => 'audience',
+        'assets'       => 'assets',
+        'agency_id'    => 'author.agency_id',
+        'author'       => 'author.lastname',
+        'firstname'    => 'author.firstname',
+        'lastname'     => 'author.lastname',
+        'syndications' => 'syndications'
     );
 
     /**
@@ -47,13 +49,12 @@ class NodeQuery
         return $this->field_map[$field_name];
     }
 
-    public function filter($value)
+    public function filter($field, $value)
     {
-        if (!$value) {
+        if (!$value)
             return;
-        }
 
-        $this->filters = $value;
+        $this->filters[$this->map($field)] = $value;
     }
 
     public function offset($value)
