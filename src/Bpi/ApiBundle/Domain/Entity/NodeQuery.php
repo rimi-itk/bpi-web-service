@@ -19,20 +19,21 @@ class NodeQuery
      * @var array
      */
     protected $field_map = array(
-        'title'    => 'resource.title',
-        'teaser'   => 'resource.teaser',
-        'body'     => 'resource.body',
-        'creation' => 'resource.creation',
-        'type'     => 'resource.type',
-        'ctime'    => 'ctime',
-        'pushed'   => 'ctime',
-        'category' => 'category',
-        'audience' => 'audience',
-        'assets' => 'assets',
-        'agency_id'=> 'author.agency_id',
-        'author'   => 'author.lastname',
-        'firstname'=> 'author.firstname',
-        'lastname' => 'author.lastname',
+        'title'        => 'resource.title',
+        'teaser'       => 'resource.teaser',
+        'body'         => 'resource.body',
+        'creation'     => 'resource.creation',
+        'type'         => 'resource.type',
+        'ctime'        => 'ctime',
+        'pushed'       => 'ctime',
+        'category'     => 'category',
+        'audience'     => 'audience',
+        'assets'       => 'assets',
+        'agency_id'    => 'author.agency_id',
+        'author'       => 'author.lastname',
+        'firstname'    => 'author.firstname',
+        'lastname'     => 'author.lastname',
+        'syndications' => 'syndications'
     );
 
     /**
