@@ -399,8 +399,6 @@ class RestController extends FOSRestController
     public function nodeAction($id)
     {
         $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
-        $count = $this->getRepository('BpiApiBundle:Entity\History')->getSyndicatedCount($id);
-        $_node->setSyndicated($count);
 
         if (!$_node) {
             throw $this->createNotFoundException();
@@ -886,7 +884,8 @@ class RestController extends FOSRestController
         $id = $this->getRequest()->get('id');
         $agency = $this->getUser();
 
-        $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
+        $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
+        $node = $nodeRepository->find($id);
         if (!$node) {
             throw $this->createNotFoundException();
         }
@@ -903,6 +902,16 @@ class RestController extends FOSRestController
         $dm = $this->get('doctrine.odm.mongodb.document_manager');
         $dm->persist($log);
         $dm->flush($log);
+
+        $nodeSyndications = $node->getSyndications();
+        if (null === $nodeSyndications) {
+            $node->setSyndications(1);
+        } else {
+            $node->setSyndications(++$nodeSyndications);
+        }
+
+        $dm->persist($node);
+        $dm->flush($node);
 
         return new Response('', 200);
     }
