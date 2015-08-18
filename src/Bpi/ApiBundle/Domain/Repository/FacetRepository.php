@@ -227,4 +227,40 @@ class FacetRepository extends DocumentRepository
 
         return $result;
     }
+
+    /**
+     * Update facets after agency changes.
+     *
+     * @param $changes
+     * @return bool
+     */
+    public function updateFacet($changes)
+    {
+        $qb = $this->dm->createQueryBuilder('BpiApiBundle:Entity\Facet')
+            ->update()
+            ->multiple(true)
+        ;
+
+        foreach ($changes as $changedValue => $changed) {
+            if (is_array($changed)) {
+                $qb
+                    ->field('facetData.' . $changedValue)->set($changed['newValue'])
+                    ->field('facetData.' . $changedValue)->equals($changed['oldValue'])
+                ;
+            }
+
+            if ('agency_id' === $changedValue && is_string($changed)) {
+                $qb
+                    ->field('facetData.' . $changedValue)->equals($changed)
+                ;
+            }
+        }
+
+        $qb
+            ->getQuery()
+            ->execute()
+        ;
+
+        return true;
+    }
 }
