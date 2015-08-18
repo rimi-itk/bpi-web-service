@@ -63,10 +63,10 @@ class UserRepository extends DocumentRepository
         $query = $this->createQueryBuilder('Entity\User');
 
         if ($agencyId) {
-            $query->addAnd($query->expr()->field('userAgency.id')->equals($agencyId));
+            $query->field('userAgency.id')->equals($agencyId);
         }
         if ($userIternalName) {
-            $query->addAnd($query->expr()->field('internalUserName')->equals($userIternalName));
+            $query->field('internalUserName')->equals($userIternalName);
         }
 
         return $query
