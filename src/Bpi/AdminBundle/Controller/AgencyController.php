@@ -93,8 +93,43 @@ class AgencyController extends Controller
         $request = $this->getRequest();
 
         if ($request->isMethod('POST')) {
+            $submitedAgency = $request->get('form');
+            $changePublicId = $agency->getAgencyId()->id() !== $submitedAgency['publicId'];
+            $submitedAgencyInternal = (isset($submitedAgency['internal'])) ? filter_var($submitedAgency['internal'], FILTER_VALIDATE_BOOLEAN) : false;
+            $changeInternal = $submitedAgencyInternal !== $agency->getInternal();
+
+            $checks = array(
+                'agency_internal' => array(
+                    'check' => $changeInternal,
+                    'oldValue' => $agency->getInternal(),
+                    'newValue' => isset($submitedAgency['internal'])
+                ),
+                'agency_id' => array(
+                    'check' => $changePublicId,
+                    'oldValue' => $agency->getAgencyId()->id(),
+                    'newValue' => $submitedAgency['publicId']
+                )
+            );
+
+            $changes = array();
+            foreach ($checks as $key => $check) {
+                if ($check['check']) {
+                    $changes[$key] = array(
+                        'oldValue' => $check['oldValue'],
+                        'newValue' => $check['newValue']
+                    );
+                }
+            }
+
+            (!isset($changes['agency_id'])) ? $changes['agency_id'] = $agency->getAgencyId()->id() : false;
+
             $form->bind($request);
             if ($form->isValid()) {
+                if ($changeInternal || $changePublicId) {
+                    $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
+                        ->getRepository('BpiApiBundle:Entity\Facet');
+                    $facetRepository->updateFacet($changes);
+                }
                 $this->getRepository()->save($agency);
 
                 return $this->redirect(
