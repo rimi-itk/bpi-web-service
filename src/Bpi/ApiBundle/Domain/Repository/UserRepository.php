@@ -51,4 +51,27 @@ class UserRepository extends DocumentRepository
 
         return $result;
     }
+
+    /**
+     * Get list of users.
+     *
+     * @param $agencyId - optional filter
+     * @return ArrayCollection
+     */
+    public function getListAutocompletions($userIternalName, $agencyId = null)
+    {
+        $query = $this->createQueryBuilder('Entity\User');
+
+        if ($agencyId) {
+            $query->field('userAgency.id')->equals($agencyId);
+        }
+        if ($userIternalName) {
+            $query->field('internalUserName')->equals($userIternalName);
+        }
+
+        return $query
+            ->getQuery()
+            ->execute();
+        ;
+    }
 }

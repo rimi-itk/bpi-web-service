@@ -5,7 +5,8 @@ use Doctrine\ORM\Mapping\ElementCollection;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface as Router;
 use Bpi\RestMediaTypeBundle\Element\Collection;
-use Bpi\RestMediaTypeBundle\Element\Entity;
+use Bpi\RestMediaTypeBundle\Element\Entity as Entity;
+use Bpi\RestMediaTypeBundle\Element\Users;
 use Bpi\RestMediaTypeBundle\Element\Property as GenericProperty;
 use Bpi\RestMediaTypeBundle\Property;
 use Bpi\RestMediaTypeBundle\Element\Link;
@@ -143,9 +144,10 @@ class Document
      * @param string $name
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
-    public function createEntity($type, $name = null)
+    public function createEntity($type, $name = null, $class = "Entity")
     {
-        $entity = new Entity($type, $name);
+        $class = "\\Bpi\\RestMediaTypeBundle\\Element\\{$class}";
+        $entity = new $class($type, $name);
         $entity->attach($this);
         return $entity;
     }

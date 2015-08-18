@@ -3,6 +3,7 @@
 namespace Bpi\ApiBundle\Domain\Entity;
 
 
+use Bpi\RestMediaTypeBundle\Document;
 
 /**
  * Bpi\ApiBundle\Domain\Entity\User
@@ -194,5 +195,20 @@ class User
     public function getUserAgency()
     {
         return $this->userAgency;
+    }
+
+    /**
+     *
+     * {@inheritdoc}
+     */
+    public function transform(Document $document)
+    {
+        try {
+            $entity= $document->currentEntity();
+        } catch (\RuntimeException $e) {
+            $entity = $document->createEntity(null, null, 'Users');
+            $document->appendEntity($entity);
+        }
+        $entity->addUser($this);
     }
 }

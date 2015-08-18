@@ -59,7 +59,6 @@ class ChannelController extends BPIController
         // Strip all params.
         $this->stripParams($params);
 
-
         $requiredParams = array(
             'name' => 0,
             'editorId' => 0,
