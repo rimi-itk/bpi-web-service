@@ -177,8 +177,14 @@ class RestController extends FOSRestController
                         $filters['tags'][] = $val;
                     }
                 }
+                if ($field == 'author' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['author'][] = $val;
+                    }
+                }
             }
-            if (!empty($filter['agencyInternal'])) {
+            if (isset($filter['agencyInternal'])) {
                 $filters['agency_internal'][] = $filter['agencyInternal'];
             }
             if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {
@@ -881,7 +887,8 @@ class RestController extends FOSRestController
         $id = $this->getRequest()->get('id');
         $agency = $this->getUser();
 
-        $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
+        $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
+        $node = $nodeRepository->find($id);
         if (!$node) {
             throw $this->createNotFoundException();
         }
@@ -898,6 +905,8 @@ class RestController extends FOSRestController
         $dm = $this->get('doctrine.odm.mongodb.document_manager');
         $dm->persist($log);
         $dm->flush($log);
+
+        $nodeRepository->incrementSyndications($id);
 
         return new Response('', 200);
     }

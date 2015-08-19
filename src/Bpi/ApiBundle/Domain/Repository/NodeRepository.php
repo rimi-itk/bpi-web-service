@@ -92,4 +92,20 @@ class NodeRepository extends DocumentRepository
         $this->dm->persist($node);
         $this->dm->flush($node);
     }
+
+    public function incrementSyndications($nodeId)
+    {
+        $qb = $this->createQueryBuilder();
+
+        $qb
+            ->field('_id')
+            ->equals($nodeId)
+            ->field('syndications')
+            ->inc(1)
+            ->getQuery()
+            ->execute()
+        ;
+
+        return;
+    }
 }
