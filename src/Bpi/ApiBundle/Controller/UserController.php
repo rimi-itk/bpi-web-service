@@ -33,12 +33,12 @@ class UserController extends BPIController
     public function listUsersAction()
     {
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
-        $serializer = $this->getSerialilzer();
 
         $allUsers = $userRepository->findAll();
 
-        // TODO: Output xml using RestMediaTypeBundle
-        return new Response('All users', 200);
+        $document = $this->get('bpi.presentation.transformer')->transformMany($allUsers);
+
+        return $document;
     }
 
     /**
