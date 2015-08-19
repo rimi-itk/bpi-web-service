@@ -76,14 +76,9 @@ class NodeController extends Controller
         $form = $this->createNodeForm($node);
         $request = $this->getRequest();
 
-        $dm = $this->get('doctrine.odm.mongodb.document_manager');
-        $uow = $dm->getUnitOfWork();
-        $uow->computeChangeSets();
-
         if ($request->isMethod('POST')) {
             $form->bind($request);
             if ($form->isValid()) {
-                $changeSet = $uow->getDocumentChangeSet($node);
                 $modifyTime = new \DateTime();
                 $node->setMtime($modifyTime);
                 $this->getRepository()->save($node);
