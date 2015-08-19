@@ -66,6 +66,8 @@ class FacetRepository extends DocumentRepository
             ->getAudience()
         ;
 
+        $author = $node->getAuthor()->getFullName();
+
         $tags = array();
         $nodeTags = $node->getTags();
         foreach ($nodeTags as $key => $tag) {
@@ -74,6 +76,7 @@ class FacetRepository extends DocumentRepository
 
 
         $facets = array(
+            'author' => array($author),
             'agency_id' => array($agencyId->id()),
             'agency_internal' => array($agency->getInternal()),
             'category' => array($category),
@@ -193,6 +196,10 @@ class FacetRepository extends DocumentRepository
                             $terms[] = $value->getAudience();
                             break;
 
+                        case 'agency_internal':
+                            $terms[] = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                            break;
+
                         // Agency, tags
                         default :
                             $terms[] = $value;
@@ -222,5 +229,45 @@ class FacetRepository extends DocumentRepository
         ;
 
         return $result;
+    }
+
+    /**
+     * Update facets after agency changes.
+     *
+     * @param $changes
+     * @return bool
+     */
+    public function updateFacet($changes)
+    {
+        $qb = $this->dm->createQueryBuilder('BpiApiBundle:Entity\Facet')
+            ->update()
+            ->multiple(true)
+        ;
+
+        if ($changes['nodeId']) {
+            $qb->field('nodeId')->equals($changes['nodeId']);
+        }
+
+        foreach ($changes as $changedValue => $changed) {
+            if (is_array($changed) && isset($changed['newValue']) && isset($changed['oldValue'])) {
+                $qb->field('facetData.' . $changedValue)->set($changed['newValue']);
+                $qb->field('facetData.' . $changedValue)->equals($changed['oldValue']);
+            } elseif ('tags' === $changedValue) {
+                $qb->field('facetData.' . $changedValue)->set($changed);
+            }
+
+            if ('agency_id' === $changedValue && is_string($changed)) {
+                $qb
+                    ->field('facetData.' . $changedValue)->equals($changed)
+                ;
+            }
+        }
+
+        $qb
+            ->getQuery()
+            ->execute()
+        ;
+
+        return true;
     }
 }

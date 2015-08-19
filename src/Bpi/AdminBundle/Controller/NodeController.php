@@ -117,21 +117,17 @@ class NodeController extends Controller
                     );
                 }
             }
-
-            if (!empty($changes)) {
-                $checks['nodeId'] = $node->getId();
-                $checks['tags'] = $submittedTags;
-            }
+            $changes['nodeId'] = $node->getId();
+            $changes['tags'] = $submittedTags;
 
             $form->bind($request);
             if ($form->isValid()) {
                 $modifyTime = new \DateTime();
                 $node->setMtime($modifyTime);
-                if (!empty($changes)) {
-                    $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
-                        ->getRepository('BpiApiBundle:Entity\Facet');
-                    $facetRepository->updateFacet($changes);
-                }
+                $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
+                    ->getRepository('BpiApiBundle:Entity\Facet');
+                $facetRepository->updateFacet($changes);
+
                 $this->getRepository()->save($node);
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_node')
