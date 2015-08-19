@@ -19,10 +19,10 @@
                             <li{% if url in route %} class="active"{% endif %}><a href="{{ url(url) }}">{{title}}</a></li>
                         {% endfor %}
                         <li>
-                            <form name="search-box" action="node" method="get">
+                            {#<form name="search-box" action="node" method="get">
                               <input placeholder="Search" class="search-input" type="text" id="search_node" name="search" value="{{ app.request.get('search')}}">
                               <input type="submit" value="Search">
-                            </form>
+                            </form>#}
                         </li>
                         </ul>
                     </div>

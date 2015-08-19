@@ -4,11 +4,13 @@ namespace Bpi\ApiBundle\Domain\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Bpi\ApiBundle\Domain\Entity\User;
+use Bpi\ApiBundle\Transform\IPresentable;
+use Bpi\RestMediaTypeBundle\Document;
 
 /**
  * Bpi\ApiBundle\Domain\Entity\Channel
  */
-class Channel
+class Channel implements IPresentable
 {
     /**
      * @var MongoId $id
@@ -207,5 +209,61 @@ class Channel
     public function getChannelNodes()
     {
         return $this->channelNodes;
+    }
+
+    public function transform(Document $document)
+    {
+        $entity = $document->createEntity('entity', 'channel');
+
+        $entity->addProperty(
+            $document->createProperty(
+                'id',
+                'string',
+                $this->getId()
+            )
+        );
+
+        $entity->addProperty(
+            $document->createProperty(
+                'channelName',
+                'string',
+                $this->getChannelName()
+            )
+        );
+
+        $entity->addProperty(
+            $document->createProperty(
+                'channelDescription',
+                'string',
+                $this->getChannelDescription()
+            )
+        );
+
+        if (!empty($this->getChannelAdmin())) {
+            $entity->addProperty(
+                $document->createProperty(
+                    'channelAdmin',
+                    'string',
+                    $this->getChannelAdmin()->getInternalUserName()
+                )
+            );
+        }
+
+        foreach ($this->channelEditors as $editor) {
+            $entity->addProperty(
+                $document->createProperty(
+                    'editor',
+                    'string',
+                    $editor->getInternalUserName()
+                )
+            );
+        }
+
+        $document->appendEntity($entity);
+
+        $document->setCursorOnEntity($entity);
+        foreach ($this->channelNodes as $node) {
+            $node->transform($node);
+        }
     }
 }

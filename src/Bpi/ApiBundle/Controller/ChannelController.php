@@ -47,7 +47,7 @@ class ChannelController extends BPIController
     /**
      * Create new channel
      *
-     * @Rest\Post("/create")
+     * @Rest\Post("/")
      * @Rest\View(statusCode="201")
      */
     public function createChannelAction()
@@ -88,12 +88,9 @@ class ChannelController extends BPIController
         $dm->persist($channel);
         $dm->flush();
 
-        $chName = filter_var($channel->getChannelName(), FILTER_SANITIZE_STRING);
-        $internalUserName = filter_var($channel->getChannelAdmin()->getInternalUserName(), FILTER_SANITIZE_STRING);
+        $document = $this->get('bpi.presentation.transformer')->transform($channel);
 
-        // TODO: Output xml using RestMediaTypeBundle
-        $responseContent = sprintf('Channel with name %s and admin user %s created', $chName, $internalUserName);
-        return new Response($responseContent, 201);
+        return $document;
     }
 
     /**
