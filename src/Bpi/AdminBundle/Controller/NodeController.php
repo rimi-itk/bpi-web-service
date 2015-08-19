@@ -93,9 +93,16 @@ class NodeController extends Controller
         $form = $this->createNodeForm($node);
         $request = $this->getRequest();
 
+        $dm = $this->get('doctrine.odm.mongodb.document_manager');
+        $uow = $dm->getUnitOfWork();
+        $uow->computeChangeSets();
+
         if ($request->isMethod('POST')) {
             $form->bind($request);
             if ($form->isValid()) {
+                $changeSet = $uow->getDocumentChangeSet($node);
+                $modifyTime = new \DateTime();
+                $node->setMtime($modifyTime);
                 $this->getRepository()->save($node);
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_node')
@@ -164,7 +171,8 @@ class NodeController extends Controller
                 'text',
                 array(
                     'label' => 'Author agency id',
-                    'required' => true
+                    'required' => true,
+                    'disabled' => true
                 )
             )
             ->add(
@@ -185,7 +193,8 @@ class NodeController extends Controller
                     'label' => 'Modify time',
                     'required' => true,
                     'date_widget' => 'single_text',
-                    'time_widget' => 'single_text'
+                    'time_widget' => 'single_text',
+                    'disabled' => true
                 )
             )
             ->add('title', 'text')
