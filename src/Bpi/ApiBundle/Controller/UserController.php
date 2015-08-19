@@ -44,7 +44,7 @@ class UserController extends BPIController
     /**
      * Create new user
      *
-     * @Rest\Post("/create")
+     * @Rest\Post("/")
      * @Rest\View()
      */
     public function createUserAction()
