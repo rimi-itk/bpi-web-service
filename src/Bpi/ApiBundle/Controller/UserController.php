@@ -105,9 +105,9 @@ class UserController extends BPIController
         $dm->persist($user);
         $dm->flush();
 
-        // TODO: Output xml using RestMediaTypeBundle
-        $responseMessage = sprintf('User with internal BPI name %s created', $user->getInternalUserName());
-        return new Response($responseMessage, $statusCode);
+        $document = $this->get('bpi.presentation.transformer')->transform($user);
+
+        return $document;
     }
 
      /**

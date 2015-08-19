@@ -3,12 +3,13 @@
 namespace Bpi\ApiBundle\Domain\Entity;
 
 
+use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 
 /**
  * Bpi\ApiBundle\Domain\Entity\User
  */
-class User
+class User implements IPresentable
 {
     /**
      * @var MongoId $id
