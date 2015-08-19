@@ -12,4 +12,15 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
  */
 class ChannelRepository extends DocumentRepository
 {
+    /**
+     * Helper method, determine if channel name is free to use for new channel
+     *
+     * @param $channelName string name of channel which should be checked on duplicates
+     * @return bool is name of channel free
+     */
+    public function findSimilarByName($channelName)
+    {
+        $result = $this->findOneByChannelName($channelName);
+        return ($result) ? true : false;
+    }
 }
