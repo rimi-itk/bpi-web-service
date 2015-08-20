@@ -223,4 +223,52 @@ class FacetRepository extends DocumentRepository
 
         return $result;
     }
+
+    /**
+     * Add channel name to facet for all nodes added to channel.
+     *
+     * @param $channelName
+     * @param $nodeIds
+     */
+    public function addChannelToFacet($channelName, $nodeIds)
+    {
+        $nids = array();
+        foreach ($nodeIds as $id) {
+            $nids[] = $id['nodeId'];
+        }
+
+        $qb = $this->createQueryBuilder();
+        $qb
+            ->update()
+            ->multiple(true)
+            ->field('facetData.channels')->addToSet($channelName)
+            ->field('nodeId')->in($nids)
+            ->getQuery()
+            ->execute()
+        ;
+    }
+
+    /**
+     * Remove channel name from facet on removing nodes from channel.
+     *
+     * @param $channelName
+     * @param $nodeIds
+     */
+    public function removeChannelFromFacet($channelName, $nodeIds)
+    {
+        $nids = array();
+        foreach ($nodeIds as $id) {
+            $nids[] = $id['nodeId'];
+        }
+
+        $qb = $this->createQueryBuilder();
+        $qb
+            ->update()
+            ->multiple(true)
+            ->field('facetData.channels')->pull($channelName)
+            ->field('nodeId')->in($nids)
+            ->getQuery()
+            ->execute()
+        ;
+    }
 }
