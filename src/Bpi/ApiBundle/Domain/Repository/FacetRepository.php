@@ -132,6 +132,14 @@ class FacetRepository extends DocumentRepository
                                 }
                                 emit(key, 1);
                             }
+                        } else if (i == "channels") {
+                            for (var j in this.facetData[i]) {
+                                var key = {
+                                    facetName: "channels",
+                                    facetValue: this.facetData[i][j]
+                                }
+                                emit(key, 1);
+                            }
                         } else {
                             var key = {
                                 facetName: i,
