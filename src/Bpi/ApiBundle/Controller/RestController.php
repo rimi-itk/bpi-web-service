@@ -406,8 +406,6 @@ class RestController extends FOSRestController
     public function nodeAction($id)
     {
         $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
-        $count = $this->getRepository('BpiApiBundle:Entity\History')->getSyndicatedCount($id);
-        $_node->setSyndicated($count);
 
         if (!$_node) {
             throw $this->createNotFoundException();
@@ -906,7 +904,15 @@ class RestController extends FOSRestController
         $dm->persist($log);
         $dm->flush($log);
 
-        $nodeRepository->incrementSyndications($id);
+        $nodeSyndications = $node->getSyndications();
+        if (null === $nodeSyndications) {
+            $node->setSyndications(1);
+        } else {
+            $node->setSyndications(++$nodeSyndications);
+        }
+
+        $dm->persist($node);
+        $dm->flush($node);
 
         return new Response('', 200);
     }

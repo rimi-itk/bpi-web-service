@@ -21,7 +21,6 @@ class Node implements IPresentable
     protected $id;
     protected $ctime;
     protected $mtime;
-    protected $syndications;
 
     protected $path;
     protected $parent;
@@ -38,9 +37,12 @@ class Node implements IPresentable
     protected $tags;
     protected $assets;
 
-    protected $syndicated = 0;
-
     protected $deleted = false;
+
+    /**
+     * @var int $syndications
+     */
+    protected $syndications;
 
     public function __construct(
         Author $author,
@@ -177,11 +179,11 @@ class Node implements IPresentable
             )
         );
 
-         $entity->addProperty(
+        $entity->addProperty(
             $document->createProperty(
-                'syndicated',
+                'syndicates',
                 'string',
-                $this->getSyndicated()
+                (null === $this->getSyndications()) ? 0 : $this->getSyndications()
             )
         );
 
@@ -342,16 +344,6 @@ class Node implements IPresentable
     public function getAssets()
     {
         return $this->assets;
-    }
-
-    public function setSyndicated($syndicated)
-    {
-        $this->syndicated = $syndicated;
-    }
-
-    public function getSyndicated()
-    {
-        return $this->syndicated;
     }
 
     public function setCtime($ctime)
