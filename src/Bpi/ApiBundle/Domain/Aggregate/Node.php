@@ -181,7 +181,7 @@ class Node implements IPresentable
 
         $entity->addProperty(
             $document->createProperty(
-                'syndicates',
+                'syndications',
                 'string',
                 (null === $this->getSyndications()) ? 0 : $this->getSyndications()
             )

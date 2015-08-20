@@ -204,8 +204,6 @@ class RestController extends FOSRestController
         $agency_id = new AgencyId($this->getUser()->getAgencyId()->id());
         foreach ($node_collection as $node) {
           $node->defineAgencyContext($agency_id);
-          $count = $this->getRepository('BpiApiBundle:Entity\History')->getSyndicatedCount($node->getId());
-          $node->setSyndicated($count);
         }
 
         $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
