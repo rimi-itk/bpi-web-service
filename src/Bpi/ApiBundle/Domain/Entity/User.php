@@ -5,7 +5,6 @@ namespace Bpi\ApiBundle\Domain\Entity;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 
-
 /**
  * Bpi\ApiBundle\Domain\Entity\User
  */
@@ -198,17 +197,18 @@ class User implements IPresentable
         return $this->userAgency;
     }
 
+    /**
+     *
+     * {@inheritdoc}
+     */
     public function transform(Document $document)
     {
-        $entity = $document->createEntity('entity', 'user');
-        $document->appendEntity($entity);
-
-        $entity->addProperty(
-            $document->createProperty(
-                'internalUserName',
-                'string',
-                $this->getInternalUserName()
-            )
-        );
+        try {
+            $entity= $document->currentEntity();
+        } catch (\RuntimeException $e) {
+            $entity = $document->createEntity(null, null, 'Users');
+            $document->appendEntity($entity);
+        }
+        $entity->addUser($this);
     }
 }

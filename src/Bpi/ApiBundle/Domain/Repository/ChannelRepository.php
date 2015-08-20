@@ -20,16 +20,7 @@ class ChannelRepository extends DocumentRepository
      */
     public function findSimilarByName($channelName)
     {
-        $em = $this->createQueryBuilder('Entity\Channel')
-            ->field('channelName')
-            ->equals($channelName)
-        ;
-
-        $result = $em
-            ->getQuery()
-            ->getSingleResult()
-        ;
-
+        $result = $this->findOneByChannelName($channelName);
         return ($result) ? true : false;
     }
 

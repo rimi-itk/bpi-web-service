@@ -33,12 +33,12 @@ class UserController extends BPIController
     public function listUsersAction()
     {
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
-        $serializer = $this->getSerialilzer();
 
         $allUsers = $userRepository->findAll();
 
-        // TODO: Output xml using RestMediaTypeBundle
-        return new Response('All users', 200);
+        $document = $this->get('bpi.presentation.transformer')->transformMany($allUsers);
+
+        return $document;
     }
 
     /**
@@ -53,49 +53,48 @@ class UserController extends BPIController
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $agencyRepository = $this->getRepository('BpiApiBundle:Aggregate\Agency');
-        $userData = $this->getAllRequestParameters();
-        $requiredUserData = array(
-            'externalId',
-            'email',
-            'agencyPublicId'
-        );
+        $params = $this->getAllRequestParameters();
+        // Strip all params.
+        $this->stripParams($params);
 
-        // Check if all required user data was sent in request
-        foreach ($requiredUserData as $reqData) {
-            if (!isset($userData[$reqData]) || empty($userData[$reqData])) {
-                $errorMessage = sprintf('%s required for user creation.', $reqData);
-                $statusCode = 400;
+        $requiredParams = array(
+            'externalId' => 0,
+            'email' => 0,
+        );
+        $this->checkParams($params, $requiredParams);
+
+        foreach ($requiredParams as $param => $count) {
+            if ($count == 0) {
+                throw new HttpException(400, "Param '{$param}' is required.");
             }
         }
 
-        //Get agency and check if exist
-        $userAgency = $agencyRepository->findOneBy(array('public_id' => $userData['agencyPublicId']));
-        if (null === $userAgency) {
-            $errorMessage = sprintf('Agency with agencyPublicId = %s dosn\'t exist.', $userData['agencyPublicId']);
-            $statusCode = 404;
+        if (!filter_var($params['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new HttpException(400, "Email '{$params['email']}' not valid.");
         }
 
-        if (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
-            $errorMessage = sprintf('Email %s not valid.', $userData['email']);
-            $statusCode = 400;
-        }
-
-        if (!empty($errorMessage)) {
-            throw new HttpException($statusCode, $errorMessage);
+        // Get agency.
+        $agency = $this->getAgencyFromHeader();
+        $user = $userRepository->findByExternalIdAgency($params['externalId'], $agency->getId());
+        if ($user) {
+            $id = $agency->getAgencyId();
+            throw new HttpException(400, "User with externalId = '{$params['externalId']}' and agency = '{$id}' already exits.");
         }
 
         $user = new User();
-        $user->setEmail($userData['email']);
-        $user->setExternalId($userData['externalId']);
-        $user->setUserAgency($userAgency);
-        if (!empty($userData['userFirstName'])) {
-            $user->setUserFirstName($userData['userFirstName']);
-        }
-        if (!empty($userData['userLastName'])) {
-            $user->setUserLastName($userData['userLastName']);
-        }
-        $user->setInternalUserName();
+        $user->setEmail($params['email']);
+        $user->setExternalId($params['externalId']);
 
+        $user->setUserAgency($agency);
+
+        if (!empty($params['userFirstName'])) {
+            $user->setUserFirstName($params['userFirstName']);
+        }
+        if (!empty($params['userLastName'])) {
+            $user->setUserLastName($params['userLastName']);
+        }
+
+        $user->setInternalUserName();
         // Check if user with such internal name exist
         if ($userRepository->findSimilarUserByInternalName($user->getInternalUserName()))
         {
@@ -106,8 +105,37 @@ class UserController extends BPIController
         $dm->persist($user);
         $dm->flush();
 
-        // TODO: Output xml using RestMediaTypeBundle
-        $responseMessage = sprintf('User with internal BPI name %s created', $user->getInternalUserName());
-        return new Response($responseMessage, $statusCode);
+        $document = $this->get('bpi.presentation.transformer')->transform($user);
+
+        return $document;
+    }
+
+     /**
+     * Create new user
+     *
+     * @Rest\Post("/autocompletions")
+     * @Rest\View()
+     */
+    public function autocompletionsUserAction()
+    {
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $params = $this->getAllRequestParameters();
+        // Strip all params.
+        $this->stripParams($params);
+
+        $agencyId = null;
+        if (isset($params['agencyId']) && !empty($params['agencyId'])) {
+            $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('public_id' => $params['agencyId']));
+            $agencyId = $agency ? $agency->getId() : 1;
+        }
+
+        $userIternalname = null;
+        if (isset($params['userIternalName']) && !empty($params['userIternalName'])) {
+            $userIternalname = $params['userIternalName'];
+        }
+
+        $users = $userRepository->getListAutocompletions($userIternalname, $agencyId);
+        $document = $this->get("bpi.presentation.transformer")->transformMany($users);
+        return $document;
     }
 }

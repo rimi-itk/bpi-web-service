@@ -99,29 +99,45 @@ class BPIController extends FOSRestController
     }
 
     /**
-     * @param $data
-     * @param $requiredData
-     * @param bool|false $multiDimensional
-     * @return bool
+     * Chekc if params is presented and how many times.
+     *
+     * @param $input
+     * @param $required
      */
-    protected function checkIncomingData($data, $requiredData, $multiDimensional = false)
+    protected function checkParams($input, &$required)
     {
-        if ($multiDimensional) {
-            foreach ($requiredData as $require) {
-                foreach ($data as $d) {
-                    if (!isset($d[$require]) || empty($d[$require])) {
-                        return $require;
-                    }
-                }
-            }
-        } else {
-            foreach ($requiredData as $require) {
-                if (!isset($data[$require]) || empty($data[$require])) {
-                    return $require;
-                }
-            }
+        array_walk_recursive($input, function($i, $k) use (&$required)  {
+            if (in_array($k, array_keys($required)) && !empty($i))
+                $required[$k]++;
+        });
+
+    }
+    /**
+     * Strips all params.
+     *
+     * @param $input
+     */
+    protected function stripParams(&$input)
+    {
+        array_walk_recursive($input, function(&$i, $k) {
+            $i = htmlspecialchars($i, ENT_QUOTES, 'UTF-8');
+        });
+    }
+
+    /**
+     * Gets agencyExternalId from headers of request.
+     *
+     * @return mixed agency
+     */
+    public function getAgencyFromHeader() {
+        $request = $this->getRequest();
+        $id = null;
+        if ($request->headers->has('Auth')) {
+            preg_match('~BPI agency="(?<agency>[^"]+)", token="(?<token>[^"]+)"~i', $request->headers->get('Auth'), $matches);
+            $id = $matches['agency'];
         }
 
-        return false;
+        $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findByPublicId($id);
+        return $agency;
     }
 }

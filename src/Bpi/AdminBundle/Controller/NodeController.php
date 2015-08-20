@@ -2,6 +2,7 @@
 
 namespace Bpi\AdminBundle\Controller;
 
+use Bpi\ApiBundle\Domain\Form\TagType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
@@ -92,9 +93,16 @@ class NodeController extends Controller
         $form = $this->createNodeForm($node);
         $request = $this->getRequest();
 
+        $dm = $this->get('doctrine.odm.mongodb.document_manager');
+        $uow = $dm->getUnitOfWork();
+        $uow->computeChangeSets();
+
         if ($request->isMethod('POST')) {
             $form->bind($request);
             if ($form->isValid()) {
+                $changeSet = $uow->getDocumentChangeSet($node);
+                $modifyTime = new \DateTime();
+                $node->setMtime($modifyTime);
                 $this->getRepository()->save($node);
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_node')
@@ -102,9 +110,13 @@ class NodeController extends Controller
             }
         }
 
+        $nodeAssets = $node->getAssets()->getCollection();
+        $assets = $this->prepareAssets($nodeAssets);
+
         return array(
             'form' => $form->createView(),
             'id' => $id,
+            'assets' => $assets
         );
     }
 
@@ -137,9 +149,57 @@ class NodeController extends Controller
 
     private function createNodeForm($node, $new = false)
     {
-        $formBuilder = $this->createFormBuilder($node)
+        $formBuilder = $this->createFormBuilder($node, array('csrf_protection' => false))
+            ->add(
+                'authorFirstName',
+                'text',
+                array(
+                    'label' => 'Author first name',
+                    'required' => true
+                )
+            )
+            ->add(
+                'authorLastName',
+                'text',
+                array(
+                    'label' => 'Author last name',
+                    'required' => false
+                )
+            )
+            ->add(
+                'authorAgencyId',
+                'text',
+                array(
+                    'label' => 'Author agency id',
+                    'required' => true,
+                    'disabled' => true
+                )
+            )
+            ->add(
+                'ctime',
+                'datetime',
+                array(
+                    'label' => 'Creation time',
+                    'required' => true,
+                    'date_widget' => 'single_text',
+                    'time_widget' => 'single_text',
+                    'disabled' => true
+                )
+            )
+            ->add(
+                'mtime',
+                'datetime',
+                array(
+                    'label' => 'Modify time',
+                    'required' => true,
+                    'date_widget' => 'single_text',
+                    'time_widget' => 'single_text',
+                    'disabled' => true
+                )
+            )
             ->add('title', 'text')
             ->add('teaser', 'textarea')->setRequired(false)
+            ->add('body', 'textarea')->setRequired(false)
             ->add(
                 'category',
                 'document',
@@ -155,12 +215,47 @@ class NodeController extends Controller
                     'class' => 'BpiApiBundle:Entity\Audience',
                     'property' => 'audience'
                 )
-            );
+            )
+            ->add(
+                'tags',
+                'collection',
+                array(
+                    'type' => new TagType(),
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'options' => array(
+                        'required' => false
+                    )
+                )
+            )
+        ;
 
         if (!$new) {
             $formBuilder->add('deleted', 'checkbox', array('required' => false));
         }
 
         return $formBuilder->getForm();
+    }
+
+    /**
+     * Filter assets on images and documents
+     *
+     * @param $nodeAssets
+     * @return array
+     */
+    protected function prepareAssets($nodeAssets)
+    {
+        $imageExtensions = array('jpg', 'jpeg', 'png', 'gif');
+        $assets =array();
+        foreach ($nodeAssets as $asset) {
+            if (in_array($asset->getExtension(), $imageExtensions)){
+                $assets['images'][] = $asset;
+            } else {
+                $assets['documents'][] = $asset;
+            }
+        }
+
+        return $assets;
+
     }
 }
