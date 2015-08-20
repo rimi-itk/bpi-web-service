@@ -45,6 +45,68 @@ class ChannelController extends BPIController
     }
 
     /**
+     * List channels of given user
+     *
+     * @param $userExternalId
+     *
+     * @Rest\Get("/user/{userExternalId}")
+     * @Rest\View()
+     *
+     * @return Document $document
+     */
+    public function listUsersChannelsAction($userExternalId)
+    {
+        if (!isset($userExternalId) || empty($userExternalId)) {
+            throw new HttpException(400, 'User external id required for listing channels.');
+        }
+
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+
+        $userAgency = $this->getAgencyFromHeader();
+        $userAgencyId = $userAgency->getAgencyId()->id();
+
+        if (null === $userAgency) {
+            throw new HttpException(404, 'Agency with external id ' . $userAgencyId . ' not found.');
+        }
+
+        $user = $userRepository->findOneBy(
+            array(
+                'externalId' => $userExternalId,
+                'userAgency.$id' => new \MongoId($userAgency->getId())
+            )
+        );
+
+        if (null === $user) {
+            $message = 'User with given externalId: ' . $userExternalId . ' and agency public_id: ' . $userAgencyId . ' not found.';
+            throw new HttpException(404, $message);
+        }
+
+        $channels = $channelRepository->findChannelsByUser($user);
+
+        $document = $this->get('bpi.presentation.transformer')->transformMany($channels);
+        $router = $this->get('router');
+        $document->walkEntities(
+            function($e) use ($document, $router, $userExternalId, $userAgencyId) {
+                $hypermedia = $document->createHypermediaSection();
+                $e->setHypermedia($hypermedia);
+                $hypermedia->addLink(
+                    $document->createLink(
+                        'self',
+                        $router->generate('list_users_channels', array(
+                            'userExternalId' => $userExternalId,
+                            'userAgencyId' => $userAgencyId
+                        ), true)
+                    )
+                );
+                $hypermedia->addLink($document->createLink('channel', $router->generate('list_channels', array(), true)));
+            }
+        );
+
+        return $document;
+    }
+
+    /**
      * Create new channel
      *
      * @Rest\Post("/")

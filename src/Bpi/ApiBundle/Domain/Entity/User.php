@@ -2,7 +2,6 @@
 
 namespace Bpi\ApiBundle\Domain\Entity;
 
-
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 

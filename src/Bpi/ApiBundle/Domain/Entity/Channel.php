@@ -2,9 +2,9 @@
 
 namespace Bpi\ApiBundle\Domain\Entity;
 
+use Bpi\ApiBundle\Transform\IPresentable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Bpi\ApiBundle\Domain\Entity\User;
-use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 
 /**

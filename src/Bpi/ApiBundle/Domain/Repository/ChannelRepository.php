@@ -23,4 +23,29 @@ class ChannelRepository extends DocumentRepository
         $result = $this->findOneByChannelName($channelName);
         return ($result) ? true : false;
     }
+
+    public function findChannelsByUser($user)
+    {
+        $qb = $this->createQueryBuilder('Entity\Channel');
+        $qb->addOr(
+            $qb
+                ->expr()
+                ->field('channelAdmin')
+                ->references($user)
+        );
+        $qb->addOr(
+            $qb
+                ->expr()
+                ->field('channelEditors')
+                ->includesReferenceTo($user)
+        );
+
+        $result = $qb
+            ->getQuery()
+            ->execute()
+        ;
+
+        $count = $result->count();
+        return ($count === 0) ? null : $result;
+    }
 }

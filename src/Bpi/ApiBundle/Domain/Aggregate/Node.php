@@ -177,7 +177,7 @@ class Node implements IPresentable
             )
         );
 
-         $entity->addProperty(
+        $entity->addProperty(
             $document->createProperty(
                 'syndicated',
                 'string',
