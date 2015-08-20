@@ -92,10 +92,59 @@ class NodeController extends Controller
         $node = $this->getRepository()->find($id);
         $form = $this->createNodeForm($node);
         $request = $this->getRequest();
+        $dm = $this->get('doctrine_mongodb.odm.document_manager');
 
         if ($request->isMethod('POST')) {
+            $submittedNode = $request->get('form');
+            $changeAuthorFirstName = $node->getAuthorFirstName() != $submittedNode['authorFirstName'];
+            $changeAuthorLastName = $node->getAuthorLastName() != $submittedNode['authorLastName'];
+            $changeAuthor = $changeAuthorFirstName || $changeAuthorLastName;
+            $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
+            $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
+
+            $submittedTags = array();
+            foreach ($submittedNode['tags'] as $tag) {
+                $submittedTags[] = $tag['tag'];
+            }
+
+            $checks = array(
+                'author' => array(
+                    'check' => $changeAuthor,
+                    'oldValue' => $node->getAuthor()->getFullName(),
+                    'newValue' => ($submittedNode['authorFirstName'] ? $submittedNode['authorFirstName'] . ' ' : '') . $submittedNode['authorLastName']
+                ),
+                'category' => array(
+                    'check' => $changeCategory,
+                    'oldValue' => $node->getCategory()->getCategory(),
+                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Category')->find($submittedNode['category'])->getCategory()
+                ),
+                'audience' => array(
+                    'check' => $changeAudience,
+                    'oldValue' => $node->getAudience()->getAudience(),
+                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Audience')->find($submittedNode['audience'])->getAudience()
+                ),
+            );
+
+            $changes = array();
+            foreach ($checks as $key => $check) {
+                if ($check['check']) {
+                    $changes[$key] = array(
+                        'oldValue' => $check['oldValue'],
+                        'newValue' => $check['newValue']
+                    );
+                }
+            }
+            $changes['nodeId'] = $node->getId();
+            $changes['tags'] = $submittedTags;
+
             $form->bind($request);
             if ($form->isValid()) {
+                $modifyTime = new \DateTime();
+                $node->setMtime($modifyTime);
+                $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
+                    ->getRepository('BpiApiBundle:Entity\Facet');
+                $facetRepository->updateFacet($changes);
+
                 $this->getRepository()->save($node);
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_node')
@@ -164,7 +213,8 @@ class NodeController extends Controller
                 'text',
                 array(
                     'label' => 'Author agency id',
-                    'required' => true
+                    'required' => true,
+                    'disabled' => true
                 )
             )
             ->add(
@@ -185,7 +235,8 @@ class NodeController extends Controller
                     'label' => 'Modify time',
                     'required' => true,
                     'date_widget' => 'single_text',
-                    'time_widget' => 'single_text'
+                    'time_widget' => 'single_text',
+                    'disabled' => true
                 )
             )
             ->add('title', 'text')

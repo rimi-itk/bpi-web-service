@@ -29,8 +29,8 @@
         <div class="span6">
             <h3>Node data</h3>
             {{ form_row(form.title) }}
-            {{ form_row(form.teaser) }}
-            {{ form_row(form.body) }}
+            {{ form_row(form.teaser, { 'attr': { 'rows': 10, 'cols': 55, 'style': 'width:auto' } }) }}
+            {{ form_row(form.body, { 'attr': { 'rows': 10, 'cols': 55, 'style': 'width:auto' } }) }}
         </div>
         <div class="span6">
             <h3>Node vocabularies</h3>
