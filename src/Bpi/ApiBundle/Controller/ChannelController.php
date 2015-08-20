@@ -48,29 +48,23 @@ class ChannelController extends BPIController
      * List channels of given user
      *
      * @param $userExternalId
-     * @param $userAgencyId
      *
-     * @Rest\Get("/user/{userExternalId}/{userAgencyId}")
+     * @Rest\Get("/user/{userExternalId}")
      * @Rest\View()
      *
      * @return Document $document
      */
-    public function listUsersChannelsAction($userExternalId, $userAgencyId)
+    public function listUsersChannelsAction($userExternalId)
     {
         if (!isset($userExternalId) || empty($userExternalId)) {
             throw new HttpException(400, 'User external id required for listing channels.');
         }
 
-        if (!isset($userAgencyId) || empty($userAgencyId)) {
-            throw new HttpException(400, 'User agency required for listing channels.');
-        }
-
-        $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
-        $agencyRepository = $this->getRepository('BpiApiBundle:Aggregate\Agency');
 
-        $userAgency = $agencyRepository->findOneBy(array('public_id' => $userAgencyId));
+        $userAgency = $this->getAgencyFromHeader();
+        $userAgencyId = $userAgency->getAgencyId()->id();
 
         if (null === $userAgency) {
             throw new HttpException(404, 'Agency with external id ' . $userAgencyId . ' not found.');
