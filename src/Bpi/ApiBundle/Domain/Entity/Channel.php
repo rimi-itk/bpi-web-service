@@ -239,12 +239,13 @@ class Channel implements IPresentable
             )
         );
 
-        if (!empty($this->getChannelAdmin())) {
+        $channelAdmin = $this->getChannelAdmin();
+        if (!empty($channelAdmin)) {
             $entity->addProperty(
                 $document->createProperty(
                     'channelAdmin',
                     'string',
-                    $this->getChannelAdmin()->getInternalUserName()
+                    $channelAdmin->getInternalUserName()
                 )
             );
         }
