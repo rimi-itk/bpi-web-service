@@ -300,11 +300,10 @@ class ChannelController extends BPIController
         $dm = $this->getDoctrineManager();
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
         $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
-        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
 
         $params = $this->getAllRequestParameters();
         // Strip all params.
-               $this->stripParams($params);
+        $this->stripParams($params);
 
         $requiredParams = array(
             'nodeId' => 0,
@@ -359,6 +358,9 @@ class ChannelController extends BPIController
         $dm->persist($channel);
         $dm->flush();
 
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
+        $facetRepository->addChannelToFacet($channel->getChannelName(), $params['nodes']);
+
         $message = "{$count} node(s) was successfully added to channel.";
         if (!empty($skipped)) {
             $message = $message . " " . count($skipped). " node(s)  already added to channel (" . implode(', ', $skipped) . ").";
@@ -367,7 +369,7 @@ class ChannelController extends BPIController
     }
 
     /**
-     * Remove node to channel.
+     * Remove node from channel.
      *
      * @Rest\Post("/remove/node")
      * @Rest\View()
@@ -379,7 +381,6 @@ class ChannelController extends BPIController
         $dm = $this->getDoctrineManager();
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
         $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
-        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
 
         $params = $this->getAllRequestParameters();
         // Strip all params.
@@ -437,6 +438,9 @@ class ChannelController extends BPIController
 
         $dm->persist($channel);
         $dm->flush();
+
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
+        $facetRepository->addChannelToFacet($channel->getChannelName(), $params['nodes']);
 
         $message = "{$count} node(s) was successfully removed from channel.";
         if (!empty($skipped)) {
