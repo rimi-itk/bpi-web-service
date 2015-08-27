@@ -12,7 +12,7 @@
                 "version": "1.0",
                 "source": {
                     "type": "git",
-                    "url": "git@github.com:bpi-dk/bpi-client.git",
+                    "url": "git@github.com:easyting/bpi-client.git",
                     "reference": "origin/develop"
                 }
             }
