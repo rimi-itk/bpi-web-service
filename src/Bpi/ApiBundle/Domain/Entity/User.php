@@ -4,6 +4,7 @@ namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 /**
  * Bpi\ApiBundle\Domain\Entity\User
@@ -201,14 +202,8 @@ class User implements IPresentable
      *
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
-        try {
-            $entity= $document->currentEntity();
-        } catch (\RuntimeException $e) {
-            $entity = $document->createEntity(null, null, 'Users');
-            $document->appendEntity($entity);
-        }
-        $entity->addUser($this);
+        $document->addUser($this);
     }
 }

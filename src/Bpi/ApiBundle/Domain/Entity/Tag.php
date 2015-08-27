@@ -3,6 +3,7 @@
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\RestMediaTypeBundle\Document;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 
 /**
@@ -80,7 +81,7 @@ class Tag
         return $this->tag;
     }
 
-    public function transform(Document  $document, $tags)
+    public function transform(XmlResponse  $document, $tags)
     {
         try {
             $entity= $document->currentEntity();

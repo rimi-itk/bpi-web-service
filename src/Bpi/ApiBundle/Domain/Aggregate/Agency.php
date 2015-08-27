@@ -2,9 +2,9 @@
 namespace Bpi\ApiBundle\Domain\Aggregate;
 
 use Bpi\ApiBundle\Transform\IPresentable;
-use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 class Agency implements IPresentable
 {
@@ -30,7 +30,7 @@ class Agency implements IPresentable
     /**
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         $entity = $document->currentEntity();
         $entity->addProperty($document->createProperty('agency_id', 'string', $this->public_id));

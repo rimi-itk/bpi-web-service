@@ -4,6 +4,7 @@ namespace Bpi\ApiBundle\Domain\Entity;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 /**
  * Statistics entity
@@ -20,7 +21,7 @@ class Statistics implements IPresentable
     /**
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         try {
             $entity= $document->currentEntity();

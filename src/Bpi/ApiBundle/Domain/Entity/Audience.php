@@ -2,6 +2,7 @@
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Transform\IPresentable;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 class Audience implements IPresentable
 {
@@ -58,7 +59,7 @@ class Audience implements IPresentable
      *
      * @param \Bpi\RestMediaTypeBundle\Document $document
      */
-    public function transform(\Bpi\RestMediaTypeBundle\Document $document)
+    public function transform(XmlResponse $document)
     {
         $entity = $document->createEntity('audience');
         $document->appendEntity($entity);

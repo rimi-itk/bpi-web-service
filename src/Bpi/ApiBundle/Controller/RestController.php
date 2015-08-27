@@ -208,7 +208,9 @@ class RestController extends FOSRestController
           $node->setSyndicated($count);
         }
 
-        $document = $this->get("bpi.presentation.transformer")->transformMany($node_collection);
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.document'));
+        $document = $transform->transformMany($node_collection);
         $router = $this->get('router');
         $document->walkEntities(
             function ($e) use ($document, $router) {
@@ -318,7 +320,9 @@ class RestController extends FOSRestController
         $repo = $this->getRepository('BpiApiBundle:Entity\History');
         $stats = $repo->getStatisticsByDateRangeForAgency($dateFrom, $dateTo, $agencyId);
 
-        $document = $this->get("bpi.presentation.transformer")->transform($stats);
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.document'));
+        $document = $transform->transform($stats);
 
         return $document;
     }
@@ -367,6 +371,7 @@ class RestController extends FOSRestController
     {
         $loader = new \Bpi\ApiBundle\Tests\DoctrineFixtures\LoadNodes();
         $transformer = $this->get("bpi.presentation.transformer");
+        $transformer->setDoc($this->get('bpi.presentation.document'));
         switch ($name) {
             case 'node':
                 return $transformer->transform($loader->createAlphaNode());
@@ -413,7 +418,9 @@ class RestController extends FOSRestController
             throw $this->createNotFoundException();
         }
         $_node->defineAgencyContext(new AgencyId($this->getUser()->getAgencyId()->id()));
-        $document = $this->get("bpi.presentation.transformer")->transform($_node);
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.document'));
+        $document = $transform->transform($_node);
 
         $hypermedia = $document->createHypermediaSection();
         $node = $document->currentEntity();
@@ -551,12 +558,19 @@ class RestController extends FOSRestController
 
                 $facetRepository->prepareFacet($node);
 
-                return $this->get("bpi.presentation.transformer")->transform($node);
+                $transform = $this->get('bpi.presentation.transformer');
+                $transform->setDoc($this->get('bpi.presentation.document'));
+                $document = $transform->transform($node);
+                return $document;
+
             }
             $node = $this->get('domain.push_service')
               ->push($author, $resource, $request->get('category'), $request->get('audience'), $request->get('tags'), $profile, $params, $assets);
 
-            return $this->get("bpi.presentation.transformer")->transform($node);
+            $transform = $this->get('bpi.presentation.transformer');
+            $transform->setDoc($this->get('bpi.presentation.document'));
+            $document = $transform->transform($node);
+            return $document;
         } catch (\LogicException $e) {
             return $this->createErrorView($e->getMessage(), 422);
         }

@@ -14,6 +14,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Entity\User;
+use Bpi\ApiBundle\Domain\XmlResponse\XmlError;
 
 /**
  * Class UserController
@@ -36,7 +37,9 @@ class UserController extends BPIController
 
         $allUsers = $userRepository->findAll();
 
-        $document = $this->get('bpi.presentation.transformer')->transformMany($allUsers);
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.users'));
+        $document = $transform->transformMany($allUsers);
 
         return $document;
     }
@@ -49,6 +52,7 @@ class UserController extends BPIController
      */
     public function createUserAction()
     {
+        $xmlError = $this->get('bpi.presentation.xmlerror');
         $statusCode = 201;
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
@@ -65,20 +69,32 @@ class UserController extends BPIController
 
         foreach ($requiredParams as $param => $count) {
             if ($count == 0) {
-                throw new HttpException(400, "Param '{$param}' is required.");
+                $xmlError->setCode(400);
+                $xmlError->setError("Param '{$param}' is required.");
+                return $xmlError;
             }
         }
 
         if (!filter_var($params['email'], FILTER_VALIDATE_EMAIL)) {
-            throw new HttpException(400, "Email '{$params['email']}' not valid.");
+            $xmlError->setCode(400);
+            $xmlError->setError("Email '{$params['email']}' not valid.");
+            return $xmlError;
         }
 
         // Get agency.
         $agency = $this->getAgencyFromHeader();
         $user = $userRepository->findByExternalIdAgency($params['externalId'], $agency->getId());
         if ($user) {
-            $id = $agency->getAgencyId();
-            throw new HttpException(400, "User with externalId = '{$params['externalId']}' and agency = '{$id}' already exits.");
+            $xmlError->setCode(400);
+            $xmlError->setError( "User with externalId = '{$params['externalId']}' and agency = '{$agency->getId()}' already exits.");
+            return $xmlError;
+        }
+
+        $user = $userRepository->findOneByEmail($params['email']);
+        if ($user) {
+            $xmlError->setCode(400);
+            $xmlError->setError( "User with email = '{$params['email']}' already exits.");
+            return $xmlError;
         }
 
         $user = new User();
@@ -105,7 +121,9 @@ class UserController extends BPIController
         $dm->persist($user);
         $dm->flush();
 
-        $document = $this->get('bpi.presentation.transformer')->transform($user);
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.users'));
+        $document = $transform->transform($user);
 
         return $document;
     }
@@ -135,7 +153,9 @@ class UserController extends BPIController
         }
 
         $users = $userRepository->getListAutocompletions($userIternalname, $agencyId);
-        $document = $this->get("bpi.presentation.transformer")->transformMany($users);
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.users'));
+        $document = $transform->transformMany($users);
         return $document;
     }
 }

@@ -7,6 +7,7 @@ use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\Profile\Relation\IRelation;
 use Bpi\ApiBundle\Domain\ValueObject\Yearwheel;
 use Bpi\ApiBundle\Domain\ValueObject\ValueObjectList as VOList;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 class Profile implements IPresentable
 {
@@ -59,7 +60,7 @@ class Profile implements IPresentable
     /**
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         try {
             $entity = $document->currentEntity();

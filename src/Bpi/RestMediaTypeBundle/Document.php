@@ -3,7 +3,7 @@ namespace Bpi\RestMediaTypeBundle;
 
 use Doctrine\ORM\Mapping\ElementCollection;
 use JMS\Serializer\Annotation as Serializer;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface as Router;
+
 use Bpi\RestMediaTypeBundle\Element\Collection;
 use Bpi\RestMediaTypeBundle\Element\Entity as Entity;
 use Bpi\RestMediaTypeBundle\Element\Users;
@@ -14,7 +14,7 @@ use Bpi\RestMediaTypeBundle\Element\Link;
 /**
  * @Serializer\XmlRoot("bpi")
  */
-class Document
+class Document extends XmlResponse
 {
     /**
      * @Serializer\Exclude
@@ -22,17 +22,7 @@ class Document
      */
     protected $current_entity;
 
-    /**
-     * @Serializer\Exclude
-     * @var \Symfony\Component\Routing\Generator\UrlGeneratorInterface
-     */
-    protected $router;
 
-    /**
-     * @Serializer\XmlAttribute
-     * @Serializer\Type("string")
-     */
-    protected $version;
 
     /**
      * @Serializer\XmlList(inline=true, entry="item")
@@ -45,39 +35,8 @@ class Document
      */
     protected $collection;
 
-    /**
-     * @param string $version API version
-     */
-    public function __construct($version = '0.0.1')
-    {
-        $this->version = $version;
-    }
 
-    /**
-     * Inject router dependency
-     *
-     * @param \Symfony\Component\Routing\Generator\UrlGeneratorInterface $router
-     */
-    public function setRouter(Router $router)
-    {
-        $this->router = $router;
-    }
 
-    /**
-     * Generates a URL from the given parameters.
-     *
-     * @param string  $name       The name of the route
-     * @param mixed   $parameters An array of parameters
-     * @param Boolean $absolute   Whether to generate an absolute URL
-     *
-     * @return string The generated URL
-     *
-     * @throws RouteNotFoundException if route doesn't exist
-     */
-    public function generateRoute($name, $parameters = array(), $absolute = false)
-    {
-        return $this->router->generate($name, $parameters, $absolute);
-    }
 
     /**
      * Call the callback on each entity

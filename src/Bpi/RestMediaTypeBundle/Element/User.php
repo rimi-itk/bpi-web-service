@@ -10,37 +10,31 @@ class User
 {
     /**
      * @Serializer\Type("string")
-     * @Serializer\XmlAttribute
      */
     protected $id;
 
     /**
      * @Serializer\Type("string")
-     * @Serializer\XmlAttribute
      */
     protected $internalUserName;
 
     /**
      * @Serializer\Type("string")
-     * @Serializer\XmlAttribute
      */
     protected $email;
 
     /**
      * @Serializer\Type("string")
-     * @Serializer\XmlAttribute
      */
     protected $userFirstName;
 
     /**
      * @Serializer\Type("string")
-     * @Serializer\XmlAttribute
      */
     protected $userLastName;
 
     /**
      * @Serializer\Type("string")
-     * @Serializer\XmlAttribute
      */
     protected $agencyId;
 

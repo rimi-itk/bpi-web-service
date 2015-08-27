@@ -6,6 +6,7 @@ use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 /**
  * Remote resource like article, news item, etc
@@ -112,7 +113,7 @@ class Resource implements IPresentable
     /**
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         try {
             $entity= $document->currentEntity();

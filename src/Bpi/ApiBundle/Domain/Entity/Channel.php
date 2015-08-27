@@ -3,6 +3,7 @@
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Transform\IPresentable;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 use Doctrine\Common\Collections\ArrayCollection;
 use Bpi\ApiBundle\Domain\Entity\User;
 use Bpi\RestMediaTypeBundle\Document;
@@ -211,7 +212,7 @@ class Channel implements IPresentable
         return $this->channelNodes;
     }
 
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         $entity = $document->createEntity('entity', 'channel');
 
@@ -264,7 +265,7 @@ class Channel implements IPresentable
 
         $document->setCursorOnEntity($entity);
         foreach ($this->channelNodes as $node) {
-            $node->transform($node);
+            $node->transform($document);
         }
     }
 }
