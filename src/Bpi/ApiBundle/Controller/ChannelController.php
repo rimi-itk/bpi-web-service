@@ -350,7 +350,7 @@ class ChannelController extends BPIController
         // Check if user have permission to add node to channel.
         $admin = $channel->getChannelAdmin();
         $editors = $channel->getChannelEditors();
-        if ($admin->getId() != $params['editorId'] && !$editors->contains($params['editorId'])) {
+        if ($admin->getId() != $params['editorId'] || !$editors->contains($params['editorId'])) {
             $xmlError->setCode(404);
             $xmlError->setError("User with id  = '{$params['editorId']}' can't push to this channel.");
             return $xmlError;
@@ -444,7 +444,7 @@ class ChannelController extends BPIController
         // Check if user have permission to add node to channel.
         $admin = $channel->getChannelAdmin();
         $editors = $channel->getChannelEditors();
-        if ($admin->getId() != $params['editorId'] && !$editors->contains($params['editorId'])) {
+        if ($admin->getId() != $params['editorId'] || !$editors->contains($params['editorId'])) {
             $xmlError->setCode(404);
             $xmlError->setError("User with id  = '{$params['editorId']}' can't push to this channel.");
             return $xmlError;

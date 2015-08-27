@@ -66,7 +66,7 @@ class UserRepository extends DocumentRepository
             $query->field('userAgency.id')->equals($agencyId);
         }
         if ($userIternalName) {
-            $query->field('internalUserName')->equals($userIternalName);
+            $query->field('internalUserName')->equals(new \MongoRegex('/.*' . $userIternalName . '.*/'));
         }
 
         return $query
