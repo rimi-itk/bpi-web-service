@@ -13,6 +13,7 @@ use Bpi\ApiBundle\Domain\Entity\Tag;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 use Doctrine\Common\Collections\ArrayCollection;
 use Gaufrette\File;
 
@@ -133,7 +134,7 @@ class Node implements IPresentable
     /**
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         $entity = $document->createEntity('entity');
 

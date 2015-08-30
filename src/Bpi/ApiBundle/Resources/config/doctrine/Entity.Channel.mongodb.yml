@@ -1,0 +1,39 @@
+Bpi\ApiBundle\Domain\Entity\Channel:
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\ChannelRepository
+  collection: Channel
+  type: document
+
+  fields:
+    id:
+      id: true
+
+    channelName:
+      type: string
+      required: true
+
+    channelDescription:
+      type: string
+      required: false
+
+    channelDeleted:
+      type: boolean
+      required: true
+      default: false
+
+    channelAdmin:
+      reference: true
+      type: one
+      targetDocument: Bpi\ApiBundle\Domain\Entity\User
+      cascade: all
+
+    channelEditors:
+      reference: true
+      type: many
+      tagrgetDocument: Bpi\ApiBundle\Domain\Entity\User
+      cascade: all
+
+    channelNodes:
+      reference: true
+      type: many
+      targeDocument: Bpi\ApiBundle\Domain\Aggregate\Node
+      cascade: all

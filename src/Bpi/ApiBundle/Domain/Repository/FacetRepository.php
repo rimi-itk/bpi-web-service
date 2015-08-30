@@ -135,6 +135,14 @@ class FacetRepository extends DocumentRepository
                                 }
                                 emit(key, 1);
                             }
+                        } else if (i == "channels") {
+                            for (var j in this.facetData[i]) {
+                                var key = {
+                                    facetName: "channels",
+                                    facetValue: this.facetData[i][j]
+                                }
+                                emit(key, 1);
+                            }
                         } else {
                             var key = {
                                 facetName: i,
@@ -257,9 +265,7 @@ class FacetRepository extends DocumentRepository
             }
 
             if ('agency_id' === $changedValue && is_string($changed)) {
-                $qb
-                    ->field('facetData.' . $changedValue)->equals($changed)
-                ;
+                $qb->field('facetData.' . $changedValue)->equals($changed);
             }
         }
 
@@ -269,5 +275,53 @@ class FacetRepository extends DocumentRepository
         ;
 
         return true;
+    }
+
+    /**
+     * Add channel name to facet for all nodes added to channel.
+     *
+     * @param $channelName
+     * @param $nodeIds
+     */
+    public function addChannelToFacet($channelName, $nodeIds)
+    {
+        $nids = array();
+        foreach ($nodeIds as $id) {
+            $nids[] = $id['nodeId'];
+        }
+
+        $qb = $this->createQueryBuilder();
+        $qb
+            ->update()
+            ->multiple(true)
+            ->field('facetData.channels')->addToSet($channelName)
+            ->field('nodeId')->in($nids)
+            ->getQuery()
+            ->execute()
+        ;
+    }
+
+    /**
+     * Remove channel name from facet on removing nodes from channel.
+     *
+     * @param $channelName
+     * @param $nodeIds
+     */
+    public function removeChannelFromFacet($channelName, $nodeIds)
+    {
+        $nids = array();
+        foreach ($nodeIds as $id) {
+            $nids[] = $id['nodeId'];
+        }
+
+        $qb = $this->createQueryBuilder();
+        $qb
+            ->update()
+            ->multiple(true)
+            ->field('facetData.channels')->pull($channelName)
+            ->field('nodeId')->in($nids)
+            ->getQuery()
+            ->execute()
+        ;
     }
 }
