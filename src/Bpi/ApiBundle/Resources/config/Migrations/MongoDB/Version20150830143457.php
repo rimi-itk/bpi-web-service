@@ -80,8 +80,8 @@ class Version20150830143457 extends AbstractMigration implements ContainerAwareI
             }
             $node->setAssets($assets);
             $dm->persist($node);
+            $dm->flush();
         }
-        $dm->flush();
     }
 
     public function down(Database $db)
