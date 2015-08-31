@@ -38,6 +38,14 @@ class Node implements IPresentable
     protected $tags;
     protected $assets;
 
+    /**
+     * @param Assets $assets
+     */
+    public function setAssets($assets)
+    {
+        $this->assets = $assets;
+    }
+
     protected $deleted = false;
 
     /**
