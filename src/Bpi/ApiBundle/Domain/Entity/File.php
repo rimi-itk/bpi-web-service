@@ -362,6 +362,14 @@ class File
     }
 
     /**
+     * @param Filesystem $filesystem
+     */
+    public function setFilesystem($filesystem)
+    {
+        $this->filesystem = $filesystem;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function transform(XmlResponse $document)
