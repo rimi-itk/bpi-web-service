@@ -4,8 +4,10 @@ namespace Bpi\ApiBundle\Migrations\MongoDB;
 
 use AntiMattr\MongoDB\Migrations\AbstractMigration;
 use Bpi\ApiBundle\Domain\Aggregate\Assets;
+use Bpi\ApiBundle\Domain\Entity\File;
 use Doctrine\MongoDB\Database;
 use Gaufrette\Util;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;
@@ -32,48 +34,54 @@ class Version20150830143457 extends AbstractMigration implements ContainerAwareI
 
     public function up(Database $db)
     {
+        $dm = $this->container->get('doctrine_mongodb')->getManager();
         $fs = $this->container->get('knp_gaufrette.filesystem_map')->get('assets');
+        $uploadDir = Util\Path::normalize(__DIR__ . '/../../../../../../../web/uploads/assets');
         $nodeQb = $db
             ->selectCollection('Node')
             ->createQueryBuilder()
         ;
-
         $request = $nodeQb
             ->field('resource.assets')->exists(true)
             ->not($nodeQb->expr()->size(0))
         ;
         $result = $request->getQuery()->execute();
 
-        foreach ($result as $key => $node) {
-            if (empty($node['resource']['assets'])) {
+        $nodeRepository = $this
+            ->container
+            ->get('doctrine.odm.mongodb.document_manager')
+            ->getRepository('BpiApiBundle:Aggregate\Node')
+        ;
+        foreach ($result as $key => $data) {
+            if (empty($data['resource']['assets'])) {
                 continue;
             }
-
-//            $nodeRepository = $this
-//                ->container
-//                ->get('doctrine.odm.mongodb.document_manager')
-//                ->getRepository('BpiApiBundle:Aggregate\Node')
-//            ;
-//            var_dump($node['_id']);exit;
-//
-//            $nodeId  = new NodeId((string)$node['_id']);
-//            var_dump($nodeId);exit;
-//            $assetsObj = new Assets();
-
-            foreach ($node['resource']['assets'] as $key => $asset) {
-                $file = $fs->get($asset['file']);
-                $rootDir = Util\Path::normalize(__DIR__.'/../../../../../web/uploads/assets');
-                $newFs = new \Gaufrette\Filesystem(new \Gaufrette\Adapter\Local($rootDir, true, 777));
-                $newFile = $fs->createFile("{$asset['file']}.{$asset['extension']}", $newFs);
-                $newFile->setContent($file->getContent());
-                $assetsObj->addElem($newFile);
-                var_dump($file);exit;
+            $node = $nodeRepository->findOneById($data['_id']);
+            $assets = new Assets();
+            foreach ($data['resource']['assets'] as $key => $asset) {
+                try {
+                    $fs_file = $fs->get($asset['file']);
+                    $newFs = new \Gaufrette\Filesystem(new \Gaufrette\Adapter\Local($uploadDir, true, 777));
+                    $new = $newFs->createFile("{$asset['file']}.{$asset['extension']}", $newFs);
+                    $new->setContent($fs_file->getContent());
+                    $params = array(
+                        'title' => $asset['file'],
+                        'extension' => $asset['extension'],
+                        'type' => $asset['type'] == 'embedded' ? 'body' : $asset['type'],
+                    );
+                    $file = new File($params);
+                    $file->setName($asset['file']);
+                    $file->setFilesystem($newFs);
+                    $file->setPath(NULL);
+                    $assets->addElem($file);
+                }
+                catch (\MongoGridFSException $e) {
+                }
             }
-
-            var_dump($node);exit;
-            $file = $fs->get($asset['filename']);
-            var_dump($file->getContent());exit;
+            $node->setAssets($assets);
+            $dm->persist($node);
         }
+        $dm->flush();
     }
 
     public function down(Database $db)
@@ -81,3 +89,4 @@ class Version20150830143457 extends AbstractMigration implements ContainerAwareI
 
     }
 }
+
