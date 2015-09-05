@@ -7,10 +7,8 @@ use Bpi\ApiBundle\Domain\Aggregate\Assets;
 use Bpi\ApiBundle\Domain\Entity\File;
 use Doctrine\MongoDB\Database;
 use Gaufrette\Util;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Bpi\ApiBundle\Domain\ValueObject\NodeId;
 
 /**
  * Auto-generated Migration: Please modify to your needs!

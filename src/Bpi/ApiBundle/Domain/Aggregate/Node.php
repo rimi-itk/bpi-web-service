@@ -205,7 +205,8 @@ class Node implements IPresentable
 
         $this->profile->transform($document);
         $this->resource->transform($document);
-        $this->assets->transform($document);
+        if (!empty($this->assets))
+            $this->assets->transform($document);
     }
 
     /**
