@@ -13,6 +13,7 @@ use Bpi\ApiBundle\Domain\Entity\Tag;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 use Doctrine\Common\Collections\ArrayCollection;
 use Gaufrette\File;
 
@@ -180,7 +181,7 @@ class Node implements IPresentable
 
         $entity->addProperty(
             $document->createProperty(
-                'syndicates',
+                'syndications',
                 'string',
                 (null === $this->getSyndications()) ? 0 : $this->getSyndications()
             )
@@ -217,6 +218,17 @@ class Node implements IPresentable
     public function defineAgencyContext(AgencyID $syndicator)
     {
         $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
+    }
+
+    public function setSyndications($syndications)
+    {
+        $this->syndications = $syndications;
+        return $this;
+    }
+
+    public function getSyndications()
+    {
+        return $this->syndications;
     }
 
     public function getAuthor()
