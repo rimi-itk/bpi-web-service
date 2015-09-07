@@ -65,7 +65,7 @@ class NodeController extends Controller
         );
 
         return array(
-          'pagination' => $pagination,
+            'pagination' => $pagination,
             'delete_lable' => 'Undelete',
             'delete_url' => 'bpi_admin_node_restore',
         );
@@ -167,8 +167,9 @@ class NodeController extends Controller
 
         $assets = array();
         $nodeAssets = $node->getAssets();
-        if(!empty($nodeAssets))
-          $assets = $this->prepareAssets($nodeAssets->getCollection());
+        if(!empty($nodeAssets)) {
+            $assets = $this->prepareAssets($nodeAssets->getCollection());
+        }
 
         return array(
             'form' => $form->createView(),
