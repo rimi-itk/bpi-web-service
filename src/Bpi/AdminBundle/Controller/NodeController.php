@@ -50,9 +50,22 @@ class NodeController extends Controller
      */
     public function deletedAction()
     {
-        $nodes = $this->getRepository()->listAll(true);
+
+        $query = $this->getRepository()->listAll(null, null, null, true);
+        $knpPaginator = $this->get('knp_paginator');
+
+        $pagination = $knpPaginator->paginate(
+          $query,
+          $this->get('request')->query->get('page', 1),
+          50,
+          array(
+            'defaultSortFieldName' => 'resource.title',
+            'defaultSortDirection' => 'desc',
+          )
+        );
+
         return array(
-            'nodes' => $nodes,
+            'pagination' => $pagination,
             'delete_lable' => 'Undelete',
             'delete_url' => 'bpi_admin_node_restore',
         );
@@ -152,8 +165,11 @@ class NodeController extends Controller
             }
         }
 
-        $nodeAssets = $node->getAssets()->getCollection();
-        $assets = $this->prepareAssets($nodeAssets);
+        $assets = array();
+        $nodeAssets = $node->getAssets();
+        if(!empty($nodeAssets)) {
+            $assets = $this->prepareAssets($nodeAssets->getCollection());
+        }
 
         return array(
             'form' => $form->createView(),
@@ -176,6 +192,10 @@ class NodeController extends Controller
     public function deleteAction($id)
     {
         $this->getRepository()->delete($id, 'ADMIN');
+        $this->get('doctrine.odm.mongodb.document_manager')
+            ->getRepository('BpiApiBundle:Entity\Facet')
+            ->delete($id)
+        ;
         return $this->redirect(
             $this->generateUrl("bpi_admin_node", array())
         );
@@ -184,6 +204,11 @@ class NodeController extends Controller
     public function restoreAction($id)
     {
         $this->getRepository()->restore($id, 'ADMIN');
+        $node = $this->getRepository()->findOneById($id);
+        $this->get('doctrine.odm.mongodb.document_manager')
+          ->getRepository('BpiApiBundle:Entity\Facet')
+          ->prepareFacet($node)
+        ;
         return $this->redirect(
             $this->generateUrl("bpi_admin_node", array())
         );

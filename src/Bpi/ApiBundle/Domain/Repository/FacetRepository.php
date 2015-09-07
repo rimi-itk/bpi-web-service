@@ -114,6 +114,7 @@ class FacetRepository extends DocumentRepository
         $this->filters = $filters;
         $this->logicalOperator = $logicalOperator;
 
+        // Ignore deleted nodes.
         $qb = $this->createQueryBuilder('Entity\Facet');
 
         $filteredNodes = $this->iterateTerms($qb);
@@ -320,6 +321,20 @@ class FacetRepository extends DocumentRepository
             ->multiple(true)
             ->field('facetData.channels')->pull($channelName)
             ->field('nodeId')->in($nids)
+            ->getQuery()
+            ->execute()
+        ;
+    }
+
+  /**
+   * Remove facet by nodeId.
+   *
+   * @param $nodeId
+   */
+    public function delete($nodeId) {
+        $this->createQueryBuilder('Facet')
+            ->remove()
+            ->field('nodeId')->equals($nodeId)
             ->getQuery()
             ->execute()
         ;
