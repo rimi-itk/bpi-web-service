@@ -43,7 +43,6 @@ class Version20150905142442 extends AbstractMigration implements ContainerAwareI
 
         foreach ($deleted as $node) {
             if(isset($node['_id'])) {
-//                $facet = $facetRepo->findOneById('55e2d0b6a4f2f1e86b8b4721');
                 $facet = $facetRepo->findOneByNodeId((string)$node['_id']);
                 if ($facet) {
                     $dm->remove($facet);
@@ -55,7 +54,5 @@ class Version20150905142442 extends AbstractMigration implements ContainerAwareI
 
     public function down(Database $db)
     {
-        // this down() migration is auto-generated, please modify it to your needs
-
     }
 }

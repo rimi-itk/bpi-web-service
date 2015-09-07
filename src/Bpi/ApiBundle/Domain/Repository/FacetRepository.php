@@ -117,7 +117,6 @@ class FacetRepository extends DocumentRepository
         // Ignore deleted nodes.
         $qb = $this->createQueryBuilder('Entity\Facet');
 
-
         $filteredNodes = $this->iterateTerms($qb);
         foreach ($filteredNodes as $key => $node) {
             $nid = $node->getNodeId();
