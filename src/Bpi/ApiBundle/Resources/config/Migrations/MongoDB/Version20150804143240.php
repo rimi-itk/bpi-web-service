@@ -46,7 +46,7 @@ class Version20150804143240 extends AbstractMigration implements ContainerAwareI
 
             $agency = $dm
                 ->getRepository('BpiApiBundle:Aggregate\Agency')
-                ->findOneBy(array('public_id' => $agencyId->id()))
+                ->findOneBy(array('public_id' => $agencyId->id(), 'deleted' => false))
             ;
 
             $categoryId = $node
