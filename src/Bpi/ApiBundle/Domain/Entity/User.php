@@ -46,6 +46,15 @@ class User implements IPresentable
      */
     protected $userAgency;
 
+    /**
+     * @var \Bpi\ApiBundle\Domain\ValueObject\Subscription
+     */
+    protected $subscriptions = array();
+
+    public function __construct()
+    {
+        $this->subscriptions = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     /**
      * Get id
@@ -205,5 +214,35 @@ class User implements IPresentable
     public function transform(XmlResponse $document)
     {
         $document->addUser($this);
+    }
+
+    /**
+     * Add subscription
+     *
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Subscription $subscription
+     */
+    public function addSubscription(\Bpi\ApiBundle\Domain\ValueObject\Subscription $subscription)
+    {
+        $this->subscriptions[] = $subscription;
+    }
+
+    /**
+     * Remove subscription
+     *
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Subscription $subscription
+     */
+    public function removeSubscription(\Bpi\ApiBundle\Domain\ValueObject\Subscription $subscription)
+    {
+        $this->subscriptions->removeElement($subscription);
+    }
+
+    /**
+     * Get subscriptions
+     *
+     * @return \Doctrine\Common\Collections\Collection $subscriptions
+     */
+    public function getSubscriptions()
+    {
+        return $this->subscriptions;
     }
 }
