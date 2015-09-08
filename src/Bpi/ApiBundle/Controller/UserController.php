@@ -5,6 +5,7 @@
  */
 namespace Bpi\ApiBundle\Controller;
 
+use Bpi\ApiBundle\Domain\ValueObject\Subscription;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Constraints;
 use Symfony\Component\HttpFoundation\Response;
@@ -156,6 +157,62 @@ class UserController extends BPIController
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.users'));
         $document = $transform->transformMany($users);
+        return $document;
+    }
+
+
+    /**
+     * Create subscription.
+     *
+     * @Rest\Post("/subscription")
+     * @Rest\View()
+     */
+    public function createSubscriptionAction()
+    {
+        $dm = $this->getDoctrineManager();
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $xmlError = $this->get('bpi.presentation.xmlerror');
+        $parameters = $this->getAllRequestParameters();
+        $this->stripParams($parameters);
+
+        // Check required parameters.
+        $requiredParams = array(
+            'title' => 0,
+            'filter' => 0,
+            'userId' => 0,
+        );
+        $this->checkParams($parameters, $requiredParams);
+
+        foreach ($requiredParams as $param => $count) {
+            if ($count == 0) {
+                $xmlError->setCode(400);
+                $xmlError->setError("Param '{$param}' is required.");
+                return $xmlError;
+            }
+        }
+
+        $user = $userRepository->find($parameters['userId']);
+        if (null === $user) {
+            $xmlError->setCode(404);
+            $xmlError->setError( "User with id = '{$parameters['userId']}' not fount.");
+            return $xmlError;
+        }
+
+        // Create new subscription.
+        $subscription = new Subscription();
+        $subscription->setTitle($parameters['title']);
+        $subscription->setFilter($parameters['filter']);
+        $subscription->setLastViewed(new \DateTime());
+
+        $user->addSubscription($subscription);
+
+        $dm->persist($user);
+        $dm->flush();
+
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.users'));
+        $document = $transform->transform($user);
+
         return $document;
     }
 }
