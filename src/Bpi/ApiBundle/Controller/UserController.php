@@ -194,8 +194,16 @@ class UserController extends BPIController
         $user = $userRepository->find($parameters['userId']);
         if (null === $user) {
             $xmlError->setCode(404);
-            $xmlError->setError( "User with id = '{$parameters['userId']}' not fount.");
+            $xmlError->setError("User with id = '{$parameters['userId']}' not fount.");
             return $xmlError;
+        }
+
+        foreach ($user->getSubscriptions() as $subscription) {
+            if ($subscription->getTitle() === $parameters['title']) {
+                $xmlError->setCode(400);
+                $xmlError->setError("User already have subscription with this name.");
+                return $xmlError;
+            }
         }
 
         // Create new subscription.
