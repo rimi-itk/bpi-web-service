@@ -39,6 +39,11 @@ class User
     protected $agencyId;
 
     /**
+     * @Serializer\Type("ArrayCollection<Bpi\ApiBundle\Domain\ValueObject\Subscription>")
+     */
+    protected $subscriptions;
+
+    /**
      * @param $data
      */
     public function __construct($data)
@@ -49,5 +54,6 @@ class User
         $this->userFirstName = $data->getUserFirstName();
         $this->userLastName = $data->getUserLastName();
         $this->agencyId = $data->getUserAgency()->getPublicId();
+        $this->subscriptions = $data->getSubscriptions();
     }
 }

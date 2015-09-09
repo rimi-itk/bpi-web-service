@@ -100,7 +100,6 @@ class XmlResponse {
      */
     public function generateRoute($name, $parameters = array(), $absolute = false)
     {
-        var_dump($parameters);die;
         return $this->router->generate($name, $parameters, $absolute);
     }
 }
