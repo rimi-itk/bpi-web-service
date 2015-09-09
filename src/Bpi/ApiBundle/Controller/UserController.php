@@ -53,10 +53,8 @@ class UserController extends BPIController
     public function createUserAction()
     {
         $xmlError = $this->get('bpi.presentation.xmlerror');
-        $statusCode = 201;
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
-        $agencyRepository = $this->getRepository('BpiApiBundle:Aggregate\Agency');
         $params = $this->getAllRequestParameters();
         // Strip all params.
         $this->stripParams($params);
@@ -156,6 +154,58 @@ class UserController extends BPIController
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.users'));
         $document = $transform->transformMany($users);
+        return $document;
+    }
+
+    /**
+     * Remove subscription for particular user.
+     *
+     * @Rest\Post("/subscription/remove")
+     * @Rest\View()
+     */
+    public function removeUserSubscriptionAction()
+    {
+        $dm = $this->getDoctrineManager();
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $xmlError = $this->get('bpi.presentation.xmlerror');
+        $parameters = $this->getAllRequestParameters();
+        // Strip all params.
+        $this->stripParams($parameters);
+
+        $requiredParams = array(
+            'userId' => 0,
+            'subscriptionTitle' => 0,
+        );
+        $this->checkParams($parameters, $requiredParams);
+
+        foreach ($requiredParams as $param => $count) {
+            if ($count == 0) {
+                $xmlError->setCode(400);
+                $xmlError->setError("Param '{$param}' is required.");
+                return $xmlError;
+            }
+        }
+
+        $user = $userRepository->find($parameters['userId']);
+        if (null === $user) {
+            $xmlError->setCode(404);
+            $xmlError->setError("User with id = '{$parameters['userId']}' not found.");
+            return $xmlError;
+        }
+
+        foreach ($user->getSubscriptions() as $subscription) {
+            if ($subscription->getTitle() === $parameters['subscriptionTitle']) {
+                $user->removeSubscription($subscription);
+            }
+        }
+
+        $dm->persist($user);
+        $dm->flush();
+
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.users'));
+        $document = $transform->transform($user);
+
         return $document;
     }
 }
