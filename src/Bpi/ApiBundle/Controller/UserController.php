@@ -45,6 +45,36 @@ class UserController extends BPIController
     }
 
     /**
+     * Returns user by it's id.
+     *
+     * @param string $userId the user id in database.
+     *
+     * @Rest\Get("/{userId}")
+     * @Rest\View()
+     *
+     * @return Presentation $document
+     */
+    public function getUserByIdAction($userId)
+    {
+        $xmlError = $this->get('bpi.presentation.xmlerror');
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+
+        $user = $userRepository->find($userId);
+
+        if (null === $user) {
+            $xmlError->setCode(404);
+            $xmlError->setError("User with id = '{$userId}' not found.");
+            return $xmlError;
+        }
+
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.users'));
+        $document = $transform->transform($user);
+
+        return $document;
+    }
+
+    /**
      * Create new user
      *
      * @Rest\Post("/")
