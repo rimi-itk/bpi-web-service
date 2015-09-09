@@ -31,3 +31,9 @@ Bpi\ApiBundle\Domain\Entity\User:
             reference: true
             type: one
             targetDocument: Bpi\ApiBundle\Domain\Aggregate\Agency
+
+        subscriptions:
+              embedded: true
+              type: many
+              strategy: pushAll
+              targetDocument: Bpi\ApiBundle\Domain\ValueObject\Subscription
