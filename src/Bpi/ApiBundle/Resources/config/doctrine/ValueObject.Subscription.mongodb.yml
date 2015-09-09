@@ -1,0 +1,9 @@
+Bpi\ApiBundle\Domain\ValueObject\Subscription:
+  type: embeddedDocument
+  fields:
+    title:
+      type: string
+    lastViewed:
+      type: date
+    filter:
+      type: string
