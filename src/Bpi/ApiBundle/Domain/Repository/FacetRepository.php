@@ -253,7 +253,7 @@ class FacetRepository extends DocumentRepository
             ->multiple(true)
         ;
 
-        if ($changes['nodeId']) {
+        if (isset($changes['nodeId'])) {
             $qb->field('nodeId')->equals($changes['nodeId']);
         }
 
@@ -267,6 +267,9 @@ class FacetRepository extends DocumentRepository
 
             if ('agency_id' === $changedValue && is_string($changed)) {
                 $qb->field('facetData.' . $changedValue)->equals($changed);
+            } else {
+                $qb->field('facetData.' . $changedValue)->set($changed['newValue']);
+                $qb->field('facetData.' . $changedValue)->equals($changed['oldValue']);
             }
         }
 
