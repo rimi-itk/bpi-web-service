@@ -40,22 +40,4 @@ class HistoryRepository extends DocumentRepository
 
     return new Statistics($res);
   }
-
-  /**
-     * Gets count of syndicated.
-     *
-     * @param int $nid
-     * @return int
-     */
-    public function getSyndicatedCount($nid)
-    {
-        $qb = $this->createQueryBuilder();
-        $qb->field('node.id')->equals($nid);
-        $qb->addAnd($qb->expr()->field('action')->equals('syndicate'));
-        $count = $qb->getQuery()
-            ->execute()
-            ->count();
-
-        return $count;
-    }
 }

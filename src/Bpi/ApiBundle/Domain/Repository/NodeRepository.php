@@ -99,7 +99,7 @@ class NodeRepository extends DocumentRepository
 
         $qb
             ->field('_id')
-            ->equals($nodeId)
+            ->equals(new \MongoId($nodeId))
             ->field('syndications')
             ->inc(1)
             ->getQuery()
