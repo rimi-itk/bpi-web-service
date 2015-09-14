@@ -66,6 +66,8 @@ class FacetRepository extends DocumentRepository
             ->getAudience()
         ;
 
+        $author = $node->getAuthor()->getFullName();
+
         $tags = array();
         $nodeTags = $node->getTags();
         foreach ($nodeTags as $key => $tag) {
@@ -74,6 +76,7 @@ class FacetRepository extends DocumentRepository
 
 
         $facets = array(
+            'author' => array($author),
             'agency_id' => array($agencyId->id()),
             'agency_internal' => array($agency->getInternal()),
             'category' => array($category),
@@ -241,12 +244,16 @@ class FacetRepository extends DocumentRepository
             ->multiple(true)
         ;
 
+        if ($changes['nodeId']) {
+            $qb->field('nodeId')->equals($changes['nodeId']);
+        }
+
         foreach ($changes as $changedValue => $changed) {
-            if (is_array($changed)) {
-                $qb
-                    ->field('facetData.' . $changedValue)->set($changed['newValue'])
-                    ->field('facetData.' . $changedValue)->equals($changed['oldValue'])
-                ;
+            if (is_array($changed) && isset($changed['newValue']) && isset($changed['oldValue'])) {
+                $qb->field('facetData.' . $changedValue)->set($changed['newValue']);
+                $qb->field('facetData.' . $changedValue)->equals($changed['oldValue']);
+            } elseif ('tags' === $changedValue) {
+                $qb->field('facetData.' . $changedValue)->set($changed);
             }
 
             if ('agency_id' === $changedValue && is_string($changed)) {

@@ -21,6 +21,7 @@ class Node implements IPresentable
     protected $id;
     protected $ctime;
     protected $mtime;
+    protected $syndications;
 
     protected $path;
     protected $parent;
@@ -36,7 +37,6 @@ class Node implements IPresentable
     protected $audience;
     protected $tags;
     protected $assets;
-
 
     protected $syndicated = 0;
 
@@ -217,6 +217,17 @@ class Node implements IPresentable
     public function defineAgencyContext(AgencyID $syndicator)
     {
         $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
+    }
+
+    public function setSyndications($syndications)
+    {
+        $this->syndications = $syndications;
+        return $this;
+    }
+
+    public function getSyndications()
+    {
+        return $this->syndications;
     }
 
     public function getAuthor()
