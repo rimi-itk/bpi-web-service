@@ -38,8 +38,6 @@ class Node implements IPresentable
     protected $tags;
     protected $assets;
 
-<<<<<<< HEAD
-=======
     /**
      * @param Assets $assets
      */
@@ -48,7 +46,6 @@ class Node implements IPresentable
         $this->assets = $assets;
     }
 
->>>>>>> BPI-98
     protected $deleted = false;
 
     /**
