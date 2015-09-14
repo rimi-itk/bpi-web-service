@@ -4,6 +4,7 @@ namespace Bpi\ApiBundle\Domain\ValueObject;
 use Bpi\ApiBundle\Domain\Repository\YearwheelRepository;
 use Bpi\ApiBundle\Transform\Comparator;
 use Bpi\ApiBundle\Transform\IPresentable;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 class Yearwheel implements IValueObject, IPresentable
 {
@@ -67,7 +68,7 @@ class Yearwheel implements IValueObject, IPresentable
      *
      * @param \Bpi\RestMediaTypeBundle\Document $document
      */
-    public function transform(\Bpi\RestMediaTypeBundle\Document $document)
+    public function transform(XmlResponse $document)
     {
         $document->currentEntity()->addProperty($document->createProperty($this->name, 'yearwheel', $this->name));
     }

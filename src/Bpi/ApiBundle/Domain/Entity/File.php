@@ -2,6 +2,7 @@
 
 namespace Bpi\ApiBundle\Domain\Entity;
 
+use Bpi\RestMediaTypeBundle\XmlResponse;
 use Gaufrette\Filesystem;
 use Gaufrette\Util;
 use Knp\Bundle\GaufretteBundle\FilesystemMap;
@@ -361,9 +362,17 @@ class File
     }
 
     /**
+     * @param Filesystem $filesystem
+     */
+    public function setFilesystem($filesystem)
+    {
+        $this->filesystem = $filesystem;
+    }
+
+    /**
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         try {
             $entity = $document->currentEntity();

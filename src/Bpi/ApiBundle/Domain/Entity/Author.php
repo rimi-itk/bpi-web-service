@@ -4,6 +4,7 @@ namespace Bpi\ApiBundle\Domain\Entity;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\RestMediaTypeBundle\Document;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 class Author implements \Bpi\ApiBundle\Transform\IPresentable
 {
@@ -79,7 +80,7 @@ class Author implements \Bpi\ApiBundle\Transform\IPresentable
     /**
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         try {
             $entity = $document->currentEntity();

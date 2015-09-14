@@ -40,9 +40,23 @@ services:
         arguments: ["%api_version%"]
         calls:
           - ['setRouter', [ "@router"] ]
+    bpi.presentation.users:
+        class: Bpi\RestMediaTypeBundle\Users
+        arguments: ["%api_version%"]
+    bpi.presentation.channels:
+            class: Bpi\RestMediaTypeBundle\Channels
+            arguments: ["%api_version%"]
+    bpi.presentation.xmlgroupoperation:
+            class: Bpi\RestMediaTypeBundle\XmlGroupOperation
+            arguments: ["%api_version%"]
+    bpi.presentation.xmlerror:
+        class: Bpi\RestMediaTypeBundle\XmlError
+        arguments: ["%api_version%"]
+    bpi.presentation.xmlresponse:
+        class: Bpi\RestMediaTypeBundle\XmlResponse
+        arguments: ["%api_version%"]
     bpi.presentation.transformer:
         class: Bpi\ApiBundle\Transform\Presentation
-        arguments:  ["@bpi.presentation.document"]
     # security
     bpi.pk.security.authentication.provider:
         class:  Bpi\ApiBundle\Security\Authentication\Provider\PKProvider

@@ -13,6 +13,7 @@ use Bpi\ApiBundle\Domain\Entity\Tag;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Bpi\RestMediaTypeBundle\XmlResponse;
 use Doctrine\Common\Collections\ArrayCollection;
 use Gaufrette\File;
 
@@ -21,7 +22,6 @@ class Node implements IPresentable
     protected $id;
     protected $ctime;
     protected $mtime;
-    protected $syndications;
 
     protected $path;
     protected $parent;
@@ -38,6 +38,17 @@ class Node implements IPresentable
     protected $tags;
     protected $assets;
 
+<<<<<<< HEAD
+=======
+    /**
+     * @param Assets $assets
+     */
+    public function setAssets($assets)
+    {
+        $this->assets = $assets;
+    }
+
+>>>>>>> BPI-98
     protected $deleted = false;
 
     /**
@@ -134,7 +145,7 @@ class Node implements IPresentable
     /**
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         $entity = $document->createEntity('entity');
 
@@ -182,7 +193,7 @@ class Node implements IPresentable
 
         $entity->addProperty(
             $document->createProperty(
-                'syndicates',
+                'syndications',
                 'string',
                 (null === $this->getSyndications()) ? 0 : $this->getSyndications()
             )
@@ -197,7 +208,9 @@ class Node implements IPresentable
 
         $this->profile->transform($document);
         $this->resource->transform($document);
-        $this->assets->transform($document);
+        if (!empty($this->assets)) {
+            $this->assets->transform($document);
+        }
     }
 
     /**
@@ -345,28 +358,6 @@ class Node implements IPresentable
     public function getAssets()
     {
         return $this->assets;
-    }
-
-    /**
-     * Set syndications
-     *
-     * @param int $syndications
-     * @return self
-     */
-    public function setSyndications($syndications)
-    {
-        $this->syndications = $syndications;
-        return $this;
-    }
-
-    /**
-     * Get syndications
-     *
-     * @return int $syndications
-     */
-    public function getSyndications()
-    {
-        return $this->syndications;
     }
 
     public function setCtime($ctime)

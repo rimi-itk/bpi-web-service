@@ -3,7 +3,7 @@
 namespace Bpi\ApiBundle\Domain\Aggregate;
 use Bpi\ApiBundle\Domain\ValueObject\ValueObjectList;
 use Bpi\RestMediaTypeBundle\Document;
-
+use Bpi\RestMediaTypeBundle\XmlResponse;
 
 
 /**
@@ -58,7 +58,7 @@ class Assets
     /**
      * {@inheritdoc}
      */
-    public function transform(Document $document)
+    public function transform(XmlResponse $document)
     {
         try {
             $entity= $document->currentEntity();
