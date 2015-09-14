@@ -12,15 +12,17 @@ class Agency implements IPresentable
     protected $public_id;
     protected $name;
     protected $moderator;
+    protected $internal;
     protected $public_key;
     protected $secret;
     protected $deleted = false;
 
-    public function __construct($public_id = null, $name = null, $moderator = null, $public_key = null, $secret = null)
+    public function __construct($public_id = null, $name = null, $moderator = null, $internal = true, $public_key = null, $secret = null)
     {
         $this->public_id = $public_id;
         $this->name = $name;
         $this->moderator = $moderator;
+        $this->internal = $internal;
         $this->setPublicKey($public_key);
         $this->setSecret($secret);
     }
@@ -30,9 +32,11 @@ class Agency implements IPresentable
      */
     public function transform(Document $document)
     {
+        $agencyInternal = (false === $this->internal) ? '0' : '1';
         $entity = $document->currentEntity();
         $entity->addProperty($document->createProperty('agency_id', 'string', $this->public_id));
         $entity->addProperty($document->createProperty('agency_name', 'string', $this->name));
+        $entity->addProperty($document->createProperty('agency_internal', 'boolean', $agencyInternal));
     }
 
     /**
@@ -124,6 +128,17 @@ class Agency implements IPresentable
     public function getSecret()
     {
         return $this->secret;
+    }
+
+    public function setInternal($internal)
+    {
+        $this->internal = $internal;
+        return $this;
+    }
+
+    public function getInternal()
+    {
+        return $this->internal;
     }
 
 }

@@ -1,3 +1,4 @@
+
 Bpi\ApiBundle\Domain\Aggregate\Agency:
   collection: Agency
   repositoryClass: Bpi\ApiBundle\Domain\Repository\AgencyRepository
@@ -13,6 +14,8 @@ Bpi\ApiBundle\Domain\Aggregate\Agency:
       type: string
     moderator:
       type: string
+    internal:
+      type: boolean
     secret:
       type: string
     public_key:

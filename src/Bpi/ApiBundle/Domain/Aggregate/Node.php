@@ -9,9 +9,11 @@ use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
+use Bpi\ApiBundle\Domain\Entity\Tag;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Doctrine\Common\Collections\ArrayCollection;
 use Gaufrette\File;
 
 class Node implements IPresentable
@@ -32,6 +34,11 @@ class Node implements IPresentable
 
     protected $category;
     protected $audience;
+    protected $tags;
+    protected $assets;
+
+
+    protected $syndicated = 0;
 
     protected $deleted = false;
 
@@ -41,14 +48,19 @@ class Node implements IPresentable
         Profile $profile,
         Category $category,
         Audience $audience,
-        Params $params
-    ) {
+        ArrayCollection $tags,
+        Params $params,
+        Assets $assets
+    )
+    {
         $this->author = $author;
         $this->resource = $resource;
         $this->profile = $profile;
         $this->params = $params;
         $this->category = $category;
         $this->audience = $audience;
+        $this->tags = $tags;
+        $this->assets = $assets;
 
         $this->markTimes();
     }
@@ -99,7 +111,7 @@ class Node implements IPresentable
      * @param Resource $resource
      * @return Node
      */
-    public function createRevision(Author $author, Resource $resource, Params $params)
+    public function createRevision(Author $author, Resource $resource, Params $params, Assets $assets)
     {
         $builder = new \Bpi\ApiBundle\Domain\Factory\NodeBuilder;
         $node = $builder
@@ -107,10 +119,10 @@ class Node implements IPresentable
             ->profile($this->profile)
             ->resource($resource)
             ->params($params)
+            ->assets($assets)
             ->category($this->category)
             ->audience($this->audience)
-            ->build()
-        ;
+            ->build();
 
         $node->parent = $this;
         return $node;
@@ -138,8 +150,10 @@ class Node implements IPresentable
         $entity->addProperty($document->createProperty(
             'editable',
             'boolean',
-            (int) $this->params
-                ->filter(function($e){ if ($e instanceof Editable) return true; })
+            (int)$this->params
+                ->filter(function ($e) {
+                    if ($e instanceof Editable) return true;
+                })
                 ->first()
                 ->isPositive()
         ));
@@ -148,7 +162,6 @@ class Node implements IPresentable
 
         $document->setCursorOnEntity($entity);
         $this->author->transform($document);
-
         $entity->addProperty(
             $document->createProperty(
                 'category',
@@ -164,8 +177,24 @@ class Node implements IPresentable
             )
         );
 
+         $entity->addProperty(
+            $document->createProperty(
+                'syndicated',
+                'string',
+                $this->getSyndicated()
+            )
+        );
+
+        $tags = $document->createTagsSection();
+        foreach ($this->tags as $tag) {
+            $serializedTag = new \Bpi\RestMediaTypeBundle\Element\Tag($tag->getTag());
+            $tags->addTag($serializedTag);
+        }
+        $entity->setTags($tags);
+
         $this->profile->transform($document);
         $this->resource->transform($document);
+        $this->assets->transform($document);
     }
 
     /**
@@ -185,27 +214,62 @@ class Node implements IPresentable
      * @param  AgencyID $syndicator
      * @return void
      */
-    public function defineAgencyContext(AgencyID $syndicator) {
+    public function defineAgencyContext(AgencyID $syndicator)
+    {
         $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
     }
 
-    public function getAuthor() {
-      return $this->author;
+    public function getAuthor()
+    {
+        return $this->author;
+    }
+
+    public function getAuthorFirstName()
+    {
+        return $this->author->getFirstname();
+    }
+
+    public function setAuthorFirstName($authorFirstName)
+    {
+        $this->author->setFirstname($authorFirstName);
+        return $this;
+    }
+
+    public function getAuthorLastName()
+    {
+        return $this->author->getLastname();
+    }
+
+    public function setAuthorLastName($authorLastName)
+    {
+        $this->author->setLastname($authorLastName);
+        return $this;
     }
 
     public function getAgencyId()
     {
-      return $this->author->getAgencyId();
+        return $this->author->getAgencyId();
+    }
+
+    public function getAuthorAgencyId()
+    {
+        return $this->author->getAgencyId()->id();
+    }
+
+    public function setAuthorAgencyId($authorAgencyId)
+    {
+        $this->author->setAgencyId($authorAgencyId);
+        return $this;
     }
 
     public function isDeleted()
     {
-      return $this->deleted;
+        return $this->deleted;
     }
 
     public function setDeleted($deleted = true)
     {
-      $this->deleted = $deleted;
+        $this->deleted = $deleted;
     }
 
     /// Setters and getters for forms
@@ -213,6 +277,7 @@ class Node implements IPresentable
     {
         return $this->resource->getTitle();
     }
+
     public function setTitle($title)
     {
         $this->resource->setTitle($title);
@@ -232,9 +297,21 @@ class Node implements IPresentable
     {
         return $this->resource->getTeaser();
     }
+
     public function setTeaser($teaser)
     {
         $this->resource->setTeaser($teaser);
+    }
+
+    public function getBody()
+    {
+        $nodeBodyObj = $this->resource->getBody();
+        return $nodeBodyObj->getFlattenContent();
+    }
+
+    public function setBody($body)
+    {
+        $this->resource->setBody($body);
     }
 
     public function setAudience(Audience $audience)
@@ -246,4 +323,59 @@ class Node implements IPresentable
         $this->category = $category;
     }
 
+    public function getTags()
+    {
+        return $this->tags;
+    }
+
+    public function getAssets()
+    {
+        return $this->assets;
+    }
+
+    public function setSyndicated($syndicated)
+    {
+        $this->syndicated = $syndicated;
+    }
+
+    public function getSyndicated()
+    {
+        return $this->syndicated;
+    }
+
+    public function setCtime($ctime)
+    {
+        $this->ctime = $ctime;
+    }
+
+    public function getCtime()
+    {
+        return $this->ctime;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMtime()
+    {
+        return $this->mtime;
+    }
+
+    /**
+     * @param mixed $mtime
+     */
+    public function setMtime($mtime)
+    {
+        $this->mtime = $mtime;
+    }
+
+    public function addTag($tag)
+    {
+        $this->tags->add($tag);
+    }
+
+    public function removeTag($tag)
+    {
+        $this->tags->removeElement($tag);
+    }
 }

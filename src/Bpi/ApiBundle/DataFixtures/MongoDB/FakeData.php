@@ -4,6 +4,7 @@ namespace Bpi\ApiBundle\DataFixtures\MongoDB;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
+use Bpi\ApiBundle\Domain\Aggregate\Assets;
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\Entity\Author;
@@ -40,9 +41,8 @@ class FakeData implements FixtureInterface
     }
 
     protected function createResourceBuilder() {
-        $fs = $this->createFilesystemMap()->get('assets');
         $router = new FakeRouter();
-        return new ResourceBuilder($fs, $router);
+        return new ResourceBuilder($router);
     }
 
     /**
@@ -56,9 +56,9 @@ class FakeData implements FixtureInterface
 
         $service = new PushService($manager, $this->createFilesystemMap());
 
-        $agency['Arhus'] = new Agency('200100', 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', md5('agency_200100_public'), sha1('agency_200100_secret'));
-        $agency['Kobenhavns'] = new Agency('200200', 'Københavns Biblioteker', 'Københavns Moderator Name', md5('agency_200200_public'), sha1('agency_200200_secret'));
-        $agency['Halsnas'] = new Agency('200300', 'Halsnæs Kommune - Bibliotekerne', 'Halsnæs Moderator Name', md5('agency_200300_public'), sha1('agency_200300_secret'));
+        $agency['Arhus'] = new Agency('200100', 'Aarhus Kommunes Biblioteker', 'Agency Moderator Name', true, md5('agency_200100_public'), sha1('agency_200100_secret'));
+        $agency['Kobenhavns'] = new Agency('200200', 'Københavns Biblioteker', 'Københavns Moderator Name', true, md5('agency_200200_public'), sha1('agency_200200_secret'));
+        $agency['Halsnas'] = new Agency('200300', 'Halsnæs Kommune - Bibliotekerne', 'Halsnæs Moderator Name', true, md5('agency_200300_public'), sha1('agency_200300_secret'));
 
         foreach($agency as $agency_item) {
             $manager->persist($agency_item);
@@ -89,8 +89,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Film',
             'Kids',
+            'tag1,tag2,tag3',
             $profile,
-            new Params(array(new Editable(1), new Authorship(1)))
+            new Params(array(new Editable(1), new Authorship(1))),
+            new Assets(array())
         );
 
         // 2 -------------------------------
@@ -115,8 +117,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Music',
             'Adult',
+            'tag3,tag4',
             $profile,
-            new Params(array(new Editable(1), new Authorship(1)))
+            new Params(array(new Editable(1), new Authorship(1))),
+            new Assets(array())
         );
 
         // 3 -------------------------------
@@ -141,8 +145,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Campaigns',
             'Adult',
+            'tag4,tag6',
             $profile,
-            new Params(array(new Editable(1), new Authorship(1)))
+            new Params(array(new Editable(1), new Authorship(1))),
+            new Assets(array())
         );
 
         // 4 -------------------------------
@@ -167,8 +173,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Literature',
             'Kids',
+            'tag5,tag7',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 5 -------------------------------
@@ -193,8 +201,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Literature',
             'Kids',
+            'tag8',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 6 -------------------------------
@@ -219,8 +229,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Other',
             'Adult',
+            'tag8,tag9',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 7 -------------------------------
@@ -245,8 +257,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Other',
             'Young',
+            'tag1,tag7',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 8 -------------------------------
@@ -271,8 +285,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Facts',
             'Elders',
+            'tag4,tag9',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 9 -------------------------------
@@ -297,8 +313,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Games',
             'Adult',
+            'tag2,tag6',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 10 -------------------------------
@@ -323,8 +341,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Games',
             'Young',
+            'tag9,tag5',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 11 -------------------------------
@@ -349,8 +369,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Book',
             'Elders',
+            'tag10,tag8',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 12 -------------------------------
@@ -375,8 +397,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Campaigns',
             'Adult',
+            'tag5,tag8',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // 13 -------------------------------
@@ -401,8 +425,10 @@ class FakeData implements FixtureInterface
             $resource,
             'Themes',
             'Adult',
+            'tag',
             $profile,
-            new Params(array(new Editable(1), new Authorship(0)))
+            new Params(array(new Editable(1), new Authorship(0))),
+            new Assets(array())
         );
 
         // Add some fake history.
