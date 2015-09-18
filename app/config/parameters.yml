@@ -1,4 +1,5 @@
 parameters:
+    unit_test_domain: bpiservice.dev
     secret: 5$Z[$}Wm}g@Qc@;w@>l3HqWj1
     locale: en
     mongodb_db: bpi

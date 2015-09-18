@@ -13,14 +13,12 @@ use BpiTestArgs;
 
 class Node extends BpiTest
 {
-    protected $domain;
     protected $guzzle;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->domain = 'http://' . bpitest_domain;
         BpiFile::$base_url = $this->domain;
 
         $this->console = new \Symfony\Bundle\FrameworkBundle\Console\Application(static::$kernel);
@@ -51,7 +49,7 @@ class Node extends BpiTest
             ->execute();
         $this->em->flush();
 
-         $agencies = $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Entity\History')
+         $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Entity\History')
             ->remove()
             ->field('agency')
             ->in(array(LoadAgencies::AGENCY_ALPHA, LoadAgencies::AGENCY_BRAVO))

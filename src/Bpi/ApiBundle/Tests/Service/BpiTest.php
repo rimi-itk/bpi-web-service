@@ -12,12 +12,18 @@ abstract class BpiTest extends WebTestCase
     protected $loadFixtures;
 
     protected $em;
+    protected $container;
+    protected $domain;
 
     public function setUp()
     {
         static::$kernel = static::createKernel();
         static::$kernel->boot();
-        $this->em = static::$kernel->getContainer()->get('doctrine_mongodb')->getManager();
+        $this->container = static::$kernel->getContainer();
+        $this->em = $this->container->get('doctrine_mongodb')->getManager();
+        $bpitestDomain = $this->container->getParameter('unit_test_domain');
+
+        $this->domain = 'http://' . $bpitestDomain;
 
         $this->console = new \Symfony\Bundle\FrameworkBundle\Console\Application(static::$kernel);
         $this->console->setAutoExit(false);
