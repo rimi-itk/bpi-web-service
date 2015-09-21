@@ -196,3 +196,10 @@ knp_gaufrette:
     filesystems:
         assets:
             adapter: attachment
+swiftmailer:
+    transport: %mailer_transport%
+    encryption: %mailer_encription%
+    auth_mode: %mailer_auth_mode%
+    host: %mailer_host%
+    username: %mailer_user%
+    password: %mailer_password%
