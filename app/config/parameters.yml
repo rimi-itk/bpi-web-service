@@ -5,9 +5,7 @@ parameters:
     mongodb_db: bpi
     swiftmailer:
 
-    mailer_transport: smtp
-    mailer_encription: ssl
-    mailer_auth_mode: login
-    mailer_host: smtp.gmail.com
-    mailer_user: makcumm@gmail.com
-    mailer_password: compaq_nc6120
+    mailer_transport: gmail
+    mailer_host: ~
+    mailer_user: some@email.com
+    mailer_password: email_password
