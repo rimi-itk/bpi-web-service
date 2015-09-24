@@ -44,7 +44,6 @@
         "knplabs/knp-paginator-bundle": "2.3.2",
         "antimattr/mongodb-migrations": "~1.0@stable",
         "antimattr/mongodb-migrations-bundle": "~1.0@stable",
-        "swiftmailer/swiftmailer": "4.1.3",
         "symfony/swiftmailer-bridge": "2.0.10",
         "symfony/swiftmailer-bundle": "2.0.10"
     },

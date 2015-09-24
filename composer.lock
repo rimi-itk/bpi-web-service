@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "af08ac38d97650fbfeacd68104598b60",
-    "content-hash": "47c7fb14a976fa1e1fda9128ca2d5e70",
+    "hash": "c844c8ff0450e2c77714871ef09179a0",
+    "content-hash": "1ff48655d5ed5ee6b6428f9322f8ec16",
     "packages": [
         {
             "name": "antimattr/mongodb-migrations",
@@ -2661,22 +2661,32 @@
         },
         {
             "name": "swiftmailer/swiftmailer",
-            "version": "4.1.3",
+            "version": "v4.1.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swiftmailer/swiftmailer.git",
-                "reference": "daaff2b8515390fbb10882647311f476b89a67e6"
+                "reference": "28ac862c8d5ccbe5c7ee8cecc07e1ca9d5195b56"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swiftmailer/swiftmailer/zipball/daaff2b8515390fbb10882647311f476b89a67e6",
-                "reference": "daaff2b8515390fbb10882647311f476b89a67e6",
+                "url": "https://api.github.com/repos/swiftmailer/swiftmailer/zipball/28ac862c8d5ccbe5c7ee8cecc07e1ca9d5195b56",
+                "reference": "28ac862c8d5ccbe5c7ee8cecc07e1ca9d5195b56",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.2.4"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.1-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "lib/swift_required.php"
+                ]
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "LGPL"
@@ -2698,7 +2708,7 @@
                 "mail",
                 "mailer"
             ],
-            "time": "2011-10-27 07:11:22"
+            "time": "2012-06-17 20:55:34"
         },
         {
             "name": "symfony/assetic-bundle",
