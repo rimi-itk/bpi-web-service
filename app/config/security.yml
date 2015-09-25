@@ -57,4 +57,5 @@ security:
             stateless: true
 
     access_control:
+        - { path: ^/admin/notification, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/admin, roles: ROLE_ADMIN }
