@@ -1,0 +1,13 @@
+{% if notification.channel %}
+    You have changes in channels:
+    {% for channelKey, channel in notification.channel %}
+        {{ channelKey }} ({{ channel|length }})
+    {% endfor %}
+{% endif %}
+
+{% if notification.subscriptions %}
+    You have changes in subscriptions:
+    {% for subscriptionKey, subscription in notification.subscriptions %}
+        {{ subscriptionKey }} ({{ subscription|length }})
+    {% endfor %}
+{% endif %}

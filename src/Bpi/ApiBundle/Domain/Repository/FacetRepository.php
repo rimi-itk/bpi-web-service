@@ -198,11 +198,19 @@ class FacetRepository extends DocumentRepository
                 foreach ($values as $value) {
                     switch ($filter_name) {
                         case 'category' :
-                            $terms[] = $value->getCategory();
+                            if (is_string($value)) {
+                                $terms[] = $value;
+                            } else {
+                                $terms[] = $value->getCategory();
+                            }
                             break;
 
-                        case 'audience' :
-                            $terms[] = $value->getAudience();
+                        case 'audience':
+                            if (is_string($value)) {
+                                $terms[] = $value;
+                            } else {
+                                $terms[] = $value->getAudience();
+                            }
                             break;
 
                         case 'agency_internal':

@@ -89,3 +89,7 @@ bpi_admin_audience_new:
 bpi_admin_audience_edit:
     pattern: /audience/edit/{id}
     defaults: { _controller: BpiAdminBundle:Audience:edit }
+
+bpi_admin_run_notifications:
+    pattern: /notification/run
+    defaults: { _controller: BpiAdminBundle:Notifications:runNotifications }
