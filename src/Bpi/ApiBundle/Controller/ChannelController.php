@@ -253,7 +253,6 @@ class ChannelController extends BPIController
         $requiredParams = array(
             'channelId' => 0,
             'adminId' => 0,
-            'editorId' => 0,
         );
         $this->checkParams($params, $requiredParams);
 
@@ -327,7 +326,6 @@ class ChannelController extends BPIController
         $this->stripParams($params);
 
         $requiredParams = array(
-            'nodeId' => 0,
             'editorId' => 0,
             'channelId' => 0,
         );
@@ -428,7 +426,6 @@ class ChannelController extends BPIController
         $this->stripParams($params);
 
         $requiredParams = array(
-            'nodeId' => 0,
             'editorId' => 0,
             'channelId' => 0,
         );
