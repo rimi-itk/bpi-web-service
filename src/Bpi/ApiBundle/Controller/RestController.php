@@ -106,8 +106,14 @@ class RestController extends FOSRestController
         $template->createField('local_id');
         $template->createField('firstname');
         $template->createField('lastname');
-        $template->createField('images');
         $template->createField('related_materials');
+        $template->createField('assets[0][path]');
+        $template->createField('assets[0][title]');
+        $template->createField('assets[0][type]');
+        $template->createField('assets[0][name]');
+        $template->createField('assets[0][extension]');
+        $template->createField('assets[0][width]');
+        $template->createField('assets[0][height]');
 
         // Profile resource
         $profile = $document->createRootEntity('resource', 'profile');
