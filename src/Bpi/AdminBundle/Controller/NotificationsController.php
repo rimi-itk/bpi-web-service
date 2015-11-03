@@ -36,13 +36,13 @@ class NotificationsController extends Controller
     public function runNotificationsAction()
     {
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
-
         $allUsers = $userRepository->findAll();
         $userNotifications = array();
         foreach ($allUsers as $user) {
             $userId = $user->getId();
-            if (!empty($userRepository->getUserNotifications($user))) {
-                $notification[$userId] = $userRepository->getUserNotifications($user);
+            $userNotification = $userRepository->getUserNotifications($user);
+            if (!empty($userNotification)) {
+                $notification[$userId] = $userNotification;
             }
             if (!isset($notification[$userId])) {
                 continue;
