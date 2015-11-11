@@ -35,7 +35,7 @@
         "jms/serializer-bundle": "0.11.0",
         "nelmio/api-doc-bundle": "2.2.*@dev",
         "friendsofsymfony/rest-bundle": "0.11.0",
-        "doctrine/mongodb": "1.1.6",
+        "doctrine/mongodb": "^1.2",
         "doctrine/mongodb-odm-bundle": "3.0.*",
         "doctrine/doctrine-fixtures-bundle": "dev-master",
         "stof/doctrine-extensions-bundle": "dev-master",
