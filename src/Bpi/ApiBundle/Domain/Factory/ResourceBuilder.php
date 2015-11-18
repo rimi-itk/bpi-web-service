@@ -10,6 +10,7 @@ use Symfony\Component\Routing\RouterInterface;
 class ResourceBuilder
 {
     protected $title, $body, $teaser, $ctime, $copyleft;
+    protected $type;
     protected $files = array();
     protected $filesystem;
     protected $router;
@@ -21,6 +22,17 @@ class ResourceBuilder
     public function __construct(RouterInterface $router)
     {
         $this->router = $router;
+    }
+
+    /**
+     *
+     * @param string $type
+     * @return \Bpi\ApiBundle\Domain\Factory\ResourceBuilder
+     */
+    public function type($type)
+    {
+        $this->type = $type;
+        return $this;
     }
 
     /**
@@ -141,6 +153,7 @@ class ResourceBuilder
         }
 
         return new Resource(
+            $this->type,
             $this->title,
             $this->body,
             $this->teaser,
