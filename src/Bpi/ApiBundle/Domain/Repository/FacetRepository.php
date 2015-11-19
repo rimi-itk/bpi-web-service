@@ -76,6 +76,7 @@ class FacetRepository extends DocumentRepository
 
 
         $facets = array(
+            'type' => array($node->getType()),
             'author' => array($author),
             'agency_id' => array($agencyId->id()),
             'agency_internal' => array($agency->getInternal()),

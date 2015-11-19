@@ -232,6 +232,10 @@ class Node implements IPresentable
         $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
     }
 
+    public function getType() {
+        return $this->resource->getType();
+    }
+
     public function setSyndications($syndications)
     {
         $this->syndications = $syndications;
