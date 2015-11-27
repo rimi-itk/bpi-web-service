@@ -53,7 +53,7 @@ class Node implements IPresentable
         Category $category,
         Audience $audience,
         ArrayCollection $tags,
-        Params $params,
+        Params $params
     )
     {
         $this->author = $author;
@@ -220,12 +220,6 @@ class Node implements IPresentable
         $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
     }
 
-    public function setSyndications($syndications)
-    {
-        $this->syndications = $syndications;
-        return $this;
-    }
-
     public function getSyndications()
     {
         return $this->syndications;
@@ -351,16 +345,6 @@ class Node implements IPresentable
     {
         $this->syndications = $syndications;
         return $this;
-    }
-
-    /**
-     * Get syndications
-     *
-     * @return int $syndications
-     */
-    public function getSyndications()
-    {
-        return $this->syndications;
     }
 
     public function setCtime($ctime)
