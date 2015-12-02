@@ -2,7 +2,6 @@
 
 namespace Bpi\AdminBundle\Controller;
 
-use Bpi\ApiBundle\Domain\Form\TagType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
@@ -115,11 +114,6 @@ class NodeController extends Controller
             $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
             $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
 
-            $submittedTags = array();
-            foreach ($submittedNode['tags'] as $tag) {
-                $submittedTags[] = $tag['tag'];
-            }
-
             $checks = array(
                 'author' => array(
                     'check' => $changeAuthor,
@@ -148,7 +142,6 @@ class NodeController extends Controller
                 }
             }
             $changes['nodeId'] = $node->getId();
-            $changes['tags'] = $submittedTags;
 
             $form->bind($request);
             if ($form->isValid()) {
@@ -281,18 +274,6 @@ class NodeController extends Controller
                 array(
                     'class' => 'BpiApiBundle:Entity\Audience',
                     'property' => 'audience'
-                )
-            )
-            ->add(
-                'tags',
-                'collection',
-                array(
-                    'type' => new TagType(),
-                    'allow_add' => true,
-                    'allow_delete' => true,
-                    'options' => array(
-                        'required' => false
-                    )
                 )
             )
         ;

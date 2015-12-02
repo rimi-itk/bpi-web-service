@@ -8,7 +8,6 @@ use Bpi\ApiBundle\Domain\Entity\Resource;
 use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\Category;
 use Bpi\ApiBundle\Domain\Entity\Audience;
-use Bpi\ApiBundle\Domain\Entity\Tag;
 use Doctrine\Common\Collections\ArrayCollection;
 use Bpi\ApiBundle\Domain\Entity\File;
 
@@ -88,15 +87,6 @@ class NodeBuilder
     public function audience(Audience $audience)
     {
         $this->audience = $audience;
-        return $this;
-    }
-
-    /**
-     * @param Tag $tag
-     * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
-     */
-    public function tag(Tag $tag) {
-        $this->tags->add($tag);
         return $this;
     }
 

@@ -2,7 +2,6 @@
 namespace Bpi\ApiBundle\Domain\Service;
 
 
-use Bpi\ApiBundle\Domain\Entity\Tag;
 use Doctrine\Common\Persistence\ObjectManager;
 
 use Knp\Bundle\GaufretteBundle\FilesystemMap;

@@ -9,7 +9,6 @@ use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
-use Bpi\ApiBundle\Domain\Entity\Tag;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
@@ -188,13 +187,6 @@ class Node implements IPresentable
             )
         );
 
-        $tags = $document->createTagsSection();
-        foreach ($this->tags as $tag) {
-            $serializedTag = new \Bpi\RestMediaTypeBundle\Element\Tag($tag->getTag());
-            $tags->addTag($serializedTag);
-        }
-        $entity->setTags($tags);
-
         $this->profile->transform($document);
         $this->resource->transform($document);
     }
@@ -331,11 +323,6 @@ class Node implements IPresentable
         $this->category = $category;
     }
 
-    public function getTags()
-    {
-        return $this->tags;
-    }
-
     /**
      * Set syndications
      *
@@ -372,15 +359,5 @@ class Node implements IPresentable
     public function setMtime($mtime)
     {
         $this->mtime = $mtime;
-    }
-
-    public function addTag($tag)
-    {
-        $this->tags->add($tag);
-    }
-
-    public function removeTag($tag)
-    {
-        $this->tags->removeElement($tag);
     }
 }
