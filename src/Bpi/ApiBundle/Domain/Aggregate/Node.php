@@ -25,7 +25,7 @@ class Node implements IPresentable
 
     protected $path;
     protected $parent;
-    protected $level = 0;
+    protected $level;
     protected $lock_time;
 
     protected $author;

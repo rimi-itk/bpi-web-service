@@ -10,7 +10,6 @@ class NodeItemTest extends SDKTestCase
         'editable',
         'category',
         'audience',
-        'tags',
         'title',
         'body',
         'teaser',
@@ -50,7 +49,6 @@ class NodeItemTest extends SDKTestCase
         $this->assertEquals('Winter', $properties['yearwheel']);
         $this->assertEquals('All', $properties['audience']);
         $this->assertEquals('Event', $properties['category']);
-        $this->assertEquals('foo, bar, zoo', $properties['tags']);
         $this->assertEquals('article', $properties['type']);
         $this->assertEquals(
             '<p>alpha_body unicode(❶)</p><p>Originally published by George Bush, Aarhus Kommunes Biblioteker.</p>',

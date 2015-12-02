@@ -76,7 +76,6 @@ class Node extends BpiTest
             'type' => 'news',
             'category' => 'Other',
             'audience' => 'All',
-            'tags' => '',
             'assets[0][path]' => 'http://av.easyddb.dev.inlead.dk/sites/default/files/dams_images_display_format.png',
             'assets[0][title]' => 'Assets title 1',
             'assets[0][alt]' => 'Assets alt 1',

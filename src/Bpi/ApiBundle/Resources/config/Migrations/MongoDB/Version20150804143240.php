@@ -71,13 +71,7 @@ class Version20150804143240 extends AbstractMigration implements ContainerAwareI
 
             $author = $node->getAuthor()->getFullName();
 
-            $tags = array();
-            $nodeTags = $node->getTags();
-            foreach ($nodeTags as $key => $tag) {
-                $tags[] = $tag->getTag();
-            }
-
-            if (null === $agency || null === $category || null === $audience || null === $tags) {
+            if (null === $agency || null === $category || null === $audience) {
                 continue;
             }
 
@@ -87,7 +81,6 @@ class Version20150804143240 extends AbstractMigration implements ContainerAwareI
                 'agency_internal' => array($agency->getInternal()),
                 'category' => array($category),
                 'audience' => array($audience),
-                'tags' => array($tags),
             );
 
             $setFacets = new \stdClass();

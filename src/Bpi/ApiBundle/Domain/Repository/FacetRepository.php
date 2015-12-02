@@ -68,20 +68,12 @@ class FacetRepository extends DocumentRepository
 
         $author = $node->getAuthor()->getFullName();
 
-        $tags = array();
-        $nodeTags = $node->getTags();
-        foreach ($nodeTags as $key => $tag) {
-            $tags[] = $tag->getTag();
-        }
-
-
         $facets = array(
             'author' => array($author),
             'agency_id' => array($agencyId->id()),
             'agency_internal' => array($agency->getInternal()),
             'category' => array($category),
             'audience' => array($audience),
-            'tags' => array($tags),
         );
 
         $setFacets = new \stdClass();
@@ -128,15 +120,7 @@ class FacetRepository extends DocumentRepository
         $qb->map('
                 function() {
                     for (var i in this.facetData) {
-                        if (i == "tags") {
-                            for (var j in this.facetData[i]) {
-                                var key = {
-                                    facetName: "tags",
-                                    facetValue: this.facetData[i][j]
-                                }
-                                emit(key, 1);
-                            }
-                        } else if (i == "channels") {
+                        if (i == "channels") {
                             for (var j in this.facetData[i]) {
                                 var key = {
                                     facetName: "channels",
@@ -261,8 +245,6 @@ class FacetRepository extends DocumentRepository
             if (is_array($changed) && isset($changed['newValue']) && isset($changed['oldValue'])) {
                 $qb->field('facetData.' . $changedValue)->set($changed['newValue']);
                 $qb->field('facetData.' . $changedValue)->equals($changed['oldValue']);
-            } elseif ('tags' === $changedValue) {
-                $qb->field('facetData.' . $changedValue)->set($changed);
             }
 
             if ('agency_id' === $changedValue && is_string($changed)) {

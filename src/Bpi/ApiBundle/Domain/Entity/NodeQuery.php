@@ -49,12 +49,12 @@ class NodeQuery
         return $this->field_map[$field_name];
     }
 
-    public function filter($field, $value)
+    public function filter($value)
     {
         if (!$value)
             return;
 
-        $this->filters[$this->map($field)] = $value;
+        $this->filters = $value;
     }
 
     public function offset($value)
