@@ -28,6 +28,7 @@ class Copyleft implements IValueObject
 
     public function __toString()
     {
-        return 'Originally published by ' . implode(', ', $this->copyrighters) . '.';
+        //TODO: Temporary hardcoded translation.
+        return 'Oprindeligt skrevet af ' . implode(', ', $this->copyrighters) . '.';
     }
 }
