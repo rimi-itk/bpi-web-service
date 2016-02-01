@@ -12,6 +12,8 @@ use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\ApiBundle\Transform\IPresentable;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Transform\Comparator;
+use Bpi\RestMediaTypeBundle\XmlResponse;
+use Doctrine\Common\Collections\ArrayCollection;
 use Gaufrette\File;
 
 class Node implements IPresentable
@@ -22,7 +24,7 @@ class Node implements IPresentable
 
     protected $path;
     protected $parent;
-    protected $level = 0;
+    protected $level;
     protected $lock_time;
 
     protected $author;
@@ -32,8 +34,16 @@ class Node implements IPresentable
 
     protected $category;
     protected $audience;
+    protected $tags;
+
+    protected $syndicated = 0;
 
     protected $deleted = false;
+
+    /**
+     * @var int $syndications
+     */
+    protected $syndications;
 
     public function __construct(
         Author $author,
@@ -41,14 +51,17 @@ class Node implements IPresentable
         Profile $profile,
         Category $category,
         Audience $audience,
+        ArrayCollection $tags,
         Params $params
-    ) {
+    )
+    {
         $this->author = $author;
         $this->resource = $resource;
         $this->profile = $profile;
         $this->params = $params;
         $this->category = $category;
         $this->audience = $audience;
+        $this->tags = $tags;
 
         $this->markTimes();
     }
@@ -138,8 +151,10 @@ class Node implements IPresentable
         $entity->addProperty($document->createProperty(
             'editable',
             'boolean',
-            (int) $this->params
-                ->filter(function($e){ if ($e instanceof Editable) return true; })
+            (int)$this->params
+                ->filter(function ($e) {
+                    if ($e instanceof Editable) return true;
+                })
                 ->first()
                 ->isPositive()
         ));
@@ -164,6 +179,14 @@ class Node implements IPresentable
             )
         );
 
+        $entity->addProperty(
+            $document->createProperty(
+                'syndications',
+                'string',
+                (null === $this->getSyndications()) ? 0 : $this->getSyndications()
+            )
+        );
+
         $this->profile->transform($document);
         $this->resource->transform($document);
     }
@@ -185,27 +208,67 @@ class Node implements IPresentable
      * @param  AgencyID $syndicator
      * @return void
      */
-    public function defineAgencyContext(AgencyID $syndicator) {
+    public function defineAgencyContext(AgencyID $syndicator)
+    {
         $this->resource->defineAgencyContext($this->author->getAgencyId(), $syndicator);
     }
 
-    public function getAuthor() {
-      return $this->author;
+    public function getSyndications()
+    {
+        return $this->syndications;
+    }
+
+    public function getAuthor()
+    {
+        return $this->author;
+    }
+
+    public function getAuthorFirstName()
+    {
+        return $this->author->getFirstname();
+    }
+
+    public function setAuthorFirstName($authorFirstName)
+    {
+        $this->author->setFirstname($authorFirstName);
+        return $this;
+    }
+
+    public function getAuthorLastName()
+    {
+        return $this->author->getLastname();
+    }
+
+    public function setAuthorLastName($authorLastName)
+    {
+        $this->author->setLastname($authorLastName);
+        return $this;
     }
 
     public function getAgencyId()
     {
-      return $this->author->getAgencyId();
+        return $this->author->getAgencyId();
+    }
+
+    public function getAuthorAgencyId()
+    {
+        return $this->author->getAgencyId()->id();
+    }
+
+    public function setAuthorAgencyId($authorAgencyId)
+    {
+        $this->author->setAgencyId($authorAgencyId);
+        return $this;
     }
 
     public function isDeleted()
     {
-      return $this->deleted;
+        return $this->deleted;
     }
 
     public function setDeleted($deleted = true)
     {
-      $this->deleted = $deleted;
+        $this->deleted = $deleted;
     }
 
     /// Setters and getters for forms
@@ -213,6 +276,7 @@ class Node implements IPresentable
     {
         return $this->resource->getTitle();
     }
+
     public function setTitle($title)
     {
         $this->resource->setTitle($title);
@@ -232,18 +296,68 @@ class Node implements IPresentable
     {
         return $this->resource->getTeaser();
     }
+
     public function setTeaser($teaser)
     {
         $this->resource->setTeaser($teaser);
+    }
+
+    public function getBody()
+    {
+        $nodeBodyObj = $this->resource->getBody();
+        return $nodeBodyObj->getFlattenContent();
+    }
+
+    public function setBody($body)
+    {
+        $this->resource->setBody($body);
     }
 
     public function setAudience(Audience $audience)
     {
         $this->audience = $audience;
     }
+
     public function setCategory(Category $category)
     {
         $this->category = $category;
     }
 
+    /**
+     * Set syndications
+     *
+     * @param int $syndications
+     * @return self
+     */
+    public function setSyndications($syndications)
+    {
+        $this->syndications = $syndications;
+        return $this;
+    }
+
+    public function setCtime($ctime)
+    {
+        $this->ctime = $ctime;
+    }
+
+    public function getCtime()
+    {
+        return $this->ctime;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMtime()
+    {
+        return $this->mtime;
+    }
+
+    /**
+     * @param mixed $mtime
+     */
+    public function setMtime($mtime)
+    {
+        $this->mtime = $mtime;
+    }
 }

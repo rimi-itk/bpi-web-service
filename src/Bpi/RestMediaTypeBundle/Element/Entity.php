@@ -58,6 +58,11 @@ class Entity implements HasLinks
     protected $hypermedia;
 
     /**
+     * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Tags")
+     */
+    protected $tags;
+
+    /**
      *
      * @param string $type
      */
@@ -258,6 +263,16 @@ class Entity implements HasLinks
     public function setHypermedia(Hypermedia $controls)
     {
         $this->hypermedia = $controls;
+        return $this;
+    }
+
+    /**
+     * @param \Bpi\RestMediaTypeBundle\Element\Tags $tags
+     * @return \Bpi\RestMediaTypeBundle\Element\Entity
+     */
+    public function setTags(Tags $tags)
+    {
+        $this->tags = $tags;
         return $this;
     }
 }

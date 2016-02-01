@@ -18,6 +18,9 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
     mtime:
       type: date
 
+    syndications:
+      type: int
+
     path:
       type: string
       gedmo:

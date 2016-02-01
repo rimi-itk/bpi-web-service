@@ -18,6 +18,7 @@ use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
 use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 use Bpi\ApiBundle\Domain\Entity\History;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Domain service for content syndication
@@ -114,6 +115,7 @@ class PushService
         $this->manager->persist($log);
 
         $this->manager->flush();
+        $this->manager->getRepository('BpiApiBundle:Entity\Facet')->prepareFacet($node);
 
         return $node;
     }
@@ -157,6 +159,8 @@ class PushService
 
         $this->manager->persist($revision);
         $this->manager->flush();
+
+        $this->manager->getRepository('BpiApiBundle:Entity\Facet')->prepareFacet($revision);
 
         return $revision;
     }

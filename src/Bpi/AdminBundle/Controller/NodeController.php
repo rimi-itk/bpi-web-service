@@ -21,8 +21,25 @@ class NodeController extends Controller
      */
     public function indexAction()
     {
-        $nodes = $this->getRepository()->listAll();
-        return array('nodes' => $nodes);
+
+        $param = $this->getRequest()->query->get('sort');
+        $direction = $this->getRequest()->query->get('direction');
+        $search = $this->getRequest()->query->get('search');
+        $query = $this->getRepository()->listAll($param, $direction, $search);
+
+        $knpPaginator = $this->get('knp_paginator');
+
+        $pagination = $knpPaginator->paginate(
+            $query,
+            $this->get('request')->query->get('page', 1),
+            50,
+            array(
+                'defaultSortFieldName' => 'resource.title',
+                'defaultSortDirection' => 'desc',
+            )
+        );
+
+        return array('pagination' => $pagination);
     }
 
     /**
@@ -32,9 +49,22 @@ class NodeController extends Controller
      */
     public function deletedAction()
     {
-        $nodes = $this->getRepository()->listAll(true);
+
+        $query = $this->getRepository()->listAll(null, null, null, true);
+        $knpPaginator = $this->get('knp_paginator');
+
+        $pagination = $knpPaginator->paginate(
+          $query,
+          $this->get('request')->query->get('page', 1),
+          50,
+          array(
+            'defaultSortFieldName' => 'resource.title',
+            'defaultSortDirection' => 'desc',
+          )
+        );
+
         return array(
-            'nodes' => $nodes,
+            'pagination' => $pagination,
             'delete_lable' => 'Undelete',
             'delete_url' => 'bpi_admin_node_restore',
         );
@@ -74,10 +104,53 @@ class NodeController extends Controller
         $node = $this->getRepository()->find($id);
         $form = $this->createNodeForm($node);
         $request = $this->getRequest();
+        $dm = $this->get('doctrine_mongodb.odm.document_manager');
 
         if ($request->isMethod('POST')) {
+            $submittedNode = $request->get('form');
+            $changeAuthorFirstName = $node->getAuthorFirstName() != $submittedNode['authorFirstName'];
+            $changeAuthorLastName = $node->getAuthorLastName() != $submittedNode['authorLastName'];
+            $changeAuthor = $changeAuthorFirstName || $changeAuthorLastName;
+            $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
+            $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
+
+            $checks = array(
+                'author' => array(
+                    'check' => $changeAuthor,
+                    'oldValue' => $node->getAuthor()->getFullName(),
+                    'newValue' => ($submittedNode['authorFirstName'] ? $submittedNode['authorFirstName'] . ' ' : '') . $submittedNode['authorLastName']
+                ),
+                'category' => array(
+                    'check' => $changeCategory,
+                    'oldValue' => $node->getCategory()->getCategory(),
+                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Category')->find($submittedNode['category'])->getCategory()
+                ),
+                'audience' => array(
+                    'check' => $changeAudience,
+                    'oldValue' => $node->getAudience()->getAudience(),
+                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Audience')->find($submittedNode['audience'])->getAudience()
+                ),
+            );
+
+            $changes = array();
+            foreach ($checks as $key => $check) {
+                if ($check['check']) {
+                    $changes[$key] = array(
+                        'oldValue' => $check['oldValue'],
+                        'newValue' => $check['newValue']
+                    );
+                }
+            }
+            $changes['nodeId'] = $node->getId();
+
             $form->bind($request);
             if ($form->isValid()) {
+                $modifyTime = new \DateTime();
+                $node->setMtime($modifyTime);
+                $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
+                    ->getRepository('BpiApiBundle:Entity\Facet');
+                $facetRepository->updateFacet($changes);
+
                 $this->getRepository()->save($node);
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_node')
@@ -85,9 +158,16 @@ class NodeController extends Controller
             }
         }
 
+        $assets = array();
+        $nodeAssets = $node->getAssets();
+        if(!empty($nodeAssets)) {
+            $assets = $this->prepareAssets($nodeAssets->getCollection());
+        }
+
         return array(
             'form' => $form->createView(),
             'id' => $id,
+            'assets' => $assets
         );
     }
 
@@ -105,6 +185,10 @@ class NodeController extends Controller
     public function deleteAction($id)
     {
         $this->getRepository()->delete($id, 'ADMIN');
+        $this->get('doctrine.odm.mongodb.document_manager')
+            ->getRepository('BpiApiBundle:Entity\Facet')
+            ->delete($id)
+        ;
         return $this->redirect(
             $this->generateUrl("bpi_admin_node", array())
         );
@@ -113,6 +197,11 @@ class NodeController extends Controller
     public function restoreAction($id)
     {
         $this->getRepository()->restore($id, 'ADMIN');
+        $node = $this->getRepository()->findOneById($id);
+        $this->get('doctrine.odm.mongodb.document_manager')
+          ->getRepository('BpiApiBundle:Entity\Facet')
+          ->prepareFacet($node)
+        ;
         return $this->redirect(
             $this->generateUrl("bpi_admin_node", array())
         );
@@ -120,9 +209,57 @@ class NodeController extends Controller
 
     private function createNodeForm($node, $new = false)
     {
-        $formBuilder = $this->createFormBuilder($node)
+        $formBuilder = $this->createFormBuilder($node, array('csrf_protection' => false))
+            ->add(
+                'authorFirstName',
+                'text',
+                array(
+                    'label' => 'Author first name',
+                    'required' => true
+                )
+            )
+            ->add(
+                'authorLastName',
+                'text',
+                array(
+                    'label' => 'Author last name',
+                    'required' => false
+                )
+            )
+            ->add(
+                'authorAgencyId',
+                'text',
+                array(
+                    'label' => 'Author agency id',
+                    'required' => true,
+                    'disabled' => true
+                )
+            )
+            ->add(
+                'ctime',
+                'datetime',
+                array(
+                    'label' => 'Creation time',
+                    'required' => true,
+                    'date_widget' => 'single_text',
+                    'time_widget' => 'single_text',
+                    'disabled' => true
+                )
+            )
+            ->add(
+                'mtime',
+                'datetime',
+                array(
+                    'label' => 'Modify time',
+                    'required' => true,
+                    'date_widget' => 'single_text',
+                    'time_widget' => 'single_text',
+                    'disabled' => true
+                )
+            )
             ->add('title', 'text')
             ->add('teaser', 'textarea')->setRequired(false)
+            ->add('body', 'textarea')->setRequired(false)
             ->add(
                 'category',
                 'document',
@@ -138,12 +275,35 @@ class NodeController extends Controller
                     'class' => 'BpiApiBundle:Entity\Audience',
                     'property' => 'audience'
                 )
-            );
+            )
+        ;
 
         if (!$new) {
             $formBuilder->add('deleted', 'checkbox', array('required' => false));
         }
 
         return $formBuilder->getForm();
+    }
+
+    /**
+     * Filter assets on images and documents
+     *
+     * @param $nodeAssets
+     * @return array
+     */
+    protected function prepareAssets($nodeAssets)
+    {
+        $imageExtensions = array('jpg', 'jpeg', 'png', 'gif');
+        $assets =array();
+        foreach ($nodeAssets as $asset) {
+            if (in_array($asset->getExtension(), $imageExtensions)){
+                $assets['images'][] = $asset;
+            } else {
+                $assets['documents'][] = $asset;
+            }
+        }
+
+        return $assets;
+
     }
 }

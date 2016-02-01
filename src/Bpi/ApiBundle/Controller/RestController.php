@@ -131,6 +131,7 @@ class RestController extends FOSRestController
      */
     public function listAction()
     {
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
         $node_query = new \Bpi\ApiBundle\Domain\Entity\NodeQuery();
         $node_query->amount(20);
         if (false !== ($amount = $this->getRequest()->query->get('amount', false))) {
@@ -145,17 +146,46 @@ class RestController extends FOSRestController
             $node_query->search($search);
         }
 
+        $filters = array();
+        $logicalOperator = '';
         if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
             foreach ($filter as $field => $value) {
-                if ($field == 'category') {
-                    $value = $this->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => $value));
+                if ($field == 'category' && !empty($value)) {
+                    foreach ($value as $val) {
+                        $category = $this->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => $val));
+                        if (empty($category)) {continue; }
+                        $filters['category'][] = $category;
+                    }
                 }
-                if ($field == 'audience') {
-                    $value = $this->getRepository('BpiApiBundle:Entity\Audience')->findOneBy(array('audience' => $value));
+                if ($field == 'audience' && !empty($value)) {
+                    foreach ($value as $val) {
+                        $audience = $this->getRepository('BpiApiBundle:Entity\Audience')->findOneBy(array('audience' => $val));
+                        if (empty($audience)) {continue; }
+                        $filters['audience'][] = $audience;
+                    }
                 }
-                $node_query->filter($field, $value);
+                if ($field == 'agency_id' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['agency_id'][] = $val;
+                    }
+                }
+                if ($field == 'author' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['author'][] = $val;
+                    }
+                }
+            }
+            if (isset($filter['agencyInternal'])) {
+                $filters['agency_internal'][] = $filter['agencyInternal'];
+            }
+            if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {
+                $logicalOperator = $filter['logicalOperator'];
             }
         }
+        $availableFacets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
+        $node_query->filter($availableFacets->nodeIds);
 
         if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
             foreach ($sort as $field => $order)
@@ -219,6 +249,32 @@ class RestController extends FOSRestController
                 'List refinements'
             )
         );
+
+        // Prepare facets for xml.
+        foreach ($availableFacets->facets as $facetName => $facet) {
+            $facetsXml = $document->createEntity('facet', $facetName);
+            $result = array();
+            foreach ($facet as $key => $term) {
+                if ($facetName == 'agency_id') {
+                    $result[] = $document->createProperty(
+                        $key,
+                        'string',
+                        $term['count'],
+                        $term['agencyName']
+                    );
+                } else {
+                    $result[] = $document->createProperty(
+                        $key,
+                        'string',
+                        $term
+                    );
+                }
+            }
+
+            $facetsXml->addProperties($result);
+            $document->prependEntity($facetsXml);
+        }
+
 
         return $document;
     }
@@ -343,6 +399,7 @@ class RestController extends FOSRestController
     public function nodeAction($id)
     {
         $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
+
         if (!$_node) {
             throw $this->createNotFoundException();
         }
@@ -416,6 +473,8 @@ class RestController extends FOSRestController
         $service = $this->get('domain.push_service');
         $assets = array();
 
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
+
         /** check request body size, must be smaller than 10MB **/
         if (strlen($request->getContent()) > 10485760) {
             return $this->createErrorView('Request entity too large', 413);
@@ -485,10 +544,14 @@ class RestController extends FOSRestController
                 $node = $this->get('domain.push_service')
                   ->pushRevision(new NodeId($id), $author, $resource, $params);
 
+                $facetRepository->prepareFacet($node);
+
                 return $this->get("bpi.presentation.transformer")->transform($node);
             }
             $node = $this->get('domain.push_service')
               ->push($author, $resource, $request->get('category'), $request->get('audience'), $profile, $params);
+
+            $facets = $facetRepository->prepareFacet($node);
 
             return $this->get("bpi.presentation.transformer")->transform($node);
         } catch (\LogicException $e) {
@@ -517,7 +580,6 @@ class RestController extends FOSRestController
     protected function _isValidForPushNode(array $data)
     {
         // @todo move somewhere all this validation stuff
-
         $node = new Constraints\Collection(array(
             'allowExtraFields' => true,
             'fields' => array(
@@ -638,7 +700,6 @@ class RestController extends FOSRestController
                     'token' => $this->container->get('security.context')->getToken()->token
                 )
             );
-
             return $this->redirect($this->generateUrl('node', $params));
         }
 
@@ -823,7 +884,8 @@ class RestController extends FOSRestController
         $id = $this->getRequest()->get('id');
         $agency = $this->getUser();
 
-        $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($id);
+        $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
+        $node = $nodeRepository->find($id);
         if (!$node) {
             throw $this->createNotFoundException();
         }
@@ -840,6 +902,16 @@ class RestController extends FOSRestController
         $dm = $this->get('doctrine.odm.mongodb.document_manager');
         $dm->persist($log);
         $dm->flush($log);
+
+        $nodeSyndications = $node->getSyndications();
+        if (null === $nodeSyndications) {
+            $node->setSyndications(1);
+        } else {
+            $node->setSyndications(++$nodeSyndications);
+        }
+
+        $dm->persist($node);
+        $dm->flush($node);
 
         return new Response('', 200);
     }
