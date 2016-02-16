@@ -6,6 +6,7 @@
 
 namespace Bpi\ApiBundle\Controller;
 
+use Bpi\RestMediaTypeBundle\XmlResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Constraints;
@@ -500,6 +501,38 @@ class ChannelController extends BPIController
         $xml->setSkippedList($skipped);
         $xml->setSuccess(count($success));
         $xml->setSuccessList($success);
+
+        return $xml;
+    }
+
+    /**
+     * Remove channel bu Id.
+     *
+     * @param string $channelId
+     *
+     * @Rest\Delete("/remove/{channelId}")
+     * @Rest\View()
+     *
+     * @return XmlGroupOperation.
+     */
+    public function removeChannelAction($channelId) {
+        $xmlError = $this->get('bpi.presentation.xmlerror');
+        $dm = $this->getDoctrineManager();
+        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+        $channel = $channelRepository->find($channelId);
+
+        if (null === $channel) {
+            $xmlError->setCode(404);
+            $xmlError->setError("Channel with id  = '{$channelId}' not found.");
+            return $xmlError;
+        }
+
+        $dm->remove($channel);
+        $dm->flush();
+
+        $xml = new XmlResponse();
+        $xml->setCode(200);
+        $xml->setMessage("Channel with Id " . $channelId . " removed.");
 
         return $xml;
     }
