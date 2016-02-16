@@ -110,7 +110,6 @@ class ChannelController extends BPIController
     {
         $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
-        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $params = $this->getAllRequestParameters();
         // Strip all params.
@@ -128,13 +127,6 @@ class ChannelController extends BPIController
                 $xmlError->setError("Param '{$param}' is required.");
                 return $xmlError;
             }
-        }
-
-        $similarTitle = $channelRepository->findSimilarByName($params['name']);
-        if ($similarTitle) {
-            $xmlError->setCode(409);
-            $xmlError->setError("Channel with name = '{$params['name']}' already exists.");
-            return $xmlError;
         }
 
         $user = $userRepository->findOneById($params['editorId']);
