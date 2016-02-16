@@ -24,13 +24,13 @@ Bpi\ApiBundle\Domain\Entity\Channel:
       reference: true
       type: one
       targetDocument: Bpi\ApiBundle\Domain\Entity\User
-      cascade: all
+      cascade: [detach]
 
     channelEditors:
       reference: true
       type: many
       tagrgetDocument: Bpi\ApiBundle\Domain\Entity\User
-      cascade: all
+      cascade: [detach]
 
     channelNodes:
       reference: true
