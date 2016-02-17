@@ -60,16 +60,21 @@ class UserRepository extends DocumentRepository
      */
     public function getListAutocompletions($userIternalName, $agencyId = null)
     {
-        $query = $this->createQueryBuilder('Entity\User');
+        $qb = $this->createQueryBuilder('Entity\User');
 
         if ($agencyId) {
-            $query->field('userAgency.id')->equals($agencyId);
+            $qb->addOr($qb->expr()->field('userAgency.id')->equals($agencyId));
         }
         if ($userIternalName) {
-            $query->field('internalUserName')->equals(new \MongoRegex('/.*' . $userIternalName . '.*/'));
+            $mongoReg = new \MongoRegex('/.*' . $userIternalName . '.*/');
+            $qb
+                ->addOr($qb->expr()->field('userFirstName')->equals($mongoReg))
+                ->addOr($qb->expr()->field('userLastName')->equals($mongoReg))
+                ->addOr($qb->expr()->field('internalUserName')->equals($mongoReg))
+            ;
         }
 
-        return $query
+        return $qb
             ->getQuery()
             ->execute();
         ;
