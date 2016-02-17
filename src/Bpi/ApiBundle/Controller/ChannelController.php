@@ -527,7 +527,8 @@ class ChannelController extends BPIController
             return $xmlError;
         }
 
-        $dm->remove($channel);
+        $channel->setChannelDeleted(true);
+        $dm->persist($channel);
         $dm->flush();
 
         $xml = new XmlResponse();
