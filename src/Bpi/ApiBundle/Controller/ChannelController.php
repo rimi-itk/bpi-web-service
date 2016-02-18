@@ -8,6 +8,7 @@ namespace Bpi\ApiBundle\Controller;
 
 use Bpi\RestMediaTypeBundle\XmlError;
 use Bpi\RestMediaTypeBundle\XmlResponse;
+use Bpi\RestMediaTypeBundle\XmlError;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Constraints;
@@ -152,6 +153,56 @@ class ChannelController extends BPIController
         $channel = new Channel();
         $channel->setChannelName($params['name']);
         $channel->setChannelAdmin($user);
+
+        $dm->persist($channel);
+        $dm->flush();
+
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.document'));
+        $document = $transform->transform($channel);
+
+        return $document;
+    }
+
+    /**
+     * @param string $channelId.
+     *
+     * @Rest\Post("/edit/{channelId}")
+     * @Rest\View()
+     *
+     * @return XmlError
+     */
+    public function editChannelAction($channelId) {
+        $xmlError = $this->get('bpi.presentation.xmlerror');
+        $dm = $this->getDoctrineManager();
+        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+        $params = $this->getAllRequestParameters();
+        // Strip all params.
+        $this->stripParams($params);
+
+        $requiredParams = array(
+            'channelName' => 0,
+            'channelDescription' => 0,
+        );
+        $this->checkParams($params, $requiredParams);
+
+        foreach ($requiredParams as $param => $count) {
+            if ($count  == 0) {
+                $xmlError->setCode(400);
+                $xmlError->setError("Param '{$param}' is required.");
+                return $xmlError;
+            }
+        }
+
+        $channel = $channelRepository->find($channelId);
+        if (null === $channel) {
+            $xmlError->setCode(404);
+            $xmlError->setError("Channel with id = '{$channelId}' not found.");
+            return $xmlError;
+        }
+
+        $channel->setChannelName($params['channelName']);
+        $channel->setChannelDescription($params['channelDescription']);
 
         $dm->persist($channel);
         $dm->flush();
