@@ -6,6 +6,7 @@
 
 namespace Bpi\ApiBundle\Controller;
 
+use Bpi\RestMediaTypeBundle\XmlError;
 use Bpi\RestMediaTypeBundle\XmlResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -30,19 +31,30 @@ class ChannelController extends BPIController
      *
      * @Rest\Get("/")
      * @Rest\View()
-     * @return \HttpResponse
+     *
+     * @return \Bpi\RestMediaTypeBundle\Channels | XmlError
      */
     public function listChannelsAction()
     {
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
-        $serializer = $this->getSerialilzer();
 
-        $allChannels = $channelRepository->findAll();
+        $allChannels = $channelRepository->findBy(array('channelDeleted' => false));
 
-        $serializedData = '';
+        // Check if not deleted channels exist.
+        if(null === $allChannels) {
+            $xmlError = $this->get('bpi.presentation.xmlerror');
+            $xmlError->setCode(200);
+            $xmlError->setMessage('No channels found.');
+            return $xmlError;
+        }
 
-        // TODO: Output xml using RestMediaTypeBundle
-        return new Response($serializedData, 200);
+        // Prepare existing channels for response.
+        $xml = $this->get('bpi.presentation.channels');
+        foreach ($allChannels as $channel) {
+            $xml->addChannel($channel);
+        }
+
+        return $xml;
     }
 
     /**
@@ -519,7 +531,8 @@ class ChannelController extends BPIController
             return $xmlError;
         }
 
-        $dm->remove($channel);
+        $channel->setChannelDeleted(true);
+        $dm->persist($channel);
         $dm->flush();
 
         $xml = new XmlResponse();
