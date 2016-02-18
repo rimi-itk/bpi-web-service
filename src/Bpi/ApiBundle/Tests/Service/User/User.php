@@ -28,9 +28,9 @@ class User extends BpiTest
         $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Entity\User')
             ->remove()
             ->field('externalId')->equals('999')
-            ->field('email')->equals('testUser@email.com')
-            ->field('userFirstName')->equals('Test')
-            ->field('userLastName')->equals('User')
+            ->field('email')->equals('testUser1@email.com')
+            ->field('userFirstName')->equals('Test1')
+            ->field('userLastName')->equals('User1')
             ->getQuery()
             ->execute()
         ;
@@ -48,6 +48,23 @@ class User extends BpiTest
             'userLastName' => 'User'
         );
 
+        return $this->makeRequest($testUser);
+    }
+
+    private function editUser()
+    {
+        $testUser = array(
+            'externalId' => '999000',
+            'email' => 'testUser1@email.com',
+            'userFirstName' => 'Test1',
+            'userLastName' => 'User1'
+        );
+
+        return $this->makeRequest($testUser);
+    }
+
+    private function makeRequest($testUser)
+    {
         $headers = array('Auth' => 'BPI agency="200400", token="$1$GynHO0zr$zHwvyDYeQ83iNruX.pati."');
 
         $request = $this->guzzle->post('app_dev.php/user/', $headers, $testUser);
@@ -80,6 +97,37 @@ class User extends BpiTest
             ->field('email')->equals('testUser@email.com')
             ->field('userFirstName')->equals('Test')
             ->field('userLastName')->equals('User')
+            ->getQuery()
+            ->getSingleResult()
+        ;
+
+        $this->assertNotNull($user, "User not found in database");
+    }
+
+    public function testUserEditAction()
+    {
+        $response = $this->createUser();
+        $responseStatusCode = $response->getStatusCode();
+
+        // Check user data in response.
+        $this->assertEquals('200', $responseStatusCode, "Create user failed. Status code wrong");
+        if (200 === $responseStatusCode) {
+            $responseBody = $response->xml();
+            $this->assertInstanceOf('SimpleXMLElement', $responseBody->user, 'User data not and XML structure.');
+            $this->assertEquals(1, $responseBody->user->count(), 'User not found in response xml.');
+            $this->assertEquals('TestUser', $responseBody->user->internal_user_name[0]->__toString(), "Internal user name don't match in response.");
+            $this->assertEquals('testUser1@email.com', $responseBody->user->email[0]->__toString(), "Email don't match in response.");
+            $this->assertEquals('Test1', $responseBody->user->user_first_name[0]->__toString(), "User first name don't match in response.");
+            $this->assertEquals('User1', $responseBody->user->user_last_name[0]->__toString(), "User last name don't match in response.");
+            $this->assertEquals('200400', $responseBody->user->agency_id[0]->__toString(), "User agency id don't match in response.");
+        }
+
+        // Check user saved in database.
+        $user = $this->em->createQueryBuilder('Bpi\ApiBundle\Domain\Entity\User')
+            ->field('externalId')->equals('999')
+            ->field('email')->equals('testUser1@email.com')
+            ->field('userFirstName')->equals('Test1')
+            ->field('userLastName')->equals('User1')
             ->getQuery()
             ->getSingleResult()
         ;

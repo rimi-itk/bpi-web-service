@@ -157,6 +157,85 @@ class UserController extends BPIController
         return $document;
     }
 
+    /**
+     * Edit user by id.
+     *
+     * @Rest\Post("/edit/{userId}")
+     * @Rest\View()
+     *
+     * @param $userId
+     *
+     * @return XmlError | \Bpi\RestMediaTypeBundle\Users
+     */
+    public function editUserAction($userId)
+    {
+        $xmlError = $this->get('bpi.presentation.xmlerror');
+        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $dm = $this->getDoctrineManager();
+        $params = $this->getAllRequestParameters();
+        $this->stripParams($params);
+
+        $requiredParams = array(
+            'internalUserName' => 0,
+            'email' => 0,
+            'userFirstName' => 0,
+            'userLastName' => 0,
+        );
+
+        $this->checkParams($params, $requiredParams);
+        foreach ($requiredParams as $param => $count) {
+            if ($count == 0) {
+                $xmlError->setCode(400);
+                $xmlError->setError("Param '{$param}' is required.");
+                return $xmlError;
+            }
+        }
+
+        $user = $userRepository->find($userId);
+
+        if (null === $user) {
+            $xmlError->setCode(404);
+            $xmlError->setMessage('User with id ' . $userId . ' not found.');
+            return $xmlError;
+        }
+
+        $user->setInternalUserName($params['internalUserName']);
+        $user->setEmail($params['email']);
+        $user->setUserFirstName($params['userFirstName']);
+        $user->setUserLastName($params['userLastName']);
+
+        if (isset($params['userAgency']) && !empty($params['userAgency'])) {
+            $agencyRepository = $this->getRepository('BpiApiBundle:Aggregate\Agency');
+            $agency = $agencyRepository->findOneBy(
+                array(
+                    'public_id' => $params['userAgency'],
+                    'deleted' => false,
+                )
+            );
+
+            if (null === $agency) {
+                $xmlError->setCode(404);
+                $xmlError->setMessage('Agency with id ' . $params['userAgency'] . ' not found.');
+                return $xmlError;
+            }
+
+            $user->setUserAgency($agency);
+        }
+
+        if (isset($params['externalId']) && !empty($params['externalId'])) {
+            $user->setExternalId($params['externalId']);
+        }
+
+        $dm->persist($user);
+        $dm->flush();
+
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.users'));
+        $document = $transform->transform($user);
+
+        return $document;
+    }
+
      /**
      * Create new user
      *
