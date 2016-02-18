@@ -6,7 +6,6 @@
 
 namespace Bpi\ApiBundle\Controller;
 
-use Bpi\RestMediaTypeBundle\XmlError;
 use Bpi\RestMediaTypeBundle\XmlResponse;
 use Bpi\RestMediaTypeBundle\XmlError;
 use Symfony\Component\HttpFoundation\Response;
