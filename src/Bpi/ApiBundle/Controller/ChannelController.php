@@ -6,6 +6,8 @@
 
 namespace Bpi\ApiBundle\Controller;
 
+use Bpi\RestMediaTypeBundle\XmlResponse;
+use Bpi\RestMediaTypeBundle\XmlError;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Constraints;
@@ -29,19 +31,30 @@ class ChannelController extends BPIController
      *
      * @Rest\Get("/")
      * @Rest\View()
-     * @return \HttpResponse
+     *
+     * @return \Bpi\RestMediaTypeBundle\Channels | XmlError
      */
     public function listChannelsAction()
     {
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
-        $serializer = $this->getSerialilzer();
 
-        $allChannels = $channelRepository->findAll();
+        $allChannels = $channelRepository->findBy(array('channelDeleted' => false));
 
-        $serializedData = '';
+        // Check if not deleted channels exist.
+        if(null === $allChannels) {
+            $xmlError = $this->get('bpi.presentation.xmlerror');
+            $xmlError->setCode(200);
+            $xmlError->setMessage('No channels found.');
+            return $xmlError;
+        }
 
-        // TODO: Output xml using RestMediaTypeBundle
-        return new Response($serializedData, 200);
+        // Prepare existing channels for response.
+        $xml = $this->get('bpi.presentation.channels');
+        foreach ($allChannels as $channel) {
+            $xml->addChannel($channel);
+        }
+
+        return $xml;
     }
 
     /**
@@ -110,7 +123,6 @@ class ChannelController extends BPIController
     {
         $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
-        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $params = $this->getAllRequestParameters();
         // Strip all params.
@@ -130,13 +142,6 @@ class ChannelController extends BPIController
             }
         }
 
-        $similarTitle = $channelRepository->findSimilarByName($params['name']);
-        if ($similarTitle) {
-            $xmlError->setCode(409);
-            $xmlError->setError("Channel with name = '{$params['name']}' already exists.");
-            return $xmlError;
-        }
-
         $user = $userRepository->findOneById($params['editorId']);
         if ($user === null) {
             $xmlError->setCode(404);
@@ -147,6 +152,56 @@ class ChannelController extends BPIController
         $channel = new Channel();
         $channel->setChannelName($params['name']);
         $channel->setChannelAdmin($user);
+
+        $dm->persist($channel);
+        $dm->flush();
+
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.document'));
+        $document = $transform->transform($channel);
+
+        return $document;
+    }
+
+    /**
+     * @param string $channelId.
+     *
+     * @Rest\Post("/edit/{channelId}")
+     * @Rest\View()
+     *
+     * @return XmlError
+     */
+    public function editChannelAction($channelId) {
+        $xmlError = $this->get('bpi.presentation.xmlerror');
+        $dm = $this->getDoctrineManager();
+        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+        $params = $this->getAllRequestParameters();
+        // Strip all params.
+        $this->stripParams($params);
+
+        $requiredParams = array(
+            'channelName' => 0,
+            'channelDescription' => 0,
+        );
+        $this->checkParams($params, $requiredParams);
+
+        foreach ($requiredParams as $param => $count) {
+            if ($count  == 0) {
+                $xmlError->setCode(400);
+                $xmlError->setError("Param '{$param}' is required.");
+                return $xmlError;
+            }
+        }
+
+        $channel = $channelRepository->find($channelId);
+        if (null === $channel) {
+            $xmlError->setCode(404);
+            $xmlError->setError("Channel with id = '{$channelId}' not found.");
+            return $xmlError;
+        }
+
+        $channel->setChannelName($params['channelName']);
+        $channel->setChannelDescription($params['channelDescription']);
 
         $dm->persist($channel);
         $dm->flush();
@@ -500,6 +555,39 @@ class ChannelController extends BPIController
         $xml->setSkippedList($skipped);
         $xml->setSuccess(count($success));
         $xml->setSuccessList($success);
+
+        return $xml;
+    }
+
+    /**
+     * Remove channel bu Id.
+     *
+     * @param string $channelId
+     *
+     * @Rest\Delete("/remove/{channelId}")
+     * @Rest\View()
+     *
+     * @return XmlGroupOperation.
+     */
+    public function removeChannelAction($channelId) {
+        $xmlError = $this->get('bpi.presentation.xmlerror');
+        $dm = $this->getDoctrineManager();
+        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+        $channel = $channelRepository->find($channelId);
+
+        if (null === $channel) {
+            $xmlError->setCode(404);
+            $xmlError->setError("Channel with id  = '{$channelId}' not found.");
+            return $xmlError;
+        }
+
+        $channel->setChannelDeleted(true);
+        $dm->persist($channel);
+        $dm->flush();
+
+        $xml = new XmlResponse();
+        $xml->setCode(200);
+        $xml->setMessage("Channel with Id " . $channelId . " removed.");
 
         return $xml;
     }
