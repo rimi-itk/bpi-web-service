@@ -43,8 +43,8 @@ class ChannelController extends BPIController
         // Check if not deleted channels exist.
         if(null === $allChannels) {
             $xmlError = $this->get('bpi.presentation.xmlerror');
-            $xmlError->setCode(200);
-            $xmlError->setMessage('No channels found.');
+            $xmlError->setCode(404);
+            $xmlError->setError('No channels found.');
             return $xmlError;
         }
 
@@ -58,9 +58,37 @@ class ChannelController extends BPIController
     }
 
     /**
+     * Get channel description for specific channel by it's id.
+     *
+     * @Rest\Get("/{channelId}")
+     * @Rest\View("")
+     *
+     * @param string $channelId.
+     *
+     * @return \Bpi\RestMediaTypeBundle\Channels | XmlError
+     */
+    public function getChannelInfoAction($channelId) {
+        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+
+        $channel = $channelRepository->find($channelId);
+
+        if (null === $channel) {
+            $xmlError = $this->get('bpi.presentation.xmlerror');
+            $xmlError->setCode(404);
+            $xmlError->setError('Channel with id ' . $channelId . ' not found.');
+            return $xmlError;
+        }
+
+        $xml = $this->get('bpi.presentation.channels');
+        $xml->addChannel($channel);
+
+        return $xml;
+    }
+
+    /**
      * List channels of given user
      *
-     * @param $userExternalId
+     * @param $userId
      *
      * @Rest\Get("/user/{userId}")
      * @Rest\View()
