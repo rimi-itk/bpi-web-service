@@ -39,6 +39,12 @@ class ChannelRepository extends DocumentRepository
                 ->field('channelEditors')
                 ->includesReferenceTo($user)
         );
+        $qb->addAnd(
+            $qb
+                ->expr()
+                ->field('channelDeleted')
+                ->equals(false)
+        );
 
         $result = $qb
             ->getQuery()
