@@ -195,7 +195,7 @@ class UserController extends BPIController
 
         if (null === $user) {
             $xmlError->setCode(404);
-            $xmlError->setMessage('User with id ' . $userId . ' not found.');
+            $xmlError->setError('User with id ' . $userId . ' not found.');
             return $xmlError;
         }
 
@@ -215,7 +215,7 @@ class UserController extends BPIController
 
             if (null === $agency) {
                 $xmlError->setCode(404);
-                $xmlError->setMessage('Agency with id ' . $params['userAgency'] . ' not found.');
+                $xmlError->setError('Agency with id ' . $params['userAgency'] . ' not found.');
                 return $xmlError;
             }
 
