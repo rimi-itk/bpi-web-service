@@ -175,22 +175,6 @@ class UserController extends BPIController
         $params = $this->getAllRequestParameters();
         $this->stripParams($params);
 
-        $requiredParams = array(
-            'internalUserName' => 0,
-            'email' => 0,
-            'userFirstName' => 0,
-            'userLastName' => 0,
-        );
-
-        $this->checkParams($params, $requiredParams);
-        foreach ($requiredParams as $param => $count) {
-            if ($count == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
-            }
-        }
-
         $user = $userRepository->find($userId);
 
         if (null === $user) {
@@ -198,11 +182,6 @@ class UserController extends BPIController
             $xmlError->setError('User with id ' . $userId . ' not found.');
             return $xmlError;
         }
-
-        $user->setInternalUserName($params['internalUserName']);
-        $user->setEmail($params['email']);
-        $user->setUserFirstName($params['userFirstName']);
-        $user->setUserLastName($params['userLastName']);
 
         if (isset($params['userAgency']) && !empty($params['userAgency'])) {
             $agencyRepository = $this->getRepository('BpiApiBundle:Aggregate\Agency');
@@ -224,6 +203,18 @@ class UserController extends BPIController
 
         if (isset($params['externalId']) && !empty($params['externalId'])) {
             $user->setExternalId($params['externalId']);
+        }
+
+        if (isset($params['email']) && !empty($params['email'])) {
+            $user->setEmail($params['email']);
+        }
+
+        if (isset($params['userFirstName']) && !empty($params['userFirstName'])) {
+            $user->setUserFirstName($params['userFirstName']);
+        }
+
+        if (isset($params['userLastName']) && !empty($params['userLastName'])) {
+            $user->setUserLastName($params['userLastName']);
         }
 
         $dm->persist($user);
