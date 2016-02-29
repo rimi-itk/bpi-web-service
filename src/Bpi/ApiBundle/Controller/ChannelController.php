@@ -153,6 +153,10 @@ class ChannelController extends BPIController
         $channel->setChannelName($params['name']);
         $channel->setChannelAdmin($user);
 
+        if (isset($params['channelDescription']) && !empty($params['channelDescription'])) {
+            $channel->setChannelDescription($params['channelDescription']);
+        }
+
         $dm->persist($channel);
         $dm->flush();
 
