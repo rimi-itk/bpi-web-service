@@ -246,7 +246,7 @@ class Channel implements IPresentable
                 $document->createProperty(
                     'channelAdmin',
                     'string',
-                    $channelAdmin->getInternalUserName()
+                    $channelAdmin->getId()
                 )
             );
         }
