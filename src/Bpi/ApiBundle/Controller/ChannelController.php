@@ -70,7 +70,12 @@ class ChannelController extends BPIController
     public function getChannelInfoAction($channelId) {
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
 
-        $channel = $channelRepository->find($channelId);
+        $channel = $channelRepository->findOneBy(
+            array(
+                'id' => $channelId,
+                'channelDeleted' => false,
+            )
+        );
 
         if (null === $channel) {
             $xmlError = $this->get('bpi.presentation.xmlerror');
