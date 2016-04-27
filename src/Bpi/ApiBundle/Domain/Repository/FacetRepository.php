@@ -172,6 +172,10 @@ class FacetRepository extends DocumentRepository
                 $agency = $this->dm->getRepository('BpiApiBundle:Aggregate\Agency')->loadUserByUsername($facet['_id']['facetValue']);
                 $facets['agency_id'][$facet['_id']['facetValue']]['agencyName'] = $agency->getName();
                 $facets['agency_id'][$facet['_id']['facetValue']]['count'] = $facet['value'];
+            } else if ($facet['_id']['facetName'] == 'channels') {
+                $channel = $this->dm->getRepository('BpiApiBundle:Entity\Channel')->find($facet['_id']['facetValue']);
+                $facets[$facet['_id']['facetName']][$facet['_id']['facetValue']]['title'] = $channel ? $channel->getChannelName() : NULL;
+                $facets[$facet['_id']['facetName']][$facet['_id']['facetValue']]['count'] = $facet['value'];
             } else {
                 $facets[$facet['_id']['facetName']][$facet['_id']['facetValue']] = $facet['value'];
             }
