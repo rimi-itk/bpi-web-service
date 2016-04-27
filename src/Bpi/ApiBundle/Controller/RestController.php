@@ -280,7 +280,7 @@ class RestController extends FOSRestController
                         $term['count'],
                         $term['agencyName']
                     );
-                } else if (isset($term['count'])) {
+                } elseif (isset($term['count'])) {
                   $result[] = $document->createProperty(
                     $key,
                     'string',
