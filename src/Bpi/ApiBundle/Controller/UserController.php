@@ -11,11 +11,11 @@ use Symfony\Component\Validator\Constraints;
 use Symfony\Component\HttpFoundation\Response;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\Rest\Util\Codes;
 
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Entity\User;
-use Bpi\ApiBundle\Domain\XmlResponse\XmlError;
 
 /**
  * Class UserController
@@ -57,15 +57,12 @@ class UserController extends BPIController
      */
     public function getUserByIdAction($userId)
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
 
         $user = $userRepository->find($userId);
 
         if (null === $user) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id = '{$userId}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id = '{$userId}' not found.");
         }
 
         $transform = $this->get('bpi.presentation.transformer');
@@ -83,7 +80,6 @@ class UserController extends BPIController
      */
     public function createUserAction()
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $params = $this->getAllRequestParameters();
@@ -98,32 +94,24 @@ class UserController extends BPIController
 
         foreach ($requiredParams as $param => $count) {
             if ($count == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         if (!filter_var($params['email'], FILTER_VALIDATE_EMAIL)) {
-            $xmlError->setCode(400);
-            $xmlError->setError("Email '{$params['email']}' not valid.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_BAD_REQUEST, "Email '{$params['email']}' not valid.");
         }
 
         // Get agency.
         $agency = $this->getAgencyFromHeader();
         $user = $userRepository->findByExternalIdAgency($params['externalId'], $agency->getId());
         if ($user) {
-            $xmlError->setCode(400);
-            $xmlError->setError( "User with externalId = '{$params['externalId']}' and agency = '{$agency->getId()}' already exits.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_BAD_REQUEST, "User with externalId = '{$params['externalId']}' and agency = '{$agency->getId()}' already exits.");
         }
 
         $user = $userRepository->findOneByEmail($params['email']);
         if ($user) {
-            $xmlError->setCode(400);
-            $xmlError->setError( "User with email = '{$params['email']}' already exits.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_BAD_REQUEST, "User with email = '{$params['email']}' already exits.");
         }
 
         $user = new User();
@@ -165,11 +153,10 @@ class UserController extends BPIController
      *
      * @param $userId
      *
-     * @return XmlError | \Bpi\RestMediaTypeBundle\Users
+     * @return \Bpi\RestMediaTypeBundle\Users
      */
     public function editUserAction($userId)
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $dm = $this->getDoctrineManager();
         $params = $this->getAllRequestParameters();
@@ -178,9 +165,7 @@ class UserController extends BPIController
         $user = $userRepository->find($userId);
 
         if (null === $user) {
-            $xmlError->setCode(404);
-            $xmlError->setError('User with id ' . $userId . ' not found.');
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, 'User with id ' . $userId . ' not found.');
         }
 
         if (isset($params['userAgency']) && !empty($params['userAgency'])) {
@@ -193,9 +178,7 @@ class UserController extends BPIController
             );
 
             if (null === $agency) {
-                $xmlError->setCode(404);
-                $xmlError->setError('Agency with id ' . $params['userAgency'] . ' not found.');
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_NOT_FOUND, 'Agency with id ' . $params['userAgency'] . ' not found.');
             }
 
             $user->setUserAgency($agency);
@@ -268,7 +251,6 @@ class UserController extends BPIController
     {
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $parameters = $this->getAllRequestParameters();
         $this->stripParams($parameters);
 
@@ -281,24 +263,18 @@ class UserController extends BPIController
         $this->checkParams($parameters, $requiredParams);
         foreach ($requiredParams as $param => $count) {
             if ($count == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         $user = $userRepository->find($parameters['userId']);
         if (null === $user) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id = '{$parameters['userId']}' not fount.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id = '{$parameters['userId']}' not fount.");
         }
 
         foreach ($user->getSubscriptions() as $subscription) {
             if ($subscription->getTitle() === $parameters['title']) {
-                $xmlError->setCode(400);
-                $xmlError->setError("User already have subscription with this name.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "User already have subscription with this name.");
             }
         }
 
@@ -329,7 +305,6 @@ class UserController extends BPIController
     {
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $parameters = $this->getAllRequestParameters();
 
         // Strip all params.
@@ -341,17 +316,13 @@ class UserController extends BPIController
         $this->checkParams($parameters, $requiredParams);
         foreach ($requiredParams as $param => $count) {
             if ($count == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         $user = $userRepository->find($parameters['userId']);
         if (null === $user) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id = '{$parameters['userId']}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id = '{$parameters['userId']}' not found.");
         }
 
         foreach ($user->getSubscriptions() as $subscription) {
