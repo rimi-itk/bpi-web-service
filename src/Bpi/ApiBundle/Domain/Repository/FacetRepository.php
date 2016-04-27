@@ -292,10 +292,10 @@ class FacetRepository extends DocumentRepository
     /**
      * Add channel name to facet for all nodes added to channel.
      *
-     * @param $channelName
+     * @param $channelId
      * @param $nodeIds
      */
-    public function addChannelToFacet($channelName, $nodeIds)
+    public function addChannelToFacet($channelId, $nodeIds)
     {
         $nids = array();
         foreach ($nodeIds as $id) {
@@ -306,7 +306,7 @@ class FacetRepository extends DocumentRepository
         $qb
             ->update()
             ->multiple(true)
-            ->field('facetData.channels')->addToSet($channelName)
+            ->field('facetData.channels')->addToSet($channelId)
             ->field('nodeId')->in($nids)
             ->getQuery()
             ->execute()
@@ -316,10 +316,10 @@ class FacetRepository extends DocumentRepository
     /**
      * Remove channel name from facet on removing nodes from channel.
      *
-     * @param $channelName
+     * @param $channelId
      * @param $nodeIds
      */
-    public function removeChannelFromFacet($channelName, $nodeIds)
+    public function removeChannelFromFacet($channelId, $nodeIds)
     {
         $nids = array();
         foreach ($nodeIds as $id) {
@@ -330,7 +330,7 @@ class FacetRepository extends DocumentRepository
         $qb
             ->update()
             ->multiple(true)
-            ->field('facetData.channels')->pull($channelName)
+            ->field('facetData.channels')->pull($channelId)
             ->field('nodeId')->in($nids)
             ->getQuery()
             ->execute()
