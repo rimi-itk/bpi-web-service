@@ -437,7 +437,7 @@ class ChannelController extends BPIController
         $dm->flush();
 
         $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
-        $facetRepository->addChannelToFacet($channel->getChannelName(), $params['nodes']);
+        $facetRepository->addChannelToFacet($channel->getId(), $params['nodes']);
 
         $xml = $this->get('bpi.presentation.xmlgroupoperation');
         $xml->setCode(200);
@@ -528,7 +528,7 @@ class ChannelController extends BPIController
         $dm->flush();
 
         $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
-        $facetRepository->removeChannelFromFacet($channel->getChannelName(), $params['nodes']);
+        $facetRepository->removeChannelFromFacet($channel->getId(), $params['nodes']);
 
         $xml = $this->get('bpi.presentation.xmlgroupoperation');
         $xml->setCode(200);
