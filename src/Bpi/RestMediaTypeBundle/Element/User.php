@@ -34,9 +34,9 @@ class User
     protected $userLastName;
 
     /**
-     * @Serializer\Type("string")
+     * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Agency")
      */
-    protected $agencyId;
+    protected $agency;
 
     /**
      * @Serializer\Type("ArrayCollection<Bpi\ApiBundle\Domain\ValueObject\Subscription>")
@@ -53,7 +53,7 @@ class User
         $this->email = $data->getEmail();
         $this->userFirstName = $data->getUserFirstName();
         $this->userLastName = $data->getUserLastName();
-        $this->agencyId = $data->getUserAgency()->getPublicId();
+        $this->agency = new Agency($data->getUserAgency());
         $this->subscriptions = $data->getSubscriptions();
     }
 }
