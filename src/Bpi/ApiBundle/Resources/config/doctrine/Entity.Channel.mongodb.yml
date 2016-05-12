@@ -37,3 +37,7 @@ Bpi\ApiBundle\Domain\Entity\Channel:
       type: many
       targeDocument: Bpi\ApiBundle\Domain\Aggregate\Node
       cascade: all
+
+    nodeLastAddedAt:
+      type: date
+      required: false
