@@ -30,6 +30,11 @@ class Channel
     private $nodes;
 
     /**
+     * @var
+     */
+    private $nodeLastAddedAt;
+
+    /**
      * @Serializer\XmlList(inline=false, entry="user")
      * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\User>")
      */
@@ -48,6 +53,7 @@ class Channel
         $nodes = $data->getChannelNodes();
         foreach($nodes as $node)
             $this->nodes[] = $node->getId();
+        $this->nodeLastAddedAt = $data->getNodeLastAddedAt();
         $users =  $data->getChannelEditors();
         foreach($users as $user)
              $this->users[] = new User($user);

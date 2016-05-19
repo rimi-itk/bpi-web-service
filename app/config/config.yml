@@ -49,9 +49,6 @@ services:
     bpi.presentation.xmlgroupoperation:
             class: Bpi\RestMediaTypeBundle\XmlGroupOperation
             arguments: ["%api_version%"]
-    bpi.presentation.xmlerror:
-        class: Bpi\RestMediaTypeBundle\XmlError
-        arguments: ["%api_version%"]
     bpi.presentation.xmlresponse:
         class: Bpi\RestMediaTypeBundle\XmlResponse
         arguments: ["%api_version%"]

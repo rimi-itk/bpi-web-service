@@ -48,6 +48,11 @@ class Channel implements IPresentable
      */
     protected $channelNodes = array();
 
+    /**
+     * @var \DateTime
+     */
+    protected $nodeLastAddedAt;
+
     public function __construct()
     {
         $this->channelEditors = new ArrayCollection();
@@ -190,6 +195,7 @@ class Channel implements IPresentable
     public function addChannelNode($channelNode)
     {
         $this->channelNodes[] = $channelNode;
+        $this->nodeLastAddedAt = new \DateTime();
     }
 
     /**
@@ -210,6 +216,16 @@ class Channel implements IPresentable
     public function getChannelNodes()
     {
         return $this->channelNodes;
+    }
+
+    /**
+     * Get nodeLastAddedAt
+     *
+     * @return \DateTime
+     */
+    public function getNodeLastAddedAt()
+    {
+        return $this->nodeLastAddedAt;
     }
 
     public function transform(XmlResponse $document)
@@ -246,10 +262,18 @@ class Channel implements IPresentable
                 $document->createProperty(
                     'channelAdmin',
                     'string',
-                    $channelAdmin->getInternalUserName()
+                    $channelAdmin->getId()
                 )
             );
         }
+
+        $entity->addProperty(
+            $document->createProperty(
+                'nodeLastAddedAt',
+                'date',
+                $this->getNodeLastAddedAt()
+            )
+        );
 
         foreach ($this->channelEditors as $editor) {
             $entity->addProperty(
