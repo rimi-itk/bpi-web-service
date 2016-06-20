@@ -83,12 +83,17 @@ class NodeQuery
         if (!$this->search)
             return;
 
-        $query
-          ->addOr($query->expr()->field($this->map('title'))->equals($this->matchAny($this->search)))
-          ->addOr($query->expr()->field($this->map('body'))->equals($this->matchAny($this->search)))
-          ->addOr($query->expr()->field($this->map('teaser'))->equals($this->matchAny($this->search)))
-          ->addOr($query->expr()->field($this->map('category'))->equals($this->matchAny($this->search)))
-        ;
+        $fields = array('title', 'body', 'teaser', 'category');
+        // Split search into words or keep as one term if quoted ("…")
+        $terms = preg_match('/^".+"$/', $this->search)
+               ? array($this->search)
+               : preg_split('/\s+/', $this->search, null, PREG_SPLIT_NO_EMPTY);
+
+        foreach ($fields as $field) {
+          foreach ($terms as $term) {
+            $query->addOr($query->expr()->field($this->map($field))->equals($this->matchAny($term)));
+          }
+        }
     }
 
     protected function applyFilters(QueryBuilder $query)
