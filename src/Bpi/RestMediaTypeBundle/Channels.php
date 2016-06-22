@@ -14,10 +14,22 @@ class Channels extends XmlResponse
      */
     public $channels = array();
 
+    /**
+     * @Serializer\XmlList(inline=true, entry="facets")
+     * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\ChannelFacet>")
+     */
+    public $facets = array();
+
     public function addChannel($entity)
     {
         $entity = new \Bpi\RestMediaTypeBundle\Element\Channel($entity);
         $this->channels[] = $entity;
+    }
+
+    public function addFacet($facet)
+    {
+        $facet = new \Bpi\RestMediaTypeBundle\Element\ChannelFacet($facet);
+        $this->facets[] = $facet;
     }
 
 }

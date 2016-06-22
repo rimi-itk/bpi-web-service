@@ -38,17 +38,107 @@ class ChannelController extends BPIController
     {
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
 
-        $allChannels = $channelRepository->findBy(array('channelDeleted' => false));
+        $query = new \Bpi\ApiBundle\Domain\Entity\ChannelQuery();
+        $query->amount(20);
+        if (false !== ($amount = $this->getRequest()->query->get('amount', false))) {
+            $query->amount($amount);
+        }
+
+        if (false !== ($offset = $this->getRequest()->query->get('offset', false))) {
+            $query->offset($offset);
+        }
+
+        if (false !== ($search = $this->getRequest()->query->get('search', false))) {
+            $query->search($search);
+        }
+
+        $filters = array();
+        $logicalOperator = '';
+        if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
+            foreach ($filter as $field => $value) {
+                if ($field == 'agency_id' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['agency_id'][] = $val;
+                    }
+                }
+                if ($field == 'tags' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['tags'][] = $val;
+                    }
+                }
+            }
+            if (isset($filter['agencyInternal'])) {
+                $filters['agency_internal'][] = $filter['agencyInternal'];
+            }
+            if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {
+                $logicalOperator = $filter['logicalOperator'];
+            }
+        }
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\ChannelFacet');
+        $availableFacets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
+        $query->filter($availableFacets->channelIds);
+
+
+
+        $facet = new \Bpi\ApiBundle\Domain\Entity\ChannelFacet();
+        $facet
+            ->setChannelId(1)
+            ->setFacetData(array('test' => __METHOD__));
+        $availableFacets->facets = array(
+            'test' => $facet,
+        );
+
+        if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
+            foreach ($sort as $field => $order)
+                $query->sort($field, $order);
+        } else {
+            $query->sort('nodeLastAddedAt', 'desc');
+        }
+
+        $channels = $channelRepository->findByChannelQuery($query);
 
         // Check if not deleted channels exist.
-        if(null === $allChannels) {
+        if (null === $channels) {
             throw new HttpException(Codes::HTTP_NOT_FOUND, 'No channels found.');
         }
 
         // Prepare existing channels for response.
         $xml = $this->get('bpi.presentation.channels');
-        foreach ($allChannels as $channel) {
-            $xml->addChannel($channel);
+
+        foreach ($availableFacets->facets as $facetName => $facet) {
+            // $facetsXml = $document->createEntity('facet', $facetName);
+            // $result = array();
+            // foreach ($facet as $key => $term) {
+            //     if ($facetName == 'agency_id') {
+            //         $result[] = $document->createProperty(
+            //             $key,
+            //             'string',
+            //             $term['count'],
+            //             $term['agencyName']
+            //         );
+            //     } elseif (isset($term['count'])) {
+            //       $result[] = $document->createProperty(
+            //         $key,
+            //         'string',
+            //         $term['count'],
+            //         isset($term['title']) ? $term['title'] : ''
+            //       );
+            //     } else {
+            //         $result[] = $document->createProperty(
+            //             $key,
+            //             'string',
+            //             $term
+            //         );
+            //     }
+            // }
+
+            $xml->addFacet($facet);
+        }
+
+        foreach ($channels as $channel) {
+            // $xml->addChannel($channel);
         }
 
         return $xml;
