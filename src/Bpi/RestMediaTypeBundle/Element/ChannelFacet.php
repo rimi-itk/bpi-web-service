@@ -15,16 +15,10 @@ class ChannelFacet
 
     /**
      * @var
+     * @Serializer\XmlAttribute
+     * @Serializer\Type("string")
      */
     private $channelId;
-
-    // private $channelIds;
-    // private $channelName;
-    // private $channelDescription;
-    // private $channelAdmin;
-    // private $nodes;
-    // private $nodeLastAddedAt;
-    // private $users;
 
     /**
      * @param $data

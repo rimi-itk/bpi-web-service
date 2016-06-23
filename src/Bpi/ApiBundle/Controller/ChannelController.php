@@ -80,16 +80,6 @@ class ChannelController extends BPIController
         $availableFacets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
         $query->filter($availableFacets->channelIds);
 
-
-
-        $facet = new \Bpi\ApiBundle\Domain\Entity\ChannelFacet();
-        $facet
-            ->setChannelId(1)
-            ->setFacetData(array('test' => __METHOD__));
-        $availableFacets->facets = array(
-            'test' => $facet,
-        );
-
         if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
             foreach ($sort as $field => $order)
                 $query->sort($field, $order);
@@ -104,41 +94,48 @@ class ChannelController extends BPIController
             throw new HttpException(Codes::HTTP_NOT_FOUND, 'No channels found.');
         }
 
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.document'));
+        $document = $transform->transformMany($channels);
+
+        return $document;
+
+
         // Prepare existing channels for response.
         $xml = $this->get('bpi.presentation.channels');
 
         foreach ($availableFacets->facets as $facetName => $facet) {
             // $facetsXml = $document->createEntity('facet', $facetName);
-            // $result = array();
-            // foreach ($facet as $key => $term) {
-            //     if ($facetName == 'agency_id') {
-            //         $result[] = $document->createProperty(
-            //             $key,
-            //             'string',
-            //             $term['count'],
-            //             $term['agencyName']
-            //         );
-            //     } elseif (isset($term['count'])) {
-            //       $result[] = $document->createProperty(
-            //         $key,
-            //         'string',
-            //         $term['count'],
-            //         isset($term['title']) ? $term['title'] : ''
-            //       );
-            //     } else {
-            //         $result[] = $document->createProperty(
-            //             $key,
-            //             'string',
-            //             $term
-            //         );
-            //     }
-            // }
+            $result = array($facetName => array());
+            foreach ($facet as $key => $term) {
+                if ($facetName == 'agency_id') {
+                    $result[$facetName] = array(
+                        $key,
+                        'string',
+                        $term['count'],
+                        $term['agencyName']
+                    );
+                } elseif (isset($term['count'])) {
+                    $result[$facetName] = array(
+                        $key,
+                        'string',
+                        $term['count'],
+                        isset($term['title']) ? $term['title'] : ''
+                    );
+                } else {
+                    $result[] = array(
+                        $key,
+                        'string',
+                        $term
+                    );
+                }
+            }
 
-            $xml->addFacet($facet);
+            $xml->addFacet($result);
         }
 
         foreach ($channels as $channel) {
-            // $xml->addChannel($channel);
+            $xml->addChannel($channel);
         }
 
         return $xml;
@@ -263,6 +260,9 @@ class ChannelController extends BPIController
 
         $dm->persist($channel);
         $dm->flush();
+
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\ChannelFacet');
+        $facetRepository->prepareFacet($channel);
 
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.document'));

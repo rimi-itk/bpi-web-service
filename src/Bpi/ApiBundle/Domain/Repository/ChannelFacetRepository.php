@@ -31,32 +31,17 @@ class ChannelFacetRepository extends DocumentRepository
      * @param $channel
      */
     public function prepareFacet($channel) {
-        $facet = new Facet();
+        $facet = new ChannelFacet();
 
-        $agencyId = $channel
-            ->getChannelAdmin()
-            ->getAgencyId()
-        ;
+        $agency = $channel->getChannelAdmin()->getUserAgency();
 
-        $agency = $this
-            ->dm
-            ->getRepository('BpiApiBundle:Aggregate\Agency')
-            ->findOneBy(array('public_id' => $agencyId->id()))
-        ;
-
-        $facets = array(
-            'agency_id' => array($agencyId->id()),
+        $data = array(
+            'agency_id' => $agency->getPublicId(),
+            // 'tags' => array('hat', 'briller'),
         );
 
-        $setFacets = new \stdClass();
-        array_walk($facets, function ($facet, $key) use (&$setFacets) {
-            if (!empty($facet)) {
-                $setFacets->$key = $facet[0];
-            }
-        });
-
         $facet->setChannelId($channel->getId());
-        $facet->setFacetData($setFacets);
+        $facet->setFacetData((object)$data);
 
         $this->dm->persist($facet);
         $this->dm->flush();

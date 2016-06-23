@@ -31,6 +31,7 @@ class Channel
 
     /**
      * @var
+     * @Serializer\Type("DateTime")
      */
     private $nodeLastAddedAt;
 
