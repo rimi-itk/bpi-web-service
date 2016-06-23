@@ -34,13 +34,56 @@ class UserController extends BPIController
      */
     public function listUsersAction()
     {
-        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $query = new \Bpi\ApiBundle\Domain\Entity\UserQuery();
+        $query->amount(20);
+        if (false !== ($amount = $this->getRequest()->query->get('amount', false))) {
+            $query->amount($amount);
+        }
 
-        $allUsers = $userRepository->findAll();
+        if (false !== ($offset = $this->getRequest()->query->get('offset', false))) {
+            $query->offset($offset);
+        }
+
+        if (false !== ($search = $this->getRequest()->query->get('search', false))) {
+            $query->search($search);
+        }
+
+        $filters = array();
+        $logicalOperator = '';
+        if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
+            foreach ($filter as $field => $value) {
+                if ($field == 'agency_id' && is_array($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['agency_id'][] = $val;
+                    }
+                }
+            }
+            if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {
+                $logicalOperator = $filter['logicalOperator'];
+            }
+        }
+
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\UserFacet');
+        $facets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
+        $query->filter($facets->userIds);
+
+        if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
+            foreach ($sort as $field => $order)
+                $query->sort($field, $order);
+        } else {
+            $query->sort('email', 'desc');
+        }
+
+        $users = $this->getRepository('BpiApiBundle:Entity\User')->findByQuery($query);
+
+        if (null === $users) {
+            throw new HttpException(Codes::HTTP_NOT_FOUND, 'No users found.');
+        }
 
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.users'));
-        $document = $transform->transformMany($allUsers);
+        $document = $transform->transformMany($users);
 
         return $document;
     }
@@ -138,6 +181,9 @@ class UserController extends BPIController
         $dm->persist($user);
         $dm->flush();
 
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\UserFacet');
+        $facetRepository->prepareFacet($user);
+
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.users'));
         $document = $transform->transform($user);
@@ -210,7 +256,7 @@ class UserController extends BPIController
         return $document;
     }
 
-     /**
+    /**
      * Create new user
      *
      * @Rest\Post("/autocompletions")

@@ -3,6 +3,7 @@
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
+use Bpi\ApiBundle\Domain\Entity\UserQuery;
 
 /**
  * UserRepository
@@ -12,6 +13,13 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
  */
 class UserRepository extends DocumentRepository
 {
+    public function findByQuery(UserQuery $query)
+    {
+        return $query->executeByDoctrineQuery(
+            $this->dm->createQueryBuilder($this->getClassName())
+        );
+    }
+
     /**
      * Check if User with such internal name exitst
      *
