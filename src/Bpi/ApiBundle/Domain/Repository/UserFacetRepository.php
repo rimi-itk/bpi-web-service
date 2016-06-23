@@ -215,4 +215,25 @@ class UserFacetRepository extends DocumentRepository
             ->execute()
         ;
     }
+
+    /**
+     * Get facet for a user.
+     *
+     * @param User $user
+     *   The user.
+     *
+     * @return UserFacet
+     *   The facet if it exists. Otherwise null.
+     */
+    public function getFacet(User $user) {
+        try {
+            return $this->createQueryBuilder()
+                ->field('userId')->equals($user->getId())
+                ->getQuery()
+                ->getSingleResult();
+        } catch(\Doctrine\ORM\NoResultException $e) {
+            return null;
+        }
+    }
+
 }
