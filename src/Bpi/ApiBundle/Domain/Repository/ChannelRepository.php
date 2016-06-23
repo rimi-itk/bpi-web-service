@@ -3,6 +3,7 @@
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
+use Bpi\ApiBundle\Domain\Entity\ChannelQuery;
 
 /**
  * ChannelRepository
@@ -12,6 +13,13 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
  */
 class ChannelRepository extends DocumentRepository
 {
+    public function findByQuery(ChannelQuery $query)
+    {
+        return $query->executeByDoctrineQuery(
+            $this->dm->createQueryBuilder($this->getClassName())
+        );
+    }
+
     /**
      * Helper method, determine if channel name is free to use for new channel
      *
