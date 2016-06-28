@@ -6,12 +6,11 @@ use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
 class ChannelQuery
 {
     public $total;
+    public $offset = 0;
+    public $amount = 20;
 
     protected $filters = array();
     protected $sorts = array();
-    protected $offset = 0;
-    protected $amount = 20;
-    protected $reduce_strategy;
     protected $search;
 
     /**
@@ -21,19 +20,8 @@ class ChannelQuery
     protected $field_map = array(
         'name'         => 'channelName',
         'description'  => 'channelDescription',
-        // 'body'         => 'resource.body',
-        // 'creation'     => 'resource.creation',
-        // 'type'         => 'resource.type',
-        // 'ctime'        => 'ctime',
         'nodeLastAddedAt'       => 'nodeLastAddedAt',
-        // 'category'     => 'category',
-        // 'audience'     => 'audience',
-        // 'assets'       => 'assets',
         'agency_id'    => 'channelAdmin.userAgency.public_id',
-        // 'author'       => 'author.lastname',
-        // 'firstname'    => 'author.firstname',
-        // 'lastname'     => 'author.lastname',
-        // 'syndications' => 'syndications'
     );
 
     /**
@@ -103,25 +91,6 @@ class ChannelQuery
             ->in($this->filters);
     }
 
-    public function reduce($strategy)
-    {
-        $this->reduce_strategy = $strategy;
-    }
-
-    protected function applyReduce(QueryBuilder $query)
-    {
-        switch ($this->reduce_strategy)
-        {
-            case 'initial':
-                $query->field('level')->equals(1);
-            break;
-            case 'latest':
-            case 'revised':
-                /** @todo custom query */
-            break;
-        }
-    }
-
     protected function applySort(QueryBuilder $query)
     {
         foreach ($this->sorts as $path => $order) {
@@ -135,15 +104,14 @@ class ChannelQuery
         $query->field('channelDeleted')->equals(false);
 
         $this->applySearch($query);
-        // $this->applyFilters($query);
-        // $this->applyReduce($query);
-        // $this->applySort($query);
+        $this->applyFilters($query);
+        $this->applySort($query);
 
         // Calculate total count of items before applying the limits
         $this->total = $query->getQuery()->execute()->count();
 
-        // $query->skip($this->offset);
-        // $query->limit($this->amount);
+        $query->skip($this->offset);
+        $query->limit($this->amount);
 
         return $query->getQuery()->execute();
     }

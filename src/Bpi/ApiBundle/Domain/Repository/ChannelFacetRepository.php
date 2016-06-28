@@ -37,7 +37,6 @@ class ChannelFacetRepository extends DocumentRepository
 
         $data = array(
             'agency_id' => $agency->getPublicId(),
-            // 'tags' => array('hat', 'briller'),
         );
 
         $facet->setChannelId($channel->getId());

@@ -31,7 +31,7 @@ class Facet
     protected $title;
 
     /**
-     * @ Serializer\XmlValue
+     * @Serializer\XmlList(inline=true, entry="term")
      * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\FacetTerm>")
      */
     protected $terms;

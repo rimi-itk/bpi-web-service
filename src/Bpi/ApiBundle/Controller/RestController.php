@@ -246,7 +246,7 @@ class RestController extends FOSRestController
                 $node_query->total
             )
         );
-        $document->prependEntity($collection);
+        // $document->prependEntity($collection);
         $hypermedia = $document->createHypermediaSection();
         $collection->setHypermedia($hypermedia);
         $hypermedia->addLink($document->createLink('canonical', $router->generate('list', array(), true)));

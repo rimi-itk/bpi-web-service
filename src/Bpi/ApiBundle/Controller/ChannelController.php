@@ -97,7 +97,10 @@ class ChannelController extends BPIController
         }
 
         // Prepare existing channels for response.
-        $xml = $this->get('bpi.presentation.channels');
+        $response = $this->get('bpi.presentation.channels');
+        $response->setTotal($query->total);
+        $response->setOffset($query->offset);
+        $response->setAmount($query->amount);
 
         foreach ($availableFacets->facets as $name => $facet) {
             $theFacet = new Facet(Facet::TYPE_STRING, $name);
@@ -118,14 +121,14 @@ class ChannelController extends BPIController
                 $theFacet->addTerm($term);
             }
 
-            $xml->addFacet($theFacet);
+            $response->addFacet($theFacet);
         }
 
         foreach ($channels as $channel) {
-            $xml->addChannel($channel);
+            $response->addChannel($channel);
         }
 
-        return $xml;
+        return $response;
     }
 
     /**
