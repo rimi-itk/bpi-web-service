@@ -3,7 +3,7 @@
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Bpi\ApiBundle\Domain\Entity\ChannelFacet;
-use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
 use Doctrine\ODM\MongoDB\DocumentRepository;
 
 /**

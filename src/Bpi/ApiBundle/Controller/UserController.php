@@ -16,6 +16,8 @@ use FOS\Rest\Util\Codes;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Entity\User;
+use Bpi\RestMediaTypeBundle\Element\Facet;
+use Bpi\RestMediaTypeBundle\Element\FacetTerm;
 
 /**
  * Class UserController
@@ -69,10 +71,9 @@ class UserController extends BPIController
         $query->filter($facets->userIds);
 
         if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
-            foreach ($sort as $field => $order)
+            foreach ($sort as $field => $order) {
                 $query->sort($field, $order);
-        } else {
-            $query->sort('email', 'desc');
+            }
         }
 
         $users = $this->getRepository('BpiApiBundle:Entity\User')->findByQuery($query);
@@ -81,11 +82,38 @@ class UserController extends BPIController
             throw new HttpException(Codes::HTTP_NOT_FOUND, 'No users found.');
         }
 
-        $transform = $this->get('bpi.presentation.transformer');
-        $transform->setDoc($this->get('bpi.presentation.users'));
-        $document = $transform->transformMany($users);
+        $response = $this->get('bpi.presentation.users');
+        $response->setTotal($query->total);
+        $response->setOffset($query->offset);
+        $response->setAmount($query->amount);
 
-        return $document;
+        foreach ($facets->facets as $name => $facet) {
+            $theFacet = new Facet(Facet::TYPE_STRING, $name);
+            foreach ($facet as $key => $term) {
+                $value = '';
+                $title = null;
+                if ($name == 'agency_id') {
+                    $value = $term['count'];
+                    $title = $term['agencyName'];
+                } elseif (isset($term['count'])) {
+                    $value = $term['count'];
+                    $title = isset($term['title']) ? $term['title'] : null;
+                } else {
+                    $value = $term;
+                }
+
+                $term = new FacetTerm($key, $value, $title);
+                $theFacet->addTerm($term);
+            }
+
+            $response->addFacet($theFacet);
+        }
+
+        foreach ($users as $user) {
+            $response->addUser($user);
+        }
+
+        return $response;
     }
 
     /**
@@ -107,6 +135,11 @@ class UserController extends BPIController
         if (null === $user) {
             throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id = '{$userId}' not found.");
         }
+
+        $response = $this->get('bpi.presentation.users');
+        $response->addUser($user);
+
+        return $response;
 
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.users'));

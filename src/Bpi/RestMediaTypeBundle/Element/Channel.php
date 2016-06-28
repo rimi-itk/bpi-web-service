@@ -52,11 +52,13 @@ class Channel extends Item
         $this->channelName = $data->getChannelName();
         $this->channelDescription = $data->getChannelDescription();
         $nodes = $data->getChannelNodes();
-        foreach($nodes as $node)
+        foreach ($nodes as $node) {
             $this->nodes[] = $node->getId();
+        }
         $this->nodeLastAddedAt = $data->getNodeLastAddedAt();
         $users =  $data->getChannelEditors();
-        foreach($users as $user)
-             $this->users[] = new User($user);
+        foreach ($users as $user) {
+            $this->users[] = new User($user);
+        }
     }
 }

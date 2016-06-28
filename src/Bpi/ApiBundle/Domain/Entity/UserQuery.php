@@ -6,12 +6,11 @@ use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
 class UserQuery
 {
     public $total;
+    public $offset = 0;
+    public $amount = 20;
 
     protected $filters = array();
     protected $sorts = array();
-    protected $offset = 0;
-    protected $amount = 20;
-    protected $reduce_strategy;
     protected $search;
 
     /**
@@ -91,25 +90,6 @@ class UserQuery
             ->in($this->filters);
     }
 
-    public function reduce($strategy)
-    {
-        $this->reduce_strategy = $strategy;
-    }
-
-    protected function applyReduce(QueryBuilder $query)
-    {
-        switch ($this->reduce_strategy)
-        {
-            case 'initial':
-                $query->field('level')->equals(1);
-            break;
-            case 'latest':
-            case 'revised':
-                /** @todo custom query */
-            break;
-        }
-    }
-
     protected function applySort(QueryBuilder $query)
     {
         foreach ($this->sorts as $path => $order) {
@@ -121,7 +101,6 @@ class UserQuery
     {
         $this->applySearch($query);
         $this->applyFilters($query);
-        $this->applyReduce($query);
         $this->applySort($query);
 
         // Calculate total count of items before applying the limits

@@ -6,7 +6,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * @Serializer\XmlRoot("user")
  */
-class User
+class User extends Item
 {
     /**
      * @Serializer\Type("string")
