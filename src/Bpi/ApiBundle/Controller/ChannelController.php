@@ -17,6 +17,8 @@ use FOS\Rest\Util\Codes;
 use Bpi\ApiBundle\Domain\Entity\Channel;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
+use Bpi\RestMediaTypeBundle\Element\Facet;
+use Bpi\RestMediaTypeBundle\Element\FacetTerm;
 
 /**
  * Class ChannelController
@@ -94,44 +96,29 @@ class ChannelController extends BPIController
             throw new HttpException(Codes::HTTP_NOT_FOUND, 'No channels found.');
         }
 
-        $transform = $this->get('bpi.presentation.transformer');
-        $transform->setDoc($this->get('bpi.presentation.document'));
-        $document = $transform->transformMany($channels);
-
-        return $document;
-
-
         // Prepare existing channels for response.
         $xml = $this->get('bpi.presentation.channels');
 
-        foreach ($availableFacets->facets as $facetName => $facet) {
-            // $facetsXml = $document->createEntity('facet', $facetName);
-            $result = array($facetName => array());
+        foreach ($availableFacets->facets as $name => $facet) {
+            $theFacet = new Facet(Facet::TYPE_STRING, $name);
             foreach ($facet as $key => $term) {
-                if ($facetName == 'agency_id') {
-                    $result[$facetName] = array(
-                        $key,
-                        'string',
-                        $term['count'],
-                        $term['agencyName']
-                    );
+                $value = '';
+                $title = null;
+                if ($name == 'agency_id') {
+                    $value = $term['count'];
+                    $title = $term['agencyName'];
                 } elseif (isset($term['count'])) {
-                    $result[$facetName] = array(
-                        $key,
-                        'string',
-                        $term['count'],
-                        isset($term['title']) ? $term['title'] : ''
-                    );
+                    $value = $term['count'];
+                    $title = isset($term['title']) ? $term['title'] : '';
                 } else {
-                    $result[] = array(
-                        $key,
-                        'string',
-                        $term
-                    );
+                    $value = $term;
                 }
+
+                $term = new FacetTerm($key, $value, $title);
+                $theFacet->addTerm($term);
             }
 
-            $xml->addFacet($result);
+            $xml->addFacet($theFacet);
         }
 
         foreach ($channels as $channel) {

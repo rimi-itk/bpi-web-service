@@ -28,7 +28,6 @@ class Channels extends XmlResponse
 
     public function addFacet($facet)
     {
-        // $facet = new \Bpi\RestMediaTypeBundle\Element\ChannelFacet($facet);
         $this->facets[] = $facet;
     }
 
