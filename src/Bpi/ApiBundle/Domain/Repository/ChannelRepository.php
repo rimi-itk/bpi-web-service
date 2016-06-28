@@ -62,4 +62,11 @@ class ChannelRepository extends DocumentRepository
         $count = $result->count();
         return ($count === 0) ? null : $result;
     }
+
+    public function findByChannelQuery(ChannelQuery $query)
+    {
+        return $query->executeByDoctrineQuery(
+            $this->dm->createQueryBuilder($this->getClassName())
+        );
+    }
 }

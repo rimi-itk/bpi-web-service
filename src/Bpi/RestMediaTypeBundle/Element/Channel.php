@@ -6,7 +6,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * @Serializer\XmlRoot("channel")
  */
-class Channel
+class Channel extends Item
 {
     /**
      * @var
@@ -31,6 +31,7 @@ class Channel
 
     /**
      * @var
+     * @Serializer\Type("DateTime")
      */
     private $nodeLastAddedAt;
 

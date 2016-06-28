@@ -17,6 +17,8 @@ use FOS\Rest\Util\Codes;
 use Bpi\ApiBundle\Domain\Entity\Channel;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
+use Bpi\RestMediaTypeBundle\Element\Facet;
+use Bpi\RestMediaTypeBundle\Element\FacetTerm;
 
 /**
  * Class ChannelController
@@ -79,17 +81,44 @@ class ChannelController extends BPIController
 
         $channels = $this->getRepository('BpiApiBundle:Entity\Channel')->findByQuery($query);
 
+
         if (null === $channels) {
             throw new HttpException(Codes::HTTP_NOT_FOUND, 'No channels found.');
         }
 
         // Prepare existing channels for response.
-        $xml = $this->get('bpi.presentation.channels');
-        foreach ($channels as $channel) {
-            $xml->addChannel($channel);
+        $response = $this->get('bpi.presentation.channels');
+        $response->setTotal($query->total);
+        $response->setOffset($query->offset);
+        $response->setAmount($query->amount);
+
+        foreach ($availableFacets->facets as $name => $facet) {
+            $theFacet = new Facet(Facet::TYPE_STRING, $name);
+            foreach ($facet as $key => $term) {
+                $value = '';
+                $title = null;
+                if ($name == 'agency_id') {
+                    $value = $term['count'];
+                    $title = $term['agencyName'];
+                } elseif (isset($term['count'])) {
+                    $value = $term['count'];
+                    $title = isset($term['title']) ? $term['title'] : '';
+                } else {
+                    $value = $term;
+                }
+
+                $term = new FacetTerm($key, $value, $title);
+                $theFacet->addTerm($term);
+            }
+
+            $response->addFacet($theFacet);
         }
 
-        return $xml;
+        foreach ($channels as $channel) {
+            $response->addChannel($channel);
+        }
+
+        return $response;
     }
 
     /**

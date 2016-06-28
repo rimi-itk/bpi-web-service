@@ -167,6 +167,7 @@ class FacetRepository extends DocumentRepository
 
 
         $result = $this->iterateTerms($qb);
+
         foreach ($result as $facet) {
             if ($facet['_id']['facetName'] == 'agency_id') {
                 $agency = $this->dm->getRepository('BpiApiBundle:Aggregate\Agency')->loadUserByUsername($facet['_id']['facetValue']);

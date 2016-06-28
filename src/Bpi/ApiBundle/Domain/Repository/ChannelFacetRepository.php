@@ -3,10 +3,8 @@
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Bpi\ApiBundle\Domain\Entity\ChannelFacet;
-use Bpi\ApiBundle\Domain\Entity\Channel;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ODM\MongoDB\DocumentRepository;
-use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
 
 /**
  * ChannelFacetRepository
@@ -28,20 +26,21 @@ class ChannelFacetRepository extends DocumentRepository
     private $logicalOperator;
 
     /**
-     * Prepare facet for a channel.
+     * Prepare facets for a channel
      *
-     * @param Channel $channel
+     * @param $channel
      */
-    public function prepareFacet(Channel $channel) {
+    public function prepareFacet($channel) {
         $facet = new ChannelFacet();
 
         $agency = $channel->getChannelAdmin()->getUserAgency();
-        $data = (object)array(
+
+        $data = array(
             'agency_id' => $agency->getPublicId(),
         );
 
         $facet->setChannelId($channel->getId());
-        $facet->setFacetData($data);
+        $facet->setFacetData((object)$data);
 
         $this->dm->persist($facet);
         $this->dm->flush();
@@ -62,7 +61,7 @@ class ChannelFacetRepository extends DocumentRepository
         $this->filters = $filters;
         $this->logicalOperator = $logicalOperator;
 
-        $qb = $this->createQueryBuilder();
+        $qb = $this->createQueryBuilder('Entity\ChannelFacet');
 
         $filteredChannels = $this->iterateTerms($qb);
         foreach ($filteredChannels as $key => $channel) {
@@ -101,8 +100,7 @@ class ChannelFacetRepository extends DocumentRepository
                     }
                     return sum;
                 };
-            ')
-            ;
+            ');
 
         $facets = array();
         $result = $this->iterateTerms($qb);
@@ -169,13 +167,13 @@ class ChannelFacetRepository extends DocumentRepository
      */
     public function updateFacet($changes)
     {
-        $qb = $this->dm->createQueryBuilder()
+        $qb = $this->dm->createQueryBuilder('BpiApiBundle:Entity\ChannelFacet')
             ->update()
             ->multiple(true)
-            ;
+        ;
 
-        if (isset($changes['nodeId'])) {
-            $qb->field('nodeId')->equals($changes['nodeId']);
+        if (isset($changes['channelId'])) {
+            $qb->field('channelId')->equals($changes['channelId']);
         }
 
         foreach ($changes as $changedValue => $changed) {
