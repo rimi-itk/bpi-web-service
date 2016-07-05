@@ -19,7 +19,7 @@ class Tag
 {
     /**
      * @Serializer\Type("string")
-     * @Serializer\XMLAttribute
+     * @Serializer\XmlAttribute
      */
     protected $tagName;
 
