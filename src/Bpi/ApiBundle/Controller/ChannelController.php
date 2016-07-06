@@ -63,6 +63,13 @@ class ChannelController extends BPIController
                         }
                         $filters['agency_id'][] = $val;
                     }
+                } elseif ($field == 'id' && is_array($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {
+                            continue;
+                        }
+                        $filters['id'][] = $val;
+                    }
                 }
             }
             if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {

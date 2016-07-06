@@ -176,13 +176,19 @@ class ChannelFacetRepository extends DocumentRepository
                     }
                 }
 
+                $fieldName = 'facetData.'.$name;
+                // Allow filtering on (channel) id.
+                if ($name === 'id') {
+                    $fieldName = 'channelId';
+                }
+
                 switch (strtoupper($this->logicalOperator)) {
                     case 'AND':
-                        $qb->addAnd($qb->expr()->field('facetData.'.$name)->in($terms));
+                        $qb->addAnd($qb->expr()->field($fieldName)->in($terms));
                         break;
 
                     default:
-                        $qb->addOr($qb->expr()->field('facetData.'.$name)->in($terms));
+                        $qb->addOr($qb->expr()->field($fieldName)->in($terms));
                         break;
                 }
             }
