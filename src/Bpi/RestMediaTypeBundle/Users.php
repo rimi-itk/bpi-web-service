@@ -1,25 +1,32 @@
 <?php
 namespace Bpi\RestMediaTypeBundle;
 
-use Bpi\RestMediaTypeBundle\Element\Entity;
-use Bpi\RestMediaTypeBundle\XmlResponse;
+use Bpi\ApiBundle\Domain\Entity\User;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
+ * Users.
+ *
  * @Serializer\XmlRoot("users")
  */
-class Users extends XmlResponse
+class Users extends Collection
 {
     /**
      * @Serializer\XmlList(inline=true, entry="user")
-     * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\User>")
      */
-    public $users = array();
-    public function addUser(\Bpi\ApiBundle\Domain\Entity\User $entity)
+    public $items = array();
+
+    /**
+     * Add a User to the collection
+     *
+     * @param User $user
+     *
+     * @return Collection
+     */
+    public function addUser(User $user)
     {
-        $entity = new \Bpi\RestMediaTypeBundle\Element\User($entity);
-        $this->users[] = $entity;
+        $item = new \Bpi\RestMediaTypeBundle\Element\User($user);
+
+        return $this->addItem($item);
     }
-
 }
-

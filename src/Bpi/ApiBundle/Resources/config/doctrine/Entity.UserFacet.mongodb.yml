@@ -1,0 +1,13 @@
+Bpi\ApiBundle\Domain\Entity\UserFacet:
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\UserFacetRepository
+  collection: UserFacet
+  type: document
+
+  fields:
+    id:
+      type: id
+      id: true
+    userId:
+      type: string
+    facetData:
+      type: hash

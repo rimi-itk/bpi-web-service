@@ -6,7 +6,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * @Serializer\XmlRoot("user")
  */
-class User
+class User extends Item
 {
     /**
      * @Serializer\Type("string")
@@ -44,16 +44,18 @@ class User
     protected $subscriptions;
 
     /**
-     * @param $data
+     * Create a new User.
+     *
+     * @param \Bpi\ApiBundle\Domain\Entity\User $user
      */
-    public function __construct($data)
+    public function __construct(\Bpi\ApiBundle\Domain\Entity\User $user)
     {
-        $this->id = $data->getId();
-        $this->internalUserName = $data->getInternalUserName();
-        $this->email = $data->getEmail();
-        $this->userFirstName = $data->getUserFirstName();
-        $this->userLastName = $data->getUserLastName();
-        $this->agency = new Agency($data->getUserAgency());
-        $this->subscriptions = $data->getSubscriptions();
+        $this->id = $user->getId();
+        $this->internalUserName = $user->getInternalUserName();
+        $this->email = $user->getEmail();
+        $this->userFirstName = $user->getUserFirstName();
+        $this->userLastName = $user->getUserLastName();
+        $this->agency = new Agency($user->getUserAgency());
+        $this->subscriptions = $user->getSubscriptions();
     }
 }
