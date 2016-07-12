@@ -1,8 +1,6 @@
 <?php
 namespace Bpi\ApiBundle\Domain\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-
 /**
  * Bpi\ApiBundle\Domain\Entity\UserFacet
  */
@@ -19,7 +17,7 @@ class UserFacet
     protected $userId;
 
     /**
-     * @var collection $facetData
+     * @var stdClass $facetData
      */
     protected $facetData;
 
@@ -28,7 +26,6 @@ class UserFacet
      */
     public function __construct()
     {
-        $this->facetData = new ArrayCollection();
     }
 
     /**
@@ -67,7 +64,7 @@ class UserFacet
     /**
      * Set facetData
      *
-     * @param collection $facetData
+     * @param stdClass $facetData
      * @return self
      */
     public function setFacetData($facetData)

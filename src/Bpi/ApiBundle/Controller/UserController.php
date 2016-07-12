@@ -36,21 +36,21 @@ class UserController extends BPIController
     {
         $query = new \Bpi\ApiBundle\Domain\Entity\UserQuery();
         $query->amount(20);
-        if (false !== ($amount = $this->getRequest()->query->get('amount', false))) {
+        if (false !== ($amount = $this->getQueryParameter('amount'))) {
             $query->amount($amount);
         }
 
-        if (false !== ($offset = $this->getRequest()->query->get('offset', false))) {
+        if (false !== ($offset = $this->getQueryParameter('offset'))) {
             $query->offset($offset);
         }
 
-        if (false !== ($search = $this->getRequest()->query->get('search', false))) {
+        if (false !== ($search = $this->getQueryParameter('search'))) {
             $query->search($search);
         }
 
         $filters = array();
         $logicalOperator = '';
-        if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
+        if (false !== ($filter = $this->getQueryParameter('filter'))) {
             foreach ($filter as $field => $value) {
                 if ($field == 'agency_id' && is_array($value)) {
                     foreach ($value as $val) {
@@ -70,7 +70,7 @@ class UserController extends BPIController
         $facets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
         $query->filter($facets->userIds);
 
-        if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
+        if (false !== ($sort = $this->getQueryParameter('sort'))) {
             foreach ($sort as $field => $order) {
                 $query->sort($field, $order);
             }
@@ -144,7 +144,7 @@ class UserController extends BPIController
      * Create new user
      *
      * @Rest\Post("/")
-     * @Rest\View()
+     * @Rest\View(statusCode="201")
      */
     public function createUserAction()
     {

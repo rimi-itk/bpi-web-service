@@ -36,12 +36,11 @@ class ChannelFacetRepository extends DocumentRepository
         $facet = new ChannelFacet();
 
         $agency = $channel->getChannelAdmin()->getUserAgency();
-        $data = array(
-            'agency_id' => $agency->getPublicId(),
-        );
+        $data = new \stdClass();
+        $data->agency_id = $agency->getPublicId();
 
         $facet->setChannelId($channel->getId());
-        $facet->setFacetData((object) $data);
+        $facet->setFacetData($data);
 
         $this->dm->persist($facet);
         $this->dm->flush();
