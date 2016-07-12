@@ -3,6 +3,7 @@
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
+use Bpi\ApiBundle\Domain\Entity\UserQuery;
 
 /**
  * UserRepository
@@ -12,6 +13,20 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
  */
 class UserRepository extends DocumentRepository
 {
+    /**
+     * Find Users by a query.
+     *
+     * @param UserQuery $query
+     *
+     * @return mixed
+     */
+    public function findByQuery(UserQuery $query)
+    {
+        return $query->executeByDoctrineQuery(
+            $this->dm->createQueryBuilder($this->getClassName())
+        );
+    }
+
     /**
      * Check if User with such internal name exitst
      *
@@ -50,34 +65,6 @@ class UserRepository extends DocumentRepository
         );
 
         return $result;
-    }
-
-    /**
-     * Get list of users.
-     *
-     * @param $agencyId - optional filter
-     * @return ArrayCollection
-     */
-    public function getListAutocompletions($userIternalName, $agencyId = null)
-    {
-        $qb = $this->createQueryBuilder('Entity\User');
-
-        if ($agencyId) {
-            $qb->addOr($qb->expr()->field('userAgency.id')->equals($agencyId));
-        }
-        if ($userIternalName) {
-            $mongoReg = new \MongoRegex('/.*' . $userIternalName . '.*/');
-            $qb
-                ->addOr($qb->expr()->field('userFirstName')->equals($mongoReg))
-                ->addOr($qb->expr()->field('userLastName')->equals($mongoReg))
-                ->addOr($qb->expr()->field('internalUserName')->equals($mongoReg))
-            ;
-        }
-
-        return $qb
-            ->getQuery()
-            ->execute();
-        ;
     }
 
     public function getUserNotifications($user)

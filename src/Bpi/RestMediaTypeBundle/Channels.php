@@ -1,23 +1,30 @@
 <?php
 namespace Bpi\RestMediaTypeBundle;
 
+use Bpi\ApiBundle\Domain\Entity\Channel;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @Serializer\XmlRoot("channels")
  */
-class Channels extends XmlResponse
+class Channels extends Collection
 {
     /**
      * @Serializer\XmlList(inline=true, entry="channel")
-     * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\Channel>")
      */
-    public $channels = array();
+    public $items;
 
-    public function addChannel($entity)
+    /**
+     * Add a Channel to the Collection.
+     *
+     * @param Channel $channel
+     *
+     * @return Collection
+     */
+    public function addChannel(Channel $channel)
     {
-        $entity = new \Bpi\RestMediaTypeBundle\Element\Channel($entity);
-        $this->channels[] = $entity;
-    }
+        $item = new \Bpi\RestMediaTypeBundle\Element\Channel($channel);
 
+        return $this->addItem($item);
+    }
 }

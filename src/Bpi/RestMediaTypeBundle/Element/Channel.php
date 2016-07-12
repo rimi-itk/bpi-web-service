@@ -6,7 +6,7 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * @Serializer\XmlRoot("channel")
  */
-class Channel
+class Channel extends Item
 {
     /**
      * @var
@@ -31,6 +31,7 @@ class Channel
 
     /**
      * @var
+     * @Serializer\Type("DateTime")
      */
     private $nodeLastAddedAt;
 
@@ -41,21 +42,23 @@ class Channel
     private $users;
 
     /**
-     * @param $data
+     * @param \Bpi\ApiBundle\Domain\Entity\Channel $channel
      */
-    public function __construct(\Bpi\ApiBundle\Domain\Entity\Channel $data)
+    public function __construct(\Bpi\ApiBundle\Domain\Entity\Channel $channel)
     {
-        $this->id = $data->getId();
-        $admin = $data->getChannelAdmin();
+        $this->id = $channel->getId();
+        $admin = $channel->getChannelAdmin();
         $this->channelAdmin = new User($admin);
-        $this->channelName = $data->getChannelName();
-        $this->channelDescription = $data->getChannelDescription();
-        $nodes = $data->getChannelNodes();
-        foreach($nodes as $node)
+        $this->channelName = $channel->getChannelName();
+        $this->channelDescription = $channel->getChannelDescription();
+        $nodes = $channel->getChannelNodes();
+        foreach ($nodes as $node) {
             $this->nodes[] = $node->getId();
-        $this->nodeLastAddedAt = $data->getNodeLastAddedAt();
-        $users =  $data->getChannelEditors();
-        foreach($users as $user)
-             $this->users[] = new User($user);
+        }
+        $this->nodeLastAddedAt = $channel->getNodeLastAddedAt();
+        $users =  $channel->getChannelEditors();
+        foreach ($users as $user) {
+            $this->users[] = new User($user);
+        }
     }
 }

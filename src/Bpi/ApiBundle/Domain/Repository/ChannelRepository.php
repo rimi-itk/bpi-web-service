@@ -3,6 +3,7 @@
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
+use Bpi\ApiBundle\Domain\Entity\ChannelQuery;
 
 /**
  * ChannelRepository
@@ -13,15 +14,17 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
 class ChannelRepository extends DocumentRepository
 {
     /**
-     * Helper method, determine if channel name is free to use for new channel
+     * Find Channels by a query.
      *
-     * @param $channelName string name of channel which should be checked on duplicates
-     * @return bool is name of channel free
+     * @param ChannelQuery $query
+     *
+     * @return mixed
      */
-    public function findSimilarByName($channelName)
+    public function findByQuery(ChannelQuery $query)
     {
-        $result = $this->findOneByChannelName($channelName);
-        return ($result) ? true : false;
+        return $query->executeByDoctrineQuery(
+            $this->dm->createQueryBuilder($this->getClassName())
+        );
     }
 
     public function findChannelsByUser($user)
@@ -53,5 +56,12 @@ class ChannelRepository extends DocumentRepository
 
         $count = $result->count();
         return ($count === 0) ? null : $result;
+    }
+
+    public function findByChannelQuery(ChannelQuery $query)
+    {
+        return $query->executeByDoctrineQuery(
+            $this->dm->createQueryBuilder($this->getClassName())
+        );
     }
 }
