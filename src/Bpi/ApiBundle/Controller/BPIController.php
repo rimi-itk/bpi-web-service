@@ -59,7 +59,7 @@ class BPIController extends FOSRestController
      */
     protected function getQueryParameter($parameterName)
     {
-        return $this->getRequest()->request->get($parameterName, false);
+        return $this->getRequest()->query->get($parameterName, false);
     }
 
     /**
