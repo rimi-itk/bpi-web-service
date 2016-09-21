@@ -174,22 +174,14 @@ class ChannelController extends BPIController
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
 
-        $userAgency = $this->getAgencyFromHeader();
-        $userAgencyId = $userAgency->getAgencyId()->id();
-
-        if (null === $userAgency) {
-            throw new HttpException(Codes::HTTP_NOT_FOUND, 'Agency with external id ' . $userId . ' not found.');
-        }
-
         $user = $userRepository->findOneBy(
             array(
                 'id' => $userId,
-                'userAgency.$id' => new \MongoId($userAgency->getId())
             )
         );
 
         if (null === $user) {
-            throw new HttpException(Codes::HTTP_NOT_FOUND, 'User with given externalId: ' . $userId . ' and agency public_id: ' . $userAgencyId . ' not found.');
+            throw new HttpException(Codes::HTTP_NOT_FOUND, 'User with given externalId: ' . $userId . ' not found.');
         }
 
         $xml = $this->get('bpi.presentation.channels');
