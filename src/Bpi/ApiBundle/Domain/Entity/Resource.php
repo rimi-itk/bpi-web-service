@@ -47,6 +47,7 @@ class Resource implements IPresentable
      * @param object $router
      */
     public function __construct(
+        $type,
         $title,
         $body,
         $teaser,
@@ -59,6 +60,7 @@ class Resource implements IPresentable
         array $materials = array()
     )
     {
+        $this->type = $type;
         $this->title = $title;
         $this->body = new Resource\Body($body, $router);
         $this->body->rebuildInlineAssets();

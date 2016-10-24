@@ -527,6 +527,7 @@ class RestController extends FOSRestController
 
         $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder($this->get('router'));
         $resource
+          ->type($request->get('type'))
           ->title($request->get('title'))
           ->body($request->get('body'))
           ->teaser($request->get('teaser'))
