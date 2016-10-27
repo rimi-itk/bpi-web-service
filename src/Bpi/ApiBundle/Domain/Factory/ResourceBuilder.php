@@ -19,6 +19,7 @@ class ResourceBuilder
     protected $category;
     protected $audience;
     protected $url;
+    protected $data;
 
     public function __construct(RouterInterface $router)
     {
@@ -77,6 +78,16 @@ class ResourceBuilder
     public function url($url)
     {
         $this->url = $url;
+        return $this;
+    }
+
+    /**
+     * @param string $data
+     * @return \Bpi\ApiBundle\Domain\Factory\ResourceBuilder
+     */
+    public function data($data)
+    {
+        $this->data = $data;
         return $this;
     }
 
@@ -177,7 +188,8 @@ class ResourceBuilder
             $this->files,
             $this->router,
             $this->materials,
-            $this->url
+            $this->url,
+            $this->data
         );
     }
 }

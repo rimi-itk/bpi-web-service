@@ -177,6 +177,9 @@ class Document extends XmlResponse
             case 'number':
                 return new Property\Number($type, $name, $value, $title);
             break;
+            case 'json':
+                return new Property\Json($type, $name, $value, $title);
+            break;
             default:
                 return new GenericProperty($type, $name, $value, $title);
         }
