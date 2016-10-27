@@ -36,6 +36,8 @@ class Resource implements IPresentable
     protected $category;
     protected $audience;
 
+    protected $url;
+
     /**
      *
      * @param string $title
@@ -57,7 +59,8 @@ class Resource implements IPresentable
         $audience,
         array $files = null,
         $router,
-        array $materials = array()
+        array $materials = array(),
+        $url
     )
     {
         $this->type = $type;
@@ -72,6 +75,7 @@ class Resource implements IPresentable
         $this->materials = $materials;
         $this->category = $category;
         $this->audience = $audience;
+        $this->url = $url;
     }
 
     /**
@@ -131,6 +135,7 @@ class Resource implements IPresentable
         $entity->addProperty($document->createProperty('teaser', 'string', $this->teaser));
         $entity->addProperty($document->createProperty('creation', 'dateTime', $this->ctime));
         $entity->addProperty($document->createProperty('type', 'string', $this->type));
+        $entity->addProperty($document->createProperty('url', 'string', $this->url));
 
         foreach ($this->materials as $material)
         {
@@ -225,6 +230,28 @@ class Resource implements IPresentable
     public function getBody()
     {
         return $this->body;
+    }
+
+    /**
+     * Set url
+     *
+     * @param string $url
+     * @return self
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+        return $this;
+    }
+
+    /**
+     * Get url
+     *
+     * @return string $body
+     */
+    public function getUrl()
+    {
+        return $this->url;
     }
 
     /**
