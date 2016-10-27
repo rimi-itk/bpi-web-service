@@ -9,6 +9,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 class ResourceBuilder
 {
+    protected $type;
     protected $title, $body, $teaser, $ctime, $copyleft;
     protected $files = array();
     protected $filesystem;
@@ -21,6 +22,17 @@ class ResourceBuilder
     public function __construct(RouterInterface $router)
     {
         $this->router = $router;
+    }
+
+    /**
+     *
+     * @param string $type
+     * @return \Bpi\ApiBundle\Domain\Factory\ResourceBuilder
+     */
+    public function type($type)
+    {
+        $this->type = $type;
+        return $this;
     }
 
     /**
@@ -117,7 +129,8 @@ class ResourceBuilder
      */
     protected function isValidForBuild()
     {
-        return !(is_null($this->title)
+        return !(is_null($this->type)
+            || is_null($this->title)
             || is_null($this->body)
             || is_null($this->teaser)
             || is_null($this->ctime)
@@ -141,6 +154,7 @@ class ResourceBuilder
         }
 
         return new Resource(
+            $this->type,
             $this->title,
             $this->body,
             $this->teaser,
