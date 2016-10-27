@@ -338,6 +338,14 @@ class Node implements IPresentable
         $this->resource->setBody($body);
     }
 
+    public function getData() {
+        return $this->resource->getData();
+    }
+
+    public function setData($data) {
+        return $this->resource->data($data);
+    }
+
     public function setAudience(Audience $audience)
     {
         $this->audience = $audience;

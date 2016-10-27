@@ -109,6 +109,7 @@ class RestController extends FOSRestController
         $template->createField('assets');
         $template->createField('related_materials');
         $template->createField('tags');
+        $template->createField('data', 'json');
 
         // Profile resource
         $profile = $document->createRootEntity('resource', 'profile');
@@ -530,6 +531,7 @@ class RestController extends FOSRestController
           ->title($request->get('title'))
           ->body($request->get('body'))
           ->teaser($request->get('teaser'))
+          ->data($request->get('data'))
           ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $request->get('creation')));
 
         // Related materials

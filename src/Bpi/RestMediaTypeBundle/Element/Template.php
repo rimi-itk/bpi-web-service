@@ -61,9 +61,9 @@ class Template
      * @param string $name
      * @return \Bpi\RestMediaTypeBundle\Element\Template\Field
      */
-    public function createField($name)
+    public function createField($name, $type = 'string')
     {
-      $this->addField($field = new Template\Field($name));
+      $this->addField($field = new Template\Field($name, $type));
       return $field;
     }
 }

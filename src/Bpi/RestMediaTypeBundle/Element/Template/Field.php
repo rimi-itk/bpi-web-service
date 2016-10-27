@@ -13,13 +13,20 @@ class Field
      * @Serializer\XmlAttribute
      */
     protected $name;
-    
+
     /**
-     * 
+     * @Serializer\Type("string")
+     * @Serializer\XmlAttribute
+     */
+    protected $type;
+
+    /**
+     *
      * @param string $name
      */
-    public function __construct($name)
+    public function __construct($name, $type)
     {
         $this->name = $name;
+        $this->type = $type;
     }
 }

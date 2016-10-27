@@ -12,6 +12,7 @@ class Property
     const TYPE_NUMBER = 'number';
     const TYPE_STRING = 'string';
     const TYPE_DATETIME = 'dateTime';
+    const TYPE_JSON = 'json';
 
     /**
      * @Serializer\XmlAttribute
