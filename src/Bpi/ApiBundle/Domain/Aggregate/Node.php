@@ -297,16 +297,6 @@ class Node implements IPresentable
     }
 
     /// Setters and getters for forms
-    public function getType()
-    {
-        return $this->resource->getType();
-    }
-
-    public function setType($type)
-    {
-        $this->resource->setType($type);
-    }
-
     public function getTitle()
     {
         return $this->resource->getTitle();

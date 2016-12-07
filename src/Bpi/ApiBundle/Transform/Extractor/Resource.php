@@ -46,7 +46,6 @@ class Resource implements IExtractor
         });
 
         return $builder
-            ->type($entity->property('type')->getValue())
             ->title($entity->property('title')->getValue())
             ->body($entity->property('body')->getValue())
             ->teaser($entity->property('teaser')->getValue())
