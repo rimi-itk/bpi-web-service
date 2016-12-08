@@ -77,6 +77,8 @@ class FakeData implements FixtureInterface
             ->copyleft(new Copyleft(''))
             ->addMaterial('123-100200:12345678')
             ->addMaterial('123-100200:87654321')
+            ->url('http://example.com/article')
+            ->data(json_encode(array('subject' => 'computer science')))
         ;
 
         $builder = new ProfileBuilder();
