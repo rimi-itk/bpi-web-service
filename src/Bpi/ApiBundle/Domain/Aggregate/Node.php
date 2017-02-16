@@ -22,11 +22,6 @@ class Node implements IPresentable
     protected $ctime;
     protected $mtime;
 
-    protected $path;
-    protected $parent;
-    protected $level;
-    protected $lock_time;
-
     protected $author;
     protected $resource;
     protected $profile;
@@ -125,7 +120,6 @@ class Node implements IPresentable
             ->build()
         ;
 
-        $node->parent = $this;
         return $node;
     }
 
