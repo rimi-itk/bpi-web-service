@@ -109,6 +109,8 @@ class RestController extends FOSRestController
         $template->createField('assets');
         $template->createField('related_materials');
         $template->createField('tags');
+        $template->createField('url');
+        $template->createField('data');
 
         // Profile resource
         $profile = $document->createRootEntity('resource', 'profile');
@@ -152,6 +154,12 @@ class RestController extends FOSRestController
         $logicalOperator = '';
         if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
             foreach ($filter as $field => $value) {
+                if ($field == 'type' && !empty($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {continue; }
+                        $filters['type'][] = $val;
+                    }
+                }
                 if ($field == 'category' && !empty($value)) {
                     foreach ($value as $val) {
                         $category = $this->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => $val));
@@ -280,6 +288,13 @@ class RestController extends FOSRestController
                         $term['count'],
                         $term['agencyName']
                     );
+                } elseif (isset($term['count'])) {
+                  $result[] = $document->createProperty(
+                    $key,
+                    'string',
+                    $term['count'],
+                    isset($term['title']) ? $term['title'] : ''
+                  );
                 } else {
                     $result[] = $document->createProperty(
                         $key,
@@ -520,9 +535,12 @@ class RestController extends FOSRestController
 
         $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder($this->get('router'));
         $resource
+          ->type($request->get('type'))
           ->title($request->get('title'))
           ->body($request->get('body'))
           ->teaser($request->get('teaser'))
+          ->url($request->get('url'))
+          ->data($request->get('data'))
           ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $request->get('creation')));
 
         // Related materials

@@ -7,16 +7,18 @@
 namespace Bpi\ApiBundle\Controller;
 
 use Bpi\RestMediaTypeBundle\XmlResponse;
-use Bpi\RestMediaTypeBundle\XmlError;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Constraints;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\Rest\Util\Codes;
 
 use Bpi\ApiBundle\Domain\Entity\Channel;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
+use Bpi\RestMediaTypeBundle\Element\Facet;
+use Bpi\RestMediaTypeBundle\Element\FacetTerm;
 
 /**
  * Class ChannelController
@@ -32,29 +34,95 @@ class ChannelController extends BPIController
      * @Rest\Get("/")
      * @Rest\View()
      *
-     * @return \Bpi\RestMediaTypeBundle\Channels | XmlError
+     * @return \Bpi\RestMediaTypeBundle\Channels
      */
     public function listChannelsAction()
     {
-        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
-
-        $allChannels = $channelRepository->findBy(array('channelDeleted' => false));
-
-        // Check if not deleted channels exist.
-        if(null === $allChannels) {
-            $xmlError = $this->get('bpi.presentation.xmlerror');
-            $xmlError->setCode(404);
-            $xmlError->setError('No channels found.');
-            return $xmlError;
+        $query = new \Bpi\ApiBundle\Domain\Entity\ChannelQuery();
+        $query->amount(20);
+        if (false !== ($amount = $this->getQueryParameter('amount'))) {
+            $query->amount($amount);
         }
 
-        // Prepare existing channels for response.
-        $xml = $this->get('bpi.presentation.channels');
-        foreach ($allChannels as $channel) {
-            $xml->addChannel($channel);
+        if (false !== ($offset = $this->getQueryParameter('offset'))) {
+            $query->offset($offset);
         }
 
-        return $xml;
+        if (false !== ($search = $this->getQueryParameter('search'))) {
+            $query->search($search);
+        }
+
+        $filters = array();
+        $logicalOperator = '';
+        if (false !== ($filter = $this->getQueryParameter('filter'))) {
+            foreach ($filter as $field => $value) {
+                if ($field == 'agency_id' && is_array($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {
+                            continue;
+                        }
+                        $filters['agency_id'][] = $val;
+                    }
+                } elseif ($field == 'id' && is_array($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {
+                            continue;
+                        }
+                        $filters['id'][] = $val;
+                    }
+                }
+            }
+            if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {
+                $logicalOperator = $filter['logicalOperator'];
+            }
+        }
+
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\ChannelFacet');
+        $facets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
+        $query->filter($facets->channelIds);
+
+        if (false !== ($sort = $this->getQueryParameter('sort'))) {
+            foreach ($sort as $field => $order) {
+                $query->sort($field, $order);
+            }
+        }
+
+        $channels = $this->getRepository('BpiApiBundle:Entity\Channel')->findByQuery($query);
+
+        if (null === $channels) {
+            throw new HttpException(Codes::HTTP_NOT_FOUND, 'No channels found.');
+        }
+
+        $response = $this->get('bpi.presentation.channels');
+        $response->setTotal($query->total);
+        $response->setOffset($query->offset);
+        $response->setAmount($query->amount);
+
+        foreach ($facets->facets as $name => $facet) {
+            $theFacet = new Facet(Facet::TYPE_STRING, $name);
+            foreach ($facet as $key => $term) {
+                $value = $term;
+                $title = null;
+                if ($name == 'agency_id') {
+                    $value = $term['count'];
+                    $title = $term['agencyName'];
+                } elseif (isset($term['count'])) {
+                    $value = $term['count'];
+                    $title = isset($term['title']) ? $term['title'] : null;
+                }
+
+                $term = new FacetTerm($key, $value, $title);
+                $theFacet->addTerm($term);
+            }
+
+            $response->addFacet($theFacet);
+        }
+
+        foreach ($channels as $channel) {
+            $response->addChannel($channel);
+        }
+
+        return $response;
     }
 
     /**
@@ -65,24 +133,26 @@ class ChannelController extends BPIController
      *
      * @param string $channelId.
      *
-     * @return \Bpi\RestMediaTypeBundle\Channels | XmlError
+     * @return \Bpi\RestMediaTypeBundle\Channels
      */
     public function getChannelInfoAction($channelId) {
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
 
-        $channel = $channelRepository->find($channelId);
+        $channel = $channelRepository->findOneBy(
+            array(
+                'id' => $channelId,
+                'channelDeleted' => false,
+            )
+        );
 
         if (null === $channel) {
-            $xmlError = $this->get('bpi.presentation.xmlerror');
-            $xmlError->setCode(404);
-            $xmlError->setError('Channel with id ' . $channelId . ' not found.');
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, 'Channel with id ' . $channelId . ' not found.');
         }
 
-        $xml = $this->get('bpi.presentation.channels');
-        $xml->addChannel($channel);
+        $response = $this->get('bpi.presentation.channels');
+        $response->addChannel($channel);
 
-        return $xml;
+        return $response;
     }
 
     /**
@@ -97,37 +167,21 @@ class ChannelController extends BPIController
      */
     public function listUsersChannelsAction($userId)
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
-
         if (!isset($userId) || empty($userId)) {
-            $xmlError->setCode(400);
-            $xmlError->setError('User external id required for listing channels.');
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_BAD_REQUEST, 'User external id required for listing channels.');
         }
 
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
 
-        $userAgency = $this->getAgencyFromHeader();
-        $userAgencyId = $userAgency->getAgencyId()->id();
-
-        if (null === $userAgency) {
-            $xmlError->setCode(400);
-            $xmlError->setError('Agency with external id ' . $userId . ' not found.');
-            return $xmlError;
-        }
-
         $user = $userRepository->findOneBy(
             array(
                 'id' => $userId,
-                'userAgency.$id' => new \MongoId($userAgency->getId())
             )
         );
 
         if (null === $user) {
-            $xmlError->setCode(400);
-            $xmlError->setError('User with given externalId: ' . $userId . ' and agency public_id: ' . $userAgencyId . ' not found.');
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, 'User with given externalId: ' . $userId . ' not found.');
         }
 
         $xml = $this->get('bpi.presentation.channels');
@@ -149,7 +203,6 @@ class ChannelController extends BPIController
      */
     public function createChannelAction()
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $params = $this->getAllRequestParameters();
@@ -164,17 +217,13 @@ class ChannelController extends BPIController
 
         foreach ($requiredParams as $param => $count) {
             if ($count  == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         $user = $userRepository->findOneById($params['editorId']);
         if ($user === null) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id = '{$params['editorId']}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id = '{$params['editorId']}' not found.");
         }
 
         $channel = new Channel();
@@ -188,11 +237,13 @@ class ChannelController extends BPIController
         $dm->persist($channel);
         $dm->flush();
 
-        $transform = $this->get('bpi.presentation.transformer');
-        $transform->setDoc($this->get('bpi.presentation.document'));
-        $document = $transform->transform($channel);
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\ChannelFacet');
+        $facetRepository->prepareFacet($channel);
 
-        return $document;
+        $response = $this->get('bpi.presentation.channels');
+        $response->addChannel($channel);
+
+        return $response;
     }
 
     /**
@@ -200,11 +251,8 @@ class ChannelController extends BPIController
      *
      * @Rest\Post("/edit/{channelId}")
      * @Rest\View()
-     *
-     * @return XmlError
      */
     public function editChannelAction($channelId) {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
         $params = $this->getAllRequestParameters();
@@ -219,17 +267,13 @@ class ChannelController extends BPIController
 
         foreach ($requiredParams as $param => $count) {
             if ($count  == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         $channel = $channelRepository->find($channelId);
         if (null === $channel) {
-            $xmlError->setCode(404);
-            $xmlError->setError("Channel with id = '{$channelId}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "Channel with id = '{$channelId}' not found.");
         }
 
         $channel->setChannelName($params['channelName']);
@@ -238,11 +282,10 @@ class ChannelController extends BPIController
         $dm->persist($channel);
         $dm->flush();
 
-        $transform = $this->get('bpi.presentation.transformer');
-        $transform->setDoc($this->get('bpi.presentation.document'));
-        $document = $transform->transform($channel);
+        $response = $this->get('bpi.presentation.channels');
+        $response->addChannel($channel);
 
-        return $document;
+        return $response;
     }
 
     /**
@@ -253,7 +296,6 @@ class ChannelController extends BPIController
      */
     public function addEditorToChannelAction()
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
@@ -270,26 +312,20 @@ class ChannelController extends BPIController
 
         foreach ($requiredParams as $param => $count) {
             if ($count  == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         // Check channel exist, load it.
         $channel = $channelRepository->findOneById($params['channelId']);
         if ($channel === null) {
-            $xmlError->setCode(404);
-            $xmlError->setError("Channel with id = '{$params['channelId']}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "Channel with id = '{$params['channelId']}' not found.");
         }
 
         // Check if user have permission to add node to channel.
         $admin = $channel->getChannelAdmin();
         if ($admin->getId() != $params['adminId']) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id  = '{$params['adminId']}' can't add users to channel.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_FORBIDDEN, "User with id  = '{$params['adminId']}' can't add users to channel.");
         }
 
         $skipped = array();
@@ -329,7 +365,6 @@ class ChannelController extends BPIController
      */
     public function removeEditorFromChannelAction()
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
@@ -345,26 +380,20 @@ class ChannelController extends BPIController
 
         foreach ($requiredParams as $param => $count) {
             if ($count  == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         // Check channel exist, load it.
         $channel = $channelRepository->findOneById($params['channelId']);
         if ($channel === null) {
-            $xmlError->setCode(404);
-            $xmlError->setError("Channel with id = '{$params['channelId']}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "Channel with id = '{$params['channelId']}' not found.");
         }
 
         // Check if user have permission to add node to channel.
         $admin = $channel->getChannelAdmin();
         if ($admin->getId() != $params['adminId']) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id  = '{$params['adminId']}' can't remove users from channel.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id  = '{$params['adminId']}' can't remove users from channel.");
         }
 
         $skipped = array();
@@ -403,7 +432,6 @@ class ChannelController extends BPIController
      */
     public function addNodeToChannelAction()
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
         $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
@@ -420,18 +448,14 @@ class ChannelController extends BPIController
 
         foreach ($requiredParams as $param => $count) {
             if ($count  == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         // Try to load channel.
         $channel = $channelRepository->findOneById($params['channelId']);
         if ($channel === null) {
-            $xmlError->setCode(404);
-            $xmlError->setError("Channel with id  = '{$params['channelId']}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "Channel with id  = '{$params['channelId']}' not found.");
         }
 
         // Check if user have permission to add node to channel.
@@ -445,9 +469,7 @@ class ChannelController extends BPIController
             }
         }
         if ($admin->getId() != $params['editorId'] && !$is_editor) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id  = '{$params['editorId']}' can't push to this channel.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_FORBIDDEN, "User with id  = '{$params['editorId']}' can't push to this channel.");
         }
 
         $skipped = array();
@@ -470,10 +492,8 @@ class ChannelController extends BPIController
             try {
                 $channel->addChannelNode($node);
                 $success[] = $node->getId();
-            } catch (Exception $e) {
-                $xmlError->setCode(500);
-                $xmlError->setError("Internal error on adding node.");
-                return $xmlError;
+            } catch (\Exception $e) {
+                throw new HttpException(Codes::HTTP_INTERNAL_SERVER_ERROR, "Internal error on adding node.");
             }
         }
 
@@ -481,7 +501,7 @@ class ChannelController extends BPIController
         $dm->flush();
 
         $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
-        $facetRepository->addChannelToFacet($channel->getChannelName(), $params['nodes']);
+        $facetRepository->addChannelToFacet($channel->getId(), $params['nodes']);
 
         $xml = $this->get('bpi.presentation.xmlgroupoperation');
         $xml->setCode(200);
@@ -503,7 +523,6 @@ class ChannelController extends BPIController
      */
     public function removeNodeFromChannelAction()
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
         $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
@@ -520,18 +539,14 @@ class ChannelController extends BPIController
 
         foreach ($requiredParams as $param => $count) {
             if ($count  == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         // Try to load channel.
         $channel = $channelRepository->findOneById($params['channelId']);
         if ($channel === null) {
-            $xmlError->setCode(404);
-            $xmlError->setError("Channel with id  = '{$params['channelId']}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "Channel with id  = '{$params['channelId']}' not found.");
         }
 
         // Check if user have permission to add node to channel.
@@ -545,9 +560,7 @@ class ChannelController extends BPIController
             }
         }
         if ($admin->getId() != $params['editorId'] && !$is_editor) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id  = '{$params['editorId']}' can't push to this channel.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_FORBIDDEN, "User with id  = '{$params['editorId']}' can't push to this channel.");
         }
 
         $success = array();
@@ -570,7 +583,7 @@ class ChannelController extends BPIController
             try {
                 $channel->removeChannelNode($node);
                 $success[] = $node->getId();
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 return new Response('Internal error on removing node.', 500);
             }
         }
@@ -579,7 +592,7 @@ class ChannelController extends BPIController
         $dm->flush();
 
         $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
-        $facetRepository->removeChannelFromFacet($channel->getChannelName(), $params['nodes']);
+        $facetRepository->removeChannelFromFacet($channel->getId(), $params['nodes']);
 
         $xml = $this->get('bpi.presentation.xmlgroupoperation');
         $xml->setCode(200);
@@ -602,15 +615,12 @@ class ChannelController extends BPIController
      * @return XmlGroupOperation.
      */
     public function removeChannelAction($channelId) {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
         $channel = $channelRepository->find($channelId);
 
         if (null === $channel) {
-            $xmlError->setCode(404);
-            $xmlError->setError("Channel with id  = '{$channelId}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "Channel with id  = '{$channelId}' not found.");
         }
 
         $channel->setChannelDeleted(true);

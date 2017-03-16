@@ -11,11 +11,11 @@ use Symfony\Component\Validator\Constraints;
 use Symfony\Component\HttpFoundation\Response;
 
 use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\Rest\Util\Codes;
 
-use Bpi\RestMediaTypeBundle\Document;
-use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Entity\User;
-use Bpi\ApiBundle\Domain\XmlResponse\XmlError;
+use Bpi\RestMediaTypeBundle\Element\Facet;
+use Bpi\RestMediaTypeBundle\Element\FacetTerm;
 
 /**
  * Class UserController
@@ -34,15 +34,84 @@ class UserController extends BPIController
      */
     public function listUsersAction()
     {
-        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
+        $query = new \Bpi\ApiBundle\Domain\Entity\UserQuery();
+        $query->amount(20);
+        if (false !== ($amount = $this->getQueryParameter('amount'))) {
+            $query->amount($amount);
+        }
 
-        $allUsers = $userRepository->findAll();
+        if (false !== ($offset = $this->getQueryParameter('offset'))) {
+            $query->offset($offset);
+        }
 
-        $transform = $this->get('bpi.presentation.transformer');
-        $transform->setDoc($this->get('bpi.presentation.users'));
-        $document = $transform->transformMany($allUsers);
+        if (false !== ($search = $this->getQueryParameter('search'))) {
+            $query->search($search);
+        }
 
-        return $document;
+        $filters = array();
+        $logicalOperator = '';
+        if (false !== ($filter = $this->getQueryParameter('filter'))) {
+            foreach ($filter as $field => $value) {
+                if ($field == 'agency_id' && is_array($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {
+                            continue;
+                        }
+                        $filters['agency_id'][] = $val;
+                    }
+                }
+            }
+            if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {
+                $logicalOperator = $filter['logicalOperator'];
+            }
+        }
+
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\UserFacet');
+        $facets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
+        $query->filter($facets->userIds);
+
+        if (false !== ($sort = $this->getQueryParameter('sort'))) {
+            foreach ($sort as $field => $order) {
+                $query->sort($field, $order);
+            }
+        }
+
+        $users = $this->getRepository('BpiApiBundle:Entity\User')->findByQuery($query);
+
+        if (null === $users) {
+            throw new HttpException(Codes::HTTP_NOT_FOUND, 'No users found.');
+        }
+
+        $response = $this->get('bpi.presentation.users');
+        $response->setTotal($query->total);
+        $response->setOffset($query->offset);
+        $response->setAmount($query->amount);
+
+        foreach ($facets->facets as $name => $facet) {
+            $theFacet = new Facet(Facet::TYPE_STRING, $name);
+            foreach ($facet as $key => $term) {
+                $value = $term;
+                $title = null;
+                if ($name == 'agency_id') {
+                    $value = $term['count'];
+                    $title = $term['agencyName'];
+                } elseif (isset($term['count'])) {
+                    $value = $term['count'];
+                    $title = isset($term['title']) ? $term['title'] : null;
+                }
+
+                $term = new FacetTerm($key, $value, $title);
+                $theFacet->addTerm($term);
+            }
+
+            $response->addFacet($theFacet);
+        }
+
+        foreach ($users as $user) {
+            $response->addUser($user);
+        }
+
+        return $response;
     }
 
     /**
@@ -53,37 +122,32 @@ class UserController extends BPIController
      * @Rest\Get("/{userId}")
      * @Rest\View()
      *
-     * @return Presentation $document
+     * @return Presentation
      */
     public function getUserByIdAction($userId)
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
 
         $user = $userRepository->find($userId);
 
         if (null === $user) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id = '{$userId}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id = '{$userId}' not found.");
         }
 
-        $transform = $this->get('bpi.presentation.transformer');
-        $transform->setDoc($this->get('bpi.presentation.users'));
-        $document = $transform->transform($user);
+        $response = $this->get('bpi.presentation.users');
+        $response->addUser($user);
 
-        return $document;
+        return $response;
     }
 
     /**
      * Create new user
      *
      * @Rest\Post("/")
-     * @Rest\View()
+     * @Rest\View(statusCode="201")
      */
     public function createUserAction()
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $params = $this->getAllRequestParameters();
@@ -98,32 +162,24 @@ class UserController extends BPIController
 
         foreach ($requiredParams as $param => $count) {
             if ($count == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         if (!filter_var($params['email'], FILTER_VALIDATE_EMAIL)) {
-            $xmlError->setCode(400);
-            $xmlError->setError("Email '{$params['email']}' not valid.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_BAD_REQUEST, "Email '{$params['email']}' not valid.");
         }
 
         // Get agency.
         $agency = $this->getAgencyFromHeader();
         $user = $userRepository->findByExternalIdAgency($params['externalId'], $agency->getId());
         if ($user) {
-            $xmlError->setCode(400);
-            $xmlError->setError( "User with externalId = '{$params['externalId']}' and agency = '{$agency->getId()}' already exits.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_BAD_REQUEST, "User with externalId = '{$params['externalId']}' and agency = '{$agency->getId()}' already exits.");
         }
 
         $user = $userRepository->findOneByEmail($params['email']);
         if ($user) {
-            $xmlError->setCode(400);
-            $xmlError->setError( "User with email = '{$params['email']}' already exits.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_BAD_REQUEST, "User with email = '{$params['email']}' already exits.");
         }
 
         $user = new User();
@@ -150,6 +206,9 @@ class UserController extends BPIController
         $dm->persist($user);
         $dm->flush();
 
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\UserFacet');
+        $facetRepository->prepareFacet($user);
+
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.users'));
         $document = $transform->transform($user);
@@ -165,11 +224,10 @@ class UserController extends BPIController
      *
      * @param $userId
      *
-     * @return XmlError | \Bpi\RestMediaTypeBundle\Users
+     * @return \Bpi\RestMediaTypeBundle\Users
      */
     public function editUserAction($userId)
     {
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $dm = $this->getDoctrineManager();
         $params = $this->getAllRequestParameters();
@@ -178,9 +236,7 @@ class UserController extends BPIController
         $user = $userRepository->find($userId);
 
         if (null === $user) {
-            $xmlError->setCode(404);
-            $xmlError->setError('User with id ' . $userId . ' not found.');
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, 'User with id ' . $userId . ' not found.');
         }
 
         if (isset($params['userAgency']) && !empty($params['userAgency'])) {
@@ -193,9 +249,7 @@ class UserController extends BPIController
             );
 
             if (null === $agency) {
-                $xmlError->setCode(404);
-                $xmlError->setError('Agency with id ' . $params['userAgency'] . ' not found.');
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_NOT_FOUND, 'Agency with id ' . $params['userAgency'] . ' not found.');
             }
 
             $user->setUserAgency($agency);
@@ -227,37 +281,6 @@ class UserController extends BPIController
         return $document;
     }
 
-     /**
-     * Create new user
-     *
-     * @Rest\Post("/autocompletions")
-     * @Rest\View()
-     */
-    public function autocompletionsUserAction()
-    {
-        $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
-        $params = $this->getAllRequestParameters();
-        // Strip all params.
-        $this->stripParams($params);
-
-        $agencyId = null;
-        if (isset($params['agencyId']) && !empty($params['agencyId'])) {
-            $agency = $this->getRepository('BpiApiBundle:Aggregate\Agency')->findOneBy(array('public_id' => $params['agencyId']));
-            $agencyId = $agency ? $agency->getId() : 1;
-        }
-
-        $userIternalname = null;
-        if (isset($params['userIternalName']) && !empty($params['userIternalName'])) {
-            $userIternalname = $params['userIternalName'];
-        }
-
-        $users = $userRepository->getListAutocompletions($userIternalname, $agencyId);
-        $transform = $this->get('bpi.presentation.transformer');
-        $transform->setDoc($this->get('bpi.presentation.users'));
-        $document = $transform->transformMany($users);
-        return $document;
-    }
-
     /**
      * Create subscription.
      *
@@ -268,7 +291,6 @@ class UserController extends BPIController
     {
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $parameters = $this->getAllRequestParameters();
         $this->stripParams($parameters);
 
@@ -281,24 +303,18 @@ class UserController extends BPIController
         $this->checkParams($parameters, $requiredParams);
         foreach ($requiredParams as $param => $count) {
             if ($count == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         $user = $userRepository->find($parameters['userId']);
         if (null === $user) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id = '{$parameters['userId']}' not fount.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id = '{$parameters['userId']}' not fount.");
         }
 
         foreach ($user->getSubscriptions() as $subscription) {
             if ($subscription->getTitle() === $parameters['title']) {
-                $xmlError->setCode(400);
-                $xmlError->setError("User already have subscription with this name.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "User already have subscription with this name.");
             }
         }
 
@@ -329,7 +345,6 @@ class UserController extends BPIController
     {
         $dm = $this->getDoctrineManager();
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
-        $xmlError = $this->get('bpi.presentation.xmlerror');
         $parameters = $this->getAllRequestParameters();
 
         // Strip all params.
@@ -341,17 +356,13 @@ class UserController extends BPIController
         $this->checkParams($parameters, $requiredParams);
         foreach ($requiredParams as $param => $count) {
             if ($count == 0) {
-                $xmlError->setCode(400);
-                $xmlError->setError("Param '{$param}' is required.");
-                return $xmlError;
+                throw new HttpException(Codes::HTTP_BAD_REQUEST, "Param '{$param}' is required.");
             }
         }
 
         $user = $userRepository->find($parameters['userId']);
         if (null === $user) {
-            $xmlError->setCode(404);
-            $xmlError->setError("User with id = '{$parameters['userId']}' not found.");
-            return $xmlError;
+            throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id = '{$parameters['userId']}' not found.");
         }
 
         foreach ($user->getSubscriptions() as $subscription) {

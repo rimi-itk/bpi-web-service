@@ -1,0 +1,13 @@
+Bpi\ApiBundle\Domain\Entity\ChannelFacet:
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\ChannelFacetRepository
+  collection: ChannelFacet
+  type: document
+
+  fields:
+    id:
+      type: id
+      id: true
+    channelId:
+      type: string
+    facetData:
+      type: hash

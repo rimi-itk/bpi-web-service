@@ -297,6 +297,16 @@ class Node implements IPresentable
     }
 
     /// Setters and getters for forms
+    public function getType()
+    {
+        return $this->resource->getType();
+    }
+
+    public function setType($type)
+    {
+        $this->resource->setType($type);
+    }
+
     public function getTitle()
     {
         return $this->resource->getTitle();
@@ -336,6 +346,22 @@ class Node implements IPresentable
     public function setBody($body)
     {
         $this->resource->setBody($body);
+    }
+
+    public function getUrl() {
+        return $this->resource->getUrl();
+    }
+
+    public function setUrl($url) {
+        return $this->resource->url($url);
+    }
+
+    public function getData() {
+        return $this->resource->getData();
+    }
+
+    public function setData($data) {
+        return $this->resource->data($data);
     }
 
     public function setAudience(Audience $audience)
