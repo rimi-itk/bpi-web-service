@@ -33,6 +33,8 @@ class FacetRepository extends DocumentRepository
     public function prepareFacet($node) {
         $facet = new Facet();
 
+        $type = $node->getType();
+
         $agencyId = $node
             ->getAuthor()
             ->getAgencyId()
@@ -76,6 +78,7 @@ class FacetRepository extends DocumentRepository
 
 
         $facets = array(
+            'type' => array($type),
             'author' => array($author),
             'agency_id' => array($agencyId->id()),
             'agency_internal' => array($agency->getInternal()),

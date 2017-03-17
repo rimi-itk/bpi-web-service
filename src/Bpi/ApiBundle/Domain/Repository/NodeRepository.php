@@ -68,10 +68,7 @@ class NodeRepository extends DocumentRepository
             $qb->sort($param, $direction);
         }
 
-        if ($deleted)
-        {
           $qb->field('deleted')->equals($deleted);
-        }
 
        if ($search)
        {

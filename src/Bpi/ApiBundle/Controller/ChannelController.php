@@ -17,6 +17,8 @@ use FOS\Rest\Util\Codes;
 use Bpi\ApiBundle\Domain\Entity\Channel;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
+use Bpi\RestMediaTypeBundle\Element\Facet;
+use Bpi\RestMediaTypeBundle\Element\FacetTerm;
 
 /**
  * Class ChannelController
@@ -36,22 +38,91 @@ class ChannelController extends BPIController
      */
     public function listChannelsAction()
     {
-        $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
+        $query = new \Bpi\ApiBundle\Domain\Entity\ChannelQuery();
+        $query->amount(20);
+        if (false !== ($amount = $this->getQueryParameter('amount'))) {
+            $query->amount($amount);
+        }
 
-        $allChannels = $channelRepository->findBy(array('channelDeleted' => false));
+        if (false !== ($offset = $this->getQueryParameter('offset'))) {
+            $query->offset($offset);
+        }
 
-        // Check if not deleted channels exist.
-        if(null === $allChannels) {
+        if (false !== ($search = $this->getQueryParameter('search'))) {
+            $query->search($search);
+        }
+
+        $filters = array();
+        $logicalOperator = '';
+        if (false !== ($filter = $this->getQueryParameter('filter'))) {
+            foreach ($filter as $field => $value) {
+                if ($field == 'agency_id' && is_array($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {
+                            continue;
+                        }
+                        $filters['agency_id'][] = $val;
+                    }
+                } elseif ($field == 'id' && is_array($value)) {
+                    foreach ($value as $val) {
+                        if (empty($val)) {
+                            continue;
+                        }
+                        $filters['id'][] = $val;
+                    }
+                }
+            }
+            if (isset($filter['logicalOperator']) && !empty($filter['logicalOperator'])) {
+                $logicalOperator = $filter['logicalOperator'];
+            }
+        }
+
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\ChannelFacet');
+        $facets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
+        $query->filter($facets->channelIds);
+
+        if (false !== ($sort = $this->getQueryParameter('sort'))) {
+            foreach ($sort as $field => $order) {
+                $query->sort($field, $order);
+            }
+        }
+
+        $channels = $this->getRepository('BpiApiBundle:Entity\Channel')->findByQuery($query);
+
+        if (null === $channels) {
             throw new HttpException(Codes::HTTP_NOT_FOUND, 'No channels found.');
         }
 
-        // Prepare existing channels for response.
-        $xml = $this->get('bpi.presentation.channels');
-        foreach ($allChannels as $channel) {
-            $xml->addChannel($channel);
+        $response = $this->get('bpi.presentation.channels');
+        $response->setTotal($query->total);
+        $response->setOffset($query->offset);
+        $response->setAmount($query->amount);
+
+        foreach ($facets->facets as $name => $facet) {
+            $theFacet = new Facet(Facet::TYPE_STRING, $name);
+            foreach ($facet as $key => $term) {
+                $value = $term;
+                $title = null;
+                if ($name == 'agency_id') {
+                    $value = $term['count'];
+                    $title = $term['agencyName'];
+                } elseif (isset($term['count'])) {
+                    $value = $term['count'];
+                    $title = isset($term['title']) ? $term['title'] : null;
+                }
+
+                $term = new FacetTerm($key, $value, $title);
+                $theFacet->addTerm($term);
+            }
+
+            $response->addFacet($theFacet);
         }
 
-        return $xml;
+        foreach ($channels as $channel) {
+            $response->addChannel($channel);
+        }
+
+        return $response;
     }
 
     /**
@@ -78,10 +149,10 @@ class ChannelController extends BPIController
             throw new HttpException(Codes::HTTP_NOT_FOUND, 'Channel with id ' . $channelId . ' not found.');
         }
 
-        $xml = $this->get('bpi.presentation.channels');
-        $xml->addChannel($channel);
+        $response = $this->get('bpi.presentation.channels');
+        $response->addChannel($channel);
 
-        return $xml;
+        return $response;
     }
 
     /**
@@ -103,22 +174,14 @@ class ChannelController extends BPIController
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $channelRepository = $this->getRepository('BpiApiBundle:Entity\Channel');
 
-        $userAgency = $this->getAgencyFromHeader();
-        $userAgencyId = $userAgency->getAgencyId()->id();
-
-        if (null === $userAgency) {
-            throw new HttpException(Codes::HTTP_NOT_FOUND, 'Agency with external id ' . $userId . ' not found.');
-        }
-
         $user = $userRepository->findOneBy(
             array(
                 'id' => $userId,
-                'userAgency.$id' => new \MongoId($userAgency->getId())
             )
         );
 
         if (null === $user) {
-            throw new HttpException(Codes::HTTP_NOT_FOUND, 'User with given externalId: ' . $userId . ' and agency public_id: ' . $userAgencyId . ' not found.');
+            throw new HttpException(Codes::HTTP_NOT_FOUND, 'User with given externalId: ' . $userId . ' not found.');
         }
 
         $xml = $this->get('bpi.presentation.channels');
@@ -174,11 +237,13 @@ class ChannelController extends BPIController
         $dm->persist($channel);
         $dm->flush();
 
-        $transform = $this->get('bpi.presentation.transformer');
-        $transform->setDoc($this->get('bpi.presentation.document'));
-        $document = $transform->transform($channel);
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\ChannelFacet');
+        $facetRepository->prepareFacet($channel);
 
-        return $document;
+        $response = $this->get('bpi.presentation.channels');
+        $response->addChannel($channel);
+
+        return $response;
     }
 
     /**
@@ -217,11 +282,10 @@ class ChannelController extends BPIController
         $dm->persist($channel);
         $dm->flush();
 
-        $transform = $this->get('bpi.presentation.transformer');
-        $transform->setDoc($this->get('bpi.presentation.document'));
-        $document = $transform->transform($channel);
+        $response = $this->get('bpi.presentation.channels');
+        $response->addChannel($channel);
 
-        return $document;
+        return $response;
     }
 
     /**
