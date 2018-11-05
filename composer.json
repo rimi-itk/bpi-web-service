@@ -16,15 +16,25 @@
                     "reference": "origin/develop"
                 }
             }
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "doesntmattr/mongodb-migrations-bundle",
+                "version": "1.0.1",
+                "source": {
+                    "type": "git",
+                    "url": "git@github.com:doesntmattr/mongodb-migrations-bundle.git",
+                    "reference": "v1.0.1"
+                }
+            }
         }
     ],
     "require": {
         "php": ">=5.3.3",
         "symfony/symfony": "2.1.10",
         "twig/twig": "v1.13.0",
-        "doctrine/doctrine-bundle": "1.1.*",
-        "doctrine/orm": "2.3.2",
-        "doctrine/dbal": "2.3.4",
+        "doctrine/doctrine-bundle": "^1.1.0",
         "twig/extensions": "1.0.*",
         "symfony/assetic-bundle": "2.3.1",
         "symfony/monolog-bundle": "2.1.*",
@@ -35,17 +45,18 @@
         "jms/serializer-bundle": "0.11.0",
         "nelmio/api-doc-bundle": "2.2.*@dev",
         "friendsofsymfony/rest-bundle": "0.11.0",
-        "doctrine/mongodb": "1.1.6",
-        "doctrine/mongodb-odm-bundle": "3.0.*",
         "doctrine/doctrine-fixtures-bundle": "dev-master",
         "stof/doctrine-extensions-bundle": "dev-master",
         "knplabs/knp-gaufrette-bundle": "0.2.*@dev",
         "knplabs/knp-markdown-bundle": "1.2.*@dev",
         "knplabs/knp-paginator-bundle": "2.3.2",
-        "antimattr/mongodb-migrations": "~1.0@stable",
-        "antimattr/mongodb-migrations-bundle": "~1.0@stable",
         "symfony/swiftmailer-bridge": "2.0.10",
-        "symfony/swiftmailer-bundle": "2.0.10"
+        "symfony/swiftmailer-bundle": "2.0.10",
+        "doctrine/orm": "^2.4.8",
+        "doctrine/mongodb-odm": "^1.0.0-BETA12",
+        "doctrine/dbal": "^2.4.5",
+        "doctrine/mongodb": "^1.2.2",
+        "doctrine/mongodb-odm-bundle": "^3.0.0-BETA6"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
