@@ -131,7 +131,9 @@ class Resource implements IPresentable
             $document->appendEntity($entity);
         }
 
-        $copyleft = '<p>' . $this->copyleft . '</p>';
+        // Do not assign copyleft info when fetching nodes.
+        // Left here for legacy purposes.
+//        $copyleft = '<p>' . $this->copyleft . '</p>';
 
         $entity->addProperty($document->createProperty('title', 'string', $this->title));
         $entity->addProperty($document->createProperty('body', 'string', $this->body->getFlattenContent() . $copyleft));
