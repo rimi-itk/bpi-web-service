@@ -1,0 +1,11 @@
+parameters:
+    unit_test_domain: ~
+    secret: ~
+    locale: en
+    mongodb_db: ~
+    swiftmailer: ~
+
+    mailer_transport: ~
+    mailer_host: ~
+    mailer_user: ~
+    mailer_password: ~

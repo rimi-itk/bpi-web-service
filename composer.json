@@ -1,8 +1,15 @@
 {
-    "name": "symfony/framework-standard-edition",
-    "description": "The \"Symfony Standard Edition\" distribution",
+    "name": "BPI Rest service",
+    "description": "",
     "autoload": {
-        "psr-0": { "": "src/", "Bpi": ["vendor/bpi-dk/bpi-client/Bpi/Sdk", "vendor/bpi-dk/bpi-client/"] }
+        "psr-4": {
+            "Bpi\\": "src/Bpi/"
+        },
+        "classmap": [ "app/AppKernel.php", "app/AppCache.php" ]
+    },
+    "autoload-dev": {
+        "psr-4": { "Tests\\": "tests/" },
+        "files": [ "vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php" ]
     },
     "repositories": [
         {
@@ -16,52 +23,42 @@
                     "reference": "origin/develop"
                 }
             }
-        },
-        {
-            "type": "package",
-            "package": {
-                "name": "doesntmattr/mongodb-migrations-bundle",
-                "version": "1.0.1",
-                "source": {
-                    "type": "git",
-                    "url": "git@github.com:doesntmattr/mongodb-migrations-bundle.git",
-                    "reference": "v1.0.1"
-                }
-            }
         }
     ],
     "require": {
-        "php": ">=5.3.3",
-        "symfony/symfony": "2.1.10",
-        "twig/twig": "v1.13.0",
-        "doctrine/doctrine-bundle": "^1.1.0",
-        "twig/extensions": "1.0.*",
-        "symfony/assetic-bundle": "2.3.1",
-        "symfony/monolog-bundle": "2.1.*",
-        "sensio/distribution-bundle": "2.1.*",
-        "sensio/framework-extra-bundle": "2.1.*",
-        "sensio/generator-bundle": "2.1.*",
-        "jms/di-extra-bundle": "1.3.*",
-        "jms/serializer-bundle": "0.11.0",
-        "nelmio/api-doc-bundle": "2.2.*@dev",
-        "friendsofsymfony/rest-bundle": "0.11.0",
-        "doctrine/doctrine-fixtures-bundle": "dev-master",
-        "stof/doctrine-extensions-bundle": "dev-master",
-        "knplabs/knp-gaufrette-bundle": "0.2.*@dev",
-        "knplabs/knp-markdown-bundle": "1.2.*@dev",
-        "knplabs/knp-paginator-bundle": "2.3.2",
-        "symfony/swiftmailer-bridge": "2.0.10",
-        "symfony/swiftmailer-bundle": "2.0.10",
-        "doctrine/orm": "^2.4.8",
-        "doctrine/mongodb-odm": "^1.0.0-BETA12",
-        "doctrine/dbal": "^2.4.5",
-        "doctrine/mongodb": "^1.2.2",
-        "doctrine/mongodb-odm-bundle": "^3.0.0-BETA6"
+        "php": ">=5.6",
+        "symfony/symfony": "~3.4.19",
+        "symfony/framework-bundle": "~3.4.19",
+        "twig/twig": "1.35.*",
+        "doctrine/doctrine-bundle": "~1.9.0",
+        "twig/extensions": "~1.5.3",
+        "symfony/assetic-bundle": "~2.8.2",
+        "symfony/monolog-bundle": "~3.3.1",
+        "sensio/distribution-bundle": "^5.0.23",
+        "sensio/framework-extra-bundle": "^5.2.2",
+        "sensio/generator-bundle": "~3.1.7",
+        "jms/di-extra-bundle": "^1.9.2",
+        "jms/serializer-bundle": "^2.4.2",
+        "nelmio/api-doc-bundle": "^2.13.3",
+        "friendsofsymfony/rest-bundle": "^2.4.0",
+        "doctrine/doctrine-fixtures-bundle": "^3.0.4",
+        "stof/doctrine-extensions-bundle": "^1.3.0",
+        "knplabs/knp-gaufrette-bundle": "^0.5.3",
+        "knplabs/knp-markdown-bundle": "^1.7.0",
+        "knplabs/knp-paginator-bundle": "^2.8.0",
+        "symfony/swiftmailer-bridge": "^2.8.48",
+        "symfony/swiftmailer-bundle": "^2.6.7",
+        "doctrine/orm": "2.5.*",
+        "doctrine/mongodb-odm": "~1.1.7",
+        "doctrine/dbal": "2.5.*",
+        "doctrine/mongodb": "1.5.*",
+        "doctrine/mongodb-odm-bundle": "^3.4.4",
+        "doesntmattr/mongodb-migrations-bundle": "^1.2.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "3.7.*",
+        "phpunit/phpunit": "5.7.*",
         "phpunit/phpunit-story": "*",
-        "fabpot/goutte": "1.0.1",
+        "fabpot/goutte": "3.2.1",
         "bpi-dk/bpi-client": "1.0"
     },
     "scripts": {
@@ -82,6 +79,9 @@
     "prefer-stable": true,
     "extra": {
         "symfony-app-dir": "app",
-        "symfony-web-dir": "web"
+        "symfony-bin-dir": "bin",
+        "symfony-var-dir": "var",
+        "symfony-web-dir": "web",
+        "symfony-tests-dir": "tests"
     }
 }

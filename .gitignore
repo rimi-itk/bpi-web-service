@@ -1,25 +1,15 @@
-# Bootstrap
-app/bootstrap*
-
-# Symfony directories
-vendor/*
-*/logs/*
-*/cache/*
-web/uploads/*
-web/bundles/*
-# Configuration files
-app/config/parameters.ini
-
+/vendor/*
+/var/logs/*
+/var/cache/*
+/var/sessions/*
+/var/bootstrap.php.cache
+/web/uploads/*
+/web/bundles/*
+/app/config/parameters.yml
+!var/SymfonyRequirements.php
 # IDE
-nbproject/*
+/nbproject
 /.settings
 /.buildpath
 /.project
 /.idea
-
-#SDK
-src/Bpi/Sdk/vendor/*
-
-# Temp files
-*~
-/composer.phar

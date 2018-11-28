@@ -4,6 +4,7 @@ namespace Bpi\AdminBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\HttpFoundation\Request;
 
 class AgencyController extends Controller
 {
@@ -19,10 +20,10 @@ class AgencyController extends Controller
     /**
      * @Template("BpiAdminBundle:Agency:index.html.twig")
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-        $param = $this->getRequest()->query->get('sort');
-        $direction = $this->getRequest()->query->get('direction');
+        $param = $request->query->get('sort');
+        $direction = $request->query->get('direction');
         $query = $this->getRepository()->listAll($param, $direction);
 
         $knpPaginator = $this->get('knp_paginator');

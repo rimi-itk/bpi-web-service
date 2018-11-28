@@ -2,9 +2,10 @@
 namespace Bpi\ApiBundle\Security\Firewall;
 
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\SecurityContextInterface;
+//use Symfony\Component\Security\Core\SecurityContextInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -14,13 +15,13 @@ use Bpi\ApiBundle\Security\Authentication\Token\PKUserToken;
 
 class PKListener implements ListenerInterface
 {
-    protected $securityContext;
+    protected $tokenStorage;
     protected $authenticationManager;
     protected $container;
 
-    public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager, ContainerInterface $container)
+    public function __construct(TokenStorage $tokenStorage, AuthenticationManagerInterface $authenticationManager, ContainerInterface $container)
     {
-        $this->securityContext = $securityContext;
+        $this->tokenStorage = $tokenStorage;
         $this->authenticationManager = $authenticationManager;
         $this->container = $container;
     }
@@ -49,7 +50,7 @@ class PKListener implements ListenerInterface
 
             if ($request->headers->has('Auth')) {
                 if (!preg_match('~BPI agency="(?<agency>[^"]+)", token="(?<token>[^"]+)"~i', $request->headers->get('Auth'), $matches)) {
-                    throw new AuthenticationException('Authorization credintials required (HTTP Headers)');
+                    throw new AuthenticationException('Authorization credentials required (HTTP Headers)');
                 }
 
                 $token->setUser($matches['agency']);
@@ -70,7 +71,7 @@ class PKListener implements ListenerInterface
             }
 
             $authToken = $this->authenticationManager->authenticate($token);
-            $this->securityContext->setToken($authToken);
+            $this->tokenStorage->setToken($authToken);
 
         } catch (AuthenticationException $failed) {
 
@@ -91,6 +92,6 @@ class PKListener implements ListenerInterface
      */
     protected function skipAuthorization()
     {
-        $this->securityContext->setToken(new PKUserToken());
+        $this->tokenStorage->setToken(new PKUserToken());
     }
 }

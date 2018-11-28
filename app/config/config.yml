@@ -60,7 +60,7 @@ services:
         arguments: ['']
     bpi.pk.security.authentication.listener:
         class:  Bpi\ApiBundle\Security\Firewall\PKListener
-        arguments: ["@security.context", "@security.authentication.manager", "@service_container"]
+        arguments: ["@security.token_storage", "@security.authentication.manager", "@service_container"]
     bpi.pk.security.user_provider:
       class: stdClass
       factory_service: doctrine_mongodb
@@ -83,7 +83,6 @@ framework:
     validation:      { enable_annotations: true }
     templating:      { engines: ['twig'] } #assets_version: SomeVersionScheme
     default_locale:  %locale%
-    trust_proxy_headers: false # Whether or not the Request object should trust proxy headers (X_FORWARDED_FOR/HTTP_CLIENT_IP)
     session:         ~
 
 # Twig Configuration
@@ -130,14 +129,13 @@ doctrine_mongodb:
                     alias: GedmoTree # this one is optional and will default to the name set for the mapping
                     is_bundle: false
 
-# TODO
-#mongo_db_migrations:
-#    collection_name: "migration_versions"
-#    database_name: "bpi"
-#    dir_name: "%kernel.root_dir%/../src/Bpi/ApiBundle/Resources/config/Migrations/MongoDB"
-#    script_dir_name: "%kernel.root_dir%/scripts"
-#    name: "Bpi APIbundle MongoDB Migrations"
-#    namespace: "Bpi\ApiBundle\Migrations\MongoDB"
+mongo_db_migrations:
+    collection_name: "migration_versions"
+    database_name: "%mongodb_db%"
+    dir_name: "%kernel.root_dir%/../src/Bpi/ApiBundle/Resources/config/Migrations/MongoDB"
+    script_dir_name: "%kernel.root_dir%/scripts"
+    name: "Bpi API bundle MongoDB Migrations"
+    namespace: "Bpi\\ApiBundle\\Migrations\\MongoDB"
 
 stof_doctrine_extensions:
     default_locale: en_US
@@ -148,7 +146,7 @@ stof_doctrine_extensions:
 nelmio_api_doc: ~
 
 sensio_framework_extra:
-    view:    { annotations: false }
+    view:    { annotations: true }
     router:  { annotations: true }
 
 fos_rest:
@@ -156,10 +154,10 @@ fos_rest:
       view_handler: bpi.apibundle.rest.view_handler
     routing_loader:
         default_format: bpi
-    format_listener:
-        default_priorities: ['bpi', 'xml', 'json', 'html', '*/*']
-        fallback_format: xml
-        prefer_extension: true
+#    format_listener:
+#        default_priorities: ['bpi', 'xml', 'json', 'html', '*/*']
+#        fallback_format: xml
+#        prefer_extension: true
     view:
         view_response_listener: true
         formats:

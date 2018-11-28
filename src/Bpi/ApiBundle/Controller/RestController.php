@@ -739,7 +739,7 @@ class RestController extends FOSRestController
                 'id' => $id,
                 '_authorization' => array(
                     'agency' => $this->getUser()->getAgencyId()->id(),
-                    'token' => $this->container->get('security.context')->getToken()->token
+                    'token' => $this->container->get('security.token_storage')->getToken()->token
                 )
             );
             return $this->redirect($this->generateUrl('node', $params));

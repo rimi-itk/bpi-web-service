@@ -4,7 +4,7 @@ Bpi\ApiBundle\Domain\Entity\Profile:
     yearwheel:
       embedded: true
       type: one
-      strategy: pushAll
+      strategy: set
       targetDocument: Bpi\ApiBundle\Domain\ValueObject\Yearwheel
   embedMany:
     tags: ~
