@@ -2,35 +2,49 @@
 
 namespace Bpi\AdminBundle\Controller;
 
+use Bpi\ApiBundle\Domain\Aggregate\Agency;
+use Bpi\ApiBundle\Domain\Entity\Facet;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * @Route(path="/agency")
+ */
 class AgencyController extends Controller
 {
-    /**
-     * @return \Bpi\ApiBundle\Domain\Repository\AgencyRepository
-     */
-    private function getRepository()
-    {
-        return $this->get('doctrine.odm.mongodb.document_manager')
-          ->getRepository('BpiApiBundle:Aggregate\Agency');
-    }
+//    /**
+//     * @return \Bpi\ApiBundle\Domain\Repository\AgencyRepository
+//     */
+//    private function getRepository()
+//    {
+//        return $this->get('doctrine.odm.mongodb.document_manager')
+//          ->getRepository('BpiApiBundle:Aggregate\Agency');
+//    }
 
     /**
+     * @Route(path="/", name="bpi_admin_agency")
      * @Template("BpiAdminBundle:Agency:index.html.twig")
      */
     public function indexAction(Request $request)
     {
         $param = $request->query->get('sort');
         $direction = $request->query->get('direction');
-        $query = $this->getRepository()->listAll($param, $direction);
+        $query = $this
+            ->get('doctrine_mongodb')
+            ->getRepository(Agency::class)
+            ->listAll($param, $direction);
 
         $knpPaginator = $this->get('knp_paginator');
 
         $pagination = $knpPaginator->paginate(
             $query,
-            $this->get('request')->query->get('page', 1),
+            $request->query->get('page', 1),
             50,
             array(
                 'defaultSortFieldName' => 'public_id',
@@ -42,18 +56,20 @@ class AgencyController extends Controller
     }
 
     /**
-     * Show deleted agencies
-     *
+     * @Route(path="/deleted", name="bpi_admin_agency_deleted")
      * @Template("BpiAdminBundle:Agency:index.html.twig")
      */
-    public function deletedAction()
+    public function deletedAction(Request $request)
     {
-        $query = $this->getRepository()->listAll(true);
+        $query = $this
+            ->get('doctrine_mongodb')
+            ->getRepository(Agency::class)
+            ->listAll(true);
 
         $paginator = $this->get('knp_paginator');
         $pagination = $paginator->paginate(
             $query,
-            $this->get('request')->query->get('page', 1),
+            $request->query->get('page', 1),
             5
         );
 
@@ -66,13 +82,13 @@ class AgencyController extends Controller
     }
 
     /**
+     * @Route(path="/new", name="bpi_admin_agency_new")
      * @Template("BpiAdminBundle:Agency:form.html.twig")
      */
-    public function newAction()
+    public function newAction(Request $request)
     {
-        $agency = new \Bpi\ApiBundle\Domain\Aggregate\Agency();
+        $agency = new Agency();
         $form = $this->createAgencyForm($agency, true);
-        $request = $this->getRequest();
 
         if ($request->isMethod('POST')) {
             $form->bind($request);
@@ -92,13 +108,12 @@ class AgencyController extends Controller
     }
 
     /**
+     * @Route(path="/edit/{id}", name="bpi_admin_agency_edit")
      * @Template("BpiAdminBundle:Agency:form.html.twig")
      */
-    public function editAction($id)
+    public function editAction(Request $request, Agency $agency)
     {
-        $agency = $this->getRepository()->find($id);
         $form = $this->createAgencyForm($agency);
-        $request = $this->getRequest();
 
         if ($request->isMethod('POST')) {
             $submitedAgency = $request->get('form');
@@ -131,14 +146,19 @@ class AgencyController extends Controller
 
             (!isset($changes['agency_id'])) ? $changes['agency_id'] = $agency->getAgencyId()->id() : false;
 
-            $form->bind($request);
+            $form->handleRequest($request);
+
             if ($form->isValid()) {
                 if ($changeInternal || $changePublicId) {
-                    $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
-                        ->getRepository('BpiApiBundle:Entity\Facet');
+                    $facetRepository = $this
+                        ->get('doctrine.odm.mongodb.document_manager')
+                        ->getRepository(Facet::class);
                     $facetRepository->updateFacet($changes);
                 }
-                $this->getRepository()->save($agency);
+                $this
+                    ->get('doctrine_mongodb')
+                    ->getRepository(Agency::class)
+                    ->save($agency);
 
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_agency')
@@ -148,22 +168,24 @@ class AgencyController extends Controller
 
         return array(
             'form' => $form->createView(),
-            'id' => $id,
+            'id' => $agency->getId(),
         );
     }
 
     /**
+     * @Route(path="/details/{id}", name="bpi_admin_agency_details")
      * @Template("BpiAdminBundle:Agency:details.html.twig")
      */
-    public function detailsAction($id)
+    public function detailsAction(Agency $agency)
     {
-        $agency = $this->getRepository()->find($id);
-
         return array(
             'agency' => $agency
         );
     }
 
+    /**
+     * @Route(path="/delete/{id}", name="bpi_admin_agency_delete")
+     */
     public function deleteAction($id)
     {
         $this->getRepository()->delete($id);
@@ -173,6 +195,9 @@ class AgencyController extends Controller
         );
     }
 
+    /**
+     * @Route(path="/purge", name="bpi_admin_agency_purge")
+     */
     public function purgeAction($id)
     {
         $this->getRepository()->purge($id);
@@ -182,6 +207,9 @@ class AgencyController extends Controller
         );
     }
 
+    /**
+     * @Route(path="/restore", name="bpi_admin_agency_restore")
+     */
     public function restoreAction($id)
     {
         $this->getRepository()->restore($id);
@@ -194,19 +222,21 @@ class AgencyController extends Controller
     private function createAgencyForm($agency, $new = false)
     {
         $formBuilder = $this->createFormBuilder($agency)
-          ->add('publicId', 'text', array('label' => 'Public ID'))
-          ->add('name', 'text')
-          ->add('moderator', 'text')
-          ->add('internal', 'checkbox', array(
+          ->add('publicId', TextType::class, array('label' => 'Public ID'))
+          ->add('name', TextType::class)
+          ->add('moderator', TextType::class)
+          ->add('internal', CheckboxType::class, array(
               'label' => 'Internal',
               'value' => 1,
           ))
-          ->add('publicKey', 'text')
-          ->add('secret', 'text');
+          ->add('publicKey', TextType::class)
+          ->add('secret', TextType::class);
 
         if (!$new) {
-            $formBuilder->add('deleted', 'checkbox', array('required' => false));
+            $formBuilder->add('deleted', CheckboxType::class, array('required' => false));
         }
+
+        $formBuilder->add('save', SubmitType::class, array('attr' => array('class' => 'btn')));
 
         return $formBuilder->getForm();
     }

@@ -116,13 +116,14 @@ class RestController extends FOSRestController
         $profile = $document->createRootEntity('resource', 'profile');
         $profile_hypermedia = $document->createHypermediaSection();
         $profile->setHypermedia($profile_hypermedia);
-        $profile_hypermedia->addLink(
-            $document->createLink(
-                'dictionary',
-                $this->get('router')->generate('profile_dictionary', array(), true),
-                'Profile items dictionary'
-            )
-        );
+        // TODO: Fix link.
+//        $profile_hypermedia->addLink(
+//            $document->createLink(
+//                'dictionary',
+//                $this->get('router')->generate('profile_dictionary', array(), true),
+//                'Profile items dictionary'
+//            )
+//        );
 
         return $document;
     }

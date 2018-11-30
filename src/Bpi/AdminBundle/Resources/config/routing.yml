@@ -1,6 +1,6 @@
-bpi_admin_homepage:
-    path: /
-    defaults: { _controller: BpiAdminBundle:Default:index }
+#bpi_admin_homepage:
+#    path: /
+#    defaults: { _controller: BpiAdminBundle:Default:index }
 
 bpi_admin_agency:
     path: /agency

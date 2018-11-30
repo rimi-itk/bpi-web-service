@@ -4,7 +4,11 @@ namespace Bpi\AdminBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route(path="/category")
+ */
 class CategoryController extends Controller
 {
     /**
@@ -17,6 +21,7 @@ class CategoryController extends Controller
     }
 
     /**
+     * @Route(path="/", name="bpi_admin_category")
      * @Template
      */
     public function indexAction()

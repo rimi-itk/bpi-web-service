@@ -5,7 +5,11 @@ namespace Bpi\AdminBundle\Controller;
 use Bpi\ApiBundle\Domain\Form\TagType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route(path="/node")
+ */
 class NodeController extends Controller
 {
     /**
@@ -18,6 +22,7 @@ class NodeController extends Controller
     }
 
     /**
+     * @Route(path="/", name="bpi_admin_node")
      * @Template("BpiAdminBundle:Node:index.html.twig")
      */
     public function indexAction()

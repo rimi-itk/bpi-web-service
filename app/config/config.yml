@@ -1,75 +1,10 @@
 imports:
     - { resource: parameters.yml }
     - { resource: security.yml }
+    - { resource: services.yml }
 
 parameters:
     api_version: 2.0-rc2
-
-services:
-    #rest
-    bpi.apibundle.rest.view_extension_handler:
-        class: Bpi\ApiBundle\View\BPIViewHandler
-    bpi.apibundle.rest.view_handler:
-        parent: fos_rest.view_handler.default
-        calls:
-          - ['registerHandler', [ 'bpi', ["@bpi.apibundle.rest.view_extension_handler", 'handleExtension'] ] ]
-
-    #domain
-    domain.push_service:
-        class: Bpi\ApiBundle\Domain\Service\PushService
-        arguments: ["@doctrine_mongodb.odm.document_manager", "@knp_gaufrette.filesystem_map"]
-
-    #gridfs gaufrette
-    bpi.gridfs.conn:
-      class: Doctrine\MongoDB\Connection
-      factory_service: doctrine_mongodb.odm.default_connection
-      factory_method: selectDatabase
-      arguments: ["bpi"]
-    bpi.gridfs.db:
-        class: Doctrine\MongoDB\Database
-        factory_service: bpi.gridfs.conn
-        factory_method: getGridFS
-        arguments: ["Asset"]
-    bpi.gridfs:
-        class: Doctrine\MongoDB\GridFS
-        factory_service: bpi.gridfs.db
-        factory_method: getMongoCollection
-    #presentation
-    bpi.presentation.document:
-        class: Bpi\RestMediaTypeBundle\Document
-        arguments: ["%api_version%"]
-        calls:
-          - ['setRouter', [ "@router"] ]
-    bpi.presentation.users:
-        class: Bpi\RestMediaTypeBundle\Users
-        arguments: ["%api_version%"]
-    bpi.presentation.channels:
-            class: Bpi\RestMediaTypeBundle\Channels
-            arguments: ["%api_version%"]
-    bpi.presentation.xmlgroupoperation:
-            class: Bpi\RestMediaTypeBundle\XmlGroupOperation
-            arguments: ["%api_version%"]
-    bpi.presentation.xmlresponse:
-        class: Bpi\RestMediaTypeBundle\XmlResponse
-        arguments: ["%api_version%"]
-    bpi.presentation.transformer:
-        class: Bpi\ApiBundle\Transform\Presentation
-    # security
-    bpi.pk.security.authentication.provider:
-        class:  Bpi\ApiBundle\Security\Authentication\Provider\PKProvider
-        arguments: ['']
-    bpi.pk.security.authentication.listener:
-        class:  Bpi\ApiBundle\Security\Firewall\PKListener
-        arguments: ["@security.token_storage", "@security.authentication.manager", "@service_container"]
-    bpi.pk.security.user_provider:
-      class: stdClass
-      factory_service: doctrine_mongodb
-      factory_method:  getRepository
-      arguments: [ 'BpiApiBundle:Aggregate\Agency' ]
-    bpi.domain.event_listener:
-        class: Bpi\ApiBundle\Domain\EventListener
-        tags:
-            -  { name: doctrine_mongodb.odm.event_listener, event: postLoad }
 
 framework:
     #esi:             ~
@@ -150,6 +85,8 @@ sensio_framework_extra:
     router:  { annotations: true }
 
 fos_rest:
+    exception:
+        enabled: true
     service:
       view_handler: bpi.apibundle.rest.view_handler
     routing_loader:

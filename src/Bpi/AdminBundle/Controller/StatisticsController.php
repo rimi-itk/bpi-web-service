@@ -4,8 +4,12 @@ namespace Bpi\AdminBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Routing\Annotation\Route;
 use Bpi\AdminBundle\Entity\Statistics;
 
+/**
+ * @Route(path="/statistics")
+ */
 class StatisticsController extends Controller
 {
     /**
@@ -18,6 +22,7 @@ class StatisticsController extends Controller
     }
 
     /**
+     * @Route(path="/", name="bpi_admin_statistics")
      * @Template("BpiAdminBundle:Statistics:index.html.twig")
      */
     public function indexAction()
