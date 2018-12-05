@@ -8,8 +8,8 @@
 {% block content %}
 {% include 'BpiAdminBundle:Node:nav.html.twig' %}
 
-<form action="{{ path(app.request.attributes.get('_route'), {'id': id}) }}" method="post" {{ form_enctype(form) }}>
-
+{#<form action="{{ path(app.request.attributes.get('_route'), {'id': id}) }}" method="post" {{ form_enctype(form) }}>#}
+{{ form_start(form) }}
     {{ form_errors(form) }}
 
     <div class="row">
@@ -33,9 +33,9 @@
             {{ form_row(form.body, { 'attr': { 'rows': 10, 'cols': 55, 'style': 'width:auto' } }) }}
         </div>
         <div class="span6">
-            <h3>Node vocabularies</h3>
-            {{ form_row(form.category) }}
-            {{ form_row(form.audience) }}
+            {#<h3>Node vocabularies</h3>#}
+            {#{{ form_row(form.category) }}#}
+            {#{{ form_row(form.audience) }}#}
 
             <p>Tags</p>
             <ul class="tags" data-prototype="{{ form_widget(form.tags.vars.prototype)|e }}">
@@ -64,8 +64,9 @@
         </div>
     </div>
 
-    <div class="form-actions">
-        <input type="submit" class="btn" value="Save" />
-    </div>
-</form>
+    {#<div class="form-actions">#}
+        {#<input type="submit" class="btn" value="Save" />#}
+    {#</div>#}
+    {{ form_widget(form) }}
+{{ form_end(form) }}
 {% endblock %}

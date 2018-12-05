@@ -2,9 +2,17 @@
 
 namespace Bpi\AdminBundle\Controller;
 
+use Bpi\ApiBundle\Domain\Aggregate\Node;
 use Bpi\ApiBundle\Domain\Form\TagType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -25,19 +33,19 @@ class NodeController extends Controller
      * @Route(path="/", name="bpi_admin_node")
      * @Template("BpiAdminBundle:Node:index.html.twig")
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
 
-        $param = $this->getRequest()->query->get('sort');
-        $direction = $this->getRequest()->query->get('direction');
-        $search = $this->getRequest()->query->get('search');
+        $param = $request->query->get('sort');
+        $direction = $request->query->get('direction');
+        $search = $request->query->get('search');
         $query = $this->getRepository()->listAll($param, $direction, $search);
 
         $knpPaginator = $this->get('knp_paginator');
 
         $pagination = $knpPaginator->paginate(
             $query,
-            $this->get('request')->query->get('page', 1),
+            $request->query->get('page', 1),
             50,
             array(
                 'defaultSortFieldName' => 'resource.title',
@@ -49,11 +57,10 @@ class NodeController extends Controller
     }
 
     /**
-     * Show deleted nodes
-     *
+     * @Route(path="/deleted", name="bpi_admin_node_deleted")
      * @Template("BpiAdminBundle:Node:index.html.twig")
      */
-    public function deletedAction()
+    public function deletedAction(Request $request)
     {
 
         $query = $this->getRepository()->listAll(null, null, null, true);
@@ -61,7 +68,7 @@ class NodeController extends Controller
 
         $pagination = $knpPaginator->paginate(
           $query,
-          $this->get('request')->query->get('page', 1),
+          $request->query->get('page', 1),
           50,
           array(
             'defaultSortFieldName' => 'resource.title',
@@ -103,27 +110,29 @@ class NodeController extends Controller
     }
 
     /**
+     * @Route(path="/edit/{id}", name="bpi_admin_node_edit")
      * @Template("BpiAdminBundle:Node:form.html.twig")
      */
-    public function editAction($id)
+    public function editAction(Request $request, Node $node)
     {
-        $node = $this->getRepository()->find($id);
         $form = $this->createNodeForm($node);
-        $request = $this->getRequest();
-        $dm = $this->get('doctrine_mongodb.odm.document_manager');
+//        $dm = $this->get('doctrine_mongodb.odm.document_manager');
 
         if ($request->isMethod('POST')) {
             $submittedNode = $request->get('form');
             $changeAuthorFirstName = $node->getAuthorFirstName() != $submittedNode['authorFirstName'];
             $changeAuthorLastName = $node->getAuthorLastName() != $submittedNode['authorLastName'];
             $changeAuthor = $changeAuthorFirstName || $changeAuthorLastName;
-            $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
-            $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
+//            $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
+//            $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
 
             $submittedTags = array();
-            foreach ($submittedNode['tags'] as $tag) {
-                $submittedTags[] = $tag['tag'];
-            }
+//            if (!empty($submittedNode['tags']) && is_array($submittedNode['tags'])) {
+//                foreach ($submittedNode['tags'] as $tag) {
+//                    $submittedTags[] = $tag['tag'];
+//                }
+//            }
+
 
             $checks = array(
                 'author' => array(
@@ -131,16 +140,16 @@ class NodeController extends Controller
                     'oldValue' => $node->getAuthor()->getFullName(),
                     'newValue' => ($submittedNode['authorFirstName'] ? $submittedNode['authorFirstName'] . ' ' : '') . $submittedNode['authorLastName']
                 ),
-                'category' => array(
-                    'check' => $changeCategory,
-                    'oldValue' => $node->getCategory()->getCategory(),
-                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Category')->find($submittedNode['category'])->getCategory()
-                ),
-                'audience' => array(
-                    'check' => $changeAudience,
-                    'oldValue' => $node->getAudience()->getAudience(),
-                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Audience')->find($submittedNode['audience'])->getAudience()
-                ),
+//                'category' => array(
+//                    'check' => $changeCategory,
+//                    'oldValue' => $node->getCategory()->getCategory(),
+//                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Category')->find($submittedNode['category'])->getCategory()
+//                ),
+//                'audience' => array(
+//                    'check' => $changeAudience,
+//                    'oldValue' => $node->getAudience()->getAudience(),
+//                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Audience')->find($submittedNode['audience'])->getAudience()
+//                ),
             );
 
             $changes = array();
@@ -155,13 +164,14 @@ class NodeController extends Controller
             $changes['nodeId'] = $node->getId();
             $changes['tags'] = $submittedTags;
 
-            $form->bind($request);
+            $form->handleRequest($request);
             if ($form->isValid()) {
                 $modifyTime = new \DateTime();
                 $node->setMtime($modifyTime);
-                $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
-                    ->getRepository('BpiApiBundle:Entity\Facet');
-                $facetRepository->updateFacet($changes);
+                /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
+//                $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
+//                    ->getRepository('BpiApiBundle:Entity\Facet');
+//                $facetRepository->updateFacet($changes);
 
                 $this->getRepository()->save($node);
                 return $this->redirect(
@@ -178,42 +188,49 @@ class NodeController extends Controller
 
         return array(
             'form' => $form->createView(),
-            'id' => $id,
+            'id' => $node->getId(),
             'assets' => $assets
         );
     }
 
     /**
+     * @Route(path="/details/{id}", name="bpi_admin_node_details")
      * @Template("BpiAdminBundle:Node:details.html.twig")
      */
-    public function detailsAction($id)
+    public function detailsAction(Node $node)
     {
-        $node = $this->getRepository()->find($id);
         return array(
             'node' => $node,
         );
     }
 
-    public function deleteAction($id)
+    /**
+     * @Route(path="/delete/{id}", name="bpi_admin_node_delete")
+     */
+    public function deleteAction(Node $node)
     {
-        $this->getRepository()->delete($id, 'ADMIN');
+        $this->getRepository()->delete($node->getId(), 'ADMIN');
         $this->get('doctrine.odm.mongodb.document_manager')
             ->getRepository('BpiApiBundle:Entity\Facet')
-            ->delete($id)
-        ;
+            ->delete($node->getId());
+
         return $this->redirect(
             $this->generateUrl("bpi_admin_node", array())
         );
     }
 
-    public function restoreAction($id)
+    /**
+     * @Route(path="/restore/{id}", name="bpi_admin_node_restore")
+     */
+    public function restoreAction(Node $node)
     {
-        $this->getRepository()->restore($id, 'ADMIN');
-        $node = $this->getRepository()->findOneById($id);
-        $this->get('doctrine.odm.mongodb.document_manager')
-          ->getRepository('BpiApiBundle:Entity\Facet')
-          ->prepareFacet($node)
-        ;
+        $this->getRepository()->restore($node->getId(), 'ADMIN');
+
+        /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
+        $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
+          ->getRepository('BpiApiBundle:Entity\Facet');
+        $facetRepository->prepareFacet($node);
+
         return $this->redirect(
             $this->generateUrl("bpi_admin_node", array())
         );
@@ -224,7 +241,7 @@ class NodeController extends Controller
         $formBuilder = $this->createFormBuilder($node, array('csrf_protection' => false))
             ->add(
                 'authorFirstName',
-                'text',
+                TextType::class,
                 array(
                     'label' => 'Author first name',
                     'required' => true
@@ -232,7 +249,7 @@ class NodeController extends Controller
             )
             ->add(
                 'authorLastName',
-                'text',
+                TextType::class,
                 array(
                     'label' => 'Author last name',
                     'required' => false
@@ -240,7 +257,7 @@ class NodeController extends Controller
             )
             ->add(
                 'authorAgencyId',
-                'text',
+                TextType::class,
                 array(
                     'label' => 'Author agency id',
                     'required' => true,
@@ -249,62 +266,66 @@ class NodeController extends Controller
             )
             ->add(
                 'ctime',
-                'datetime',
+                DateType::class,
                 array(
                     'label' => 'Creation time',
                     'required' => true,
-                    'date_widget' => 'single_text',
-                    'time_widget' => 'single_text',
+                    'widget' => 'single_text',
                     'disabled' => true
                 )
             )
             ->add(
                 'mtime',
-                'datetime',
+                DateType::class,
                 array(
                     'label' => 'Modify time',
                     'required' => true,
-                    'date_widget' => 'single_text',
-                    'time_widget' => 'single_text',
+                    'widget' => 'single_text',
                     'disabled' => true
                 )
             )
-            ->add('title', 'text')
-            ->add('teaser', 'textarea')->setRequired(false)
-            ->add('body', 'textarea')->setRequired(false)
-            ->add(
-                'category',
-                'document',
-                array(
-                    'class' => 'BpiApiBundle:Entity\Category',
-                    'property' => 'category',
-                )
-            )
-            ->add(
-                'audience',
-                'document',
-                array(
-                    'class' => 'BpiApiBundle:Entity\Audience',
-                    'property' => 'audience'
-                )
-            )
+            ->add('title', TextType::class)
+            ->add('teaser', TextareaType::class)->setRequired(false)
+            ->add('body', TextareaType::class)->setRequired(false)
+//            ->add(
+//                'category',
+//                EntityType::class,
+//                array(
+//                    'class' => Category::class,
+//                    'choice_label' => 'category',
+//                )
+//            )
+//            ->add(
+//                'audience',
+//                EntityType::class,
+//                array(
+//                    'class' => 'BpiApiBundle:Entity\Audience',
+//                    'choice_label' => 'audience'
+//                )
+//            )
             ->add(
                 'tags',
-                'collection',
+                CollectionType::class,
                 array(
-                    'type' => new TagType(),
+                    'entry_type' => TagType::class,
                     'allow_add' => true,
                     'allow_delete' => true,
-                    'options' => array(
-                        'required' => false
-                    )
+                    'required' => false,
                 )
             )
         ;
 
         if (!$new) {
-            $formBuilder->add('deleted', 'checkbox', array('required' => false));
+            $formBuilder->add(
+                'deleted',
+                CheckboxType::class,
+                array(
+                    'required' => false,
+                )
+            );
         }
+
+        $formBuilder->add('save', SubmitType::class, ['attr' => ['class' => 'btn']]);
 
         return $formBuilder->getForm();
     }

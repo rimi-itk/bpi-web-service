@@ -18,14 +18,14 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class AgencyController extends Controller
 {
-//    /**
-//     * @return \Bpi\ApiBundle\Domain\Repository\AgencyRepository
-//     */
-//    private function getRepository()
-//    {
-//        return $this->get('doctrine.odm.mongodb.document_manager')
-//          ->getRepository('BpiApiBundle:Aggregate\Agency');
-//    }
+    /**
+     * @return \Bpi\ApiBundle\Domain\Repository\AgencyRepository
+     */
+    private function getRepository()
+    {
+        return $this->get('doctrine.odm.mongodb.document_manager')
+            ->getRepository('BpiApiBundle:Aggregate\Agency');
+    }
 
     /**
      * @Route(path="/", name="bpi_admin_agency")
@@ -36,8 +36,7 @@ class AgencyController extends Controller
         $param = $request->query->get('sort');
         $direction = $request->query->get('direction');
         $query = $this
-            ->get('doctrine_mongodb')
-            ->getRepository(Agency::class)
+            ->getRepository()
             ->listAll($param, $direction);
 
         $knpPaginator = $this->get('knp_paginator');
@@ -46,13 +45,13 @@ class AgencyController extends Controller
             $query,
             $request->query->get('page', 1),
             50,
-            array(
+            [
                 'defaultSortFieldName' => 'public_id',
                 'defaultSortDirection' => 'asc',
-            )
+            ]
         );
 
-        return array('pagination' => $pagination);
+        return ['pagination' => $pagination];
     }
 
     /**
@@ -61,10 +60,11 @@ class AgencyController extends Controller
      */
     public function deletedAction(Request $request)
     {
-        $query = $this
-            ->get('doctrine_mongodb')
-            ->getRepository(Agency::class)
-            ->listAll(true);
+        $query = $this->getRepository()->findBy(
+            [
+                'deleted' => true,
+            ]
+        );
 
         $paginator = $this->get('knp_paginator');
         $pagination = $paginator->paginate(
@@ -73,12 +73,12 @@ class AgencyController extends Controller
             5
         );
 
-        return array(
+        return [
             'pagination' => $pagination,
             'delete_lable' => 'Undelete',
             'delete_url' => 'bpi_admin_agency_restore',
             'purge' => 1,
-        );
+        ];
     }
 
     /**
@@ -91,7 +91,7 @@ class AgencyController extends Controller
         $form = $this->createAgencyForm($agency, true);
 
         if ($request->isMethod('POST')) {
-            $form->bind($request);
+            $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($agency);
 
@@ -101,10 +101,10 @@ class AgencyController extends Controller
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
             'id' => null,
-        );
+        ];
     }
 
     /**
@@ -121,26 +121,26 @@ class AgencyController extends Controller
             $submitedAgencyInternal = (isset($submitedAgency['internal'])) ? filter_var($submitedAgency['internal'], FILTER_VALIDATE_BOOLEAN) : false;
             $changeInternal = $submitedAgencyInternal !== $agency->getInternal();
 
-            $checks = array(
-                'agency_internal' => array(
+            $checks = [
+                'agency_internal' => [
                     'check' => $changeInternal,
                     'oldValue' => $agency->getInternal(),
-                    'newValue' => isset($submitedAgency['internal'])
-                ),
-                'agency_id' => array(
+                    'newValue' => isset($submitedAgency['internal']),
+                ],
+                'agency_id' => [
                     'check' => $changePublicId,
                     'oldValue' => $agency->getAgencyId()->id(),
-                    'newValue' => $submitedAgency['publicId']
-                )
-            );
+                    'newValue' => $submitedAgency['publicId'],
+                ],
+            ];
 
-            $changes = array();
+            $changes = [];
             foreach ($checks as $key => $check) {
                 if ($check['check']) {
-                    $changes[$key] = array(
+                    $changes[$key] = [
                         'oldValue' => $check['oldValue'],
-                        'newValue' => $check['newValue']
-                    );
+                        'newValue' => $check['newValue'],
+                    ];
                 }
             }
 
@@ -155,10 +155,8 @@ class AgencyController extends Controller
                         ->getRepository(Facet::class);
                     $facetRepository->updateFacet($changes);
                 }
-                $this
-                    ->get('doctrine_mongodb')
-                    ->getRepository(Agency::class)
-                    ->save($agency);
+
+                $this->getRepository()->save($agency);
 
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_agency')
@@ -166,10 +164,10 @@ class AgencyController extends Controller
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
             'id' => $agency->getId(),
-        );
+        ];
     }
 
     /**
@@ -178,65 +176,69 @@ class AgencyController extends Controller
      */
     public function detailsAction(Agency $agency)
     {
-        return array(
-            'agency' => $agency
-        );
+        return [
+            'agency' => $agency,
+        ];
     }
 
     /**
      * @Route(path="/delete/{id}", name="bpi_admin_agency_delete")
      */
-    public function deleteAction($id)
+    public function deleteAction(Agency $agency)
     {
-        $this->getRepository()->delete($id);
+        $this->getRepository()->delete($agency->getId());
 
         return $this->redirect(
-            $this->generateUrl("bpi_admin_agency", array())
+            $this->generateUrl("bpi_admin_agency", [])
         );
     }
 
     /**
-     * @Route(path="/purge", name="bpi_admin_agency_purge")
+     * @Route(path="/purge/{id}", name="bpi_admin_agency_purge")
      */
-    public function purgeAction($id)
+    public function purgeAction(Agency $agency)
     {
-        $this->getRepository()->purge($id);
+        $this->getRepository()->purge($agency->getId());
 
         return $this->redirect(
-            $this->generateUrl("bpi_admin_agency_deleted", array())
+            $this->generateUrl("bpi_admin_agency_deleted", [])
         );
     }
 
     /**
-     * @Route(path="/restore", name="bpi_admin_agency_restore")
+     * @Route(path="/restore/{id}", name="bpi_admin_agency_restore")
      */
-    public function restoreAction($id)
+    public function restoreAction(Agency $agency)
     {
-        $this->getRepository()->restore($id);
+        $this->getRepository()->restore($agency->getId());
 
         return $this->redirect(
-            $this->generateUrl("bpi_admin_agency", array())
+            $this->generateUrl("bpi_admin_agency", [])
         );
     }
 
     private function createAgencyForm($agency, $new = false)
     {
         $formBuilder = $this->createFormBuilder($agency)
-          ->add('publicId', TextType::class, array('label' => 'Public ID'))
-          ->add('name', TextType::class)
-          ->add('moderator', TextType::class)
-          ->add('internal', CheckboxType::class, array(
-              'label' => 'Internal',
-              'value' => 1,
-          ))
-          ->add('publicKey', TextType::class)
-          ->add('secret', TextType::class);
+            ->add('publicId', TextType::class, ['label' => 'Public ID'])
+            ->add('name', TextType::class)
+            ->add('moderator', TextType::class)
+            ->add(
+                'internal',
+                CheckboxType::class,
+                [
+                    'label' => 'Internal',
+                    'value' => 1,
+                ]
+            )
+            ->add('publicKey', TextType::class)
+            ->add('secret', TextType::class);
 
         if (!$new) {
-            $formBuilder->add('deleted', CheckboxType::class, array('required' => false));
+            $formBuilder->add('deleted', CheckboxType::class, ['required' => false]);
         }
 
-        $formBuilder->add('save', SubmitType::class, array('attr' => array('class' => 'btn')));
+        $formBuilder->add('save', SubmitType::class, ['attr' => ['class' => 'btn']]);
 
         return $formBuilder->getForm();
     }

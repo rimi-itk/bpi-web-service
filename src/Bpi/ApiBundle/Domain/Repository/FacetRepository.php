@@ -37,14 +37,12 @@ class FacetRepository extends DocumentRepository
 
         $agencyId = $node
             ->getAuthor()
-            ->getAgencyId()
-        ;
+            ->getAgencyId();
 
         $agency = $this
             ->dm
             ->getRepository('BpiApiBundle:Aggregate\Agency')
-            ->findOneBy(array('public_id' => $agencyId->id()))
-        ;
+            ->findOneBy(array('public_id' => $agencyId->id()));
 
         $categoryId = $node
             ->getCategory()
@@ -87,10 +85,10 @@ class FacetRepository extends DocumentRepository
             'tags' => array($tags),
         );
 
-        $setFacets = new \stdClass();
+        $setFacets = [];
         array_walk($facets, function ($facet, $key) use (&$setFacets) {
             if (!empty($facet)) {
-                $setFacets->$key = $facet[0];
+                $setFacets[$key] = $facet[0];
             }
         });
 
@@ -261,37 +259,27 @@ class FacetRepository extends DocumentRepository
      * @param $changes
      * @return bool
      */
-    public function updateFacet($changes)
+    public function updateFacet(array $changes)
     {
         $qb = $this->dm->createQueryBuilder('BpiApiBundle:Entity\Facet')
             ->update()
-            ->multiple(true)
-        ;
+            ->multiple(true);
 
         if (isset($changes['nodeId'])) {
             $qb->field('nodeId')->equals($changes['nodeId']);
         }
 
         foreach ($changes as $changedValue => $changed) {
-            if (is_array($changed) && isset($changed['newValue']) && isset($changed['oldValue'])) {
-                $qb->field('facetData.' . $changedValue)->set($changed['newValue']);
-                $qb->field('facetData.' . $changedValue)->equals($changed['oldValue']);
-            } elseif ('tags' === $changedValue) {
+            if ('tags' === $changedValue) {
                 $qb->field('facetData.' . $changedValue)->set($changed);
             }
-
-            if ('agency_id' === $changedValue && is_string($changed)) {
-                $qb->field('facetData.' . $changedValue)->equals($changed);
-            } else {
+            elseif (is_array($changed) && isset($changed['newValue']) && isset($changed['oldValue'])) {
                 $qb->field('facetData.' . $changedValue)->set($changed['newValue']);
                 $qb->field('facetData.' . $changedValue)->equals($changed['oldValue']);
             }
         }
 
-        $qb
-            ->getQuery()
-            ->execute()
-        ;
+        $qb->getQuery()->execute();
 
         return true;
     }

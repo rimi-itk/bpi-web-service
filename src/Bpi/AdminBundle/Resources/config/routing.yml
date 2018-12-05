@@ -2,37 +2,37 @@
 #    path: /
 #    defaults: { _controller: BpiAdminBundle:Default:index }
 
-bpi_admin_agency:
-    path: /agency
-    defaults: { _controller: BpiAdminBundle:Agency:index }
-
-bpi_admin_agency_details:
-    path: /agency/details/{id}
-    defaults: { _controller: BpiAdminBundle:Agency:details }
-
-bpi_admin_agency_new:
-    path: /agency/new
-    defaults: { _controller: BpiAdminBundle:Agency:new }
-
-bpi_admin_agency_edit:
-    path: /agency/edit/{id}
-    defaults: { _controller: BpiAdminBundle:Agency:edit }
-
-bpi_admin_agency_delete:
-    path: /agency/delete/{id}
-    defaults: { _controller: BpiAdminBundle:Agency:delete }
-
-bpi_admin_agency_purge:
-    path: /agency/purge/{id}
-    defaults: { _controller: BpiAdminBundle:Agency:purge }
-
-bpi_admin_agency_restore:
-    path: /agency/restore/{id}
-    defaults: { _controller: BpiAdminBundle:Agency:restore }
-
-bpi_admin_agency_deleted:
-    path: /agency/deleted
-    defaults: { _controller: BpiAdminBundle:Agency:deleted }
+#bpi_admin_agency:
+#    path: /agency
+#    defaults: { _controller: BpiAdminBundle:Agency:index }
+#
+#bpi_admin_agency_details:
+#    path: /agency/details/{id}
+#    defaults: { _controller: BpiAdminBundle:Agency:details }
+#
+#bpi_admin_agency_new:
+#    path: /agency/new
+#    defaults: { _controller: BpiAdminBundle:Agency:new }
+#
+#bpi_admin_agency_edit:
+#    path: /agency/edit/{id}
+#    defaults: { _controller: BpiAdminBundle:Agency:edit }
+#
+#bpi_admin_agency_delete:
+#    path: /agency/delete/{id}
+#    defaults: { _controller: BpiAdminBundle:Agency:delete }
+#
+#bpi_admin_agency_purge:
+#    path: /agency/purge/{id}
+#    defaults: { _controller: BpiAdminBundle:Agency:purge }
+#
+#bpi_admin_agency_restore:
+#    path: /agency/restore/{id}
+#    defaults: { _controller: BpiAdminBundle:Agency:restore }
+#
+#bpi_admin_agency_deleted:
+#    path: /agency/deleted
+#    defaults: { _controller: BpiAdminBundle:Agency:deleted }
 
 bpi_admin_node:
     path:  /node

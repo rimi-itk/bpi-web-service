@@ -56,7 +56,12 @@ doctrine_mongodb:
     document_managers:
         default:
             mappings:
-                BpiApiBundle: { type: yml, prefix: Bpi\ApiBundle\Domain }
+                BpiApiBundle:
+                    type: yml
+                    prefix: Bpi\ApiBundle\Domain
+#                    dir: "%kernel.root_dir%/../src/Bpi/ApiBundle/Domain"
+#                    alias: 'BpiApiBundle'
+#                    is_bundle: false
                 gedmo_tree:
                     type: yml
                     prefix: Gedmo\Tree\Document
