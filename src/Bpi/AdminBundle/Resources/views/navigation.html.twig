@@ -19,7 +19,7 @@
                             <li{% if url in route %} class="active"{% endif %}><a href="{{ url(url) }}">{{title}}</a></li>
                         {% endfor %}
                             <li class="pull-right">
-                                <form name="search-box" action="node" method="get" class="navbar-search pull-right">
+                                <form name="search-box" action="{{ url('bpi_admin_node') }}" method="get" class="navbar-search pull-right">
                                   <input placeholder="Search" class="input-small search-input" type="text" id="search_node" name="search" value="{{ app.request.get('search')}}">
                                 </form>
                             </li>

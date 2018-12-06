@@ -35,7 +35,6 @@ class NodeController extends Controller
      */
     public function indexAction(Request $request)
     {
-
         $param = $request->query->get('sort');
         $direction = $request->query->get('direction');
         $search = $request->query->get('search');
@@ -80,32 +79,6 @@ class NodeController extends Controller
             'pagination' => $pagination,
             'delete_lable' => 'Undelete',
             'delete_url' => 'bpi_admin_node_restore',
-        );
-    }
-
-    /**
-     * @Template("BpiAdminBundle:Node:form.html.twig")
-     */
-    public function newAction()
-    {
-        $node = new \Bpi\ApiBundle\Domain\Aggregate\Node();
-        $form = $this->createNodeForm($node, true);
-        $request = $this->getRequest();
-
-        if ($request->isMethod('POST')) {
-            $form->bind($request);
-            if ($form->isValid()) {
-                $this->getRepository()->save($node);
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_node')
-                );
-            }
-
-        }
-
-        return array(
-            'form' => $form->createView(),
-            'id' => null,
         );
     }
 
