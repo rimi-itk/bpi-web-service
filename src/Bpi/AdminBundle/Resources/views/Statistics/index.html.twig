@@ -12,20 +12,9 @@
 {% endblock %}
 
 {% block content %}
-
-{#<form action="{{ path(app.request.attributes.get('_route')) }}" method="post" {{ form_enctype(form) }}>#}
-
-    {#{{ form_widget(form) }}#}
-
-    {#<div class="form-actions">#}
-        {#<input type="submit" class="btn" value="Show" />#}
-    {#</div>#}
-{#</form>#}
     {{ form_start(form) }}
     {{ form_widget(form) }}
     {{ form_end(form) }}
-
-
 {% for key, stat in statistics %}
     <span>{{key}}</span>: {{stat}}<br />
 {% else %}
