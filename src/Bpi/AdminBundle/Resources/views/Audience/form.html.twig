@@ -3,12 +3,15 @@
 {% block content %}
 {% include 'BpiAdminBundle:Audience:nav.html.twig' %}
 
-<form action="{{ path(app.request.attributes.get('_route'), {'id': id}) }}" method="post" {{ form_enctype(form) }}>
+{#<form action="{{ path(app.request.attributes.get('_route'), {'id': id}) }}" method="post" {{ form_enctype(form) }}>#}
 
+    {#{{ form_widget(form) }}#}
+
+    {#<div class="form-actions">#}
+        {#<input type="submit" class="btn" value="Save" />#}
+    {#</div>#}
+{#</form>#}
+    {{ form_start(form) }}
     {{ form_widget(form) }}
-
-    <div class="form-actions">
-        <input type="submit" class="btn" value="Save" />
-    </div>
-</form>
+    {{ form_end(form) }}
 {% endblock %}
