@@ -136,7 +136,7 @@ class Resource implements IPresentable
 //        $copyleft = '<p>' . $this->copyleft . '</p>';
 
         $entity->addProperty($document->createProperty('title', 'string', $this->title));
-        $entity->addProperty($document->createProperty('body', 'string', $this->body->getFlattenContent() . $copyleft));
+        $entity->addProperty($document->createProperty('body', 'string', $this->body->getFlattenContent()));
         $entity->addProperty($document->createProperty('teaser', 'string', $this->teaser));
         $entity->addProperty($document->createProperty('creation', 'dateTime', $this->ctime));
         $entity->addProperty($document->createProperty('type', 'string', $this->type));

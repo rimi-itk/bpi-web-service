@@ -6,9 +6,9 @@ app:
     prefix: /admin
     type: annotation
 
-#bpi_api:
-#    resource: Bpi\ApiBundle\Controller\RestController
-#    type: rest
+bpi_api:
+    resource: Bpi\ApiBundle\Controller\RestController
+    type: rest
 #
 #bpi_api_channels:
 #    resource: Bpi\ApiBundle\Controller\ChannelController

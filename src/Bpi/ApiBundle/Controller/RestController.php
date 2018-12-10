@@ -2,8 +2,10 @@
 
 namespace Bpi\ApiBundle\Controller;
 
+use Bpi\ApiBundle\Domain\Aggregate\Node;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints;
@@ -134,26 +136,26 @@ class RestController extends FOSRestController
      * @Rest\Get("/node/collection")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="200")
      */
-    public function listAction()
+    public function listAction(Request $request)
     {
         $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
         $node_query = new \Bpi\ApiBundle\Domain\Entity\NodeQuery();
         $node_query->amount(20);
-        if (false !== ($amount = $this->getRequest()->query->get('amount', false))) {
+        if (false !== ($amount = $request->query->get('amount', false))) {
             $node_query->amount($amount);
         }
 
-        if (false !== ($offset = $this->getRequest()->query->get('offset', false))) {
+        if (false !== ($offset = $request->query->get('offset', false))) {
             $node_query->offset($offset);
         }
 
-        if (false !== ($search = $this->getRequest()->query->get('search', false))) {
+        if (false !== ($search = $request->query->get('search', false))) {
             $node_query->search($search);
         }
 
         $filters = array();
         $logicalOperator = '';
-        if (false !== ($filter = $this->getRequest()->query->get('filter', false))) {
+        if (false !== ($filter = $request->query->get('filter', false))) {
             foreach ($filter as $field => $value) {
                 if ($field == 'type' && !empty($value)) {
                     foreach ($value as $val) {
@@ -214,7 +216,7 @@ class RestController extends FOSRestController
         $availableFacets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
         $node_query->filter($availableFacets->nodeIds);
 
-        if (false !== ($sort = $this->getRequest()->query->get('sort', false))) {
+        if (false !== ($sort = $request->query->get('sort', false))) {
             foreach ($sort as $field => $order)
                 $node_query->sort($field, $order);
         } else {
@@ -260,7 +262,7 @@ class RestController extends FOSRestController
         $collection->setHypermedia($hypermedia);
         $hypermedia->addLink($document->createLink('canonical', $router->generate('list', array(), true)));
         $hypermedia->addLink(
-            $document->createLink('self', $router->generate('list', $this->getRequest()->query->all(), true))
+            $document->createLink('self', $router->generate('list', $request->query->all(), true))
         );
         $hypermedia->addQuery(
             $document->createQuery(
@@ -325,26 +327,31 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Shows statictic by AgencyId
+     * Shows statistics for a certain agency.
+     *
+     * This would return:
      *  - Number of pushed nodes.
-     *  - Number of syncidated nodes.
+     *  - Number of syndicated nodes.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *   The request object.
      *
      * @Rest\Get("/statistics")
      * @Rest\View(template="BpiApiBundle:Rest:statistics.html.twig", statusCode="200")
      */
-    public function statisticsAction()
+    public function statisticsAction(Request $request)
     {
-        /* @var $request \Symfony\Component\HttpFoundation\Request */
-        $request = $this->getRequest();
         $agencyId = $this->getUser()->getAgencyId()->id();
 
         // @todo Add input validation
         $dateFrom = $request->get('dateFrom');
         $dateTo = $request->get('dateTo');
 
+        /** @var \Bpi\ApiBundle\Domain\Repository\HistoryRepository $repo */
         $repo = $this->getRepository('BpiApiBundle:Entity\History');
         $stats = $repo->getStatisticsByDateRangeForAgency($dateFrom, $dateTo, $agencyId);
 
+        /** @var \Bpi\ApiBundle\Transform\Presentation $transform */
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.document'));
         $document = $transform->transform($stats);
@@ -353,7 +360,7 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Display available options
+     * Display available options.
      *
      * @Rest\Options("/node/collection")
      */
@@ -371,10 +378,9 @@ class RestController extends FOSRestController
     }
 
     /**
-     * List available media type entities
+     * List available media type entities.
      *
-     * @category test interface
-     * @Rest\Get("/shema/entity/list")
+     * @Rest\Get("/schema/entity/list")
      * @Rest\View
      */
     public function schemaListEntitiesAction()
@@ -386,15 +392,14 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Display example of entity
+     * Display example of entity.
      *
-     * @category test interface
-     * @Rest\Get("/shema/entity/{name}")
+     * @Rest\Get("/schema/entity/{name}")
      * @Rest\View
      */
     public function schemaEntityAction($name)
     {
-        $loader = new \Bpi\ApiBundle\Tests\DoctrineFixtures\LoadNodes();
+        $loader = new \Bpi\ApiBundle\Tests\Service\Fixtures\Node\LoadNodes();
         $transformer = $this->get("bpi.presentation.transformer");
         $transformer->setDoc($this->get('bpi.presentation.document'));
         switch ($name) {
@@ -428,22 +433,20 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Display node item
+     * Display node item.
      *
      * @Rest\Get("/node/item/{id}")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
      */
-    public function nodeAction($id)
+    public function nodeAction(Node $loadedNode)
     {
-        $_node = $this->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($id);
-
-        if (!$_node) {
+        if (!$loadedNode) {
             throw $this->createNotFoundException();
         }
-        $_node->defineAgencyContext(new AgencyId($this->getUser()->getAgencyId()->id()));
+        $loadedNode->defineAgencyContext(new AgencyId($this->getUser()->getAgencyId()->id()));
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.document'));
-        $document = $transform->transform($_node);
+        $document = $transform->transform($loadedNode);
 
         $hypermedia = $document->createHypermediaSection();
         $node = $document->currentEntity();
@@ -501,14 +504,13 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Push new content
+     * Push new content.
      *
      * @Rest\Post("/node")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="201")
      */
-    public function postNodeAction()
+    public function postNodeAction(Request $request)
     {
-        $request = $this->getRequest();
         $service = $this->get('domain.push_service');
         BpiFile::$base_url = $this->getRequest()->getScheme() . '://' . $this->getRequest()->getHttpHost() . $this->getRequest()->getBasePath();
         $assets = array();
@@ -730,10 +732,10 @@ class RestController extends FOSRestController
      * @Rest\Get("/node")
      * @Rest\View(template="BpiApiBundle:Rest:testinterface2.html.twig")
      */
-    public function nodeResourceAction()
+    public function nodeResourceAction(Request $request)
     {
         // Handle query by node id
-        if ($id = $this->getRequest()->get('id')) {
+        if ($id = $request->get('id')) {
             // SDK can not handle properly redirects, so query string is used
             // @see https://github.com/symfony/symfony/issues/7929
             $params = array(
@@ -756,49 +758,6 @@ class RestController extends FOSRestController
         $controls->addLink($document->createLink('collection', 'Collection'));
 
         return $document;
-    }
-
-    /**
-     * Only for live documentation
-     *
-     * @Rest\Get("/node/{node_id}/asset")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="200")
-     */
-    public function getNodeAssetAction($node_id)
-    {
-
-    }
-
-    /**
-     * Link file with node
-     * Filename will overwrite existing one if it has previously set
-     *
-     * @Rest\Put("/node/{node_id}/asset/{filename}")
-     * @Rest\View(statusCode="204")
-     */
-    public function putNodeAssetAction($node_id, $filename)
-    {
-        /*
-         * NOT USED
-        $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->find($node_id);
-        if (is_null($node))
-            throw new HttpException(404, 'No such node ID exists');
-
-        $filesystem = $this->get('knp_gaufrette.filesystem_map')->get('assets');
-        $file = new \Gaufrette\File($filename, $filesystem);
-        $result = $file->setContent($this->getRequest()->getContent(), array('title' => 'test_title'));
-
-        if (false === $result)
-            throw new HttpException(500, 'Unable to store requested file');
-
-        $node->allocateFile($file);
-
-        $dm = $this->get('doctrine.odm.mongodb.document_manager');
-        $dm->persist($node);
-        $dm->flush();
-
-        return new Response('', 204);
-        */
     }
 
     /**
@@ -888,47 +847,20 @@ class RestController extends FOSRestController
     }
 
     /**
-     * For testing purposes. Echoes back sent request
-     *
-     * @Rest\Get("/tools/echo")
-     * @Rest\View(statusCode="200")
-     */
-    public function echoAction()
-    {
-        return $this->view($this->get('request')->getContent(), 200);
-    }
-
-    /**
-     * Static documentation for the service
-     *
-     * @Rest\Get("/doc/{page}")
-     * @Rest\View(template="BpiApiBundle:Rest:static_doc.html.twig")
-     * @param string $page
-     */
-    public function docAction($page)
-    {
-        try {
-            $file = $this->get('kernel')->locateResource('@BpiApiBundle/Resources/doc/' . $page . '.md');
-
-            return $this->view(file_get_contents($file));
-        } catch (\InvalidArgumentException $e) {
-            throw $this->createNotFoundException();
-        }
-    }
-
-    /**
      * Mark node as syndicated
      *
      * @Rest\Get("/node/syndicated")
      * @Rest\View(statusCode="200")
      */
-    public function nodeSyndicatedAction()
+    public function nodeSyndicatedAction(Request $request)
     {
-        $id = $this->getRequest()->get('id');
+        $nodeId = $request->get('id');
         $agency = $this->getUser();
 
+        /** @var \Bpi\ApiBundle\Domain\Repository\NodeRepository $nodeRepository */
         $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
-        $node = $nodeRepository->find($id);
+        /** @var \Bpi\ApiBundle\Domain\Aggregate\Node $node */
+        $node = $nodeRepository->find($nodeId);
         if (!$node) {
             throw $this->createNotFoundException();
         }
@@ -965,15 +897,15 @@ class RestController extends FOSRestController
      * @Rest\Get("/node/delete")
      * @Rest\View(statusCode="200")
      */
-    public function nodeDeleteAction()
+    public function nodeDeleteAction(Request $request)
     {
         // @todo Add check if node exists
 
-        $id = $this->getRequest()->get('id');
+        $nodeId = $request->get('id');
 
         $agencyId = $this->getUser()->getAgencyId()->id();
 
-        $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->delete($id, $agencyId);
+        $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->delete($nodeId, $agencyId);
 
         if ($node == null) {
             return new Response('This node does not belong to you', 403);
@@ -997,30 +929,5 @@ class RestController extends FOSRestController
         );
 
         return new Response(file_get_contents($file), 200, $headers);
-    }
-
-    /**
-     * Get unserialized request body
-     *
-     * @return \Bpi\RestMediaTypeBundle\Document
-     */
-    protected function getDocument()
-    {
-        $request_body = $this->getRequest()->getContent();
-
-        /**
-         * @todo validate against schema (logical check)
-         */
-        if (empty($request_body) || false === simplexml_load_string($request_body))
-            throw new HttpException(400, 'Bad Request'); // syntax check fail
-
-        $document = $this->get("serializer")->deserialize(
-            $request_body,
-            'Bpi\RestMediaTypeBundle\Document',
-            'xml'
-        );
-        $document->setRouter($this->get('router'));
-
-        return $document;
     }
 }

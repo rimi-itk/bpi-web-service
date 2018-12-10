@@ -66,9 +66,8 @@ services:
     arguments: ["@security.token_storage", "@security.authentication.manager", "@service_container"]
 
   bpi.pk.security.user_provider:
-    class: stdClass
-    factory_service: doctrine_mongodb
-    factory_method:  getRepository
+    class: 'Bpi\ApiBundle\Domain\Repository\AgencyRepository'
+    factory: ['@doctrine.odm.mongodb.document_manager', 'getRepository']
     arguments: [ 'BpiApiBundle:Aggregate\Agency' ]
 
   bpi.domain.event_listener:

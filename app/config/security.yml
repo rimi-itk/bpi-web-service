@@ -29,7 +29,7 @@ security:
             security: false
 
         schema:
-            pattern: ^/shema.*
+            pattern: ^/schema.*
             security: false
 
         mainpage:
