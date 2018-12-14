@@ -1,24 +1,11 @@
-#bpi_admin:
-#    resource: "@BpiAdminBundle/Resources/config/routing.yml"
-#    prefix:   /admin
-app:
+bpi_admin:
     resource: "@BpiAdminBundle/Controller/"
     prefix: /admin
     type: annotation
 
 bpi_api:
-    resource: Bpi\ApiBundle\Controller\RestController
+    resource: "@BpiApiBundle/Controller/"
     type: rest
-#
-#bpi_api_channels:
-#    resource: Bpi\ApiBundle\Controller\ChannelController
-#    type: rest
-#    prefix: /channel
-#
-#bpi_api_users:
-#    resource: Bpi\ApiBundle\Controller\UserController
-#    type: rest
-#    prefix: /user
 
 # Internal routing configuration to handle ESI
 #_internal:

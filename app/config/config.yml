@@ -4,7 +4,7 @@ imports:
     - { resource: services.yml }
 
 parameters:
-    api_version: 2.0-rc2
+    api_version: 3.0
 
 framework:
     #esi:             ~
@@ -50,7 +50,7 @@ doctrine_mongodb:
     connections:
         default:
             server: mongodb://localhost:27017
-            #server: mongodb://rockmongo.bpi1.inlead.dk:27017
+            # server: mongodb://%mongodb_user%:%mongodb_pass%@localhost:27017/%mongodb_db%
             options: {}
     default_database: %mongodb_db%
     document_managers:
@@ -59,15 +59,12 @@ doctrine_mongodb:
                 BpiApiBundle:
                     type: yml
                     prefix: Bpi\ApiBundle\Domain
-#                    dir: "%kernel.root_dir%/../src/Bpi/ApiBundle/Domain"
-#                    alias: 'BpiApiBundle'
+#                gedmo_tree:
+#                    type: yml
+#                    prefix: Gedmo\Tree\Document
+#                    dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Tree/Document"
+#                    alias: GedmoTree # this one is optional and will default to the name set for the mapping
 #                    is_bundle: false
-                gedmo_tree:
-                    type: yml
-                    prefix: Gedmo\Tree\Document
-                    dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Tree/Document"
-                    alias: GedmoTree # this one is optional and will default to the name set for the mapping
-                    is_bundle: false
 
 mongo_db_migrations:
     collection_name: "migration_versions"
@@ -96,10 +93,6 @@ fos_rest:
       view_handler: bpi.apibundle.rest.view_handler
     routing_loader:
         default_format: bpi
-#    format_listener:
-#        default_priorities: ['bpi', 'xml', 'json', 'html', '*/*']
-#        fallback_format: xml
-#        prefer_extension: true
     view:
         view_response_listener: true
         formats:

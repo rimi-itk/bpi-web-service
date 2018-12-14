@@ -1,36 +1,30 @@
 services:
-  #rest
   bpi.apibundle.rest.view_extension_handler:
     class: Bpi\ApiBundle\View\BPIViewHandler
+
   bpi.apibundle.rest.view_handler:
     parent: fos_rest.view_handler.default
     calls:
       - ['registerHandler', [ 'bpi', ["@bpi.apibundle.rest.view_extension_handler", 'handleExtension'] ] ]
 
-  #domain
   domain.push_service:
     class: Bpi\ApiBundle\Domain\Service\PushService
-    arguments: ["@doctrine_mongodb.odm.document_manager", "@knp_gaufrette.filesystem_map"]
+    arguments: ["@doctrine_mongodb.odm.document_manager"]
 
-  #gridfs gaufrette
   bpi.gridfs.conn:
     class: Doctrine\MongoDB\Connection
-    factory_service: doctrine_mongodb.odm.default_connection
-    factory_method: selectDatabase
+    factory: ['@doctrine_mongodb.odm.default_connection', 'selectDatabase']
     arguments: ["bpi"]
 
   bpi.gridfs.db:
     class: Doctrine\MongoDB\Database
-    factory_service: bpi.gridfs.conn
-    factory_method: getGridFS
+    factory: ['@bpi.gridfs.conn', 'getGridFS']
     arguments: ["Asset"]
 
   bpi.gridfs:
     class: Doctrine\MongoDB\GridFS
-    factory_service: bpi.gridfs.db
-    factory_method: getMongoCollection
+    factory: ['@bpi.gridfs.db', 'getMongoCollection']
 
-  #presentation
   bpi.presentation.document:
     class: Bpi\RestMediaTypeBundle\Document
     arguments: ["%api_version%"]
@@ -56,7 +50,6 @@ services:
   bpi.presentation.transformer:
     class: Bpi\ApiBundle\Transform\Presentation
 
-  # security
   bpi.pk.security.authentication.provider:
     class:  Bpi\ApiBundle\Security\Authentication\Provider\PKProvider
     arguments: ['']

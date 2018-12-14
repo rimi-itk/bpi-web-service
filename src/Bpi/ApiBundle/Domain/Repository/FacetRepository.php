@@ -3,7 +3,6 @@
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Bpi\ApiBundle\Domain\Entity\Facet;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ODM\MongoDB\DocumentRepository;
 
 /**
@@ -262,8 +261,7 @@ class FacetRepository extends DocumentRepository
     public function updateFacet(array $changes)
     {
         $qb = $this->dm->createQueryBuilder('BpiApiBundle:Entity\Facet')
-            ->update()
-            ->multiple(true);
+            ->updateMany();
 
         if (isset($changes['nodeId'])) {
             $qb->field('nodeId')->equals($changes['nodeId']);
@@ -285,54 +283,6 @@ class FacetRepository extends DocumentRepository
     }
 
     /**
-     * Add channel name to facet for all nodes added to channel.
-     *
-     * @param $channelId
-     * @param $nodeIds
-     */
-    public function addChannelToFacet($channelId, $nodeIds)
-    {
-        $nids = array();
-        foreach ($nodeIds as $id) {
-            $nids[] = $id['nodeId'];
-        }
-
-        $qb = $this->createQueryBuilder();
-        $qb
-            ->update()
-            ->multiple(true)
-            ->field('facetData.channels')->addToSet($channelId)
-            ->field('nodeId')->in($nids)
-            ->getQuery()
-            ->execute()
-        ;
-    }
-
-    /**
-     * Remove channel name from facet on removing nodes from channel.
-     *
-     * @param $channelId
-     * @param $nodeIds
-     */
-    public function removeChannelFromFacet($channelId, $nodeIds)
-    {
-        $nids = array();
-        foreach ($nodeIds as $id) {
-            $nids[] = $id['nodeId'];
-        }
-
-        $qb = $this->createQueryBuilder();
-        $qb
-            ->update()
-            ->multiple(true)
-            ->field('facetData.channels')->pull($channelId)
-            ->field('nodeId')->in($nids)
-            ->getQuery()
-            ->execute()
-        ;
-    }
-
-  /**
    * Remove facet by nodeId.
    *
    * @param $nodeId

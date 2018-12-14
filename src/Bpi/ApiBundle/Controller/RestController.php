@@ -2,7 +2,15 @@
 
 namespace Bpi\ApiBundle\Controller;
 
+use Bpi\ApiBundle\Domain\Aggregate\Assets;
 use Bpi\ApiBundle\Domain\Aggregate\Node;
+use Bpi\ApiBundle\Domain\Aggregate\Params;
+use Bpi\ApiBundle\Domain\Entity\File;
+use Bpi\ApiBundle\Domain\Entity\NodeQuery;
+use Bpi\ApiBundle\Domain\Entity\Profile;
+use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
+use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
+use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +25,7 @@ use Bpi\ApiBundle\Domain\ValueObject\NodeId;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 
 /**
- * Main entry point for REST requests
+ * Main entry point for REST requests.
  */
 class RestController extends FOSRestController
 {
@@ -138,8 +146,7 @@ class RestController extends FOSRestController
      */
     public function listAction(Request $request)
     {
-        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
-        $node_query = new \Bpi\ApiBundle\Domain\Entity\NodeQuery();
+        $node_query = new NodeQuery();
         $node_query->amount(20);
         if (false !== ($amount = $request->query->get('amount', false))) {
             $node_query->amount($amount);
@@ -213,7 +220,10 @@ class RestController extends FOSRestController
                 $logicalOperator = $filter['logicalOperator'];
             }
         }
+        /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
+        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
         $availableFacets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
+
         $node_query->filter($availableFacets->nodeIds);
 
         if (false !== ($sort = $request->query->get('sort', false))) {
@@ -222,7 +232,11 @@ class RestController extends FOSRestController
         } else {
             $node_query->sort('pushed', 'desc');
         }
-        $node_collection = $this->getRepository('BpiApiBundle:Aggregate\Node')->findByNodesQuery($node_query);
+
+        /** @var \Bpi\ApiBundle\Domain\Repository\NodeRepository $node_repository */
+        $node_repository = $this->getRepository('BpiApiBundle:Aggregate\Node');
+        $node_collection = $node_repository->findByNodesQuery($node_query);
+
         $agency_id = new AgencyId($this->getUser()->getAgencyId()->id());
         foreach ($node_collection as $node) {
           $node->defineAgencyContext($agency_id);
@@ -378,61 +392,6 @@ class RestController extends FOSRestController
     }
 
     /**
-     * List available media type entities.
-     *
-     * @Rest\Get("/schema/entity/list")
-     * @Rest\View
-     */
-    public function schemaListEntitiesAction()
-    {
-        $response = array('list' => array('nodes_query', 'node', 'agency', 'profile', 'resource'));
-        sort($response['list']);
-
-        return $response;
-    }
-
-    /**
-     * Display example of entity.
-     *
-     * @Rest\Get("/schema/entity/{name}")
-     * @Rest\View
-     */
-    public function schemaEntityAction($name)
-    {
-        $loader = new \Bpi\ApiBundle\Tests\Service\Fixtures\Node\LoadNodes();
-        $transformer = $this->get("bpi.presentation.transformer");
-        $transformer->setDoc($this->get('bpi.presentation.document'));
-        switch ($name) {
-            case 'node':
-                return $transformer->transform($loader->createAlphaNode());
-                break;
-            case 'resource':
-                return $transformer->transform($loader->createAlphaResource());
-                break;
-            case 'profile':
-                return $transformer->transform($loader->createAlphaProfile());
-                break;
-            case 'agency':
-                return $transformer->transform($loader->createAlphaAgency());
-                break;
-            case 'nodes_query':
-                $doc = $this->get('bpi.presentation.document');
-                $doc->appendEntity($entity = $doc->createEntity('nodes_query'));
-                $entity->addProperty($doc->createProperty('amount', 'number', 10));
-                $entity->addProperty($doc->createProperty('offset', 'number', 0));
-                $entity->addProperty($doc->createProperty('filter[resource.title]', 'string', ''));
-                $entity->addProperty($doc->createProperty('sort[ctime]', 'string', 'desc'));
-                $entity->addProperty(
-                    $doc->createProperty('reduce', 'string', 'initial', 'Reduce revisions to initial or latest')
-                );
-
-                return $doc;
-            default:
-                throw new HttpException(404, 'Requested entity does not exists');
-        }
-    }
-
-    /**
      * Display node item.
      *
      * @Rest\Get("/node/item/{id}")
@@ -511,32 +470,39 @@ class RestController extends FOSRestController
      */
     public function postNodeAction(Request $request)
     {
-        $service = $this->get('domain.push_service');
-        BpiFile::$base_url = $this->getRequest()->getScheme() . '://' . $this->getRequest()->getHttpHost() . $this->getRequest()->getBasePath();
-        $assets = array();
+        BpiFile::$base_url = $request->getScheme() . '://' . $request->getHttpHost() . $request->getBasePath();
 
-        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
+        // Validate request size.
+        $returnBytes = function ($value)
+        {
+            switch (substr ($value, -1))
+            {
+                case 'K': case 'k': return (int)$value * 1024;
+                case 'M': case 'm': return (int)$value * 1048576;
+                case 'G': case 'g': return (int)$value * 1073741824;
+                default: return $value;
+            }
+        };
 
-        /** check request body size, must be smaller than 10MB **/
-        if (strlen($request->getContent()) > 10485760) {
+        if (strlen($request->getContent()) > $returnBytes(ini_get('post_max_size'))) {
             return $this->createErrorView('Request entity too large', 413);
         }
 
-        // request validation
+        // Validate payload structure.
         $violations = $this->_isValidForPushNode($request->request->all());
         if (count($violations)) {
             return $this->createErrorView((string) $violations, 422);
         }
 
         $author = new \Bpi\ApiBundle\Domain\Entity\Author(
-            new \Bpi\ApiBundle\Domain\ValueObject\AgencyId($request->get('agency_id')),
+            new AgencyId($request->get('agency_id')),
             $request->get('local_author_id'),
             $request->get('firstname'),
             $request->get('lastname')
         );
 
+        $resource = new ResourceBuilder($this->get('router'));
 
-        $resource = new \Bpi\ApiBundle\Domain\Factory\ResourceBuilder($this->get('router'));
         $resource
           ->type($request->get('type'))
           ->title($request->get('title'))
@@ -546,33 +512,37 @@ class RestController extends FOSRestController
           ->data($request->get('data'))
           ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $request->get('creation')));
 
-        // Related materials
+        // Prepare related materials.
         foreach ($request->get('related_materials', array()) as $material) {
             $resource->addMaterial($material);
         }
 
-        // Download files and add them to resource
-        $assets = new \Bpi\ApiBundle\Domain\Aggregate\Assets();
+        // Prepare assets.
+        $assets = new Assets();
         $data = $request->get('assets', array());
         foreach ($data as $asset) {
-            $bpi_file = new \Bpi\ApiBundle\Domain\Entity\File($asset);
+            $bpi_file = new File($asset);
             $bpi_file->createFile();
             $assets->addElem($bpi_file);
         }
 
-        $profile = new \Bpi\ApiBundle\Domain\Entity\Profile();
+        // TODO: What's a profile anyway?
+        $profile = new Profile();
 
-        $params = new \Bpi\ApiBundle\Domain\Aggregate\Params();
+        $params = new Params();
         $params->add(
-            new \Bpi\ApiBundle\Domain\ValueObject\Param\Authorship(
+            new Authorship(
                 $request->get('authorship')
             )
         );
         $params->add(
-            new \Bpi\ApiBundle\Domain\ValueObject\Param\Editable(
+            new Editable(
                 $request->get('editable')
             )
         );
+
+        /** @var \Bpi\ApiBundle\Domain\Service\PushService $pushService */
+        $pushService = $this->get('domain.push_service');
 
         try {
             // Check for BPI ID
@@ -581,23 +551,40 @@ class RestController extends FOSRestController
                     return $this->createErrorView(sprintf('Such BPI ID [%s] not found', $id), 422);
                 }
 
-                $node = $this->get('domain.push_service')
-                  ->pushRevision(new NodeId($id), $author, $resource, $params, $assets);
+                $node = $pushService->pushRevision(
+                    new NodeId($id),
+                    $author,
+                    $resource,
+                    $params,
+                    $assets
+                );
 
+                /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
+                $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
                 $facetRepository->prepareFacet($node);
 
                 $transform = $this->get('bpi.presentation.transformer');
                 $transform->setDoc($this->get('bpi.presentation.document'));
                 $document = $transform->transform($node);
-                return $document;
 
+                return $document;
             }
-            $node = $this->get('domain.push_service')
-              ->push($author, $resource, $request->get('category'), $request->get('audience'), $request->get('tags'), $profile, $params, $assets);
+
+            $node = $pushService->push(
+                $author,
+                $resource,
+                $request->get('category'),
+                $request->get('audience'),
+                $request->get('tags'),
+                $profile,
+                $params,
+                $assets
+            );
 
             $transform = $this->get('bpi.presentation.transformer');
             $transform->setDoc($this->get('bpi.presentation.document'));
             $document = $transform->transform($node);
+
             return $document;
         } catch (\LogicException $e) {
             return $this->createErrorView($e->getMessage(), 422);
@@ -612,7 +599,6 @@ class RestController extends FOSRestController
      */
     protected function createErrorView($contents, $code)
     {
-        // @todo standart error format
         return $this->view($contents, $code);
     }
 
@@ -677,9 +663,10 @@ class RestController extends FOSRestController
             )
         ));
 
+        /** @var \Symfony\Component\Validator\Validator\ValidatorInterface $validator */
         $validator = $this->container->get('validator');
 
-        return $validator->validateValue($data, $node);
+        return $validator->validate($data, $node);
     }
 
     /**

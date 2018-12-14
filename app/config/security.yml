@@ -28,10 +28,6 @@ security:
             pattern:  ^/.+\.html$
             security: false
 
-        schema:
-            pattern: ^/schema.*
-            security: false
-
         mainpage:
             pattern: ^/$
             security: false

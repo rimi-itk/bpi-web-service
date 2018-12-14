@@ -2,7 +2,9 @@ parameters:
     unit_test_domain: ~
     secret: ~
     locale: en
-    mongodb_db: ~
+    mongodb_db: bpi
+    mongodb_user: ~
+    mongodb_pass: ~
     swiftmailer: ~
 
     mailer_transport: ~

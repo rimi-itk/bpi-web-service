@@ -193,6 +193,7 @@ class PushService
      */
     public function pushRevision(NodeId $node_id, Author $author, ResourceBuilder $builder, Params $params, Assets $assets)
     {
+        /** @var \Bpi\ApiBundle\Domain\Aggregate\Node $node */
         $node = $this->manager->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($node_id->id());
 
         $revision = $node->createRevision($author, $builder->build(), $params, $assets);
