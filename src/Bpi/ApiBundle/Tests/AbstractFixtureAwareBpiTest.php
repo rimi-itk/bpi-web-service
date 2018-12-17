@@ -24,8 +24,8 @@ abstract class AbstractFixtureAwareBpiTest extends AbstractBaseBpiTest
             }
             $loader->addFixture($fixture);
         }
-        $purger = new MongoDBPurger($this->dm->getManager());
-        $executor = new MongoDBExecutor($this->dm->getManager(), $purger);
+        $purger = new MongoDBPurger($this->registry->getManager());
+        $executor = new MongoDBExecutor($this->registry->getManager(), $purger);
         $executor->execute($loader->getFixtures());
     }
 

@@ -23,9 +23,39 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
+    public function testWithMissingAuthentication()
+    {
+        $this->client->request('GET', '/node/item/123456');
+
+        $rawResult = $this->client->getResponse()->getContent();
+
+        $xml = simplexml_load_string($rawResult);
+        $this->assertNotFalse($xml);
+        $this->assertEquals('SimpleXMLElement', get_class($xml));
+        $this->assertXmlStringEqualsXmlString(
+            '<result><![CDATA[Authorization required (none)]]></result>',
+            $xml->asXML()
+        );
+
+        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
+    }
+
+    /**
+     *
+     */
+    public function testMissingNodeById()
+    {
+        $this->client->request('GET', '/node/item/123456');
+
+        $this->assertEquals(404, $this->client->getResponse()->getStatusCode());
+    }
+
+    /**
+     *
+     */
     public function testFetchNodeById()
     {
-        $nodeRepository = $this->dm->getRepository(Node::class);
+        $nodeRepository = $this->registry->getRepository(Node::class);
 
         /** @var Node[] $nodes */
         $nodes = $nodeRepository->findAll();

@@ -20,7 +20,7 @@ abstract class AbstractBaseBpiTest extends WebTestCase
     /**
      * @var \Doctrine\Bundle\MongoDBBundle\ManagerRegistry
      */
-    protected $dm;
+    protected $registry;
 
     /**
      * {@inheritdoc}
@@ -31,7 +31,7 @@ abstract class AbstractBaseBpiTest extends WebTestCase
 
         $this->client = static::createClient();
         $this->container = $this->client->getContainer();
-        $this->dm = $this->container->get('doctrine_mongodb');
+        $this->registry = $this->container->get('doctrine_mongodb');
     }
 
     /**
