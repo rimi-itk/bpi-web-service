@@ -28,6 +28,7 @@ services:
   bpi.presentation.document:
     class: Bpi\RestMediaTypeBundle\Document
     arguments: ["%api_version%"]
+    public: true
     calls:
       - ['setRouter', [ "@router"] ]
 

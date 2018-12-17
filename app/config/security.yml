@@ -50,6 +50,7 @@ security:
         api:
             pattern:   ^/
             pk:      true
+            provider: agencies
             stateless: true
 
     access_control:

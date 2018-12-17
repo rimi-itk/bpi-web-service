@@ -9,26 +9,26 @@ parameters:
 framework:
     #esi:             ~
     #translator:      { fallback: %locale% }
-    secret:          %secret%
+    secret:          "%secret%"
     router:
         resource: "%kernel.root_dir%/config/routing.yml"
-        strict_requirements: %kernel.debug%
+        strict_requirements: "%kernel.debug%"
     form:            true
     csrf_protection: true
     validation:      { enable_annotations: true }
     templating:      { engines: ['twig'] } #assets_version: SomeVersionScheme
-    default_locale:  %locale%
+    default_locale:  "%locale%"
     session:         ~
 
 # Twig Configuration
 twig:
-    debug:            %kernel.debug%
-    strict_variables: %kernel.debug%
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
     exception_controller: 'FOS\RestBundle\Controller\ExceptionController::showAction'
 
 # Assetic Configuration
 assetic:
-    debug:          %kernel.debug%
+    debug:          "%kernel.debug%"
     use_controller: false
     bundles:        [ ]
     #java: /usr/bin/java
@@ -52,7 +52,7 @@ doctrine_mongodb:
             server: mongodb://localhost:27017
             # server: mongodb://%mongodb_user%:%mongodb_pass%@localhost:27017/%mongodb_db%
             options: {}
-    default_database: %mongodb_db%
+    default_database: "%mongodb_db%"
     document_managers:
         default:
             mappings:
@@ -84,7 +84,7 @@ nelmio_api_doc: ~
 
 sensio_framework_extra:
     view:    { annotations: true }
-    router:  { annotations: true }
+    router:  { annotations: false }
 
 fos_rest:
     exception:
@@ -128,7 +128,7 @@ knp_gaufrette:
         assets:
             adapter: attachment
 swiftmailer:
-    transport: %mailer_transport%
-    host: %mailer_host%
-    username: %mailer_user%
-    password: %mailer_password%
+    transport: "%mailer_transport%"
+    host: "%mailer_host%"
+    username: "%mailer_user%"
+    password: "%mailer_password%"
