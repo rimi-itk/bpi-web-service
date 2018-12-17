@@ -33,7 +33,7 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
 
         $resourceBuilder = new ResourceBuilder($this->container->get('router'));
         $resourceBuilder->title($faker->sentence);
-        $resourceBuilder->body(implode('\n', $faker->paragraphs));
+        $resourceBuilder->body(implode("\n", $faker->paragraphs));
         $resourceBuilder->teaser($faker->paragraph);
         $resourceBuilder->type($faker->userName);
         $resourceBuilder->ctime($faker->dateTime);
