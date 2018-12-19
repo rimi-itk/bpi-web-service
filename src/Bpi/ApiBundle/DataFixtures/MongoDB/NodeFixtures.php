@@ -5,6 +5,7 @@ namespace Bpi\ApiBundle\DataFixtures\MongoDB;
 use Bpi\ApiBundle\Domain\Aggregate\Assets;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
 use Bpi\ApiBundle\Domain\Entity\Author;
+use Bpi\ApiBundle\Domain\Entity\Facet;
 use Bpi\ApiBundle\Domain\Entity\Profile;
 use Bpi\ApiBundle\Domain\Factory\NodeBuilder;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
@@ -42,13 +43,13 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
         $nodeBuilder->resource($resourceBuilder->build());
 
         // Set audience.
-        $nodeBuilder->audience($this->getReference('audience-Studerende'));
+        $nodeBuilder->audience($this->getReference(AudienceFixtures::getRandomFixtureReference()));
         // Set category.
-        $nodeBuilder->category($this->getReference('category-Sport'));
+        $nodeBuilder->category($this->getReference(CategoryFixtures::getRandomFixtureReference()));
 
         // Set author.
         $authorFixture = new Author(
-            $this->getReference('agency-test_agency')->getAgencyId(),
+            $this->getReference(AgencyFixtures::TEST_AGENCY)->getAgencyId(),
             null,
             $faker->lastName,
             $faker->name
@@ -56,12 +57,11 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
         $nodeBuilder->author($authorFixture);
 
         // Set some tags.
-        $nodeBuilder->tag(
-            $this->getReference('tag-alpha')
-        );
-        $nodeBuilder->tag(
-            $this->getReference('tag-beta')
-        );
+        for($i = 0; $i < mt_rand(1, 10); $i++) {
+            $nodeBuilder->tag(
+                $this->getReference(TagFixtures::getRandomFixtureReference())
+            );
+        }
 
         // Set profile. (???)
         $nodeBuilder->profile(new Profile());
@@ -69,10 +69,10 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
         // Set some parameters.
         $params = new Params();
         $params->add(
-            new Authorship(true)
+            new Authorship((boolean) mt_rand(0, 1))
         );
         $params->add(
-            new Editable(true)
+            new Editable((boolean) mt_rand(0, 1))
         );
         $nodeBuilder->params($params);
 
@@ -84,6 +84,11 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
         $node = $nodeBuilder->build();
 
         $manager->persist($node);
+
+        /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
+        $facetRepository = $manager->getRepository(Facet::class);
+        $facetRepository->prepareFacet($node);
+
         $manager->flush();
     }
 

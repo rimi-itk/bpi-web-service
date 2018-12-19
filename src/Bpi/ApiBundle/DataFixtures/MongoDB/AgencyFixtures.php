@@ -12,6 +12,9 @@ use Faker\Factory as FakerFactory;
  */
 class AgencyFixtures extends Fixture
 {
+
+    const TEST_AGENCY = 'agency-test_agency';
+
     /**
      * {@inheritdoc}
      */
@@ -29,6 +32,6 @@ class AgencyFixtures extends Fixture
         $manager->persist($testAgency);
         $manager->flush();
 
-        $this->addReference('agency-test_agency', $testAgency);
+        $this->addReference(self::TEST_AGENCY, $testAgency);
     }
 }

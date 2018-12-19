@@ -50,6 +50,7 @@ services:
 
   bpi.presentation.transformer:
     class: Bpi\ApiBundle\Transform\Presentation
+    public: true
 
   bpi.pk.security.authentication.provider:
     class:  Bpi\ApiBundle\Security\Authentication\Provider\PKProvider
@@ -67,7 +68,7 @@ services:
   bpi.domain.event_listener:
     class: Bpi\ApiBundle\Domain\EventListener
     tags:
-      -  { name: doctrine_mongodb.odm.event_listener, event: postLoad }
+      - { name: doctrine_mongodb.odm.event_listener, event: postLoad }
 
   bpi.converter.doctrine.mongodb:
     class: Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\DoctrineParamConverter

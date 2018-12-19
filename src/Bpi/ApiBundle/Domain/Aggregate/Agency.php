@@ -66,8 +66,7 @@ class Agency implements IPresentable
      */
     public function checkToken($token)
     {
-        $localToken = crypt($this->public_id . $this->public_key . $this->secret, $token);
-        return $token === $localToken;
+        return password_verify($this->public_id.$this->public_key.$this->secret, $token);
     }
 
     public function __toString()

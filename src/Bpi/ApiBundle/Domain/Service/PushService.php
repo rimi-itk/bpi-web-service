@@ -118,7 +118,10 @@ class PushService
         $this->manager->persist($log);
 
         $this->manager->flush();
-        $this->manager->getRepository('BpiApiBundle:Entity\Facet')->prepareFacet($node);
+
+        /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
+        $facetRepository = $this->manager->getRepository('BpiApiBundle:Entity\Facet');
+        $facetRepository->prepareFacet($node);
 
         return $node;
     }

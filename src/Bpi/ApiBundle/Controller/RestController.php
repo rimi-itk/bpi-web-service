@@ -147,7 +147,7 @@ class RestController extends FOSRestController
     public function listAction(Request $request)
     {
         $node_query = new NodeQuery();
-        $node_query->amount(20);
+        $node_query->amount(10);
         if (false !== ($amount = $request->query->get('amount', false))) {
             $node_query->amount($amount);
         }
@@ -235,6 +235,7 @@ class RestController extends FOSRestController
 
         /** @var \Bpi\ApiBundle\Domain\Repository\NodeRepository $node_repository */
         $node_repository = $this->getRepository('BpiApiBundle:Aggregate\Node');
+        /** @var \Bpi\ApiBundle\Domain\Aggregate\Node[] $node_collection */
         $node_collection = $node_repository->findByNodesQuery($node_query);
 
         $agency_id = new AgencyId($this->getUser()->getAgencyId()->id());
@@ -324,7 +325,6 @@ class RestController extends FOSRestController
             $facetsXml->addProperties($result);
             $document->prependEntity($facetsXml);
         }
-
 
         return $document;
     }
@@ -651,15 +651,13 @@ class RestController extends FOSRestController
                 'audience' => array(
                     new Constraints\Length(array('min' => 2, 'max' => 100))
                 ),
-                // params
-                /* @todo
-                'editable' => array(
-                 * new Constraints\Type(array('type' => 'boolean'))
-                 * ),
-                 * 'authorship' => array(
-                 * new Constraints\Type(array('type' => 'boolean'))
-                 * ),
-                 */
+                // TODO: Enable this, but requires client changes as well.
+//                'editable' => array(
+//                    new Constraints\Type(array('type' => 'boolean')),
+//                ),
+//                'authorship' => array(
+//                    new Constraints\Type(array('type' => 'boolean')),
+//                ),
             )
         ));
 

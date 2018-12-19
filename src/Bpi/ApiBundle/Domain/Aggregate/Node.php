@@ -169,6 +169,17 @@ class Node implements IPresentable
                 ->isPositive()
         ));
 
+        $entity->addProperty($document->createProperty(
+            'authorship',
+            'boolean',
+            (int)$this->params
+                ->filter(function ($e) {
+                    if ($e instanceof Editable) return true;
+                })
+                ->first()
+                ->isPositive()
+        ));
+
         $document->appendEntity($entity);
 
         $document->setCursorOnEntity($entity);
