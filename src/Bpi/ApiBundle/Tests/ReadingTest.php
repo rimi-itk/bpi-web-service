@@ -14,28 +14,6 @@ use Bpi\ApiBundle\Domain\Aggregate\Node;
  */
 class ReadingTest extends AbstractFixtureAwareBpiTest
 {
-    const VALID_NODE_PROPERTIES = [
-        'id' => 'string',
-        'pushed' => 'dateTime',
-        'editable' => 'boolean',
-        'authorship' => 'boolean',
-        'author' => 'string',
-        'agency_id' => 'string',
-        'agency_name' => 'string',
-        'agency_internal' => 'boolean',
-        'category' => 'string',
-        'audience' => 'string',
-        'syndications' => 'string',
-        'title' => 'string',
-        'body' => 'string',
-        'teaser' => 'string',
-        'creation' => 'dateTime',
-        'type' => 'string',
-        'url' => 'string',
-        'data' => 'string',
-        'material' => 'string',
-    ];
-
     /**
      * Authentication token.
      *
@@ -122,9 +100,10 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
             ]
         );
 
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
         $rawResponse = $this->client->getResponse()->getContent();
         $xml = new \SimpleXMLElement($rawResponse);
-
         // Assert root tag.
         $this->assertEquals('bpi', $xml->getName());
         $rootNode = $xml;
@@ -134,42 +113,7 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
         $item = $xml->xpath('item');
         $this->assertNotEmpty($item);
         $this->assertCount(1, $item);
-        $this->assertNotNull($item[0]->attributes()['type']);
-        $this->assertEquals('entity', $item[0]->attributes()['type']);
-
-        // Assert 'properties' tag.
-        /** @var \SimpleXMLElement[] $properties */
-        $properties = $item[0]->xpath('properties');
-        $this->assertNotEmpty($properties);
-        $this->assertCount(1, $properties);
-
-        // Assert 'property' tags.
-        /** @var \SimpleXMLElement $property */
-        $property = $properties[0]->xpath('property');
-        $this->assertNotEmpty($property);
-
-        foreach (self::VALID_NODE_PROPERTIES as $validPropertyName => $validPropertyType) {
-            // Assert property with required name exists.
-            $propertyTag = $properties[0]->xpath('property[@name="'.$validPropertyName.'"]');
-            $this->assertNotEmpty($propertyTag);
-
-            // Assert certain property is of valid type.
-            $this->assertNotNull($propertyTag[0]->attributes()['type']);
-            $propertyTagTypeProperty = (string)$propertyTag[0]->attributes()['type'];
-
-            $this->assertEquals(
-                $validPropertyType,
-                $propertyTagTypeProperty
-            );
-        }
-
-        // Assert 'assets' tag.
-        /** @var \SimpleXMLElement[] $assets */
-        $assets = $item[0]->xpath('assets');
-        $this->assertNotEmpty($assets);
-        $this->assertCount(1, $assets);
-
-        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        $this->assertBpiEntity($item[0]);
     }
 
     /**
@@ -181,11 +125,11 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
             '/node/collection'
         );
 
+        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
+
         $rawResult = $this->client->getResponse()->getContent();
 
         $this->assertBpiMissingAuthentication($rawResult);
-
-        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
     }
 
     /**
@@ -203,6 +147,26 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
         );
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
+        $rawResponse = $this->client->getResponse()->getContent();
+        $xml = new \SimpleXMLElement($rawResponse);
+
+        // Assert 'item' tags with 'entity' type.
+        /** @var \SimpleXMLElement[] $entities */
+        $entities = $xml->xpath('item[@type="entity"]');
+        $this->assertNotEmpty($entities);
+
+//        /** @var \Bpi\ApiBundle\Domain\Repository\NodeRepository $nodeRepository */
+//        $nodeRepository = $this->registry->getRepository(Node::class);
+//        /** @var Node[] $nodes */
+//        $nodes = $nodeRepository->findAll();
+        // Defaults to 10 items.
+        $this->assertCount(10, $entities);
+
+        /** @var \SimpleXMLElement $entity */
+        foreach ($entities as $entity) {
+            $this->assertBpiEntity($entity);
+        }
     }
 
     /**
@@ -215,11 +179,11 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
             '/profile/dictionary'
         );
 
+        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
+
         $rawResult = $this->client->getResponse()->getContent();
 
         $this->assertBpiMissingAuthentication($rawResult);
-
-        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
     }
 
     /**

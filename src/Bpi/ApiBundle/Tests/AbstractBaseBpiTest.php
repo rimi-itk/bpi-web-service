@@ -12,6 +12,28 @@ abstract class AbstractBaseBpiTest extends WebTestCase
 {
     use ContainerAwareTrait;
 
+    const VALID_NODE_PROPERTIES = [
+        'id' => 'string',
+        'pushed' => 'dateTime',
+        'editable' => 'boolean',
+        'authorship' => 'boolean',
+        'author' => 'string',
+        'agency_id' => 'string',
+        'agency_name' => 'string',
+        'agency_internal' => 'boolean',
+        'category' => 'string',
+        'audience' => 'string',
+        'syndications' => 'string',
+        'title' => 'string',
+        'body' => 'string',
+        'teaser' => 'string',
+        'creation' => 'dateTime',
+        'type' => 'string',
+        'url' => 'string',
+        'data' => 'string',
+        'material' => 'string',
+    ];
+
     /**
      * @var \Symfony\Bundle\FrameworkBundle\Client
      */
@@ -54,5 +76,48 @@ abstract class AbstractBaseBpiTest extends WebTestCase
 
         $expectedXml = '<result><![CDATA[Authorization required (none)]]></result>';
         $this->assertXmlStringEqualsXmlString($expectedXml, $xml->asXML());
+    }
+
+    /**
+     * Asserts single bpi entity structure.
+     *
+     * @param \SimpleXMLElement $xml BPI entity.
+     */
+    public function assertBpiEntity(\SimpleXMLElement $item)
+    {
+        $this->assertNotNull($item->attributes()['type']);
+        $this->assertEquals('entity', $item->attributes()['type']);
+
+        // Assert 'properties' tag.
+        /** @var \SimpleXMLElement[] $properties */
+        $properties = $item->xpath('properties');
+        $this->assertNotEmpty($properties);
+        $this->assertCount(1, $properties);
+
+        // Assert 'property' tags.
+        /** @var \SimpleXMLElement $property */
+        $property = $properties[0]->xpath('property');
+        $this->assertNotEmpty($property);
+
+        foreach (self::VALID_NODE_PROPERTIES as $validPropertyName => $validPropertyType) {
+            // Assert property with required name exists.
+            $propertyTag = $properties[0]->xpath('property[@name="'.$validPropertyName.'"]');
+            $this->assertNotEmpty($propertyTag);
+
+            // Assert certain property is of valid type.
+            $this->assertNotNull($propertyTag[0]->attributes()['type']);
+            $propertyTagTypeProperty = (string)$propertyTag[0]->attributes()['type'];
+
+            $this->assertEquals(
+                $validPropertyType,
+                $propertyTagTypeProperty
+            );
+        }
+
+        // Assert 'assets' tag.
+        /** @var \SimpleXMLElement[] $assets */
+        $assets = $item[0]->xpath('assets');
+        $this->assertNotEmpty($assets);
+        $this->assertCount(1, $assets);
     }
 }

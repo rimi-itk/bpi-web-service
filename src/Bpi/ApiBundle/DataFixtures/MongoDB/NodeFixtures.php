@@ -32,7 +32,7 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
     {
         $faker = FakerFactory::create();
 
-        $nodeCount = mt_rand(1, 2);
+        $nodeCount = mt_rand(11, 33);
         for ($i = 0; $i < $nodeCount; $i++) {
             $resourceBuilder = new ResourceBuilder($this->container->get('router'));
             $resourceBuilder->title($faker->sentence);
