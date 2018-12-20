@@ -14,6 +14,28 @@ use Bpi\ApiBundle\Domain\Aggregate\Node;
  */
 class ReadingTest extends AbstractFixtureAwareBpiTest
 {
+    const VALID_NODE_PROPERTIES = [
+        'id' => 'string',
+        'pushed' => 'dateTime',
+        'editable' => 'boolean',
+        'authorship' => 'boolean',
+        'author' => 'string',
+        'agency_id' => 'string',
+        'agency_name' => 'string',
+        'agency_internal' => 'boolean',
+        'category' => 'string',
+        'audience' => 'string',
+        'syndications' => 'string',
+        'title' => 'string',
+        'body' => 'string',
+        'teaser' => 'string',
+        'creation' => 'dateTime',
+        'type' => 'string',
+        'url' => 'string',
+        'data' => 'string',
+        'material' => 'string',
+    ];
+
     /**
      * Authentication token.
      *
@@ -49,18 +71,13 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
-    public function testWithMissingAuthentication()
+    public function testAnonymousNodeItem()
     {
         $this->client->request('GET', '/node/item/123456');
 
         $rawResult = $this->client->getResponse()->getContent();
 
-        $xml = simplexml_load_string($rawResult);
-        $this->assertNotFalse($xml);
-        $this->assertEquals('SimpleXMLElement', get_class($xml));
-
-        $expectedXml = '<result><![CDATA[Authorization required (none)]]></result>';
-        $this->assertXmlStringEqualsXmlString($expectedXml, $xml->asXML());
+        $this->assertBpiMissingAuthentication($rawResult);
 
         $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
     }
@@ -68,7 +85,7 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
-    public function testMissingNodeById()
+    public function testMissingNodeItem()
     {
         $this->client->request(
             'GET',
@@ -86,7 +103,7 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
-    public function testFetchNodeById()
+    public function testNodeItem()
     {
         $nodeRepository = $this->registry->getRepository(Node::class);
 
@@ -105,7 +122,70 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
             ]
         );
 
+        $rawResponse = $this->client->getResponse()->getContent();
+        $xml = new \SimpleXMLElement($rawResponse);
+
+        // Assert root tag.
+        $this->assertEquals('bpi', $xml->getName());
+        $rootNode = $xml;
+        $this->assertNotNull($rootNode->attributes()['version']);
+
+        /** @var \SimpleXMLElement[] $item */
+        $item = $xml->xpath('item');
+        $this->assertNotEmpty($item);
+        $this->assertCount(1, $item);
+        $this->assertNotNull($item[0]->attributes()['type']);
+        $this->assertEquals('entity', $item[0]->attributes()['type']);
+
+        // Assert 'properties' tag.
+        /** @var \SimpleXMLElement[] $properties */
+        $properties = $item[0]->xpath('properties');
+        $this->assertNotEmpty($properties);
+        $this->assertCount(1, $properties);
+
+        // Assert 'property' tags.
+        /** @var \SimpleXMLElement $property */
+        $property = $properties[0]->xpath('property');
+        $this->assertNotEmpty($property);
+
+        foreach (self::VALID_NODE_PROPERTIES as $validPropertyName => $validPropertyType) {
+            // Assert property with required name exists.
+            $propertyTag = $properties[0]->xpath('property[@name="'.$validPropertyName.'"]');
+            $this->assertNotEmpty($propertyTag);
+
+            // Assert certain property is of valid type.
+            $this->assertNotNull($propertyTag[0]->attributes()['type']);
+            $propertyTagTypeProperty = (string)$propertyTag[0]->attributes()['type'];
+
+            $this->assertEquals(
+                $validPropertyType,
+                $propertyTagTypeProperty
+            );
+        }
+
+        // Assert 'assets' tag.
+        /** @var \SimpleXMLElement[] $assets */
+        $assets = $item[0]->xpath('assets');
+        $this->assertNotEmpty($assets);
+        $this->assertCount(1, $assets);
+
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+    }
+
+    /**
+     *
+     */
+    public function testAnonymousNodeCollection() {
+        $this->client->request(
+            'GET',
+            '/node/collection'
+        );
+
+        $rawResult = $this->client->getResponse()->getContent();
+
+        $this->assertBpiMissingAuthentication($rawResult);
+
+        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
     }
 
     /**
@@ -128,7 +208,24 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
-    public function testFetchDictionaries()
+    public function testAnonymousDictionaries()
+    {
+        $this->client->request(
+            'GET',
+            '/profile/dictionary'
+        );
+
+        $rawResult = $this->client->getResponse()->getContent();
+
+        $this->assertBpiMissingAuthentication($rawResult);
+
+        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
+    }
+
+    /**
+     *
+     */
+    public function testDictionaries()
     {
         $this->client->request(
             'GET',
@@ -142,38 +239,47 @@ class ReadingTest extends AbstractFixtureAwareBpiTest
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
 
-        $expectedXml = '<bpi version="3">
-  <item type="audience" name="noname">
-    <properties>
-      <property type="string" name="group" title=""><![CDATA[audience]]></property>
-      <property type="string" name="name" title=""><![CDATA[Studerende]]></property>
-    </properties>
-    <assets/>
-  </item>
-  <item type="audience" name="noname">
-    <properties>
-      <property type="string" name="group" title=""><![CDATA[audience]]></property>
-      <property type="string" name="name" title=""><![CDATA[Voksne]]></property>
-    </properties>
-    <assets/>
-  </item>
-  <item type="category" name="noname">
-    <properties>
-      <property type="string" name="group" title=""><![CDATA[category]]></property>
-      <property type="string" name="name" title=""><![CDATA[Litteratur]]></property>
-    </properties>
-    <assets/>
-  </item>
-  <item type="category" name="noname">
-    <properties>
-      <property type="string" name="group" title=""><![CDATA[category]]></property>
-      <property type="string" name="name" title=""><![CDATA[Sport]]></property>
-    </properties>
-    <assets/>
-  </item>
-</bpi>';
+        $xml = new \SimpleXMLElement($this->client->getResponse()->getContent());
 
-        $this->assertXmlStringEqualsXmlString($expectedXml, $this->client->getResponse()->getContent());
+        // Assert root.
+        $this->assertEquals('bpi', $xml->getName());
+        $this->assertNotNull($xml->attributes()['version']);
+
+        // Assert 'item' tags.
+        /** @var \SimpleXMLElement[] $item */
+        $itemTags = $xml->xpath('item');
+        $this->assertNotEmpty($itemTags);
+
+        // Assert each 'item' tag structure.
+        /** @var \SimpleXMLElement $itemTag */
+        foreach ($itemTags as $itemTag) {
+            $this->assertNotNull($itemTag->attributes()['type']);
+            $this->assertNotEmpty((string)$itemTag->attributes()['type']);
+
+            $this->assertNotNull($itemTag->attributes()['name']);
+            $this->assertNotEmpty((string)$itemTag->attributes()['name']);
+
+            // Assert 'properties' tag.
+            /** @var \SimpleXMLElement[] $propertiesTags */
+            $propertiesTags = $itemTag->xpath('properties');
+            $this->assertNotEmpty($propertiesTags);
+            $this->assertCount(1, $propertiesTags);
+
+            // Assert 'property' tag.
+            /** @var \SimpleXMLElement[] $propertyTags */
+            $propertyTags = $propertiesTags[0]->xpath('property');
+            $this->assertNotEmpty($propertyTags);
+            $this->assertCount(2, $propertyTags);
+
+            // Assert each 'property' tag structure.
+            /** @var \SimpleXMLElement $propertyTag */
+            foreach ($propertyTags as $propertyTag) {
+                $this->assertNotNull($propertyTag->attributes()['type']);
+                $this->assertNotNull($propertyTag->attributes()['name']);
+                $this->assertNotNull($propertyTag->attributes()['title']);
+                $this->assertNotEmpty((string)$propertyTag);
+            }
+        }
     }
 
     /**

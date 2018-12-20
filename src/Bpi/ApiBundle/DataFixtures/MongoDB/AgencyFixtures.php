@@ -28,6 +28,7 @@ class AgencyFixtures extends Fixture
         $testAgency->setPublicId(999999);
         $testAgency->setPublicKey('3fa');
         $testAgency->setSecret('abc');
+        $testAgency->setName($faker->sentence);
 
         $manager->persist($testAgency);
         $manager->flush();

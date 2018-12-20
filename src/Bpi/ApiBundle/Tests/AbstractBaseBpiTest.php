@@ -41,4 +41,18 @@ abstract class AbstractBaseBpiTest extends WebTestCase
     {
         return \AppKernel::class;
     }
+
+    /**
+     * Asserts missing authentication XML response.
+     *
+     * @param string $rawResult Raw request result.
+     */
+    public function assertBpiMissingAuthentication($rawResult)
+    {
+        $xml = new \SimpleXMLElement($rawResult);
+        $this->assertEquals('SimpleXMLElement', get_class($xml));
+
+        $expectedXml = '<result><![CDATA[Authorization required (none)]]></result>';
+        $this->assertXmlStringEqualsXmlString($expectedXml, $xml->asXML());
+    }
 }
