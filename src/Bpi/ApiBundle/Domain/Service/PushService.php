@@ -168,7 +168,7 @@ class PushService
      *
      * @param \Bpi\ApiBundle\Domain\Entity\Author $author
      * @param \Bpi\ApiBundle\Domain\Factory\ResourceBuilder $builder
-     * @param \Bpi\ApiBundle\Domain\ValueObject\Autorship $autorship
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Authorship $autorship
      */
     public function assignCopyleft(Author $author, ResourceBuilder $builder, Authorship $autorship)
     {

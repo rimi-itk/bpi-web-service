@@ -5,6 +5,7 @@ namespace Bpi\ApiBundle\Controller;
 use Bpi\ApiBundle\Domain\Aggregate\Assets;
 use Bpi\ApiBundle\Domain\Aggregate\Node;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
+use Bpi\ApiBundle\Domain\Entity\Author;
 use Bpi\ApiBundle\Domain\Entity\File;
 use Bpi\ApiBundle\Domain\Entity\NodeQuery;
 use Bpi\ApiBundle\Domain\Entity\Profile;
@@ -35,7 +36,7 @@ class RestController extends FOSRestController
      * Main page of API redirects to human representation of entry point
      *
      * @Rest\Get("/")
-     * @Rest\View()
+     * @Rest\View(statusCode="200")
      *
      * TODO: This serves no practical function.
      * @deprecated
@@ -132,13 +133,13 @@ class RestController extends FOSRestController
         $profile_hypermedia = $document->createHypermediaSection();
         $profile->setHypermedia($profile_hypermedia);
         // TODO: Fix link.
-//        $profile_hypermedia->addLink(
-//            $document->createLink(
-//                'dictionary',
-//                $this->get('router')->generate('profile_dictionary', array(), true),
-//                'Profile items dictionary'
-//            )
-//        );
+        $profile_hypermedia->addLink(
+            $document->createLink(
+                'dictionary',
+                $this->get('router')->generate('profile_dictionary', array(), true),
+                'Profile items dictionary'
+            )
+        );
 
         return $document;
     }
@@ -147,7 +148,7 @@ class RestController extends FOSRestController
      * Default node listing
      *
      * @Rest\Get("/node/collection")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="200")
+     * @Rest\View(statusCode="200")
      */
     public function listAction(Request $request)
     {
@@ -356,7 +357,7 @@ class RestController extends FOSRestController
      *   The request object.
      *
      * @Rest\Get("/statistics")
-     * @Rest\View(template="BpiApiBundle:Rest:statistics.html.twig", statusCode="200")
+     * @Rest\View(statusCode="200")
      */
     public function statisticsAction(Request $request)
     {
@@ -400,7 +401,7 @@ class RestController extends FOSRestController
      * Display node item.
      *
      * @Rest\Get("/node/item/{id}")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
+     * @Rest\View(statusCode="200")
      */
     public function nodeAction(Node $loadedNode)
     {
@@ -471,7 +472,7 @@ class RestController extends FOSRestController
      * Push new content.
      *
      * @Rest\Post("/node")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig", statusCode="201")
+     * @Rest\View(statusCode="201")
      */
     public function postNodeAction(Request $request)
     {
@@ -499,7 +500,7 @@ class RestController extends FOSRestController
             return $this->createErrorView((string) $violations, 422);
         }
 
-        $author = new \Bpi\ApiBundle\Domain\Entity\Author(
+        $author = new Author(
             new AgencyId($request->get('agency_id')),
             $request->get('local_author_id'),
             $request->get('firstname'),
@@ -717,82 +718,10 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Node resource
-     *
-     * @Rest\Get("/node")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface2.html.twig")
-     */
-    public function nodeResourceAction(Request $request)
-    {
-        // Handle query by node id
-        if ($id = $request->get('id')) {
-            // SDK can not handle properly redirects, so query string is used
-            // @see https://github.com/symfony/symfony/issues/7929
-            $params = array(
-                'id' => $id,
-                '_authorization' => array(
-                    'agency' => $this->getUser()->getAgencyId()->id(),
-                    'token' => $this->container->get('security.token_storage')->getToken()->token
-                )
-            );
-            return $this->redirect($this->generateUrl('node', $params));
-        }
-
-        $document = $this->get('bpi.presentation.document');
-        $entity = $document->createRootEntity('node');
-        $controls = $document->createHypermediaSection();
-        $entity->setHypermedia($controls);
-        $controls->addQuery($document->createQuery('search', 'abc', array('id'), 'Find a node by ID'));
-        $controls->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
-        $controls->addLink($document->createLink('self', 'Self'));
-        $controls->addLink($document->createLink('collection', 'Collection'));
-
-        return $document;
-    }
-
-    /**
-     * Output media asset
-     *
-     * @Rest\Get("/asset/{filename}.{extension}")
-     */
-    public function getAssetAction($filename, $extension)
-    {
-        $extension = strtolower($extension);
-
-        $file = $filename . '.' . $extension;
-        $mime = 'application/octet-stream';
-
-        switch ($extension) {
-            case 'jpg':
-            case 'jpeg':
-                $mime = 'image/jpeg';
-                break;
-            case 'gif':
-                $mime = 'image/gif';
-                break;
-            case 'png':
-                $mime = 'image/png';
-        }
-        $headers = array(
-            'Content-Type' => $mime
-        );
-
-        try {
-            $fs = $this->get('domain.push_service')->getFilesystem();
-            $file = $fs->get($filename);
-            return new Response($file->getContent(), 200, $headers);
-        } catch (\Gaufrette\Exception\FileNotFound $e) {
-            throw $this->createNotFoundException();
-        } catch (\Exception $e) {
-            return new Response('Bad file', 410);
-        }
-    }
-
-    /**
      * Get profile dictionary
      *
-     * @Rest\Get("/profile/dictionary", name="profile_dictionary")
-     * @Rest\View(template="BpiApiBundle:Rest:testinterface.html.twig")
+     * @Rest\Get("/profile/dictionary")
+     * @Rest\View(statusCode="200")
      */
     public function profileDictionaryAction()
     {
@@ -902,22 +831,5 @@ class RestController extends FOSRestController
         }
 
         return new Response('', 200);
-    }
-
-    /**
-     * Get static images
-     *
-     * @Rest\Get("/images/{file}.{ext}")
-     * @Rest\View(statusCode="200")
-     */
-    public function staticImagesAction($file, $ext)
-    {
-        $file = __DIR__ . '/../Resources/public/images/' . $file . '.' . $ext;
-        $mime = mime_content_type($file);
-        $headers = array(
-            'Content-Type' => $mime
-        );
-
-        return new Response(file_get_contents($file), 200, $headers);
     }
 }
