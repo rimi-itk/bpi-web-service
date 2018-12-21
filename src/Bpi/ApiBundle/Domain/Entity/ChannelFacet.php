@@ -7,7 +7,7 @@ namespace Bpi\ApiBundle\Domain\Entity;
 class ChannelFacet
 {
     /**
-     * @var MongoId $id
+     * @var string $id
      */
     protected $id;
 
@@ -17,7 +17,7 @@ class ChannelFacet
     protected $channelId;
 
     /**
-     * @var stdClass $facetData
+     * @var array $facetData
      */
     protected $facetData;
 
@@ -29,9 +29,9 @@ class ChannelFacet
     }
 
     /**
-     * Get id
+     * Get id.
      *
-     * @return id $id
+     * @return string $id
      */
     public function getId()
     {
@@ -64,7 +64,7 @@ class ChannelFacet
     /**
      * Set facetData
      *
-     * @param stdClass $facetData
+     * @param array $facetData
      * @return self
      */
     public function setFacetData($facetData)
@@ -77,7 +77,7 @@ class ChannelFacet
     /**
      * Get facetData
      *
-     * @return collection $facetData
+     * @return array $facetData
      */
     public function getFacetData()
     {

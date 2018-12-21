@@ -36,8 +36,9 @@ class UserFacetRepository extends DocumentRepository
         $facet = new UserFacet();
 
         $agency = $user->getUserAgency();
-        $data = new \stdClass();
-        $data->agency_id = $agency->getPublicId();
+        $data = [
+            'agency_id' => $agency->getPublicId(),
+        ];
 
         $facet->setUserId($user->getId());
         $facet->setFacetData($data);

@@ -47,7 +47,7 @@ class Subscription
     /**
      * Set lastViewed
      *
-     * @param date $lastViewed
+     * @param \DateTime $lastViewed
      * @return self
      */
     public function setLastViewed($lastViewed)

@@ -36,8 +36,9 @@ class ChannelFacetRepository extends DocumentRepository
         $facet = new ChannelFacet();
 
         $agency = $channel->getChannelAdmin()->getUserAgency();
-        $data = new \stdClass();
-        $data->agency_id = $agency->getPublicId();
+        $data = [
+            'agency_id' => $agency->getPublicId(),
+        ];
 
         $facet->setChannelId($channel->getId());
         $facet->setFacetData($data);
