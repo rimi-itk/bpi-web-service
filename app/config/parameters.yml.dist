@@ -1,5 +1,4 @@
 parameters:
-    unit_test_domain: ~
     secret: ~
     locale: en
     mongodb_db: bpi

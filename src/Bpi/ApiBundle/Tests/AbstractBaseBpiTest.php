@@ -34,6 +34,16 @@ abstract class AbstractBaseBpiTest extends WebTestCase
         'material' => 'string',
     ];
 
+    const VALID_NODE_FACETS = [
+        'type',
+        'tags',
+        'category',
+        'author',
+        'audience',
+        'agency_internal',
+        'agency_id',
+    ];
+
     /**
      * @var \Symfony\Bundle\FrameworkBundle\Client
      */
@@ -91,7 +101,6 @@ abstract class AbstractBaseBpiTest extends WebTestCase
         // Assert 'properties' tag.
         /** @var \SimpleXMLElement[] $properties */
         $properties = $item->xpath('properties');
-        $this->assertNotEmpty($properties);
         $this->assertCount(1, $properties);
 
         // Assert 'property' tags.
@@ -117,7 +126,18 @@ abstract class AbstractBaseBpiTest extends WebTestCase
         // Assert 'assets' tag.
         /** @var \SimpleXMLElement[] $assets */
         $assets = $item[0]->xpath('assets');
-        $this->assertNotEmpty($assets);
         $this->assertCount(1, $assets);
+
+        // Assert 'tags' tag.
+        /** @var \SimpleXMLElement[] $tags */
+        $tags = $item[0]->xpath('tags');
+        $this->assertCount(1, $tags);
+
+        // Assert 'tag' tags.
+        /** @var \SimpleXMLElement $tag */
+        foreach ($tags[0]->xpath('tag') as $tag) {
+            $this->assertNotNull($tag->attributes()['tag_name']);
+            $this->assertNotEmpty((string)$tag->attributes()['tag_name']);
+        }
     }
 }

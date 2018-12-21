@@ -29,11 +29,16 @@ use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
  */
 class RestController extends FOSRestController
 {
+    const NODE_LIST_AMOUNT = 10;
+
     /**
      * Main page of API redirects to human representation of entry point
      *
      * @Rest\Get("/")
      * @Rest\View()
+     *
+     * TODO: This serves no practical function.
+     * @deprecated
      */
     public function indexAction()
     {
@@ -147,16 +152,16 @@ class RestController extends FOSRestController
     public function listAction(Request $request)
     {
         $node_query = new NodeQuery();
-        $node_query->amount(10);
-        if (false !== ($amount = $request->query->get('amount', false))) {
+
+        if ($amount = $request->query->get('amount', self::NODE_LIST_AMOUNT)) {
             $node_query->amount($amount);
         }
 
-        if (false !== ($offset = $request->query->get('offset', false))) {
+        if ($offset = $request->query->get('offset', false)) {
             $node_query->offset($offset);
         }
 
-        if (false !== ($search = $request->query->get('search', false))) {
+        if ($search = $request->query->get('search', false)) {
             $node_query->search($search);
         }
 
