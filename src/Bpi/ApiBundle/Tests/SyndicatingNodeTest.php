@@ -69,8 +69,10 @@ class SyndicatingNodeTest extends AbstractFixtureAwareBpiTest
         // about it.
         $this->client->request(
             'GET',
-            '/node/syndicate/'.$nodeEntity->getId(),
-            [],
+            '/node/syndicated',
+            [
+                'id' => $nodeEntity->getId(),
+            ],
             [],
             [
                 'HTTP_Auth' => $this->generateAuthenticationHeader($syndicatingAgencyEntity),

@@ -794,7 +794,6 @@ class RestController extends FOSRestController
         return [];
     }
 
-
     /**
      * Mark node as syndicated.
      *
@@ -807,7 +806,7 @@ class RestController extends FOSRestController
     {
         $nodeId = $request->get('id');
 
-        $result = $this->forward('Bpi\ApiBundle\Controller\RestController::nodeMarkSyndicated', [
+        $result = $this->forward('Bpi\ApiBundle\Controller\RestController::nodeMarkSyndicatedAction', [
             'id' => $nodeId,
         ]);
 
@@ -819,6 +818,10 @@ class RestController extends FOSRestController
      *
      * @Rest\Get("/node/delete")
      * @Rest\View(statusCode="200")
+     *
+     * TODO: Forward to new method with ParamConverter.
+     *
+     * @deprecated
      */
     public function nodeDeleteAction(Request $request)
     {
@@ -828,13 +831,16 @@ class RestController extends FOSRestController
 
         $agencyId = $this->getUser()->getAgencyId()->id();
 
-        $node = $this->getRepository('BpiApiBundle:Aggregate\Node')->delete($nodeId, $agencyId);
+        /** @var \Bpi\ApiBundle\Domain\Repository\NodeRepository $nodeRepository */
+        $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
+        $node = $nodeRepository->delete($nodeId, $agencyId);
 
         if ($node == null) {
             return new Response('This node does not belong to you', 403);
         }
 
-        return new Response('', 200);
+        // TODO: Add a meaningful output.
+        return [];
     }
 
     /**
