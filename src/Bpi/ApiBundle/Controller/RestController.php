@@ -168,7 +168,7 @@ class RestController extends FOSRestController
 
         $filters = array();
         $logicalOperator = '';
-        if (false !== ($filter = $request->query->get('filter', false))) {
+        if ($filter = $request->query->get('filter', [])) {
             foreach ($filter as $field => $value) {
                 if ($field == 'type' && !empty($value)) {
                     foreach ($value as $val) {

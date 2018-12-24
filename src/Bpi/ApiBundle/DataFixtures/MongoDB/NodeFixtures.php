@@ -71,9 +71,11 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
 
             // Set some tags.
             for ($j = 0; $j < mt_rand(1, 10); $j++) {
-                $nodeBuilder->tag(
-                    $this->getReference(TagFixtures::getRandomFixtureReference())
-                );
+                $randomTag = $this->getReference(TagFixtures::getRandomFixtureReference());
+                if ($nodeBuilder->getTags()->contains($randomTag)) {
+                    continue;
+                }
+                $nodeBuilder->tag($randomTag);
             }
 
             // Set profile. (???)

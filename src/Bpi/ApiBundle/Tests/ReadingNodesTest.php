@@ -377,6 +377,85 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
     }
 
     /**
+     * TODO: This test is pretty limited, extend when possible.
+     * TODO: Add logicalOperator test.
+     * TODO: Add multiple filtering test.
+     */
+    function testNodeCollectionFiltered()
+    {
+        $this->client->request(
+            'GET',
+            '/node/collection',
+            [],
+            [],
+            [
+                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+            ]
+        );
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
+        $rawResponse = $this->client->getResponse()->getContent();
+        $initialXml = new \SimpleXMLElement($rawResponse);
+
+        // Pick a random tag to filter on.
+        /** @var \SimpleXMLElement[] $collectionTags */
+        $collectionTags = $initialXml->xpath('//item[@type="facet" and @name="tags"]/properties/property');
+        $this->assertNotEmpty($collectionTags);
+        /** @var \SimpleXMLElement $randomTag */
+        $randomTag = $collectionTags[mt_rand(0, count($collectionTags) - 1)];
+        // The tag value.
+        $randomTagValue = (string)$randomTag->attributes()['name'];
+        // Number of entities containing this tag.
+        $entitiesTaggedCount = (int)$randomTag;
+
+        // Send a new, filtered request.
+        $this->client->request(
+            'GET',
+            '/node/collection',
+            [
+                'filter' => [
+                    'tags' => [
+                        $randomTagValue,
+                    ],
+                ],
+                'amount' => 99, // Make sure to grab all filtered nodes.
+            ],
+            [],
+            [
+                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+            ]
+        );
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
+        $rawResponse = $this->client->getResponse()->getContent();
+        /** @var \SimpleXMLElement $filteredXml */
+        $filteredXml = new \SimpleXMLElement($rawResponse);
+
+        // Tag facet value must match the number of filtered nodes.
+        /** @var \SimpleXMLElement[] $filteredEntities */
+        $filteredEntities = $filteredXml->xpath('//item[@type="entity"]');
+        $this->assertCount($entitiesTaggedCount, $filteredEntities);
+
+        // Check that entities actually contain the filtered tag value.
+        /** @var \SimpleXMLElement $filteredEntity */
+        foreach ($filteredEntities as $filteredEntity) {
+            /** @var \SimpleXMLElement[] $tags */
+            $tags = $filteredEntity->xpath('tags/tag[@tag_name="'.$randomTagValue.'"]');
+            $this->assertNotEmpty($tags);
+        }
+
+        // The count of facets also should decrease, in comparison to unfiltered
+        // query, showing only facets available for the filtered result.
+        // Check number of 'type' facets for this logic.
+        /** @var \SimpleXMLElement[] $initialTypeFacets */
+        $initialTypeFacets = $initialXml->xpath('//item[@type="facet" and @name="type"]/properties/property');
+        $filteredTypeFacets = $filteredXml->xpath('//item[@type="facet" and @name="type"]/properties/property');
+        $this->assertLessThan(count($initialTypeFacets), count($filteredTypeFacets));
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getFixtures()
