@@ -294,6 +294,89 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
     }
 
     /**
+     *
+     */
+    function testNodeCollectionSortedByTitleAscending() {
+        $this->client->request(
+            'GET',
+            '/node/collection',
+            [
+                'sort' => ['title' => 'asc'],
+            ],
+            [],
+            [
+                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+            ]
+        );
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
+        $rawResponse = $this->client->getResponse()->getContent();
+        $xml = new \SimpleXMLElement($rawResponse);
+
+        // Assert 'item' tags with 'entity' type.
+        /** @var \SimpleXMLElement[] $entityItemTags */
+        $entityItemTags = $xml->xpath('//item[@type="entity"]');
+
+        $this->assertNotEmpty($entityItemTags);
+
+        // Compare each title against the previous one.
+        /** @var \SimpleXMLElement $entityItemTag */
+        $previousTitle = '';
+        foreach ($entityItemTags as $entityItemTag) {
+            /** @var \SimpleXMLElement[] $titleProperty */
+            $titleProperty = $entityItemTag->xpath('properties/property[@name="title"]');
+            $this->assertNotEmpty($titleProperty);
+            $currentTitle = (string) $titleProperty[0];
+            // Ascending order means that two compared strings deliver
+            // a negative value when.
+            $this->assertLessThanOrEqual(0, strcmp($previousTitle, $currentTitle));
+            $previousTitle = $currentTitle;
+        }
+    }
+
+    /**
+     *
+     */
+    function testNodeCollectionSortedByPushedDescending()
+    {
+        $this->client->request(
+            'GET',
+            '/node/collection',
+            [
+                'sort' => ['pushed' => 'desc'],
+            ],
+            [],
+            [
+                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+            ]
+        );
+
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+
+        $rawResponse = $this->client->getResponse()->getContent();
+        $xml = new \SimpleXMLElement($rawResponse);
+
+        // Assert 'item' tags with 'entity' type.
+        /** @var \SimpleXMLElement[] $entityItemTags */
+        $entityItemTags = $xml->xpath('//item[@type="entity"]');
+
+        $this->assertNotEmpty($entityItemTags);
+
+        // Compare each title against the previous one.
+        /** @var \SimpleXMLElement $entityItemTag */
+        $previousDate = strtotime('2099-01-01');
+        foreach ($entityItemTags as $entityItemTag) {
+            /** @var \SimpleXMLElement[] $pushedProperty */
+            $pushedProperty = $entityItemTag->xpath('properties/property[@name="pushed"]');
+            $this->assertNotEmpty($pushedProperty);
+            $currentDate = strtotime((string) $pushedProperty[0]);
+            $this->assertLessThanOrEqual($previousDate, $currentDate);
+            $previousDate = $currentDate;
+        }
+    }
+
+    /**
      * {@inheritdoc}
      */
     public function getFixtures()

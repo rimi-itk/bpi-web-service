@@ -232,7 +232,7 @@ class RestController extends FOSRestController
 
         $node_query->filter($availableFacets->nodeIds);
 
-        if (false !== ($sort = $request->query->get('sort', false))) {
+        if ($sort = $request->query->get('sort', [])) {
             foreach ($sort as $field => $order)
                 $node_query->sort($field, $order);
         } else {
@@ -831,5 +831,40 @@ class RestController extends FOSRestController
         }
 
         return new Response('', 200);
+    }
+
+    /**
+     * Node resource.
+     *
+     * @Rest\Get("/node")
+     * @Rest\View()
+     */
+    public function nodeResourceAction(Request $request)
+    {
+        // Handle query by node id
+        if ($id = $request->get('id')) {
+            // SDK can not handle properly redirects, so query string is used
+            // @see https://github.com/symfony/symfony/issues/7929
+            $params = array(
+                'id' => $id,
+                '_authorization' => array(
+                    'agency' => $this->getUser()->getAgencyId()->id(),
+                    'token' => $this->container->get('security.context')->getToken()->token
+                )
+            );
+
+            return $this->redirect($this->generateUrl('node', $params));
+        }
+
+        $document = $this->get('bpi.presentation.document');
+        $entity = $document->createRootEntity('node');
+        $controls = $document->createHypermediaSection();
+        $entity->setHypermedia($controls);
+        $controls->addQuery($document->createQuery('search', 'abc', array('id'), 'Find a node by ID'));
+        $controls->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
+        $controls->addLink($document->createLink('self', 'Self'));
+        $controls->addLink($document->createLink('collection', 'Collection'));
+
+        return $document;
     }
 }
