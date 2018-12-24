@@ -20,7 +20,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
      *
      * @var string
      */
-    protected $requestToken;
+    protected $authenticationToken;
 
     /**
      * {@inheritdoc}
@@ -34,7 +34,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             'public_id' => '999999',
         ]);
         // Store an authentication token for further requests.
-        $this->requestToken = password_hash($agency->getAgencyId()->id().$agency->getPublicKey().$agency->getSecret(), PASSWORD_BCRYPT);
+        $this->authenticationToken = $this->generateAuthenticationHeader($agency);
     }
 
     /**
@@ -72,7 +72,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             [],
             [],
             [
-                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                'HTTP_Auth' => $this->authenticationToken,
             ]
         );
 
@@ -97,7 +97,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             [],
             [],
             [
-                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                'HTTP_Auth' => $this->authenticationToken,
             ]
         );
 
@@ -142,7 +142,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             [],
             [],
             [
-                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                'HTTP_Auth' => $this->authenticationToken,
             ]
         );
 
@@ -213,7 +213,8 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
      */
     public function testNodeCollectionWithAmount()
     {
-        $randomCount = mt_rand(2, 22);
+        // Max value should be LESS than fixture generated lowest amount.
+        $randomCount = mt_rand(5, NodeFixtures::NODE_COUNT_MIN);
         $this->client->request(
             'GET',
             '/node/collection',
@@ -222,7 +223,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             ],
             [],
             [
-                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                'HTTP_Auth' => $this->authenticationToken,
             ]
         );
 
@@ -256,7 +257,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
                 ],
                 [],
                 [
-                    'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                    'HTTP_Auth' => $this->authenticationToken,
                 ]
             );
 
@@ -305,7 +306,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             ],
             [],
             [
-                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                'HTTP_Auth' => $this->authenticationToken,
             ]
         );
 
@@ -348,7 +349,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             ],
             [],
             [
-                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                'HTTP_Auth' => $this->authenticationToken,
             ]
         );
 
@@ -389,7 +390,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             [],
             [],
             [
-                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                'HTTP_Auth' => $this->authenticationToken,
             ]
         );
 
@@ -423,7 +424,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             ],
             [],
             [
-                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                'HTTP_Auth' => $this->authenticationToken,
             ]
         );
 

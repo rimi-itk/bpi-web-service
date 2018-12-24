@@ -14,7 +14,7 @@ class ReadingDictionariesTest extends AbstractFixtureAwareBpiTest
      *
      * @var string
      */
-    protected $requestToken;
+    protected $authenticationHeader;
 
     /**
      * {@inheritdoc}
@@ -28,9 +28,8 @@ class ReadingDictionariesTest extends AbstractFixtureAwareBpiTest
             'public_id' => '999999',
         ]);
         // Store an authentication token for further requests.
-        $this->requestToken = password_hash($agency->getAgencyId()->id().$agency->getPublicKey().$agency->getSecret(), PASSWORD_BCRYPT);
+        $this->authenticationHeader = $this->generateAuthenticationHeader($agency);
     }
-
 
     /**
      *
@@ -60,7 +59,7 @@ class ReadingDictionariesTest extends AbstractFixtureAwareBpiTest
             [],
             [],
             [
-                'HTTP_Auth' => 'BPI agency="999999", token="'.$this->requestToken.'"',
+                'HTTP_Auth' => $this->authenticationHeader,
             ]
         );
 

@@ -25,6 +25,9 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
 {
     use ContainerAwareTrait;
 
+    const NODE_COUNT_MIN = 22;
+    const NODE_COUNT_MAX = 44;
+
     /**
      * {@inheritdoc}
      */
@@ -32,7 +35,9 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
     {
         $faker = FakerFactory::create();
 
-        $nodeCount = mt_rand(11, 33);
+        // Pay attention when changing this - adjust tests accordingly.
+        $nodeCount = mt_rand(self::NODE_COUNT_MIN, self::NODE_COUNT_MAX);
+
         for ($i = 0; $i < $nodeCount; $i++) {
             $resourceBuilder = new ResourceBuilder($this->container->get('router'));
             $resourceBuilder->title($faker->sentence);
@@ -62,7 +67,7 @@ class NodeFixtures extends Fixture implements ContainerAwareInterface, Dependent
 
             // Set author.
             $authorFixture = new Author(
-                $this->getReference(AgencyFixtures::TEST_AGENCY)->getAgencyId(),
+                $this->getReference(AgencyFixtures::AGENCY_999999)->getAgencyId(),
                 null,
                 $faker->lastName,
                 $faker->name

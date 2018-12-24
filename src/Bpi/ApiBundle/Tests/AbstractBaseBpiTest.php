@@ -2,6 +2,7 @@
 
 namespace Bpi\ApiBundle\Tests;
 
+use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
@@ -72,6 +73,22 @@ abstract class AbstractBaseBpiTest extends WebTestCase
     protected static function getKernelClass()
     {
         return \AppKernel::class;
+    }
+
+    /**
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $agency
+     *
+     * @return string
+     */
+    public function generateAuthenticationHeader(Agency $agency)
+    {
+        $agencyId = $agency->getAgencyId()->id();
+        $requestToken = password_hash(
+            $agencyId.$agency->getPublicKey().$agency->getSecret(),
+            PASSWORD_BCRYPT
+        );
+
+        return 'BPI agency="'.$agencyId.'", token="'.$requestToken.'"';
     }
 
     /**

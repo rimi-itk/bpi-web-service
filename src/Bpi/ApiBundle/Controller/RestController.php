@@ -343,7 +343,7 @@ class RestController extends FOSRestController
      */
     protected function getRepository($name)
     {
-        return $this->get('doctrine.odm.mongodb.document_manager')->getRepository($name);
+        return $this->get('doctrine_mongodb')->getRepository($name);
     }
 
     /**
@@ -766,24 +766,12 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Mark node as syndicated
-     *
-     * @Rest\Get("/node/syndicated")
+     * @Rest\Get("/node/syndicate/{id}")
      * @Rest\View(statusCode="200")
      */
-    public function nodeSyndicatedAction(Request $request)
+    public function nodeMarkSyndicatedAction(Node $node)
     {
-        $nodeId = $request->get('id');
         $agency = $this->getUser();
-
-        /** @var \Bpi\ApiBundle\Domain\Repository\NodeRepository $nodeRepository */
-        $nodeRepository = $this->getRepository('BpiApiBundle:Aggregate\Node');
-        /** @var \Bpi\ApiBundle\Domain\Aggregate\Node $node */
-        $node = $nodeRepository->find($nodeId);
-        if (!$node) {
-            throw $this->createNotFoundException();
-        }
-
         if ($node->isOwner($agency)) {
             return $this->createErrorView(
                 'Not Acceptable: Trying to syndicate content by owner who already did that',
@@ -793,21 +781,37 @@ class RestController extends FOSRestController
 
         $log = new History($node, $agency->getAgencyId()->id(), new \DateTime(), 'syndicate');
 
-        $dm = $this->get('doctrine.odm.mongodb.document_manager');
+        /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
+        $dm = $this->get('doctrine_mongodb')->getManager();
         $dm->persist($log);
-        $dm->flush($log);
 
-        $nodeSyndications = $node->getSyndications();
-        if (null === $nodeSyndications) {
-            $node->setSyndications(1);
-        } else {
-            $node->setSyndications(++$nodeSyndications);
-        }
-
+        $node->setSyndications(((int) $node->getSyndications()) + 1);
         $dm->persist($node);
-        $dm->flush($node);
 
-        return new Response('', 200);
+        $dm->flush();
+
+        // TODO: Add a meaningful output.
+        return [];
+    }
+
+
+    /**
+     * Mark node as syndicated.
+     *
+     * @Rest\Get("/node/syndicated")
+     * @Rest\View(statusCode="200")
+     *
+     * @deprecated
+     */
+    public function nodeSyndicatedAction(Request $request)
+    {
+        $nodeId = $request->get('id');
+
+        $result = $this->forward('Bpi\ApiBundle\Controller\RestController::nodeMarkSyndicated', [
+            'id' => $nodeId,
+        ]);
+
+        return $result;
     }
 
     /**

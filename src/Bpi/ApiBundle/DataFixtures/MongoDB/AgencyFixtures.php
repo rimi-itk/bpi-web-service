@@ -13,7 +13,8 @@ use Faker\Factory as FakerFactory;
 class AgencyFixtures extends Fixture
 {
 
-    const TEST_AGENCY = 'agency-test_agency';
+    const AGENCY_999999 = 'agency-999999';
+    const AGENCY_111111 = 'agency-111111';
 
     /**
      * {@inheritdoc}
@@ -33,6 +34,19 @@ class AgencyFixtures extends Fixture
         $manager->persist($testAgency);
         $manager->flush();
 
-        $this->addReference(self::TEST_AGENCY, $testAgency);
+        $this->addReference(self::AGENCY_999999, $testAgency);
+
+        $testAgency = new Agency();
+        $testAgency->setModerator($faker->name);
+        $testAgency->setInternal(true);
+        $testAgency->setPublicId(111111);
+        $testAgency->setPublicKey('3fb');
+        $testAgency->setSecret('abd');
+        $testAgency->setName($faker->sentence);
+
+        $manager->persist($testAgency);
+        $manager->flush();
+
+        $this->addReference(self::AGENCY_111111, $testAgency);
     }
 }
