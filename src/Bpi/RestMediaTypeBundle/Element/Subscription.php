@@ -10,6 +10,7 @@ use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Class Subscription
+ *
  * @package Bpi\RestMediaTypeBundle\Element
  * @Serializer\XmlRoot("Subscription")
  */

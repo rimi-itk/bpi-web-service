@@ -21,6 +21,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  * Class UserController.
  *
  * TODO: Unknown purpose.
+ *
  * @deprecated
  */
 class UserController extends FOSRestController
@@ -51,7 +52,7 @@ class UserController extends FOSRestController
             $query->search($search);
         }
 
-        $filters = array();
+        $filters = [];
         $logicalOperator = '';
         if ($filter = $request->query->get('filter', [])) {
             foreach ($filter as $field => $value) {
@@ -156,15 +157,15 @@ class UserController extends FOSRestController
         // Strip all params.
         $this->stripParams($params);
 
-        $requiredParams = array(
+        $requiredParams = [
             'externalId' => 0,
             'email' => 0,
-        );
+        ];
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
             if (!$count) {
-                throw new BadRequestHttpException( "Param '{$param}' is required.");
+                throw new BadRequestHttpException("Param '{$param}' is required.");
             }
         }
 
@@ -180,12 +181,12 @@ class UserController extends FOSRestController
         /** @var User $user */
         $user = $userRepository->findByExternalIdAgency($params['externalId'], $agency->getId());
         if ($user) {
-            throw new BadRequestHttpException( "User with externalId = '{$params['externalId']}' and agency = '{$agency->getId()}' already exits.");
+            throw new BadRequestHttpException("User with externalId = '{$params['externalId']}' and agency = '{$agency->getId()}' already exits.");
         }
 
         $user = $userRepository->findOneBy(['email' => $params['email']]);
         if ($user) {
-            throw new BadRequestHttpException( "User with email = '{$params['email']}' already exits.");
+            throw new BadRequestHttpException("User with email = '{$params['email']}' already exits.");
         }
 
         $user = new User();
@@ -203,8 +204,7 @@ class UserController extends FOSRestController
 
         $user->setInternalUserName();
         // Check if user with such internal name exist
-        if ($userRepository->findSimilarUserByInternalName($user->getInternalUserName()))
-        {
+        if ($userRepository->findSimilarUserByInternalName($user->getInternalUserName())) {
             // If user with internal name exist, try to create from email
             $user->setInternalUserName(true);
         }
@@ -244,14 +244,14 @@ class UserController extends FOSRestController
             $agencyRepository = $dm->getRepository(Agency::class);
             /** @var Agency $agency */
             $agency = $agencyRepository->findOneBy(
-                array(
+                [
                     'public_id' => $params['userAgency'],
                     'deleted' => false,
-                )
+                ]
             );
 
             if (!$agency) {
-                throw new NotFoundHttpException( 'Agency with id ' . $params['userAgency'] . ' not found.');
+                throw new NotFoundHttpException('Agency with id '.$params['userAgency'].' not found.');
             }
 
             $user->setUserAgency($agency);
@@ -299,11 +299,11 @@ class UserController extends FOSRestController
         $this->stripParams($parameters);
 
         // Check required parameters.
-        $requiredParams = array(
+        $requiredParams = [
             'title' => 0,
             'filter' => 0,
             'userId' => 0,
-        );
+        ];
         $this->checkParams($parameters, $requiredParams);
         foreach ($requiredParams as $param => $count) {
             if (!$count) {
@@ -357,10 +357,10 @@ class UserController extends FOSRestController
 
         // Strip all params.
         $this->stripParams($parameters);
-        $requiredParams = array(
+        $requiredParams = [
             'userId' => 0,
             'subscriptionTitle' => 0,
-        );
+        ];
         $this->checkParams($parameters, $requiredParams);
         foreach ($requiredParams as $param => $count) {
             if (!$count) {

@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Transform\Extractor;
 
 use Bpi\RestMediaTypeBundle\Document;

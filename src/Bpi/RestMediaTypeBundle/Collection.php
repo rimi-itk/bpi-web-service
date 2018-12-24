@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle;
 
 use Bpi\RestMediaTypeBundle\Element\Item;
@@ -38,7 +39,7 @@ class Collection extends XmlResponse
      * @Serializer\XmlList(inline=true, entry="facet")
      * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\Facet>")
      */
-    public $facets = array();
+    public $facets = [];
 
     /**
      * Set $total.

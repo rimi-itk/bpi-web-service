@@ -1,8 +1,8 @@
 <?php
 
 namespace Bpi\ApiBundle\Domain\Entity;
-use Doctrine\Common\Collections\ArrayCollection;
 
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Bpi\ApiBundle\Domain\Entity\Facet
@@ -44,11 +44,13 @@ class Facet
      * Set nodeId
      *
      * @param string $nodeId
+     *
      * @return self
      */
     public function setNodeId($nodeId)
     {
         $this->nodeId = $nodeId;
+
         return $this;
     }
 
@@ -66,11 +68,13 @@ class Facet
      * Set facetData
      *
      * @param collection $facetData
+     *
      * @return self
      */
     public function setFacetData($facetData)
     {
         $this->facetData = $facetData;
+
         return $this;
     }
 

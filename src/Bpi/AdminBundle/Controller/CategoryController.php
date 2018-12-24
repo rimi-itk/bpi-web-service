@@ -41,13 +41,13 @@ class CategoryController extends Controller
             $query,
             $request->query->get('page', 1),
             50,
-            array(
+            [
                 'defaultSortFieldName' => 'category',
                 'defaultSortDirection' => 'asc',
-            )
+            ]
         );
 
-        return array('pagination' => $pagination);
+        return ['pagination' => $pagination];
     }
 
     /**
@@ -63,16 +63,17 @@ class CategoryController extends Controller
             $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($category);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_category')
                 );
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
             'id' => null,
-        );
+        ];
     }
 
     /**
@@ -87,16 +88,17 @@ class CategoryController extends Controller
             $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($category);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_category')
                 );
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
             'id' => $category->getId(),
-        );
+        ];
     }
 
     private function createCategoryForm($category)

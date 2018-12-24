@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\ValueObject;
 
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
@@ -12,13 +13,14 @@ class Material implements IValueObject
      * This could be ID, FAUST or ISBN number
      *
      * @param  string $fully_qualified_code
+     *
      * @return Material
      */
     public static function create($fully_qualified_code)
     {
         // @TODO: detect ISBN and other types
         if (!preg_match('~^(\d+)\-([^\:]+)\:(.+)~', $fully_qualified_code)) {
-            throw new \InvalidArgumentException("Incorrect material number: ". $fully_qualified_code);
+            throw new \InvalidArgumentException("Incorrect material number: ".$fully_qualified_code);
         }
 
         list($library_code, $faust_code) = explode(':', $fully_qualified_code);
@@ -34,6 +36,7 @@ class Material implements IValueObject
 
     /**
      * @param \Bpi\ApiBundle\Domain\ValueObject\Material $material
+     *
      * @return boolean
      */
     public function equals(IValueObject $material)
@@ -51,16 +54,18 @@ class Material implements IValueObject
      */
     public function __toString()
     {
-    	return $this->library_code . ':' . $this->faust_code;
+        return $this->library_code.':'.$this->faust_code;
     }
 
     /**
      * Check if library of material equals given agency
      *
      * @param  AgencyID $external_library
+     *
      * @return boolean
      */
-    public function isLibraryEquals(AgencyID $external_library) {
+    public function isLibraryEquals(AgencyID $external_library)
+    {
         $library = new AgencyId($this->library_code);
 
         return $library->equals($external_library);
@@ -70,11 +75,13 @@ class Material implements IValueObject
      * Reassign library code to given Agency
      *
      * @param  AgencyID $agency_id
+     *
      * @return Material modified copy
      */
-    public function reassignToAgency(AgencyID $agency_id) {
+    public function reassignToAgency(AgencyID $agency_id)
+    {
         $modificated = clone $this;
-        $modificated->library_code = (string) $agency_id;
+        $modificated->library_code = (string)$agency_id;
 
         return $modificated;
     }
@@ -83,11 +90,13 @@ class Material implements IValueObject
      * Set libraryCode
      *
      * @param string $libraryCode
+     *
      * @return self
      */
     public function setLibraryCode($libraryCode)
     {
         $this->library_code = $libraryCode;
+
         return $this;
     }
 
@@ -105,11 +114,13 @@ class Material implements IValueObject
      * Set faustCode
      *
      * @param string $faustCode
+     *
      * @return self
      */
     public function setFaustCode($faustCode)
     {
         $this->faust_code = $faustCode;
+
         return $this;
     }
 

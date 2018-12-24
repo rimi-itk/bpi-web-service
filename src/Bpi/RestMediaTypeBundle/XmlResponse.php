@@ -11,7 +11,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface as Router;
 /**
  * @Serializer\XmlRoot("bpi")
  */
-class XmlResponse {
+class XmlResponse
+{
 
     /**
      * @Serializer\XmlAttribute
@@ -68,7 +69,6 @@ class XmlResponse {
     }
 
 
-
     /**
      * @param string $version API version
      */
@@ -90,17 +90,16 @@ class XmlResponse {
     /**
      * Generates a URL from the given parameters.
      *
-     * @param string  $name       The name of the route
-     * @param mixed   $parameters An array of parameters
-     * @param Boolean $absolute   Whether to generate an absolute URL
+     * @param string $name The name of the route
+     * @param mixed $parameters An array of parameters
+     * @param Boolean $absolute Whether to generate an absolute URL
      *
      * @return string The generated URL
      *
      * @throws RouteNotFoundException if route doesn't exist
      */
-    public function generateRoute($name, $parameters = array(), $absolute = false)
+    public function generateRoute($name, $parameters = [], $absolute = false)
     {
         return $this->router->generate($name, $parameters, $absolute);
     }
 }
-

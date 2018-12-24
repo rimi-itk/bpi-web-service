@@ -19,12 +19,14 @@ trait BpiRequestParamSanitizerTrait
      */
     protected function checkParams($input, &$required)
     {
-        array_walk_recursive($input, function($i, $k) use (&$required)  {
-            if (in_array($k, array_keys($required)) && !empty($i)) {
-                $required[$k]++;
+        array_walk_recursive(
+            $input,
+            function ($i, $k) use (&$required) {
+                if (in_array($k, array_keys($required)) && !empty($i)) {
+                    $required[$k]++;
+                }
             }
-        });
-
+        );
     }
 
     /**
@@ -34,8 +36,11 @@ trait BpiRequestParamSanitizerTrait
      */
     protected function stripParams(&$input)
     {
-        array_walk_recursive($input, function(&$i, $k) {
-            $i = htmlspecialchars($i, ENT_QUOTES, 'UTF-8');
-        });
+        array_walk_recursive(
+            $input,
+            function (&$i, $k) {
+                $i = htmlspecialchars($i, ENT_QUOTES, 'UTF-8');
+            }
+        );
     }
 }

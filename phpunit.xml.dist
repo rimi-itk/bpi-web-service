@@ -20,7 +20,6 @@
     <testsuites>
         <testsuite name="BpiApiTests">
             <directory>src/Bpi/ApiBundle/Tests</directory>
-            <exclude>src/Bpi/ApiBundle/Tests/Service</exclude>
         </testsuite>
     </testsuites>
 </phpunit>

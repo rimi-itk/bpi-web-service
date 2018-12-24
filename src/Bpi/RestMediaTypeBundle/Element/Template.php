@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Element;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -46,24 +47,28 @@ class Template
     }
 
     /**
-     * 
+     *
      * @param \Bpi\RestMediaTypeBundle\Element\Template\Field $field
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Template
      */
     public function addField(Template\Field $field)
     {
         $this->fields[] = $field;
+
         return $this;
     }
 
     /**
      *
      * @param string $name
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Template\Field
      */
     public function createField($name)
     {
-      $this->addField($field = new Template\Field($name));
-      return $field;
+        $this->addField($field = new Template\Field($name));
+
+        return $field;
     }
 }

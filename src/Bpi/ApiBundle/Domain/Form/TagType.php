@@ -24,8 +24,10 @@ class TagType extends AbstractType
      */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => 'Bpi\ApiBundle\Domain\Entity\Tag',
-        ));
+        $resolver->setDefaults(
+            [
+                'data_class' => 'Bpi\ApiBundle\Domain\Entity\Tag',
+            ]
+        );
     }
 }

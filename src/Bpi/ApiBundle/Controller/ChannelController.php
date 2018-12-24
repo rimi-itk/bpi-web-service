@@ -24,6 +24,7 @@ use Bpi\RestMediaTypeBundle\Element\FacetTerm;
  * Class ChannelController.
  *
  * TODO: Unknown purpose.
+ *
  * @deprecated
  */
 class ChannelController extends FOSRestController
@@ -55,7 +56,7 @@ class ChannelController extends FOSRestController
             $query->search($search);
         }
 
-        $filters = array();
+        $filters = [];
         $logicalOperator = '';
         if ($filter = $request->query->get('filter', [])) {
             foreach ($filter as $field => $value) {
@@ -137,11 +138,12 @@ class ChannelController extends FOSRestController
      * @Rest\Get("/channel/{id}")
      * @Rest\View("")
      *
-     * @param string $channelId.
+     * @param string $channelId .
      *
      * @return \Bpi\RestMediaTypeBundle\XmlResponse
      */
-    public function getChannelInfoAction(Channel $channel) {
+    public function getChannelInfoAction(Channel $channel)
+    {
         /** @var \Bpi\RestMediaTypeBundle\Channels $response */
         $response = $this->get('bpi.presentation.channels');
 
@@ -168,7 +170,7 @@ class ChannelController extends FOSRestController
         /** @var \Bpi\RestMediaTypeBundle\Channels $xml */
         $xml = $this->get('bpi.presentation.channels');
         $channels = $channelRepository->findChannelsByUser($user);
-        if(!empty($channels)) {
+        if (!empty($channels)) {
             foreach ($channels as $channel) {
                 $xml->addChannel($channel);
             }
@@ -193,10 +195,10 @@ class ChannelController extends FOSRestController
         // Strip all params.
         $this->stripParams($params);
 
-        $requiredParams = array(
+        $requiredParams = [
             'name' => 0,
             'editorId' => 0,
-        );
+        ];
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
@@ -233,22 +235,23 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * @param string $channelId.
+     * @param string $channelId .
      *
      * @Rest\Post("/channel/edit/{id}")
      * @Rest\View()
      */
-    public function editChannelAction(Request $request, Channel $channel) {
+    public function editChannelAction(Request $request, Channel $channel)
+    {
         /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
         $dm = $this->get('doctrine_mongodb')->getManager();
         $params = $request->request->all();
         // Strip all params.
         $this->stripParams($params);
 
-        $requiredParams = array(
+        $requiredParams = [
             'channelName' => 0,
             'channelDescription' => 0,
-        );
+        ];
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
@@ -285,15 +288,15 @@ class ChannelController extends FOSRestController
         // Strip all params.
         $this->stripParams($params);
 
-        $requiredParams = array(
+        $requiredParams = [
             'channelId' => 0,
             'adminId' => 0,
             'editorId' => 0,
-        );
+        ];
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
-            if ($count  == 0) {
+            if ($count == 0) {
                 throw new BadRequestHttpException("Param '{$param}' is required.");
             }
         }
@@ -310,9 +313,9 @@ class ChannelController extends FOSRestController
             throw new HttpException(404, "User with id  = '{$params['adminId']}' can't add users to channel.");
         }
 
-        $skipped = array();
+        $skipped = [];
         $editors = $channel->getChannelEditors();
-        $success = array();
+        $success = [];
         foreach ($params['users'] as $user) {
             $u = $userRepository->find($user['editorId']);
 
@@ -334,6 +337,7 @@ class ChannelController extends FOSRestController
         $xml->setSkippedList($skipped);
         $xml->setSuccess(count($success));
         $xml->setSuccessList($success);
+
         return $xml;
     }
 
@@ -357,10 +361,10 @@ class ChannelController extends FOSRestController
         // Strip all params.
         $this->stripParams($params);
 
-        $requiredParams = array(
+        $requiredParams = [
             'channelId' => 0,
             'adminId' => 0,
-        );
+        ];
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
@@ -378,11 +382,11 @@ class ChannelController extends FOSRestController
         // Check if user have permission to add node to channel.
         $admin = $channel->getChannelAdmin();
         if ($admin->getId() != $params['adminId']) {
-            throw new HttpException(Codes::HTTP_NOT_FOUND, "User with id  = '{$params['adminId']}' can't remove users from channel.");
+            throw new NotFoundHttpException("User with id  = '{$params['adminId']}' can't remove users from channel.");
         }
 
-        $skipped = array();
-        $success = array();
+        $skipped = [];
+        $success = [];
         $editors = $channel->getChannelEditors();
         foreach ($params['users'] as $user) {
             $u = $userRepository->find($user['editorId']);
@@ -404,6 +408,7 @@ class ChannelController extends FOSRestController
         $xml->setSkippedList($skipped);
         $xml->setSuccess(count($success));
         $xml->setSuccessList($success);
+
         return $xml;
     }
 
@@ -428,10 +433,10 @@ class ChannelController extends FOSRestController
         // Strip all params.
         $this->stripParams($params);
 
-        $requiredParams = array(
+        $requiredParams = [
             'editorId' => 0,
             'channelId' => 0,
-        );
+        ];
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
@@ -451,7 +456,7 @@ class ChannelController extends FOSRestController
         $editors = $channel->getChannelEditors();
         $is_editor = false;
         foreach ($editors as $editor) {
-            if($editor->getId() == $params['editorId']) {
+            if ($editor->getId() == $params['editorId']) {
                 $is_editor = true;
                 break;
             }
@@ -460,8 +465,8 @@ class ChannelController extends FOSRestController
             throw new HttpException(403, "User with id  = '{$params['editorId']}' can't push to this channel.");
         }
 
-        $skipped = array();
-        $success = array();
+        $skipped = [];
+        $success = [];
         foreach ($params['nodes'] as $data) {
             // Check node exist, load it.
             $node = $nodeRepository->find($data['nodeId']);
@@ -524,10 +529,10 @@ class ChannelController extends FOSRestController
         // Strip all params.
         $this->stripParams($params);
 
-        $requiredParams = array(
+        $requiredParams = [
             'editorId' => 0,
             'channelId' => 0,
-        );
+        ];
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
@@ -548,7 +553,7 @@ class ChannelController extends FOSRestController
         $editors = $channel->getChannelEditors();
         $is_editor = false;
         foreach ($editors as $editor) {
-            if($editor->getId() == $params['editorId']) {
+            if ($editor->getId() == $params['editorId']) {
                 $is_editor = true;
                 break;
             }
@@ -557,8 +562,8 @@ class ChannelController extends FOSRestController
             throw new HttpException(403, "User with id  = '{$params['editorId']}' can't push to this channel.");
         }
 
-        $success = array();
-        $skipped = array();
+        $success = [];
+        $skipped = [];
         foreach ($params['nodes'] as $data) {
             // Check node exist, load it.
             /** @var \Bpi\ApiBundle\Domain\Aggregate\Node $node */
@@ -611,7 +616,8 @@ class ChannelController extends FOSRestController
      *
      * @return \Bpi\RestMediaTypeBundle\XmlResponse.
      */
-    public function removeChannelAction(Channel $channel) {
+    public function removeChannelAction(Channel $channel)
+    {
         /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
         $dm = $this->get('doctrine_mongodb')->getManager();
 
@@ -621,7 +627,7 @@ class ChannelController extends FOSRestController
 
         $xml = new XmlResponse();
         $xml->setCode(200);
-        $xml->setMessage("Channel with Id " . $channel->getId() . " removed.");
+        $xml->setMessage("Channel with Id ".$channel->getId()." removed.");
 
         return $xml;
     }

@@ -2,8 +2,6 @@
 
 namespace Bpi\ApiBundle\Domain\ValueObject\Assets;
 
-
-
 /**
  * Bpi\ApiBundle\Domain\ValueObject\Assets\Path
  */
@@ -19,11 +17,13 @@ class Path
      * Set path
      *
      * @param string $path
+     *
      * @return self
      */
     public function setPath($path)
     {
         $this->path = $path;
+
         return $this;
     }
 

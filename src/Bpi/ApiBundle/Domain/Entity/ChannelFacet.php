@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 /**
@@ -42,6 +43,7 @@ class ChannelFacet
      * Set channelId
      *
      * @param string $channelId
+     *
      * @return self
      */
     public function setChannelId($channelId)
@@ -65,6 +67,7 @@ class ChannelFacet
      * Set facetData
      *
      * @param array $facetData
+     *
      * @return self
      */
     public function setFacetData($facetData)

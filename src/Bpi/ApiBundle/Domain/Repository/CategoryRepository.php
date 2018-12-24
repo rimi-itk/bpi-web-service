@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
@@ -10,14 +11,14 @@ class CategoryRepository extends DocumentRepository
      *
      * @param string $param
      * @param string $direction
+     *
      * @return array
      */
     public function listAll($param = null, $direction = null)
     {
         $qb = $this->createQueryBuilder();
 
-        if ($param && $direction)
-        {
+        if ($param && $direction) {
             $qb->sort($param, $direction);
         }
 

@@ -42,13 +42,13 @@ class AudienceController extends Controller
             $query,
             $request->query->get('page', 1),
             50,
-            array(
+            [
                 'defaultSortFieldName' => 'audience',
                 'defaultSortDirection' => 'asc',
-            )
+            ]
         );
 
-        return array('pagination' => $pagination);
+        return ['pagination' => $pagination];
     }
 
     /**
@@ -64,16 +64,17 @@ class AudienceController extends Controller
             $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($audience);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_audience')
                 );
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
             'id' => null,
-        );
+        ];
     }
 
     /**
@@ -88,16 +89,17 @@ class AudienceController extends Controller
             $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($audience);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_audience')
                 );
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
             'id' => $audience->getId(),
-        );
+        ];
     }
 
     private function createAudienceForm($audience)

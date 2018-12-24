@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\DataType;
 
 class String implements DataType
@@ -7,11 +8,11 @@ class String implements DataType
 
     public function __construct($value)
     {
-        $this->value = (string) $value;
+        $this->value = (string)$value;
     }
 
     public function value()
     {
-        return (string) $this->value;
+        return (string)$this->value;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Doctrine\ODM\MongoDB\DocumentRepository;
@@ -14,12 +15,11 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
      */
     public function loadUserByUsername($agencyId)
     {
-        return $this->findOneBy(array('public_id' => $agencyId));
+        return $this->findOneBy(['public_id' => $agencyId]);
     }
 
     public function refreshUser(UserInterface $user)
     {
-
     }
 
     public function supportsClass($class)
@@ -33,6 +33,7 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
      * @param string $param
      * @param string $direction
      * @param bool $deleted
+     *
      * @return array
      */
     public function listAll($param = null, $direction = null, $deleted = false)
@@ -99,6 +100,6 @@ class AgencyRepository extends DocumentRepository implements UserProviderInterfa
      */
     public function findByPublicId($publicId)
     {
-        return $this->findOneBy(array('public_id' => $publicId));
+        return $this->findOneBy(['public_id' => $publicId]);
     }
 }

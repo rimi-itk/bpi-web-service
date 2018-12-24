@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Tests;
 
 use Bpi\RestMediaTypeBundle\Document;

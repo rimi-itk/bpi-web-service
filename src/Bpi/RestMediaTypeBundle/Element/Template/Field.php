@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Element\Template;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -13,9 +14,9 @@ class Field
      * @Serializer\XmlAttribute
      */
     protected $name;
-    
+
     /**
-     * 
+     *
      * @param string $name
      */
     public function __construct($name)

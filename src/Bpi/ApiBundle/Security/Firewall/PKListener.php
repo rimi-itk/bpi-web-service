@@ -34,8 +34,7 @@ class PKListener implements ListenerInterface
         TokenStorage $tokenStorage,
         AuthenticationManagerInterface $authenticationManager,
         ContainerInterface $container
-    )
-    {
+    ) {
         $this->tokenStorage = $tokenStorage;
         $this->authenticationManager = $authenticationManager;
         $this->container = $container;
@@ -93,7 +92,7 @@ class PKListener implements ListenerInterface
             $viewHandler = $this->container->get('fos_rest.view_handler');
             $view_listener = new ViewResponseListener(
                 $viewHandler,
-                TRUE
+                true
             );
             $view_listener->onKernelView($controller_result_event);
 

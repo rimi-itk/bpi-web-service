@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
@@ -7,8 +8,8 @@ class NodeQuery
 {
     public $total;
 
-    protected $filters = array();
-    protected $sorts = array();
+    protected $filters = [];
+    protected $sorts = [];
     protected $offset = 0;
     protected $amount = 20;
     protected $reduce_strategy;
@@ -18,23 +19,23 @@ class NodeQuery
      *
      * @var array
      */
-    protected $field_map = array(
-        'title'        => 'resource.title',
-        'teaser'       => 'resource.teaser',
-        'body'         => 'resource.body',
-        'creation'     => 'resource.creation',
-        'type'         => 'resource.type',
-        'ctime'        => 'ctime',
-        'pushed'       => 'ctime',
-        'category'     => 'category',
-        'audience'     => 'audience',
-        'assets'       => 'assets',
-        'agency_id'    => 'author.agency_id',
-        'author'       => 'author.lastname',
-        'firstname'    => 'author.firstname',
-        'lastname'     => 'author.lastname',
-        'syndications' => 'syndications'
-    );
+    protected $field_map = [
+        'title' => 'resource.title',
+        'teaser' => 'resource.teaser',
+        'body' => 'resource.body',
+        'creation' => 'resource.creation',
+        'type' => 'resource.type',
+        'ctime' => 'ctime',
+        'pushed' => 'ctime',
+        'category' => 'category',
+        'audience' => 'audience',
+        'assets' => 'assets',
+        'agency_id' => 'author.agency_id',
+        'author' => 'author.lastname',
+        'firstname' => 'author.firstname',
+        'lastname' => 'author.lastname',
+        'syndications' => 'syndications',
+    ];
 
     /**
      * Transform field names from presentation layer to persistense
@@ -43,8 +44,9 @@ class NodeQuery
      */
     protected function map($field_name)
     {
-        if (!array_key_exists($field_name, $this->field_map))
+        if (!array_key_exists($field_name, $this->field_map)) {
             throw new \InvalidArgumentException(sprintf('Field "%s" has no mapping', $field_name));
+        }
 
         return $this->field_map[$field_name];
     }
@@ -60,12 +62,12 @@ class NodeQuery
 
     public function offset($value)
     {
-        $this->offset = (int) $value;
+        $this->offset = (int)$value;
     }
 
     public function amount($value)
     {
-        $this->amount = (int) $value;
+        $this->amount = (int)$value;
     }
 
     public function sort($field, $order)
@@ -80,19 +82,20 @@ class NodeQuery
 
     protected function applySearch(QueryBuilder $query)
     {
-        if (!$this->search)
+        if (!$this->search) {
             return;
+        }
 
-        $fields = array('title', 'body', 'teaser', 'category');
+        $fields = ['title', 'body', 'teaser', 'category'];
         // Split search into words or keep as one term if quoted ("…")
         $terms = preg_match('/^".+"$/', $this->search)
-               ? array($this->search)
-               : preg_split('/\s+/', $this->search, null, PREG_SPLIT_NO_EMPTY);
+            ? [$this->search]
+            : preg_split('/\s+/', $this->search, null, PREG_SPLIT_NO_EMPTY);
 
         foreach ($fields as $field) {
-          foreach ($terms as $term) {
-            $query->addOr($query->expr()->field($this->map($field))->equals($this->matchAny($term)));
-          }
+            foreach ($terms as $term) {
+                $query->addOr($query->expr()->field($this->map($field))->equals($this->matchAny($term)));
+            }
         }
     }
 
@@ -110,15 +113,14 @@ class NodeQuery
 
     protected function applyReduce(QueryBuilder $query)
     {
-        switch ($this->reduce_strategy)
-        {
+        switch ($this->reduce_strategy) {
             case 'initial':
                 $query->field('level')->equals(1);
-            break;
+                break;
             case 'latest':
             case 'revised':
                 /** @todo custom query */
-            break;
+                break;
         }
     }
 
@@ -150,6 +152,6 @@ class NodeQuery
 
     protected function matchAny($value)
     {
-        return new \MongoRegex('/.*' . preg_quote($value) . '.*/i');
+        return new \MongoRegex('/.*'.preg_quote($value).'.*/i');
     }
 }

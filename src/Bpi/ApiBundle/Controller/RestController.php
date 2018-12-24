@@ -39,6 +39,7 @@ class RestController extends FOSRestController
      * @Rest\View(statusCode="200")
      *
      * TODO: This serves no practical function.
+     *
      * @deprecated
      */
     public function indexAction()
@@ -52,8 +53,8 @@ class RestController extends FOSRestController
         $hypermedia->addQuery(
             $document->createQuery(
                 'item',
-                $this->get('router')->generate('node_resource', array(), true),
-                array('id'),
+                $this->get('router')->generate('node_resource', [], true),
+                ['id'],
                 'Find a node by ID'
             )
         );
@@ -61,7 +62,7 @@ class RestController extends FOSRestController
         $hypermedia->addLink(
             $document->createLink(
                 'canonical',
-                $this->get('router')->generate('node_resource', array(), true),
+                $this->get('router')->generate('node_resource', [], true),
                 'Node resource'
             )
         );
@@ -69,7 +70,7 @@ class RestController extends FOSRestController
         $hypermedia->addLink(
             $document->createLink(
                 'collection',
-                $this->get('router')->generate('list', array(), true),
+                $this->get('router')->generate('list', [], true),
                 'Node collection'
             )
         );
@@ -77,7 +78,7 @@ class RestController extends FOSRestController
         $hypermedia->addTemplate(
             $template = $document->createTemplate(
                 'push',
-                $this->get('router')->generate('node_resource', array(), true),
+                $this->get('router')->generate('node_resource', [], true),
                 'Template for pushing node content'
             )
         );
@@ -85,8 +86,8 @@ class RestController extends FOSRestController
         $hypermedia->addQuery(
             $document->createQuery(
                 'statistics',
-                $this->get('router')->generate('statistics', array(), true),
-                array('dateFrom', 'dateTo'),
+                $this->get('router')->generate('statistics', [], true),
+                ['dateFrom', 'dateTo'],
                 'Statistics for date range'
             )
         );
@@ -94,8 +95,8 @@ class RestController extends FOSRestController
         $hypermedia->addQuery(
             $document->createQuery(
                 'syndicated',
-                $this->get('router')->generate('node_syndicated', array(), true),
-                array('id'),
+                $this->get('router')->generate('node_syndicated', [], true),
+                ['id'],
                 'Notify service about node syndication'
             )
         );
@@ -103,8 +104,8 @@ class RestController extends FOSRestController
         $hypermedia->addQuery(
             $document->createQuery(
                 'delete',
-                $this->get('router')->generate('node_delete', array(), true),
-                array('id'),
+                $this->get('router')->generate('node_delete', [], true),
+                ['id'],
                 'Mark node as deleted'
             )
         );
@@ -136,7 +137,7 @@ class RestController extends FOSRestController
         $profile_hypermedia->addLink(
             $document->createLink(
                 'dictionary',
-                $this->get('router')->generate('profile_dictionary', array(), true),
+                $this->get('router')->generate('profile_dictionary', [], true),
                 'Profile items dictionary'
             )
         );
@@ -166,39 +167,53 @@ class RestController extends FOSRestController
             $node_query->search($search);
         }
 
-        $filters = array();
+        $filters = [];
         $logicalOperator = '';
         if ($filter = $request->query->get('filter', [])) {
             foreach ($filter as $field => $value) {
                 if ($field == 'type' && !empty($value)) {
                     foreach ($value as $val) {
-                        if (empty($val)) {continue; }
+                        if (empty($val)) {
+                            continue;
+                        }
                         $filters['type'][] = $val;
                     }
                 }
                 if ($field == 'category' && !empty($value)) {
                     foreach ($value as $val) {
-                        $category = $this->getRepository('BpiApiBundle:Entity\Category')->findOneBy(array('category' => $val));
-                        if (empty($category)) {continue; }
+                        $category = $this
+                            ->getRepository('BpiApiBundle:Entity\Category')
+                            ->findOneBy(['category' => $val]);
+                        if (empty($category)) {
+                            continue;
+                        }
                         $filters['category'][] = $category;
                     }
                 }
                 if ($field == 'audience' && !empty($value)) {
                     foreach ($value as $val) {
-                        $audience = $this->getRepository('BpiApiBundle:Entity\Audience')->findOneBy(array('audience' => $val));
-                        if (empty($audience)) {continue; }
+                        $audience = $this
+                            ->getRepository('BpiApiBundle:Entity\Audience')
+                            ->findOneBy(['audience' => $val]);
+                        if (empty($audience)) {
+                            continue;
+                        }
                         $filters['audience'][] = $audience;
                     }
                 }
                 if ($field == 'agency_id' && !empty($value)) {
                     foreach ($value as $val) {
-                        if (empty($val)) {continue; }
+                        if (empty($val)) {
+                            continue;
+                        }
                         $filters['agency_id'][] = $val;
                     }
                 }
                 if ($field == 'tags' && !empty($value)) {
                     foreach ($value as $val) {
-                        if (empty($val)) {continue; }
+                        if (empty($val)) {
+                            continue;
+                        }
                         $filters['tags'][] = $val;
                     }
                 }
@@ -214,7 +229,9 @@ class RestController extends FOSRestController
 
                 if ($field == 'channels' && !empty($value)) {
                     foreach ($value as $val) {
-                        if (empty($val)) {continue; }
+                        if (empty($val)) {
+                            continue;
+                        }
                         $filters['channels'][] = $val;
                     }
                 }
@@ -233,8 +250,9 @@ class RestController extends FOSRestController
         $node_query->filter($availableFacets->nodeIds);
 
         if ($sort = $request->query->get('sort', [])) {
-            foreach ($sort as $field => $order)
+            foreach ($sort as $field => $order) {
                 $node_query->sort($field, $order);
+            }
         } else {
             $node_query->sort('pushed', 'desc');
         }
@@ -246,7 +264,7 @@ class RestController extends FOSRestController
 
         $agency_id = new AgencyId($this->getUser()->getAgencyId()->id());
         foreach ($node_collection as $node) {
-          $node->defineAgencyContext($agency_id);
+            $node->defineAgencyContext($agency_id);
         }
 
         $transform = $this->get('bpi.presentation.transformer');
@@ -260,10 +278,16 @@ class RestController extends FOSRestController
                 $hypermedia->addLink(
                     $document->createLink(
                         'self',
-                        $router->generate('node', array('id' => $e->property('id')->getValue()), true)
+                        $router->generate('node', ['id' => $e->property('id')->getValue()], true)
                     )
                 );
-                $hypermedia->addLink($document->createLink('collection', $router->generate('list', array(), true)));
+                $hypermedia
+                    ->addLink(
+                        $document->createLink(
+                            'collection',
+                            $router->generate('list', [], true)
+                        )
+                    );
 
                 // @todo: implementation
                 //$hypermedia->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), 'filename' => ''), true)));
@@ -281,21 +305,21 @@ class RestController extends FOSRestController
         $document->prependEntity($collection);
         $hypermedia = $document->createHypermediaSection();
         $collection->setHypermedia($hypermedia);
-        $hypermedia->addLink($document->createLink('canonical', $router->generate('list', array(), true)));
+        $hypermedia->addLink($document->createLink('canonical', $router->generate('list', [], true)));
         $hypermedia->addLink(
             $document->createLink('self', $router->generate('list', $request->query->all(), true))
         );
         $hypermedia->addQuery(
             $document->createQuery(
                 'refinement',
-                $this->get('router')->generate('list', array(), true),
-                array(
+                $this->get('router')->generate('list', [], true),
+                [
                     'amount',
                     'offset',
                     'search',
                     $document->createQueryParameter('filter')->setMultiple(),
                     $document->createQueryParameter('sort')->setMultiple(),
-                ),
+                ],
                 'List refinements'
             )
         );
@@ -303,7 +327,7 @@ class RestController extends FOSRestController
         // Prepare facets for xml.
         foreach ($availableFacets->facets as $facetName => $facet) {
             $facetsXml = $document->createEntity('facet', $facetName);
-            $result = array();
+            $result = [];
             foreach ($facet as $key => $term) {
                 if ($facetName == 'agency_id') {
                     $result[] = $document->createProperty(
@@ -313,12 +337,12 @@ class RestController extends FOSRestController
                         $term['agencyName']
                     );
                 } elseif (isset($term['count'])) {
-                  $result[] = $document->createProperty(
-                    $key,
-                    'string',
-                    $term['count'],
-                    isset($term['title']) ? $term['title'] : ''
-                  );
+                    $result[] = $document->createProperty(
+                        $key,
+                        'string',
+                        $term['count'],
+                        isset($term['title']) ? $term['title'] : ''
+                    );
                 } else {
                     $result[] = $document->createProperty(
                         $key,
@@ -339,6 +363,7 @@ class RestController extends FOSRestController
      * Get entity repository
      *
      * @param string $name repository name
+     *
      * @return \Doctrine\Common\Persistence\ObjectManager
      */
     protected function getRepository($name)
@@ -386,13 +411,13 @@ class RestController extends FOSRestController
      */
     public function nodeListOptionsAction()
     {
-        $options = array(
-            'GET' => array(
+        $options = [
+            'GET' => [
                 'action' => 'List of nodes',
-            ),
-            'OPTIONS' => array('action' => 'List available options'),
-        );
-        $headers = array('Allow' => implode(', ', array_keys($options)));
+            ],
+            'OPTIONS' => ['action' => 'List available options'],
+        ];
+        $headers = ['Allow' => implode(', ', array_keys($options))];
 
         return $this->handleView($this->view($options, 200, $headers));
     }
@@ -420,10 +445,10 @@ class RestController extends FOSRestController
         $hypermedia->addLink(
             $document->createLink(
                 'self',
-                $this->generateUrl('node', array('id' => $node->property('id')->getValue()), true)
+                $this->generateUrl('node', ['id' => $node->property('id')->getValue()], true)
             )
         );
-        $hypermedia->addLink($document->createLink('collection', $this->generateUrl('list', array(), true)));
+        $hypermedia->addLink($document->createLink('collection', $this->generateUrl('list', [], true)));
 
         return $document;
     }
@@ -437,33 +462,33 @@ class RestController extends FOSRestController
      */
     public function nodeItemOptionsAction($id)
     {
-        $options = array(
-            'GET' => array(
+        $options = [
+            'GET' => [
                 'action' => 'Node item',
-                'output' => array(
-                    'entities' => array(
-                        'node'
-                    )
-                )
-            ),
-            'POST' => array(
+                'output' => [
+                    'entities' => [
+                        'node',
+                    ],
+                ],
+            ],
+            'POST' => [
                 'action' => 'Post node revision',
-                'input' => array(
-                    'entities' => array(
+                'input' => [
+                    'entities' => [
                         'agency',
                         'resource',
                         'profile',
-                    )
-                ),
-                'output' => array(
-                    'entities' => array(
-                        'node'
-                    )
-                )
-            ),
-            'OPTIONS' => array('action' => 'List available options'),
-        );
-        $headers = array('Allow' => implode(', ', array_keys($options)));
+                    ],
+                ],
+                'output' => [
+                    'entities' => [
+                        'node',
+                    ],
+                ],
+            ],
+            'OPTIONS' => ['action' => 'List available options'],
+        ];
+        $headers = ['Allow' => implode(', ', array_keys($options))];
 
         return $this->handleView($this->view($options, 200, $headers));
     }
@@ -476,17 +501,22 @@ class RestController extends FOSRestController
      */
     public function postNodeAction(Request $request)
     {
-        BpiFile::$base_url = $request->getScheme() . '://' . $request->getHttpHost() . $request->getBasePath();
+        BpiFile::$base_url = $request->getScheme().'://'.$request->getHttpHost().$request->getBasePath();
 
         // Validate request size.
-        $returnBytes = function ($value)
-        {
-            switch (substr ($value, -1))
-            {
-                case 'K': case 'k': return (int)$value * 1024;
-                case 'M': case 'm': return (int)$value * 1048576;
-                case 'G': case 'g': return (int)$value * 1073741824;
-                default: return $value;
+        $returnBytes = function ($value) {
+            switch (substr($value, -1)) {
+                case 'K':
+                case 'k':
+                    return (int)$value * 1024;
+                case 'M':
+                case 'm':
+                    return (int)$value * 1048576;
+                case 'G':
+                case 'g':
+                    return (int)$value * 1073741824;
+                default:
+                    return $value;
             }
         };
 
@@ -495,9 +525,9 @@ class RestController extends FOSRestController
         }
 
         // Validate payload structure.
-        $violations = $this->_isValidForPushNode($request->request->all());
+        $violations = $this->isValidForPushNode($request->request->all());
         if (count($violations)) {
-            return $this->createErrorView((string) $violations, 422);
+            return $this->createErrorView((string)$violations, 422);
         }
 
         $author = new Author(
@@ -510,22 +540,22 @@ class RestController extends FOSRestController
         $resource = new ResourceBuilder($this->get('router'));
 
         $resource
-          ->type($request->get('type'))
-          ->title($request->get('title'))
-          ->body($request->get('body'))
-          ->teaser($request->get('teaser'))
-          ->url($request->get('url'))
-          ->data($request->get('data'))
-          ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $request->get('creation')));
+            ->type($request->get('type'))
+            ->title($request->get('title'))
+            ->body($request->get('body'))
+            ->teaser($request->get('teaser'))
+            ->url($request->get('url'))
+            ->data($request->get('data'))
+            ->ctime(\DateTime::createFromFormat(\DateTime::W3C, $request->get('creation')));
 
         // Prepare related materials.
-        foreach ($request->get('related_materials', array()) as $material) {
+        foreach ($request->get('related_materials', []) as $material) {
             $resource->addMaterial($material);
         }
 
         // Prepare assets.
         $assets = new Assets();
-        $data = $request->get('assets', array());
+        $data = $request->get('assets', []);
         foreach ($data as $asset) {
             $bpi_file = new File($asset);
             $bpi_file->createFile();
@@ -601,6 +631,7 @@ class RestController extends FOSRestController
      *
      * @param string $contents
      * @param int $code
+     *
      * @return View
      */
     protected function createErrorView($contents, $code)
@@ -612,60 +643,63 @@ class RestController extends FOSRestController
      * Create form to make validation
      *
      * @param array $data
+     *
      * @return \Symfony\Component\Validator\ConstraintViolationList
      */
-    protected function _isValidForPushNode(array $data)
+    protected function isValidForPushNode(array $data)
     {
         // @todo move somewhere all this validation stuff
-        $node = new Constraints\Collection(array(
-            'allowExtraFields' => true,
-            'fields' => array(
-                // Author
-                'agency_id' => array(
-                    new Constraints\NotBlank()
-                ),
-                'local_id' => array(
-                    new Constraints\NotBlank()
-                ),
-                'firstname' => array(
-                    new Constraints\Length(array('min' => 2, 'max' => 100))
-                ),
-                'lastname' => array(
-                    new Constraints\Length(array('min' => 2, 'max' => 100))
-                ),
-                // Resource
-                'title' => array(
-                    new Constraints\Length(array('min' => 2, 'max' => 500))
-                ),
-                'body' => array(
-                    new Constraints\Length(array('min' => 2))
-                ),
-                'teaser' => array(
-                    new Constraints\Length(array('min' => 2, 'max' => 5000))
-                ),
-                'creation' => array(
-                    //@todo validate against DateTime::W3C format
-                    new Constraints\NotBlank()
-                ),
-                'type' => array(
-                    new Constraints\NotBlank()
-                ),
-                // profile; tags, yearwheel - compulsory
-                'category' => array(
-                    new Constraints\Length(array('min' => 2, 'max' => 100))
-                ),
-                'audience' => array(
-                    new Constraints\Length(array('min' => 2, 'max' => 100))
-                ),
-                // TODO: Enable this, but requires client changes as well.
+        $node = new Constraints\Collection(
+            [
+                'allowExtraFields' => true,
+                'fields' => [
+                    // Author
+                    'agency_id' => [
+                        new Constraints\NotBlank(),
+                    ],
+                    'local_id' => [
+                        new Constraints\NotBlank(),
+                    ],
+                    'firstname' => [
+                        new Constraints\Length(['min' => 2, 'max' => 100]),
+                    ],
+                    'lastname' => [
+                        new Constraints\Length(['min' => 2, 'max' => 100]),
+                    ],
+                    // Resource
+                    'title' => [
+                        new Constraints\Length(['min' => 2, 'max' => 500]),
+                    ],
+                    'body' => [
+                        new Constraints\Length(['min' => 2]),
+                    ],
+                    'teaser' => [
+                        new Constraints\Length(['min' => 2, 'max' => 5000]),
+                    ],
+                    'creation' => [
+                        //@todo validate against DateTime::W3C format
+                        new Constraints\NotBlank(),
+                    ],
+                    'type' => [
+                        new Constraints\NotBlank(),
+                    ],
+                    // profile; tags, yearwheel - compulsory
+                    'category' => [
+                        new Constraints\Length(['min' => 2, 'max' => 100]),
+                    ],
+                    'audience' => [
+                        new Constraints\Length(['min' => 2, 'max' => 100]),
+                    ],
+                    // TODO: Enable this, but requires client changes as well.
 //                'editable' => array(
 //                    new Constraints\Type(array('type' => 'boolean')),
 //                ),
 //                'authorship' => array(
 //                    new Constraints\Type(array('type' => 'boolean')),
 //                ),
-            )
-        ));
+                ],
+            ]
+        );
 
         /** @var \Symfony\Component\Validator\Validator\ValidatorInterface $validator */
         $validator = $this->container->get('validator');
@@ -681,18 +715,18 @@ class RestController extends FOSRestController
      */
     public function nodeAssetOptionsAction($node_id)
     {
-        $options = array(
-            'PUT' => array(
+        $options = [
+            'PUT' => [
                 'action' => 'Add asset to specific node',
-                'input' => array(
-                    'entities' => array(
+                'input' => [
+                    'entities' => [
                         'binary file',
-                    )
-                ),
-            ),
-            'OPTIONS' => array('action' => 'List available options'),
-        );
-        $headers = array('Allow' => implode(', ', array_keys($options)));
+                    ],
+                ],
+            ],
+            'OPTIONS' => ['action' => 'List available options'],
+        ];
+        $headers = ['Allow' => implode(', ', array_keys($options))];
 
         return $this->handleView($this->view($options, 200, $headers));
     }
@@ -705,14 +739,14 @@ class RestController extends FOSRestController
      */
     public function nodeOptionsAction()
     {
-        $options = array(
-            'POST' => array(
+        $options = [
+            'POST' => [
                 'action' => 'Push new node',
-                'template' => array(),
-            ),
-            'OPTIONS' => array('action' => 'List available options'),
-        );
-        $headers = array('Allow' => implode(', ', array_keys($options)));
+                'template' => [],
+            ],
+            'OPTIONS' => ['action' => 'List available options'],
+        ];
+        $headers = ['Allow' => implode(', ', array_keys($options))];
 
         return $this->handleView($this->view($options, 200, $headers));
     }
@@ -749,18 +783,18 @@ class RestController extends FOSRestController
      */
     public function profileDictionaryOptionsAction()
     {
-        $options = array(
-            'GET' => array(
+        $options = [
+            'GET' => [
                 'action' => 'Get profile dictionary',
-                'output' => array(
-                    'entities' => array(
+                'output' => [
+                    'entities' => [
                         'profile_dictionary',
-                    )
-                ),
-            ),
-            'OPTIONS' => array('action' => 'List available options'),
-        );
-        $headers = array('Allow' => implode(', ', array_keys($options)));
+                    ],
+                ],
+            ],
+            'OPTIONS' => ['action' => 'List available options'],
+        ];
+        $headers = ['Allow' => implode(', ', array_keys($options))];
 
         return $this->view($options, 200, $headers);
     }
@@ -785,7 +819,7 @@ class RestController extends FOSRestController
         $dm = $this->get('doctrine_mongodb')->getManager();
         $dm->persist($log);
 
-        $node->setSyndications(((int) $node->getSyndications()) + 1);
+        $node->setSyndications(((int)$node->getSyndications()) + 1);
         $dm->persist($node);
 
         $dm->flush();
@@ -806,9 +840,12 @@ class RestController extends FOSRestController
     {
         $nodeId = $request->get('id');
 
-        $result = $this->forward('Bpi\ApiBundle\Controller\RestController::nodeMarkSyndicatedAction', [
-            'id' => $nodeId,
-        ]);
+        $result = $this->forward(
+            'Bpi\ApiBundle\Controller\RestController::nodeMarkSyndicatedAction',
+            [
+                'id' => $nodeId,
+            ]
+        );
 
         return $result;
     }
@@ -855,13 +892,13 @@ class RestController extends FOSRestController
         if ($id = $request->get('id')) {
             // SDK can not handle properly redirects, so query string is used
             // @see https://github.com/symfony/symfony/issues/7929
-            $params = array(
+            $params = [
                 'id' => $id,
-                '_authorization' => array(
+                '_authorization' => [
                     'agency' => $this->getUser()->getAgencyId()->id(),
-                    'token' => $this->container->get('security.context')->getToken()->token
-                )
-            );
+                    'token' => $this->container->get('security.context')->getToken()->token,
+                ],
+            ];
 
             return $this->redirect($this->generateUrl('node', $params));
         }
@@ -870,8 +907,8 @@ class RestController extends FOSRestController
         $entity = $document->createRootEntity('node');
         $controls = $document->createHypermediaSection();
         $entity->setHypermedia($controls);
-        $controls->addQuery($document->createQuery('search', 'abc', array('id'), 'Find a node by ID'));
-        $controls->addQuery($document->createQuery('filter', 'xyz', array('name', 'title'), 'Filtration'));
+        $controls->addQuery($document->createQuery('search', 'abc', ['id'], 'Find a node by ID'));
+        $controls->addQuery($document->createQuery('filter', 'xyz', ['name', 'title'], 'Filtration'));
         $controls->addLink($document->createLink('self', 'Self'));
         $controls->addLink($document->createLink('collection', 'Collection'));
 

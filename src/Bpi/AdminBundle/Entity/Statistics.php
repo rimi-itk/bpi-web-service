@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\AdminBundle\Entity;
 
 class Statistics
@@ -15,6 +16,7 @@ class Statistics
         if ($this->dateFrom) {
             return $this->dateFrom->format('Y-m-d');
         }
+
         return null;
     }
 
@@ -23,6 +25,7 @@ class Statistics
         if ($this->dateTo) {
             return $this->dateTo->format('Y-m-d');
         }
+
         return null;
     }
 

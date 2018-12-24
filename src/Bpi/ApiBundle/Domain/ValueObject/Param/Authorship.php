@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\ValueObject\Param;
 
 class Authorship implements IParam
@@ -12,18 +13,20 @@ class Authorship implements IParam
 
     public function isPositive()
     {
-      return $this->authorship;
+        return $this->authorship;
     }
 
     /**
      * Set authorship
      *
      * @param string $authorship
+     *
      * @return self
      */
     public function setAuthorship($authorship)
     {
         $this->authorship = $authorship;
+
         return $this;
     }
 

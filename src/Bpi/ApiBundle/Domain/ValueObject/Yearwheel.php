@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\ValueObject;
 
 use Bpi\ApiBundle\Domain\Repository\YearwheelRepository;
@@ -34,28 +35,33 @@ class Yearwheel implements IValueObject, IPresentable
      * @param \Bpi\ApiBundle\Domain\ValueObject\Yearwheel $yearwheel
      * @param string $field
      * @param int $order 1=asc, -1=desc
+     *
      * @return int see strcmp PHP function
      */
     public function compare(Yearwheel $yearwheel, $field, $order = 1)
     {
         $cmp = new Comparator($this->$field, $yearwheel->$field, $order);
+
         return $cmp->getResult();
     }
 
     /**
      * @param \Bpi\ApiBundle\Domain\ValueObject\Yearwheel $yearwheel
+     *
      * @return boolean
      */
     public function equals(IValueObject $yearwheel)
     {
-        if (get_class($this) != get_class($yearwheel))
+        if (get_class($this) != get_class($yearwheel)) {
             return false;
+        }
 
         return $this->name() == $yearwheel->name();
     }
 
     /**
      * @param \Bpi\ApiBundle\Domain\Repository\YearwheelRepository $repository
+     *
      * @return boolean
      */
     public function isInRepository(YearwheelRepository $repository)
@@ -77,11 +83,13 @@ class Yearwheel implements IValueObject, IPresentable
      * Set name
      *
      * @param string $name
+     *
      * @return self
      */
     public function setName($name)
     {
         $this->name = $name;
+
         return $this;
     }
 

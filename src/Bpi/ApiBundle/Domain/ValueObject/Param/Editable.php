@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\ValueObject\Param;
 
 class Editable implements IParam
@@ -19,11 +20,13 @@ class Editable implements IParam
      * Set editable
      *
      * @param string $editable
+     *
      * @return self
      */
     public function setEditable($editable)
     {
         $this->editable = $editable;
+
         return $this;
     }
 

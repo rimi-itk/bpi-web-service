@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Domain\Aggregate\Node;
@@ -45,6 +46,7 @@ class History
      * Set node
      *
      * @param \Bpi\ApiBundle\Domain\Aggregate\Node $node
+     *
      * @return History
      */
     public function setNode($node)
@@ -68,6 +70,7 @@ class History
      * Set agency
      *
      * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $agency
+     *
      * @return History
      */
     public function setAgency($agency)
@@ -91,6 +94,7 @@ class History
      * Set datetime
      *
      * @param \Datetime $time
+     *
      * @return History
      */
     public function setDatetime(\Datetime $time)
@@ -114,6 +118,7 @@ class History
      * Set action
      *
      * @param string $action
+     *
      * @return History
      */
     public function setAction($action)
@@ -132,5 +137,4 @@ class History
     {
         return $this->action;
     }
-
 }

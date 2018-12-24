@@ -51,10 +51,10 @@ class ChannelRepository extends DocumentRepository
 
         $result = $qb
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
 
         $count = $result->count();
+
         return ($count === 0) ? null : $result;
     }
 

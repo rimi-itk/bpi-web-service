@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Element;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -105,41 +106,47 @@ class Entity implements HasLinks
      */
     public function addProperties(array $properties)
     {
-        foreach ($properties as $property)
+        foreach ($properties as $property) {
             $this->addProperty($property);
+        }
     }
 
     /**
      *
      * @param \Bpi\RestMediaTypeBundle\Element\Link $link
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
     public function addLink(Link $link)
     {
         $this->links[] = $link;
+
         return $this;
     }
 
     /**
      *
      * @param string $name
+     *
      * @return Property|array|null
      */
     public function property($name)
     {
-        $property = array();
-        foreach ($this->properties as $prop)
-        {
-            if ($prop->getName() == $name)
+        $property = [];
+        foreach ($this->properties as $prop) {
+            if ($prop->getName() == $name) {
                 $property[] = $prop;
+            }
         }
 
         $count = count($property);
-        if ($count == 0)
+        if ($count == 0) {
             return null;
+        }
 
-        if ($count == 1)
+        if ($count == 1) {
             return current($property);
+        }
 
         return $property;
     }
@@ -158,20 +165,19 @@ class Entity implements HasLinks
     /**
      * Check existence of property. There might be multiple properties with same name.
      *
-     * @param  string       $name
-     * @param  string|null  $type
+     * @param  string $name
+     * @param  string|null $type
+     *
      * @return boolean
      */
     public function hasProperty($name, $type = null)
     {
-        foreach ($this->properties as $key => $prop)
-        {
-            if ($prop->getName() == $name)
-            {
-                if (!is_null($type))
-                {
-                    if (!$prop->typeOf($type))
+        foreach ($this->properties as $key => $prop) {
+            if ($prop->getName() == $name) {
+                if (!is_null($type)) {
+                    if (!$prop->typeOf($type)) {
                         return false;
+                    }
                 }
 
                 return true;
@@ -195,6 +201,7 @@ class Entity implements HasLinks
      * Check if givendocument is owner of current entity
      *
      * @param \Bpi\RestMediaTypeBundle\Document $document
+     *
      * @return bool
      */
     public function isOwner(Document $document)
@@ -215,6 +222,7 @@ class Entity implements HasLinks
     /**
      *
      * @param string $name of entity
+     *
      * @return Entity
      */
     public function getChildEntity($name)
@@ -226,15 +234,18 @@ class Entity implements HasLinks
      * Get properties matched by name
      *
      * @param string $regexp name regular expression
+     *
      * @return array
      */
     public function matchProperties($regexp)
     {
-        $props = array();
+        $props = [];
         foreach ($this->properties as $property) {
-            if (preg_match($regexp, $property->getName(), $matches))
+            if (preg_match($regexp, $property->getName(), $matches)) {
                 $props[$matches[1]] = $property;
+            }
         }
+
         return $props;
     }
 
@@ -251,20 +262,24 @@ class Entity implements HasLinks
      * Get properties matched by type
      *
      * @param string $type
+     *
      * @return array
      */
     public function matchPropertiesByType($type)
     {
-        $props = array();
+        $props = [];
         foreach ($this->properties as $property) {
-            if ($property->typeOf($type))
+            if ($property->typeOf($type)) {
                 $props[$property->getName()] = $property;
+            }
         }
+
         return $props;
     }
 
     /**
      * Adds file to assets array.
+     *
      * @param mixed $data
      */
     public function addAsset($data)
@@ -275,21 +290,25 @@ class Entity implements HasLinks
     /**
      *
      * @param \Bpi\RestMediaTypeBundle\Element\Hypermedia $controls
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
     public function setHypermedia(Hypermedia $controls)
     {
         $this->hypermedia = $controls;
+
         return $this;
     }
 
     /**
      * @param \Bpi\RestMediaTypeBundle\Element\Tags $tags
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
     public function setTags(Tags $tags)
     {
         $this->tags = $tags;
+
         return $this;
     }
 }

@@ -24,9 +24,11 @@ class ReadingDictionariesTest extends AbstractFixtureAwareBpiTest
         parent::setUp();
 
         /** @var \Bpi\ApiBundle\Domain\Aggregate\Agency $agency */
-        $agency = $this->registry->getRepository(Agency::class)->findOneBy([
-            'public_id' => '999999',
-        ]);
+        $agency = $this->registry->getRepository(Agency::class)->findOneBy(
+            [
+                'public_id' => '999999',
+            ]
+        );
         // Store an authentication token for further requests.
         $this->authenticationHeader = $this->generateAuthenticationHeader($agency);
     }

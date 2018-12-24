@@ -1,6 +1,8 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\ValueObject\Param;
 
-interface IParam {
+interface IParam
+{
     public function isPositive();
 }

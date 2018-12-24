@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle;
 
 use Bpi\ApiBundle\Domain\Entity\Channel;

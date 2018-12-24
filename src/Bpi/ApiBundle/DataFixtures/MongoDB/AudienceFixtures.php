@@ -24,7 +24,7 @@ class AudienceFixtures extends Fixture implements RandomFixtureReferenceInterfac
     public function load(ObjectManager $manager)
     {
         $audiences = [
-            self::AUDIENCE_STUDERENDE =>'Studerende',
+            self::AUDIENCE_STUDERENDE => 'Studerende',
             self::AUDIENCE_VOKSNE => 'Voksne',
         ];
 

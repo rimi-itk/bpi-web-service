@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Element;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -56,7 +57,7 @@ class Channel extends Item
             $this->nodes[] = $node->getId();
         }
         $this->nodeLastAddedAt = $channel->getNodeLastAddedAt();
-        $users =  $channel->getChannelEditors();
+        $users = $channel->getChannelEditors();
         foreach ($users as $user) {
             $this->users[] = new User($user);
         }

@@ -17,7 +17,7 @@ class RepresentationTest extends WebTestCase
 
     public function __construct()
     {
-        static::$kernel = static::createKernel(array());
+        static::$kernel = static::createKernel([]);
         static::$kernel->boot();
         $this->serializer = static::$kernel->getContainer()->get('serializer');
     }
@@ -77,15 +77,17 @@ class RepresentationTest extends WebTestCase
         $xml = simplexml_load_string($this->serializer->serialize($collection, "xml"));
 
         $this->assertEquals(1, count($xml->links));
-        foreach($xml->links->children() as $link)
+        foreach ($xml->links->children() as $link) {
             $this->assertEquals('link', $link->getName());
+        }
 
         $entity = new Entity('bar');
         $entity->addLink(new Link('foo', 'bar', 'zoo'));
         $xml = simplexml_load_string($this->serializer->serialize($entity, "xml"));
 
         $this->assertEquals(1, count($xml->links));
-        foreach($xml->links->children() as $link)
+        foreach ($xml->links->children() as $link) {
             $this->assertEquals('link', $link->getName());
+        }
     }
 }

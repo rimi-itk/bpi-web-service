@@ -48,18 +48,18 @@ class StatisticsController extends Controller
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
-            'statistics'=> $statisitcs,
-        );
+            'statistics' => $statisitcs,
+        ];
     }
 
     private function createStatisticsForm($data)
     {
         $formBuilder = $this->createFormBuilder($data)
-            ->add('dateFrom', DateType::class, array('widget' => 'single_text'))
-            ->add('dateTo', DateType::class, array('widget' => 'single_text'))
-            ->add('agency', TextType::class, array('required' => false))
+            ->add('dateFrom', DateType::class, ['widget' => 'single_text'])
+            ->add('dateTo', DateType::class, ['widget' => 'single_text'])
+            ->add('agency', TextType::class, ['required' => false])
             ->add('show', SubmitType::class, ['attr' => ['class' => 'btn']]);
 
         return $formBuilder->getForm();

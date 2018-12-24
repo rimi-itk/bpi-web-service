@@ -5,7 +5,6 @@ namespace Bpi\ApiBundle\Domain\Entity;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\RestMediaTypeBundle\XmlResponse;
 
-
 /**
  * Bpi\ApiBundle\Domain\Entity\Tag
  */
@@ -36,11 +35,13 @@ class Tag
      * Set category
      *
      * @param string $category
+     *
      * @return self
      */
     public function setCategory($category)
     {
         $this->category = $category;
+
         return $this;
     }
 
@@ -53,6 +54,7 @@ class Tag
     {
         return $this->category;
     }
+
     /**
      * @var string $tag
      */
@@ -63,11 +65,13 @@ class Tag
      * Set tag
      *
      * @param string $tag
+     *
      * @return self
      */
     public function setTag($tag)
     {
         $this->tag = $tag;
+
         return $this;
     }
 
@@ -81,10 +85,10 @@ class Tag
         return $this->tag;
     }
 
-    public function transform(XmlResponse  $document, $tags)
+    public function transform(XmlResponse $document, $tags)
     {
         try {
-            $entity= $document->currentEntity();
+            $entity = $document->currentEntity();
         } catch (\RuntimeException $e) {
             $entity = $document->createEntity('entity', 'tags');
             $document->appendEntity($entity);

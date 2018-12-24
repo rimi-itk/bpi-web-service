@@ -2,8 +2,6 @@
 
 namespace Bpi\ApiBundle\Domain\ValueObject\Assets;
 
-
-
 /**
  * Bpi\ApiBundle\Domain\ValueObject\Assets\Alt
  */
@@ -19,11 +17,13 @@ class Alt
      * Set alt
      *
      * @param string $alt
+     *
      * @return self
      */
     public function setAlt($alt)
     {
         $this->alt = $alt;
+
         return $this;
     }
 

@@ -41,12 +41,12 @@ class Channel implements IPresentable
     /**
      * @var object
      */
-    protected $channelEditors = array();
+    protected $channelEditors = [];
 
     /**
      * @var object
      */
-    protected $channelNodes = array();
+    protected $channelNodes = [];
 
     /**
      * @var \DateTime
@@ -73,11 +73,13 @@ class Channel implements IPresentable
      * Set channelName
      *
      * @param string $channelName
+     *
      * @return self
      */
     public function setChannelName($channelName)
     {
         $this->channelName = $channelName;
+
         return $this;
     }
 
@@ -95,11 +97,13 @@ class Channel implements IPresentable
      * Set channelDescription
      *
      * @param string $channelDescription
+     *
      * @return self
      */
     public function setChannelDescription($channelDescription)
     {
         $this->channelDescription = $channelDescription;
+
         return $this;
     }
 
@@ -117,11 +121,13 @@ class Channel implements IPresentable
      * Set channelDeleted
      *
      * @param boolean $channelDeleted
+     *
      * @return self
      */
     public function setChannelDeleted($channelDeleted)
     {
         $this->channelDeleted = $channelDeleted;
+
         return $this;
     }
 
@@ -139,11 +145,13 @@ class Channel implements IPresentable
      * Set channelAdmin
      *
      * @param \Bpi\ApiBundle\Domain\Entity\User $channelAdmin
+     *
      * @return self
      */
     public function setChannelAdmin(User $channelAdmin)
     {
         $this->channelAdmin = $channelAdmin;
+
         return $this;
     }
 

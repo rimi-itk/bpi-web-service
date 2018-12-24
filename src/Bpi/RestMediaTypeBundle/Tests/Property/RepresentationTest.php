@@ -18,7 +18,7 @@ class RepresentationTest extends WebTestCase
 
     public function __construct()
     {
-        static::$kernel = static::createKernel(array());
+        static::$kernel = static::createKernel([]);
         static::$kernel->boot();
         $this->serializer = static::$kernel->getContainer()->get('serializer');
     }
@@ -56,7 +56,7 @@ class RepresentationTest extends WebTestCase
         $entity2 = new EntityElement('bar');
         $property = new EntityProperty(
             new String('foo'),
-            new EntityType(array($entity, $entity2)),
+            new EntityType([$entity, $entity2]),
             new String('zoo')
         );
 

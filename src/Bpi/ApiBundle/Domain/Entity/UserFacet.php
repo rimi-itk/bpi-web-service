@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 /**
@@ -35,6 +36,7 @@ class UserFacet
      * Set userId
      *
      * @param string $userId
+     *
      * @return self
      */
     public function setUserId($userId)
@@ -58,6 +60,7 @@ class UserFacet
      * Set facetData
      *
      * @param array $facetData
+     *
      * @return self
      */
     public function setFacetData($facetData)

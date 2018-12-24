@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
@@ -11,14 +12,14 @@ class UserQuery extends Query
     /**
      * {@inheritdoc}
      */
-    protected $fieldMap = array(
-        'email'     => 'email',
+    protected $fieldMap = [
+        'email' => 'email',
         'firstname' => 'userFirstName',
-        'lastname'  => 'userLastName',
-    );
+        'lastname' => 'userLastName',
+    ];
 
     /**
      * {@inheritdoc}
      */
-    protected $searchFields = array('firstname', 'lastname', 'email');
+    protected $searchFields = ['firstname', 'lastname', 'email'];
 }

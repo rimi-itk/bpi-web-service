@@ -41,37 +41,31 @@ class Version20150804143240 extends AbstractMigration implements ContainerAwareI
 
             $agencyId = $node
                 ->getAuthor()
-                ->getAgencyId()
-            ;
+                ->getAgencyId();
 
             $agency = $dm
                 ->getRepository('BpiApiBundle:Aggregate\Agency')
-                ->findOneBy(array('public_id' => $agencyId->id(), 'deleted' => false))
-            ;
+                ->findOneBy(['public_id' => $agencyId->id(), 'deleted' => false]);
 
             $categoryId = $node
                 ->getCategory()
-                ->getId()
-            ;
+                ->getId();
             $category = $dm
                 ->getRepository('BpiApiBundle:Entity\Category')
-                ->findOneBy(array('_id' => $categoryId))
-                ->getCategory()
-            ;
+                ->findOneBy(['_id' => $categoryId])
+                ->getCategory();
 
             $audienceId = $node
                 ->getAudience()
-                ->getId()
-            ;
+                ->getId();
             $audience = $dm
                 ->getRepository('BpiApiBundle:Entity\Audience')
-                ->findOneBy(array('_id' => $audienceId))
-                ->getAudience()
-            ;
+                ->findOneBy(['_id' => $audienceId])
+                ->getAudience();
 
             $author = $node->getAuthor()->getFullName();
 
-            $tags = array();
+            $tags = [];
             $nodeTags = $node->getTags();
             foreach ($nodeTags as $key => $tag) {
                 $tags[] = $tag->getTag();
@@ -81,21 +75,24 @@ class Version20150804143240 extends AbstractMigration implements ContainerAwareI
                 continue;
             }
 
-            $facets = array(
-                'author' => array($author),
-                'agency_id' => array($agencyId->id()),
-                'agency_internal' => array($agency->getInternal()),
-                'category' => array($category),
-                'audience' => array($audience),
-                'tags' => array($tags),
-            );
+            $facets = [
+                'author' => [$author],
+                'agency_id' => [$agencyId->id()],
+                'agency_internal' => [$agency->getInternal()],
+                'category' => [$category],
+                'audience' => [$audience],
+                'tags' => [$tags],
+            ];
 
             $setFacets = new \stdClass();
-            array_walk($facets, function ($facet, $key) use (&$setFacets) {
-                if (!empty($facet)) {
-                    $setFacets->$key = $facet[0];
+            array_walk(
+                $facets,
+                function ($facet, $key) use (&$setFacets) {
+                    if (!empty($facet)) {
+                        $setFacets->$key = $facet[0];
+                    }
                 }
-            });
+            );
 
             $facet->setNodeId($node->getId());
             $facet->setFacetData($setFacets);

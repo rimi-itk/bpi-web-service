@@ -23,7 +23,7 @@ class PKFactory implements SecurityFactoryInterface
         $listenerId = 'security.authentication.listener.pk.'.$id;
         $container->setDefinition($listenerId, new ChildDefinition('bpi.pk.security.authentication.listener'));
 
-        return array($providerId, $listenerId, $defaultEntryPoint);
+        return [$providerId, $listenerId, $defaultEntryPoint];
     }
 
     /**
@@ -47,6 +47,5 @@ class PKFactory implements SecurityFactoryInterface
      */
     public function addConfiguration(NodeDefinition $builder)
     {
-
     }
 }

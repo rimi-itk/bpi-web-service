@@ -30,9 +30,11 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
         parent::setUp();
 
         /** @var \Bpi\ApiBundle\Domain\Aggregate\Agency $agency */
-        $agency = $this->registry->getRepository(Agency::class)->findOneBy([
-            'public_id' => '999999',
-        ]);
+        $agency = $this->registry->getRepository(Agency::class)->findOneBy(
+            [
+                'public_id' => '999999',
+            ]
+        );
         // Store an authentication token for further requests.
         $this->authenticationToken = $this->generateAuthenticationHeader($agency);
     }
@@ -119,7 +121,8 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
-    public function testAnonymousNodeCollection() {
+    public function testAnonymousNodeCollection()
+    {
         $this->client->request(
             'GET',
             '/node/collection'
@@ -135,7 +138,8 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
-    public function testNodeCollection() {
+    public function testNodeCollection()
+    {
         $this->client->request(
             'GET',
             '/node/collection',
@@ -280,8 +284,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
 
             $offset += $randomCount;
             $numberOfNodes += $lastEntityCount;
-        }
-        while(0 !== $lastEntityCount);
+        } while (0 !== $lastEntityCount);
 
         // Assert total number of nodes.
         /** @var \Bpi\ApiBundle\Domain\Repository\NodeRepository $nodeRepository */
@@ -297,7 +300,8 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
-    function testNodeCollectionSortedByTitleAscending() {
+    public function testNodeCollectionSortedByTitleAscending()
+    {
         $this->client->request(
             'GET',
             '/node/collection',
@@ -328,7 +332,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             /** @var \SimpleXMLElement[] $titleProperty */
             $titleProperty = $entityItemTag->xpath('properties/property[@name="title"]');
             $this->assertNotEmpty($titleProperty);
-            $currentTitle = (string) $titleProperty[0];
+            $currentTitle = (string)$titleProperty[0];
             // Ascending order means that two compared strings deliver
             // a negative value when.
             $this->assertLessThanOrEqual(0, strcmp($previousTitle, $currentTitle));
@@ -339,7 +343,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
-    function testNodeCollectionSortedByPushedDescending()
+    public function testNodeCollectionSortedByPushedDescending()
     {
         $this->client->request(
             'GET',
@@ -371,7 +375,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
             /** @var \SimpleXMLElement[] $pushedProperty */
             $pushedProperty = $entityItemTag->xpath('properties/property[@name="pushed"]');
             $this->assertNotEmpty($pushedProperty);
-            $currentDate = strtotime((string) $pushedProperty[0]);
+            $currentDate = strtotime((string)$pushedProperty[0]);
             $this->assertLessThanOrEqual($previousDate, $currentDate);
             $previousDate = $currentDate;
         }
@@ -382,7 +386,7 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
      * TODO: Add logicalOperator test.
      * TODO: Add multiple filtering test.
      */
-    function testNodeCollectionFiltered()
+    public function testNodeCollectionFiltered()
     {
         $this->client->request(
             'GET',

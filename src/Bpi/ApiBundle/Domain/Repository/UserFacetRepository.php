@@ -50,14 +50,15 @@ class UserFacetRepository extends DocumentRepository
     /**
      * Build facets and get user ids by which will be made request to DB
      *
-     * @param array  $filters         applied filters
+     * @param array $filters applied filters
      * @param string $logicalOperator by default OR could be AND
+     *
      * @return \StdClass
      *  contain array of built facets and array of user ids
      */
-    public function getFacetsByRequest($filters = array(), $logicalOperator = 'OR')
+    public function getFacetsByRequest($filters = [], $logicalOperator = 'OR')
     {
-        $userIds = array();
+        $userIds = [];
 
         $this->filters = $filters;
         $this->logicalOperator = $logicalOperator;
@@ -72,7 +73,8 @@ class UserFacetRepository extends DocumentRepository
             }
         }
 
-        $qb->map('
+        $qb->map(
+            '
                 function() {
                     for (var i in this.facetData) {
                         if (i == "tags") {
@@ -92,8 +94,10 @@ class UserFacetRepository extends DocumentRepository
                         }
                     }
                 }
-            ')
-            ->reduce('
+            '
+        )
+            ->reduce(
+                '
                 function(key, values) {
                     var sum = 0;
                     for(var i in values) {
@@ -101,14 +105,17 @@ class UserFacetRepository extends DocumentRepository
                     }
                     return sum;
                 };
-            ')
-        ;
+            '
+            );
 
-        $facets = array();
+        $facets = [];
         $result = $this->iterateTerms($qb);
         foreach ($result as $facet) {
             if ($facet['_id']['facetName'] == 'agency_id') {
-                $agency = $this->dm->getRepository('BpiApiBundle:Aggregate\Agency')->loadUserByUsername($facet['_id']['facetValue']);
+                $agency = $this
+                    ->dm
+                    ->getRepository('BpiApiBundle:Aggregate\Agency')
+                    ->loadUserByUsername($facet['_id']['facetValue']);
                 $facets['agency_id'][$facet['_id']['facetValue']]['agencyName'] = $agency->getName();
                 $facets['agency_id'][$facet['_id']['facetValue']]['count'] = $facet['value'];
             } else {
@@ -116,10 +123,10 @@ class UserFacetRepository extends DocumentRepository
             }
         }
 
-        return (object) array(
+        return (object)[
             'facets' => $facets,
             'userIds' => $userIds,
-        );
+        ];
     }
 
     /**
@@ -133,8 +140,7 @@ class UserFacetRepository extends DocumentRepository
             ->remove()
             ->field('userId')->equals($user->getId())
             ->getQuery()
-            ->execute()
-            ;
+            ->execute();
     }
 
     /**
@@ -160,7 +166,9 @@ class UserFacetRepository extends DocumentRepository
 
     /**
      * Iterate over applied filters and make request to db
+     *
      * @param $qb object of query builder
+     *
      * @return mixed
      *  array of facets or facet entities
      */
@@ -168,7 +176,7 @@ class UserFacetRepository extends DocumentRepository
     {
         if (!empty($this->filters)) {
             foreach ($this->filters as $name => $values) {
-                $terms = array();
+                $terms = [];
                 foreach ($values as $value) {
                     switch ($name) {
                         default:
@@ -191,8 +199,7 @@ class UserFacetRepository extends DocumentRepository
 
         $result = $qb
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
 
         return $result;
     }

@@ -29,7 +29,8 @@ class FacetRepository extends DocumentRepository
      *
      * @param $node
      */
-    public function prepareFacet($node) {
+    public function prepareFacet($node)
+    {
         $facet = new Facet();
 
         $type = $node->getType();
@@ -41,55 +42,54 @@ class FacetRepository extends DocumentRepository
         $agency = $this
             ->dm
             ->getRepository('BpiApiBundle:Aggregate\Agency')
-            ->findOneBy(array('public_id' => $agencyId->id()));
+            ->findOneBy(['public_id' => $agencyId->id()]);
 
         $categoryId = $node
             ->getCategory()
-            ->getId()
-        ;
+            ->getId();
         $category = $this
             ->dm
             ->getRepository('BpiApiBundle:Entity\Category')
-            ->findOneBy(array('_id' => $categoryId))
-            ->getCategory()
-        ;
+            ->findOneBy(['_id' => $categoryId])
+            ->getCategory();
 
         $audienceId = $node
             ->getAudience()
-            ->getId()
-        ;
+            ->getId();
         $audience = $this
             ->dm
             ->getRepository('BpiApiBundle:Entity\Audience')
-            ->findOneBy(array('_id' => $audienceId))
-            ->getAudience()
-        ;
+            ->findOneBy(['_id' => $audienceId])
+            ->getAudience();
 
         $author = $node->getAuthor()->getFullName();
 
-        $tags = array();
+        $tags = [];
         $nodeTags = $node->getTags();
         foreach ($nodeTags as $key => $tag) {
             $tags[] = $tag->getTag();
         }
 
 
-        $facets = array(
-            'type' => array($type),
-            'author' => array($author),
-            'agency_id' => array($agencyId->id()),
-            'agency_internal' => array($agency->getInternal()),
-            'category' => array($category),
-            'audience' => array($audience),
-            'tags' => array($tags),
-        );
+        $facets = [
+            'type' => [$type],
+            'author' => [$author],
+            'agency_id' => [$agencyId->id()],
+            'agency_internal' => [$agency->getInternal()],
+            'category' => [$category],
+            'audience' => [$audience],
+            'tags' => [$tags],
+        ];
 
         $setFacets = [];
-        array_walk($facets, function ($facet, $key) use (&$setFacets) {
-            if (!empty($facet)) {
-                $setFacets[$key] = $facet[0];
+        array_walk(
+            $facets,
+            function ($facet, $key) use (&$setFacets) {
+                if (!empty($facet)) {
+                    $setFacets[$key] = $facet[0];
+                }
             }
-        });
+        );
 
         $facet->setNodeId($node->getId());
         $facet->setFacetData($setFacets);
@@ -103,13 +103,14 @@ class FacetRepository extends DocumentRepository
      *
      * @param array $filters applied filters
      * @param string $logicalOperator by default OR could be AND
+     *
      * @return \StdClass
      *  contain array of built facets and array of node ids
      */
-    public function getFacetsByRequest($filters = array(), $logicalOperator = 'OR')
+    public function getFacetsByRequest($filters = [], $logicalOperator = 'OR')
     {
-        $facets = array();
-        $nodeIds = array();
+        $facets = [];
+        $nodeIds = [];
 
         $this->filters = $filters;
         $this->logicalOperator = $logicalOperator;
@@ -125,7 +126,8 @@ class FacetRepository extends DocumentRepository
             }
         }
 
-        $qb->map('
+        $qb->map(
+            '
                 function() {
                     for (var i in this.facetData) {
                         if (i == "tags") {
@@ -153,8 +155,10 @@ class FacetRepository extends DocumentRepository
                         }
                     }
                 }
-            ')
-            ->reduce('
+            '
+        )
+            ->reduce(
+                '
                 function(key, values) {
                     var sum = 0;
                     for(var i in values) {
@@ -162,19 +166,25 @@ class FacetRepository extends DocumentRepository
                     }
                     return sum;
                 };
-            ')
-        ;
+            '
+            );
 
 
         $result = $this->iterateTerms($qb);
         foreach ($result as $facet) {
             if ($facet['_id']['facetName'] == 'agency_id') {
-                $agency = $this->dm->getRepository('BpiApiBundle:Aggregate\Agency')->loadUserByUsername($facet['_id']['facetValue']);
+                $agency = $this
+                    ->dm
+                    ->getRepository('BpiApiBundle:Aggregate\Agency')
+                    ->loadUserByUsername($facet['_id']['facetValue']);
                 $facets['agency_id'][$facet['_id']['facetValue']]['agencyName'] = $agency->getName();
                 $facets['agency_id'][$facet['_id']['facetValue']]['count'] = $facet['value'];
             } elseif ($facet['_id']['facetName'] == 'channels') {
-                $channel = $this->dm->getRepository('BpiApiBundle:Entity\Channel')->find($facet['_id']['facetValue']);
-                $facets[$facet['_id']['facetName']][$facet['_id']['facetValue']]['title'] = $channel ? $channel->getChannelName() : NULL;
+                $channel = $this
+                    ->dm
+                    ->getRepository('BpiApiBundle:Entity\Channel')
+                    ->find($facet['_id']['facetValue']);
+                $facets[$facet['_id']['facetName']][$facet['_id']['facetValue']]['title'] = $channel ? $channel->getChannelName() : null;
                 $facets[$facet['_id']['facetName']][$facet['_id']['facetValue']]['count'] = $facet['value'];
             } else {
                 $facets[$facet['_id']['facetName']][$facet['_id']['facetValue']] = $facet['value'];
@@ -190,7 +200,9 @@ class FacetRepository extends DocumentRepository
 
     /**
      * Iterate over applied filters and make request to db
+     *
      * @param $qb object of query builder
+     *
      * @return mixed
      *  array of facets or facet entities
      */
@@ -198,10 +210,10 @@ class FacetRepository extends DocumentRepository
     {
         if (!empty($this->filters)) {
             foreach ($this->filters as $filter_name => $values) {
-                $terms = array();
+                $terms = [];
                 foreach ($values as $value) {
                     switch ($filter_name) {
-                        case 'category' :
+                        case 'category':
                             if (is_string($value)) {
                                 $terms[] = $value;
                             } else {
@@ -222,23 +234,23 @@ class FacetRepository extends DocumentRepository
                             break;
 
                         // Agency, tags
-                        default :
+                        default:
                             $terms[] = $value;
                             break;
                     }
                 }
 
                 switch (strtoupper($this->logicalOperator)) {
-                    case 'OR' :
-                        $qb->addOr($qb->expr()->field('facetData.' . $filter_name)->in($terms));
+                    case 'OR':
+                        $qb->addOr($qb->expr()->field('facetData.'.$filter_name)->in($terms));
                         break;
 
-                    case 'AND' :
-                        $qb->addAnd($qb->expr()->field('facetData.' . $filter_name)->in($terms));
+                    case 'AND':
+                        $qb->addAnd($qb->expr()->field('facetData.'.$filter_name)->in($terms));
                         break;
 
-                    default :
-                        $qb->addOr($qb->expr()->field('facetData.' . $filter_name)->in($terms));
+                    default:
+                        $qb->addOr($qb->expr()->field('facetData.'.$filter_name)->in($terms));
                         break;
                 }
             }
@@ -246,8 +258,7 @@ class FacetRepository extends DocumentRepository
 
         $result = $qb
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
 
         return $result;
     }
@@ -256,6 +267,7 @@ class FacetRepository extends DocumentRepository
      * Update facets after agency changes.
      *
      * @param $changes
+     *
      * @return bool
      */
     public function updateFacet(array $changes)
@@ -269,11 +281,10 @@ class FacetRepository extends DocumentRepository
 
         foreach ($changes as $changedValue => $changed) {
             if ('tags' === $changedValue) {
-                $qb->field('facetData.' . $changedValue)->set($changed);
-            }
-            elseif (is_array($changed) && isset($changed['newValue']) && isset($changed['oldValue'])) {
-                $qb->field('facetData.' . $changedValue)->set($changed['newValue']);
-                $qb->field('facetData.' . $changedValue)->equals($changed['oldValue']);
+                $qb->field('facetData.'.$changedValue)->set($changed);
+            } elseif (is_array($changed) && isset($changed['newValue']) && isset($changed['oldValue'])) {
+                $qb->field('facetData.'.$changedValue)->set($changed['newValue']);
+                $qb->field('facetData.'.$changedValue)->equals($changed['oldValue']);
             }
         }
 
@@ -290,7 +301,7 @@ class FacetRepository extends DocumentRepository
      */
     public function addChannelToFacet($channelId, $nodeIds)
     {
-        $nids = array();
+        $nids = [];
         foreach ($nodeIds as $id) {
             $nids[] = $id['nodeId'];
         }
@@ -302,8 +313,7 @@ class FacetRepository extends DocumentRepository
             ->field('facetData.channels')->addToSet($channelId)
             ->field('nodeId')->in($nids)
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
     }
 
     /**
@@ -314,7 +324,7 @@ class FacetRepository extends DocumentRepository
      */
     public function removeChannelFromFacet($channelId, $nodeIds)
     {
-        $nids = array();
+        $nids = [];
         foreach ($nodeIds as $id) {
             $nids[] = $id['nodeId'];
         }
@@ -326,21 +336,20 @@ class FacetRepository extends DocumentRepository
             ->field('facetData.channels')->pull($channelId)
             ->field('nodeId')->in($nids)
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
     }
 
     /**
-   * Remove facet by nodeId.
-   *
-   * @param $nodeId
-   */
-    public function delete($nodeId) {
+     * Remove facet by nodeId.
+     *
+     * @param $nodeId
+     */
+    public function delete($nodeId)
+    {
         $this->createQueryBuilder('Facet')
             ->remove()
             ->field('nodeId')->equals($nodeId)
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
     }
 }

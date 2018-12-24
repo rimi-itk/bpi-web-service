@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Aggregate;
 
 use Closure;
@@ -9,7 +10,7 @@ class Params
 {
     protected $collection;
 
-    public function __construct(array $collection = array())
+    public function __construct(array $collection = [])
     {
         $this->collection = new ValueObjectList($collection);
     }
@@ -18,6 +19,7 @@ class Params
      * Adds an element to the collection.
      *
      * @param IParam $value
+     *
      * @return boolean Always TRUE.
      */
     public function add(IParam $elem)
@@ -30,6 +32,7 @@ class Params
      * The order of the elements is preserved.
      *
      * @param Closure $p The predicate used for filtering.
+     *
      * @return Collection A collection with the results of the filter operation.
      */
     public function filter(Closure $p)

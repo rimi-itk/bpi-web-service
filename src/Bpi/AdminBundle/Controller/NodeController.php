@@ -46,13 +46,13 @@ class NodeController extends Controller
             $query,
             $request->query->get('page', 1),
             50,
-            array(
+            [
                 'defaultSortFieldName' => 'resource.title',
                 'defaultSortDirection' => 'desc',
-            )
+            ]
         );
 
-        return array('pagination' => $pagination);
+        return ['pagination' => $pagination];
     }
 
     /**
@@ -66,20 +66,20 @@ class NodeController extends Controller
         $knpPaginator = $this->get('knp_paginator');
 
         $pagination = $knpPaginator->paginate(
-          $query,
-          $request->query->get('page', 1),
-          50,
-          array(
-            'defaultSortFieldName' => 'resource.title',
-            'defaultSortDirection' => 'desc',
-          )
+            $query,
+            $request->query->get('page', 1),
+            50,
+            [
+                'defaultSortFieldName' => 'resource.title',
+                'defaultSortDirection' => 'desc',
+            ]
         );
 
-        return array(
+        return [
             'pagination' => $pagination,
             'delete_lable' => 'Undelete',
             'delete_url' => 'bpi_admin_node_restore',
-        );
+        ];
     }
 
     /**
@@ -99,7 +99,7 @@ class NodeController extends Controller
 //            $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
 //            $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
 
-            $submittedTags = array();
+            $submittedTags = [];
 //            if (!empty($submittedNode['tags']) && is_array($submittedNode['tags'])) {
 //                foreach ($submittedNode['tags'] as $tag) {
 //                    $submittedTags[] = $tag['tag'];
@@ -107,12 +107,12 @@ class NodeController extends Controller
 //            }
 
 
-            $checks = array(
-                'author' => array(
+            $checks = [
+                'author' => [
                     'check' => $changeAuthor,
                     'oldValue' => $node->getAuthor()->getFullName(),
-                    'newValue' => ($submittedNode['authorFirstName'] ? $submittedNode['authorFirstName'] . ' ' : '') . $submittedNode['authorLastName']
-                ),
+                    'newValue' => ($submittedNode['authorFirstName'] ? $submittedNode['authorFirstName'].' ' : '').$submittedNode['authorLastName'],
+                ],
 //                'category' => array(
 //                    'check' => $changeCategory,
 //                    'oldValue' => $node->getCategory()->getCategory(),
@@ -123,15 +123,15 @@ class NodeController extends Controller
 //                    'oldValue' => $node->getAudience()->getAudience(),
 //                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Audience')->find($submittedNode['audience'])->getAudience()
 //                ),
-            );
+            ];
 
-            $changes = array();
+            $changes = [];
             foreach ($checks as $key => $check) {
                 if ($check['check']) {
-                    $changes[$key] = array(
+                    $changes[$key] = [
                         'oldValue' => $check['oldValue'],
-                        'newValue' => $check['newValue']
-                    );
+                        'newValue' => $check['newValue'],
+                    ];
                 }
             }
             $changes['nodeId'] = $node->getId();
@@ -147,23 +147,24 @@ class NodeController extends Controller
 //                $facetRepository->updateFacet($changes);
 
                 $this->getRepository()->save($node);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_node')
                 );
             }
         }
 
-        $assets = array();
+        $assets = [];
         $nodeAssets = $node->getAssets();
-        if(!empty($nodeAssets)) {
+        if (!empty($nodeAssets)) {
             $assets = $this->prepareAssets($nodeAssets->getCollection());
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
             'id' => $node->getId(),
-            'assets' => $assets
-        );
+            'assets' => $assets,
+        ];
     }
 
     /**
@@ -172,9 +173,9 @@ class NodeController extends Controller
      */
     public function detailsAction(Node $node)
     {
-        return array(
+        return [
             'node' => $node,
-        );
+        ];
     }
 
     /**
@@ -188,7 +189,7 @@ class NodeController extends Controller
             ->delete($node->getId());
 
         return $this->redirect(
-            $this->generateUrl("bpi_admin_node", array())
+            $this->generateUrl("bpi_admin_node", [])
         );
     }
 
@@ -201,61 +202,61 @@ class NodeController extends Controller
 
         /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
         $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
-          ->getRepository('BpiApiBundle:Entity\Facet');
+            ->getRepository('BpiApiBundle:Entity\Facet');
         $facetRepository->prepareFacet($node);
 
         return $this->redirect(
-            $this->generateUrl("bpi_admin_node", array())
+            $this->generateUrl("bpi_admin_node", [])
         );
     }
 
     private function createNodeForm($node, $new = false)
     {
-        $formBuilder = $this->createFormBuilder($node, array('csrf_protection' => false))
+        $formBuilder = $this->createFormBuilder($node, ['csrf_protection' => false])
             ->add(
                 'authorFirstName',
                 TextType::class,
-                array(
+                [
                     'label' => 'Author first name',
-                    'required' => true
-                )
+                    'required' => true,
+                ]
             )
             ->add(
                 'authorLastName',
                 TextType::class,
-                array(
+                [
                     'label' => 'Author last name',
-                    'required' => false
-                )
+                    'required' => false,
+                ]
             )
             ->add(
                 'authorAgencyId',
                 TextType::class,
-                array(
+                [
                     'label' => 'Author agency id',
                     'required' => true,
-                    'disabled' => true
-                )
+                    'disabled' => true,
+                ]
             )
             ->add(
                 'ctime',
                 DateType::class,
-                array(
+                [
                     'label' => 'Creation time',
                     'required' => true,
                     'widget' => 'single_text',
-                    'disabled' => true
-                )
+                    'disabled' => true,
+                ]
             )
             ->add(
                 'mtime',
                 DateType::class,
-                array(
+                [
                     'label' => 'Modify time',
                     'required' => true,
                     'widget' => 'single_text',
-                    'disabled' => true
-                )
+                    'disabled' => true,
+                ]
             )
             ->add('title', TextType::class)
             ->add('teaser', TextareaType::class)->setRequired(false)
@@ -279,22 +280,21 @@ class NodeController extends Controller
             ->add(
                 'tags',
                 CollectionType::class,
-                array(
+                [
                     'entry_type' => TagType::class,
                     'allow_add' => true,
                     'allow_delete' => true,
                     'required' => false,
-                )
-            )
-        ;
+                ]
+            );
 
         if (!$new) {
             $formBuilder->add(
                 'deleted',
                 CheckboxType::class,
-                array(
+                [
                     'required' => false,
-                )
+                ]
             );
         }
 
@@ -307,14 +307,15 @@ class NodeController extends Controller
      * Filter assets on images and documents
      *
      * @param $nodeAssets
+     *
      * @return array
      */
     protected function prepareAssets($nodeAssets)
     {
-        $imageExtensions = array('jpg', 'jpeg', 'png', 'gif');
-        $assets =array();
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        $assets = [];
         foreach ($nodeAssets as $asset) {
-            if (in_array($asset->getExtension(), $imageExtensions)){
+            if (in_array($asset->getExtension(), $imageExtensions)) {
                 $assets['images'][] = $asset;
             } else {
                 $assets['documents'][] = $asset;
@@ -322,6 +323,5 @@ class NodeController extends Controller
         }
 
         return $assets;
-
     }
 }

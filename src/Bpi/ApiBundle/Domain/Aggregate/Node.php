@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Aggregate;
 
 use Bpi\ApiBundle\Domain\Entity\Profile;
@@ -62,8 +63,7 @@ class Node implements IPresentable
         ArrayCollection $tags,
         Params $params,
         Assets $assets
-    )
-    {
+    ) {
         $this->author = $author;
         $this->resource = $resource;
         $this->profile = $profile;
@@ -92,16 +92,19 @@ class Node implements IPresentable
      * @param \Bpi\ApiBundle\Domain\Aggregate\Node $node
      * @param string $field can be compound like profile.taxonomy.category
      * @param int $order 1=asc, -1=desc
+     *
      * @return int see strcmp PHP function
      */
     public function compare(Node $node, $field, $order = 1)
     {
         if (stristr($field, '.')) {
             list($local_field, $child_field) = explode(".", $field, 2);
+
             return $this->$local_field->compare($node->$local_field, $child_field, $order);
         }
 
         $cmp = new Comparator($this->$field, $node->$field, $order);
+
         return $cmp->getResult();
     }
 
@@ -109,6 +112,7 @@ class Node implements IPresentable
      * Calculate similarity of resources
      *
      * @param Resource $resource
+     *
      * @return boolean
      */
     protected function isSimilarResource(Resource $resource)
@@ -120,6 +124,7 @@ class Node implements IPresentable
      * Create new revision of current node
      *
      * @param Resource $resource
+     *
      * @return Node
      */
     public function createRevision(Author $author, Resource $resource, Params $params, Assets $assets)
@@ -136,6 +141,7 @@ class Node implements IPresentable
             ->build();
 
         $node->parent = $this;
+
         return $node;
     }
 
@@ -146,39 +152,55 @@ class Node implements IPresentable
     {
         $entity = $document->createEntity('entity');
 
-        $entity->addProperty($document->createProperty(
-            'id',
-            'string',
-            $this->getId()
-        ));
+        $entity->addProperty(
+            $document->createProperty(
+                'id',
+                'string',
+                $this->getId()
+            )
+        );
 
-        $entity->addProperty($document->createProperty(
-            'pushed',
-            'dateTime',
-            $this->ctime
-        ));
+        $entity->addProperty(
+            $document->createProperty(
+                'pushed',
+                'dateTime',
+                $this->ctime
+            )
+        );
 
-        $entity->addProperty($document->createProperty(
-            'editable',
-            'boolean',
-            (int)$this->params
-                ->filter(function ($e) {
-                    if ($e instanceof Editable) return true;
-                })
-                ->first()
-                ->isPositive()
-        ));
+        $entity->addProperty(
+            $document->createProperty(
+                'editable',
+                'boolean',
+                (int)$this->params
+                    ->filter(
+                        function ($e) {
+                            if ($e instanceof Editable) {
+                                return true;
+                            }
+                        }
+                    )
+                    ->first()
+                    ->isPositive()
+            )
+        );
 
-        $entity->addProperty($document->createProperty(
-            'authorship',
-            'boolean',
-            (int)$this->params
-                ->filter(function ($e) {
-                    if ($e instanceof Editable) return true;
-                })
-                ->first()
-                ->isPositive()
-        ));
+        $entity->addProperty(
+            $document->createProperty(
+                'authorship',
+                'boolean',
+                (int)$this->params
+                    ->filter(
+                        function ($e) {
+                            if ($e instanceof Editable) {
+                                return true;
+                            }
+                        }
+                    )
+                    ->first()
+                    ->isPositive()
+            )
+        );
 
         $document->appendEntity($entity);
 
@@ -225,6 +247,7 @@ class Node implements IPresentable
      * Check ownership
      *
      * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $agency
+     *
      * @return boolean
      */
     public function isOwner(Agency $agency)
@@ -236,6 +259,7 @@ class Node implements IPresentable
      * Some data like materials are dependent of syndicator context
      *
      * @param  AgencyID $syndicator
+     *
      * @return void
      */
     public function defineAgencyContext(AgencyID $syndicator)
@@ -246,6 +270,7 @@ class Node implements IPresentable
     public function setSyndications($syndications)
     {
         $this->syndications = $syndications;
+
         return $this;
     }
 
@@ -267,6 +292,7 @@ class Node implements IPresentable
     public function setAuthorFirstName($authorFirstName)
     {
         $this->author->setFirstname($authorFirstName);
+
         return $this;
     }
 
@@ -278,6 +304,7 @@ class Node implements IPresentable
     public function setAuthorLastName($authorLastName)
     {
         $this->author->setLastname($authorLastName);
+
         return $this;
     }
 
@@ -294,6 +321,7 @@ class Node implements IPresentable
     public function setAuthorAgencyId($authorAgencyId)
     {
         $this->author->setAgencyId($authorAgencyId);
+
         return $this;
     }
 
@@ -351,6 +379,7 @@ class Node implements IPresentable
     public function getBody()
     {
         $nodeBodyObj = $this->resource->getBody();
+
         return $nodeBodyObj->getFlattenContent();
     }
 
@@ -359,19 +388,23 @@ class Node implements IPresentable
         $this->resource->setBody($body);
     }
 
-    public function getUrl() {
+    public function getUrl()
+    {
         return $this->resource->getUrl();
     }
 
-    public function setUrl($url) {
+    public function setUrl($url)
+    {
         return $this->resource->url($url);
     }
 
-    public function getData() {
+    public function getData()
+    {
         return $this->resource->getData();
     }
 
-    public function setData($data) {
+    public function setData($data)
+    {
         return $this->resource->data($data);
     }
 
@@ -379,6 +412,7 @@ class Node implements IPresentable
     {
         $this->audience = $audience;
     }
+
     public function setCategory(Category $category)
     {
         $this->category = $category;

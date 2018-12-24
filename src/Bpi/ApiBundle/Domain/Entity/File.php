@@ -9,8 +9,6 @@ use Knp\Bundle\GaufretteBundle\FilesystemMap;
 use Bpi\RestMediaTypeBundle\Document;
 use Guzzle\Http\Client as Guzzle;
 
-
-
 /**
  * Bpi\ApiBundle\Domain\Entity\File
  */
@@ -48,18 +46,26 @@ class File
 
     /**
      * Constructor
+     *
      * @param array $params
      */
-    public function __construct(array $params) {
+    public function __construct(array $params)
+    {
         $this->external = !empty($params['path']) ? $params['path'] : null;
-        $this->name = !empty($params['name']) ? md5($params['name'] . time()) : null;
+        $this->name = !empty($params['name']) ? md5($params['name'].time()) : null;
         $this->title = !empty($params['title']) ? $params['title'] : null;
         $this->alt = !empty($params['alt']) ? $params['alt'] : null;
         $this->extension = !empty($params['extension']) ? $params['extension'] : null;
         $this->type = !empty($params['type']) ? $params['type'] : null;
         $this->width = !empty($params['width']) ? $params['width'] : null;
         $this->height = !empty($params['height']) ? $params['height'] : null;
-        $this->filesystem = new \Gaufrette\Filesystem(new \Gaufrette\Adapter\Local($this->getUploadRootDir(), true, 777));
+        $this->filesystem = new \Gaufrette\Filesystem(
+            new \Gaufrette\Adapter\Local(
+                $this->getUploadRootDir(),
+                true,
+                777
+            )
+        );
     }
 
     /**
@@ -76,11 +82,13 @@ class File
      * Set path
      *
      * @param string $path
+     *
      * @return self
      */
     public function setPath($path)
     {
         $this->path = $path;
+
         return $this;
     }
 
@@ -98,11 +106,13 @@ class File
      * Set name
      *
      * @param string $name
+     *
      * @return self
      */
     public function setName($name)
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -120,11 +130,13 @@ class File
      * Set type
      *
      * @param string $type
+     *
      * @return self
      */
     public function setType($type)
     {
         $this->type = $type;
+
         return $this;
     }
 
@@ -141,10 +153,12 @@ class File
     /**
      * Creates file and refresh path to them.
      */
-    public function createFile() {
-        if (empty($this->name))
+    public function createFile()
+    {
+        if (empty($this->name)) {
             throw new Exception("Empty filename.");
-        $file = $this->filesystem->createFile("{$this->name}.{$this->extension}" , $this->filesystem);
+        }
+        $file = $this->filesystem->createFile("{$this->name}.{$this->extension}", $this->filesystem);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->external);
@@ -152,18 +166,18 @@ class File
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $content = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if($code == 404) {
+        if ($code == 404) {
             return false;
         }
         curl_close($ch);
 
-        if ($content === FALSE) {
+        if ($content === false) {
             throw new \Exception("Can't download file");
         }
 
         $file->setContent($content);
 
-        $this->path = $this->getWebPath() . "/{$this->name}.{$this->extension}";
+        $this->path = $this->getWebPath()."/{$this->name}.{$this->extension}";
 
         return $this;
     }
@@ -175,7 +189,7 @@ class File
      */
     public function getWebPath()
     {
-        return self::$base_url . "/uploads/assets";
+        return self::$base_url."/uploads/assets";
     }
 
     /**
@@ -188,7 +202,7 @@ class File
         return Util\Path::normalize(__DIR__.'/../../../../../web/'.$this->getUploadDir());
     }
 
-     /**
+    /**
      * Get path to assets directory.
      *
      * @return string $path
@@ -214,11 +228,13 @@ class File
      * Set title
      *
      * @param string $title
+     *
      * @return self
      */
     public function setTitle($title)
     {
         $this->title = $title;
+
         return $this;
     }
 
@@ -236,11 +252,13 @@ class File
      * Set external
      *
      * @param string $external
+     *
      * @return self
      */
     public function setExternal($external)
     {
         $this->external = $external;
+
         return $this;
     }
 
@@ -253,6 +271,7 @@ class File
     {
         return $this->external;
     }
+
     /**
      * @var string $alt
      */
@@ -278,11 +297,13 @@ class File
      * Set alt
      *
      * @param string $alt
+     *
      * @return self
      */
     public function setAlt($alt)
     {
         $this->alt = $alt;
+
         return $this;
     }
 
@@ -300,11 +321,13 @@ class File
      * Set extension
      *
      * @param string $extension
+     *
      * @return self
      */
     public function setExtension($extension)
     {
         $this->extension = $extension;
+
         return $this;
     }
 
@@ -322,11 +345,13 @@ class File
      * Set width
      *
      * @param int $width
+     *
      * @return self
      */
     public function setWidth($width)
     {
         $this->width = $width;
+
         return $this;
     }
 
@@ -344,11 +369,13 @@ class File
      * Set height
      *
      * @param int $height
+     *
      * @return self
      */
     public function setHeight($height)
     {
         $this->height = $height;
+
         return $this;
     }
 
@@ -377,7 +404,7 @@ class File
     {
         try {
             $entity = $document->currentEntity();
-        } catch(\RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             $entity = $document->createEntity('entity', 'File');
             $document->appendEntity($entity);
         }

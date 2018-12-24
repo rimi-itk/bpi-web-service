@@ -21,28 +21,34 @@ class SyndicatingNodeTest extends AbstractFixtureAwareBpiTest
         $ownerAgencyEntity = $this
             ->registry
             ->getRepository(Agency::class)
-            ->findOneBy([
-                'public_id' => '999999',
-            ]);
+            ->findOneBy(
+                [
+                    'public_id' => '999999',
+                ]
+            );
 
         /** @var \Bpi\ApiBundle\Domain\Aggregate\Agency $syndicatingAgencyEntity */
         $syndicatingAgencyEntity = $this
             ->registry
             ->getRepository(Agency::class)
-            ->findOneBy([
-                'public_id' => '111111',
-            ]);
+            ->findOneBy(
+                [
+                    'public_id' => '111111',
+                ]
+            );
 
         /** @var \Bpi\ApiBundle\Domain\Aggregate\Node $nodeEntity */
         $nodeEntity = $this
             ->registry
             ->getRepository(Node::class)
-            ->findOneBy([
-                'author.agency_id' => $ownerAgencyEntity->getAgencyId()->id(),
-            ]);
+            ->findOneBy(
+                [
+                    'author.agency_id' => $ownerAgencyEntity->getAgencyId()->id(),
+                ]
+            );
 
         // Check that there are no syndications so far.
-        $syndicationsCount = (int) $nodeEntity->getSyndications();
+        $syndicationsCount = (int)$nodeEntity->getSyndications();
         $this->assertEquals(0, $syndicationsCount);
 
         // And this is reflected in the API response as well.
@@ -63,7 +69,7 @@ class SyndicatingNodeTest extends AbstractFixtureAwareBpiTest
         /** @var \SimpleXMLElement[] $syndicationsProperty */
         $syndicationsProperty = $xml->xpath('//item[@type="entity"]/properties/property[@name="syndications"]');
         $this->assertNotEmpty($syndicationsProperty);
-        $this->assertEquals(0, (int) $syndicationsProperty[0]);
+        $this->assertEquals(0, (int)$syndicationsProperty[0]);
 
         // Now, assuming that this node was syndicated, let know the API
         // about it.
@@ -84,7 +90,7 @@ class SyndicatingNodeTest extends AbstractFixtureAwareBpiTest
         // Check the storage (reload the entity).
         $this->registry->getManager()->refresh($nodeEntity);
 
-        $this->assertEquals(1, (int) $nodeEntity->getSyndications());
+        $this->assertEquals(1, (int)$nodeEntity->getSyndications());
 
         // Check the API response for same value.
         $this->client->request(
@@ -105,7 +111,7 @@ class SyndicatingNodeTest extends AbstractFixtureAwareBpiTest
         /** @var \SimpleXMLElement[] $syndicationsProperty */
         $syndicationsProperty = $xml->xpath('//item[@type="entity"]/properties/property[@name="syndications"]');
         $this->assertNotEmpty($syndicationsProperty);
-        $this->assertEquals(1, (int) $syndicationsProperty[0]);
+        $this->assertEquals(1, (int)$syndicationsProperty[0]);
     }
 
     /**

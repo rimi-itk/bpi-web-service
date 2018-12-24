@@ -34,22 +34,19 @@ class Version20150830143457 extends AbstractMigration implements ContainerAwareI
     {
         $dm = $this->container->get('doctrine_mongodb')->getManager();
         $fs = $this->container->get('knp_gaufrette.filesystem_map')->get('assets');
-        $uploadDir = Util\Path::normalize(__DIR__ . '/../../../../../../../web/uploads/assets');
+        $uploadDir = Util\Path::normalize(__DIR__.'/../../../../../../../web/uploads/assets');
         $nodeQb = $db
             ->selectCollection('Node')
-            ->createQueryBuilder()
-        ;
+            ->createQueryBuilder();
         $request = $nodeQb
             ->field('resource.assets')->exists(true)
-            ->not($nodeQb->expr()->size(0))
-        ;
+            ->not($nodeQb->expr()->size(0));
         $result = $request->getQuery()->execute();
 
         $nodeRepository = $this
             ->container
             ->get('doctrine.odm.mongodb.document_manager')
-            ->getRepository('BpiApiBundle:Aggregate\Node')
-        ;
+            ->getRepository('BpiApiBundle:Aggregate\Node');
         foreach ($result as $key => $data) {
             if (empty($data['resource']['assets'])) {
                 continue;
@@ -62,18 +59,17 @@ class Version20150830143457 extends AbstractMigration implements ContainerAwareI
                     $newFs = new \Gaufrette\Filesystem(new \Gaufrette\Adapter\Local($uploadDir, true, 777));
                     $new = $newFs->createFile("{$asset['file']}.{$asset['extension']}", $newFs);
                     $new->setContent($fs_file->getContent());
-                    $params = array(
+                    $params = [
                         'title' => $asset['file'],
                         'extension' => $asset['extension'],
                         'type' => $asset['type'] == 'embedded' ? 'body' : $asset['type'],
-                    );
+                    ];
                     $file = new File($params);
                     $file->setName($asset['file']);
                     $file->setFilesystem($newFs);
-                    $file->setPath(NULL);
+                    $file->setPath(null);
                     $assets->addElem($file);
-                }
-                catch (\MongoGridFSException $e) {
+                } catch (\MongoGridFSException $e) {
                 }
             }
             $node->setAssets($assets);
@@ -87,4 +83,3 @@ class Version20150830143457 extends AbstractMigration implements ContainerAwareI
 
     }
 }
-

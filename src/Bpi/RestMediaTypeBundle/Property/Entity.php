@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Property;
 
 use JMS\Serializer\Annotation as Serializer;

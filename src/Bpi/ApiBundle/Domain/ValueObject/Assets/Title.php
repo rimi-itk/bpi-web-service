@@ -2,8 +2,6 @@
 
 namespace Bpi\ApiBundle\Domain\ValueObject\Assets;
 
-
-
 /**
  * Bpi\ApiBundle\Domain\ValueObject\Assets\Title
  */
@@ -19,11 +17,13 @@ class Title
      * Set title
      *
      * @param string $title
+     *
      * @return self
      */
     public function setTitle($title)
     {
         $this->title = $title;
+
         return $this;
     }
 
