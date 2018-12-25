@@ -30,11 +30,11 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
         parent::setUp();
 
         /** @var \Bpi\ApiBundle\Domain\Aggregate\Agency $agency */
-        $agency = $this->registry->getRepository(Agency::class)->findOneBy(
-            [
+        $agency = $this->registry->getRepository(Agency::class)
+            ->findOneBy([
                 'public_id' => '999999',
-            ]
-        );
+            ]);
+
         // Store an authentication token for further requests.
         $this->authenticationToken = $this->generateAuthenticationHeader($agency);
     }

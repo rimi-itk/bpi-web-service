@@ -375,15 +375,12 @@ class RestController extends FOSRestController
     /**
      * Shows statistics for a certain agency.
      *
-     * This would return:
-     *  - Number of pushed nodes.
-     *  - Number of syndicated nodes.
-     *
-     * @param \Symfony\Component\HttpFoundation\Request $request
-     *   The request object.
+     * @param \Symfony\Component\HttpFoundation\Request $request The request object.
      *
      * @Rest\Get("/statistics")
      * @Rest\View(statusCode="200")
+     *
+     * @return \Bpi\RestMediaTypeBundle\XmlResponse
      */
     public function statisticsAction(Request $request)
     {
@@ -409,6 +406,9 @@ class RestController extends FOSRestController
      * Display available options.
      *
      * @Rest\Options("/node/collection")
+     *
+     * TODO: This serves no practical function.
+     * @deprecated
      */
     public function nodeListOptionsAction()
     {
@@ -460,6 +460,9 @@ class RestController extends FOSRestController
      * 2. Expected media type entities in input/output
      *
      * @Rest\Options("/node/item/{id}")
+     *
+     * TODO: This serves no practical function.
+     * @deprecated
      */
     public function nodeItemOptionsAction($id)
     {
@@ -713,6 +716,9 @@ class RestController extends FOSRestController
      *
      * @Rest\Options("/node/{node_id}/asset")
      * @Rest\View
+     *
+     * TODO: This serves no practical function.
+     * @deprecated
      */
     public function nodeAssetOptionsAction($node_id)
     {
@@ -737,6 +743,9 @@ class RestController extends FOSRestController
      *
      * @Rest\Options("/node")
      * @Rest\View(statusCode="200")
+     *
+     * TODO: This serves no practical function.
+     * @deprecated
      */
     public function nodeOptionsAction()
     {
@@ -781,6 +790,9 @@ class RestController extends FOSRestController
      *
      * @Rest\Options("/profile_dictionary")
      * @Rest\View(statusCode="200")
+     *
+     * TODO: This serves no practical function.
+     * @deprecated
      */
     public function profileDictionaryOptionsAction()
     {
@@ -891,6 +903,7 @@ class RestController extends FOSRestController
     {
         // Handle query by node id
         if ($id = $request->get('id')) {
+            // TODO: This looks wrong.
             // SDK can not handle properly redirects, so query string is used
             // @see https://github.com/symfony/symfony/issues/7929
             $params = [

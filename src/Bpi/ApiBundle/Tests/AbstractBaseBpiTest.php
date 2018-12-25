@@ -58,9 +58,9 @@ abstract class AbstractBaseBpiTest extends WebTestCase
     /**
      * {@inheritdoc}
      */
-    public function __construct($name = null, array $data = [], $dataName = '')
+    protected function setUp()
     {
-        parent::__construct($name, $data, $dataName);
+        parent::setUp();
 
         $this->client = static::createClient();
         $this->container = $this->client->getContainer();
