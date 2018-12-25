@@ -6,6 +6,9 @@ use Bpi\ApiBundle\Domain\Entity\Category;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
+/**
+ * Class CategoryFixtures.
+ */
 class CategoryFixtures extends Fixture implements RandomFixtureReferenceInterface
 {
     const CATEGORY_LITTERATUR = 'category-Litteratur';

@@ -8,6 +8,9 @@ use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Config\Definition\Builder\NodeDefinition;
 use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\SecurityFactoryInterface;
 
+/**
+ * Class PKFactory.
+ */
 class PKFactory implements SecurityFactoryInterface
 {
     /**

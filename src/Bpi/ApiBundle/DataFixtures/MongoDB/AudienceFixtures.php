@@ -6,6 +6,9 @@ use Bpi\ApiBundle\Domain\Entity\Audience;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
 
+/**
+ * Class AudienceFixtures.
+ */
 class AudienceFixtures extends Fixture implements RandomFixtureReferenceInterface
 {
     const AUDIENCE_STUDERENDE = 'audience-Studerende';

@@ -22,10 +22,6 @@ use Bpi\RestMediaTypeBundle\Element\FacetTerm;
 
 /**
  * Class ChannelController.
- *
- * TODO: Unknown purpose.
- *
- * @deprecated
  */
 class ChannelController extends FOSRestController
 {
@@ -34,23 +30,21 @@ class ChannelController extends FOSRestController
     const CHANNEL_LIST_COUNT = 10;
 
     /**
-     * List all channels
+     * Handles channel listing.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request The request object.
      *
      * @Rest\Get("/channel")
      * @Rest\View()
      *
-     * @return \Bpi\RestMediaTypeBundle\Channels
+     * @return \Bpi\RestMediaTypeBundle\XmlResponse
      */
     public function listChannelsAction(Request $request)
     {
         $query = new \Bpi\ApiBundle\Domain\Entity\ChannelQuery();
-        if ($amount = $request->query->get('amount', self::CHANNEL_LIST_COUNT)) {
-            $query->amount($amount);
-        }
 
-        if ($offset = $request->query->get('offset')) {
-            $query->offset($offset);
-        }
+        $query->amount($request->query->get('amount', self::CHANNEL_LIST_COUNT));
+        $query->offset($request->query->get('offset', 0));
 
         if ($search = $request->query->get('search')) {
             $query->search($search);
@@ -100,6 +94,7 @@ class ChannelController extends FOSRestController
             throw new NotFoundHttpException('No channels found.');
         }
 
+        /** @var \Bpi\RestMediaTypeBundle\Channels $response */
         $response = $this->get('bpi.presentation.channels');
         $response->setTotal($query->total);
         $response->setOffset($query->offset);
@@ -133,12 +128,12 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * Get channel description for specific channel by it's id.
+     * Handles channel info fetch.
      *
      * @Rest\Get("/channel/{id}")
-     * @Rest\View("")
+     * @Rest\View()
      *
-     * @param string $channelId .
+     * @param \Bpi\ApiBundle\Domain\Entity\Channel $channel Loaded channel entity.
      *
      * @return \Bpi\RestMediaTypeBundle\XmlResponse
      */
@@ -153,9 +148,9 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * List channels of given user
+     * Handles listing of channel for a given user.
      *
-     * @param $userId
+     * @param \Bpi\ApiBundle\Domain\Entity\User $user Loaded user entity.
      *
      * @Rest\Get("/channel/user/{id}")
      * @Rest\View()
@@ -180,10 +175,14 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * Create new channel
+     * Handles new channel creation.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request The request object.
      *
      * @Rest\Post("/channel")
      * @Rest\View(statusCode="201")
+     *
+     * @return \Bpi\RestMediaTypeBundle\XmlResponse
      */
     public function createChannelAction(Request $request)
     {
@@ -228,6 +227,7 @@ class ChannelController extends FOSRestController
         $facetRepository = $dm->getRepository(ChannelFacet::class);
         $facetRepository->prepareFacet($channel);
 
+        /** @var \Bpi\RestMediaTypeBundle\Channels $response */
         $response = $this->get('bpi.presentation.channels');
         $response->addChannel($channel);
 
@@ -235,10 +235,15 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * @param string $channelId .
+     * Handles channel edit action.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request The request object.
+     * @param \Bpi\ApiBundle\Domain\Entity\Channel $channel Loaded channel entity.
      *
      * @Rest\Post("/channel/edit/{id}")
      * @Rest\View()
+     *
+     * @return \Bpi\RestMediaTypeBundle\XmlResponse
      */
     public function editChannelAction(Request $request, Channel $channel)
     {
@@ -266,6 +271,7 @@ class ChannelController extends FOSRestController
         $dm->persist($channel);
         $dm->flush();
 
+        /** @var \Bpi\RestMediaTypeBundle\Channels $response */
         $response = $this->get('bpi.presentation.channels');
         $response->addChannel($channel);
 
@@ -273,10 +279,14 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * Add editors to channels
+     * Handles editors addition to a certain channel.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request The request object.
      *
      * @Rest\Post("/channel/add/editor")
      * @Rest\View()
+     *
+     * @return \Bpi\RestMediaTypeBundle\XmlResponse
      */
     public function addEditorToChannelAction(Request $request)
     {
@@ -296,12 +306,12 @@ class ChannelController extends FOSRestController
         $this->checkParams($params, $requiredParams);
 
         foreach ($requiredParams as $param => $count) {
-            if ($count == 0) {
+            if (!$count) {
                 throw new BadRequestHttpException("Param '{$param}' is required.");
             }
         }
 
-        /** @var Channel $channel */
+        /** @var \Bpi\ApiBundle\Domain\Entity\Channel $channel */
         $channel = $channelRepository->find($params['channelId']);
         if (!$channel) {
             throw new NotFoundHttpException("Channel with id = '{$params['channelId']}' not found.");
@@ -331,6 +341,7 @@ class ChannelController extends FOSRestController
         $dm->persist($channel);
         $dm->flush();
 
+        /** @var \Bpi\RestMediaTypeBundle\XmlGroupOperation $xml */
         $xml = $this->get('bpi.presentation.xmlgroupoperation');
         $xml->setCode(200);
         $xml->setSkipped(count($skipped));
@@ -342,12 +353,14 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * Remove user from channel
+     * Handles editor removal from a certain channel.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request The request object.
      *
      * @Rest\Post("/channel/remove/editor")
      * @Rest\View()
      *
-     * @return Response
+     * @return \Bpi\RestMediaTypeBundle\XmlResponse
      */
     public function removeEditorFromChannelAction(Request $request)
     {
@@ -402,6 +415,7 @@ class ChannelController extends FOSRestController
         $dm->persist($channel);
         $dm->flush();
 
+        /** @var \Bpi\RestMediaTypeBundle\XmlGroupOperation $xml */
         $xml = $this->get('bpi.presentation.xmlgroupoperation');
         $xml->setCode(200);
         $xml->setSkipped(count($skipped));
@@ -413,7 +427,9 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * Add node to channel.
+     * Handles nodes addition to a certain channel.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request The request object.
      *
      * @Rest\Post("/channel/add/node")
      * @Rest\View()
@@ -509,7 +525,9 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * Remove node from channel.
+     * Handles node removal from a certain channel.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request The request object.
      *
      * @Rest\Post("/channel/remove/node")
      * @Rest\View()
@@ -584,7 +602,7 @@ class ChannelController extends FOSRestController
                 $channel->removeChannelNode($node);
                 $success[] = $node->getId();
             } catch (\Exception $e) {
-                return new Response('Internal error on removing node.', 500);
+                throw new HttpException(500, 'Internal error on removing node.');
             }
         }
 
@@ -607,9 +625,9 @@ class ChannelController extends FOSRestController
     }
 
     /**
-     * Remove channel by Id.
+     * Handles channel removal.
      *
-     * @param string $channelId
+     * @param \Bpi\ApiBundle\Domain\Entity\Channel $channel Loaded channel entity.
      *
      * @Rest\Delete("/channel/remove/{id}")
      * @Rest\View()
@@ -627,7 +645,7 @@ class ChannelController extends FOSRestController
 
         $xml = new XmlResponse();
         $xml->setCode(200);
-        $xml->setMessage("Channel with Id ".$channel->getId()." removed.");
+        $xml->setMessage("Channel with Id {$channel->getId()} removed.");
 
         return $xml;
     }

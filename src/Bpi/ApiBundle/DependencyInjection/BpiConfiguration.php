@@ -7,8 +7,6 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
  * Class BpiConfiguration.
- *
- * @package Bpi\ApiBundle\DependencyInjection
  */
 class BpiConfiguration implements ConfigurationInterface
 {

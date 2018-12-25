@@ -14,10 +14,10 @@ trait BpiRequestParamSanitizerTrait
     /**
      * Check if params are present and how many times.
      *
-     * @param $input
-     * @param $required
+     * @param array $input Input values.
+     * @param array $required Required values.
      */
-    protected function checkParams($input, &$required)
+    protected function checkParams(array $input, array &$required)
     {
         array_walk_recursive(
             $input,
@@ -32,9 +32,9 @@ trait BpiRequestParamSanitizerTrait
     /**
      * Strips all params.
      *
-     * @param $input
+     * @param array $input Input values.
      */
-    protected function stripParams(&$input)
+    protected function stripParams(array &$input)
     {
         array_walk_recursive(
             $input,

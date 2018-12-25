@@ -5,7 +5,10 @@ namespace Bpi\ApiBundle\Controller;
 use Bpi\ApiBundle\Domain\Aggregate\Assets;
 use Bpi\ApiBundle\Domain\Aggregate\Node;
 use Bpi\ApiBundle\Domain\Aggregate\Params;
+use Bpi\ApiBundle\Domain\Entity\Audience;
 use Bpi\ApiBundle\Domain\Entity\Author;
+use Bpi\ApiBundle\Domain\Entity\Category;
+use Bpi\ApiBundle\Domain\Entity\Facet;
 use Bpi\ApiBundle\Domain\Entity\File;
 use Bpi\ApiBundle\Domain\Entity\NodeQuery;
 use Bpi\ApiBundle\Domain\Entity\Profile;
@@ -15,11 +18,9 @@ use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints;
 
-use Bpi\RestMediaTypeBundle\Document;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Entity\File as BpiFile;
 use Bpi\ApiBundle\Domain\ValueObject\NodeId;
@@ -33,10 +34,12 @@ class RestController extends FOSRestController
     const NODE_LIST_AMOUNT = 10;
 
     /**
-     * Main page of API redirects to human representation of entry point
+     * Handles display of general API schema.
      *
      * @Rest\Get("/")
      * @Rest\View(statusCode="200")
+     *
+     * @return \Bpi\RestMediaTypeBundle\XmlResponse
      *
      * TODO: This serves no practical function.
      *
@@ -44,6 +47,7 @@ class RestController extends FOSRestController
      */
     public function indexAction()
     {
+        /** @var \Bpi\RestMediaTypeBundle\Document $document */
         $document = $this->get('bpi.presentation.document');
 
         // Node resource
@@ -133,7 +137,6 @@ class RestController extends FOSRestController
         $profile = $document->createRootEntity('resource', 'profile');
         $profile_hypermedia = $document->createHypermediaSection();
         $profile->setHypermedia($profile_hypermedia);
-        // TODO: Fix link.
         $profile_hypermedia->addLink(
             $document->createLink(
                 'dictionary',
@@ -146,7 +149,9 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Default node listing
+     * Handles node listing.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request The request object.
      *
      * @Rest\Get("/node/collection")
      * @Rest\View(statusCode="200")
@@ -155,15 +160,10 @@ class RestController extends FOSRestController
     {
         $node_query = new NodeQuery();
 
-        if ($amount = $request->query->get('amount', self::NODE_LIST_AMOUNT)) {
-            $node_query->amount($amount);
-        }
+        $node_query->amount($request->query->get('amount', self::NODE_LIST_AMOUNT));
+        $node_query->offset($request->query->get('offset', 0));
 
-        if ($offset = $request->query->get('offset', false)) {
-            $node_query->offset($offset);
-        }
-
-        if ($search = $request->query->get('search', false)) {
+        if ($search = $request->query->get('search')) {
             $node_query->search($search);
         }
 
@@ -182,7 +182,7 @@ class RestController extends FOSRestController
                 if ($field == 'category' && !empty($value)) {
                     foreach ($value as $val) {
                         $category = $this
-                            ->getRepository('BpiApiBundle:Entity\Category')
+                            ->getRepository(Category::class)
                             ->findOneBy(['category' => $val]);
                         if (empty($category)) {
                             continue;
@@ -193,7 +193,7 @@ class RestController extends FOSRestController
                 if ($field == 'audience' && !empty($value)) {
                     foreach ($value as $val) {
                         $audience = $this
-                            ->getRepository('BpiApiBundle:Entity\Audience')
+                            ->getRepository(Audience::class)
                             ->findOneBy(['audience' => $val]);
                         if (empty($audience)) {
                             continue;
@@ -244,7 +244,7 @@ class RestController extends FOSRestController
             }
         }
         /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
-        $facetRepository = $this->getRepository('BpiApiBundle:Entity\Facet');
+        $facetRepository = $this->getRepository(Facet::class);
         $availableFacets = $facetRepository->getFacetsByRequest($filters, $logicalOperator);
 
         $node_query->filter($availableFacets->nodeIds);
@@ -258,7 +258,7 @@ class RestController extends FOSRestController
         }
 
         /** @var \Bpi\ApiBundle\Domain\Repository\NodeRepository $node_repository */
-        $node_repository = $this->getRepository('BpiApiBundle:Aggregate\Node');
+        $node_repository = $this->getRepository(Node::class);
         /** @var \Bpi\ApiBundle\Domain\Aggregate\Node[] $node_collection */
         $node_collection = $node_repository->findByNodesQuery($node_query);
 
@@ -267,6 +267,7 @@ class RestController extends FOSRestController
             $node->defineAgencyContext($agency_id);
         }
 
+        /** @var \Bpi\ApiBundle\Transform\Presentation $transform */
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.document'));
         $document = $transform->transformMany($node_collection);
