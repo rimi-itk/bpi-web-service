@@ -428,11 +428,17 @@ class Node implements IPresentable
         return $this->assets;
     }
 
+    /**
+     * @param $ctime \DateTime
+     */
     public function setCtime($ctime)
     {
         $this->ctime = $ctime;
     }
 
+    /**
+     * @return \DateTime
+     */
     public function getCtime()
     {
         return $this->ctime;

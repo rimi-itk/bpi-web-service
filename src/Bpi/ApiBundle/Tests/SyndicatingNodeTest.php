@@ -11,6 +11,44 @@ use Bpi\ApiBundle\Domain\Aggregate\Node;
  */
 class SyndicatingNodeTest extends AbstractFixtureAwareBpiTest
 {
+    /**
+     *
+     */
+    public function testMarkSyndicatedAnonymous()
+    {
+        $this->client->request(
+            'GET',
+            '/node/syndicated',
+            [
+                'id' => 1,
+            ],
+            [],
+            []
+        );
+
+        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
+
+        $rawResult = $this->client->getResponse()->getContent();
+
+        $this->assertBpiMissingAuthentication($rawResult);
+    }
+
+    public function testMarkSyndicatedWrongAuthentication()
+    {
+        $this->client->request(
+            'GET',
+            '/node/syndicated',
+            [
+                'id' => 1,
+            ],
+            [],
+            [
+                'HTTP_Auth' => $this->generateAuthenticationHeader(new Agency()),
+            ]
+        );
+
+        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
+    }
 
     /**
      *

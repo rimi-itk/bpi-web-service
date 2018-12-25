@@ -537,8 +537,8 @@ class RestController extends FOSRestController
         $author = new Author(
             new AgencyId($request->get('agency_id')),
             $request->get('local_author_id'),
-            $request->get('firstname'),
-            $request->get('lastname')
+            $request->get('lastname'),
+            $request->get('firstname')
         );
 
         $resource = new ResourceBuilder($this->get('router'));

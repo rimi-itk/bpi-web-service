@@ -56,11 +56,11 @@ class ReadingNodesTest extends AbstractFixtureAwareBpiTest
     {
         $this->client->request('GET', '/node/item/123456');
 
+        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
+
         $rawResult = $this->client->getResponse()->getContent();
 
         $this->assertBpiMissingAuthentication($rawResult);
-
-        $this->assertEquals(401, $this->client->getResponse()->getStatusCode());
     }
 
     /**

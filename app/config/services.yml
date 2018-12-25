@@ -10,6 +10,7 @@ services:
   domain.push_service:
     class: Bpi\ApiBundle\Domain\Service\PushService
     arguments: ["@doctrine_mongodb.odm.document_manager"]
+    public: true
 
   bpi.gridfs.conn:
     class: Doctrine\MongoDB\Connection
