@@ -11,7 +11,6 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -24,7 +23,7 @@ class AgencyController extends Controller
      */
     private function getRepository()
     {
-        return $this->get('doctrine.odm.mongodb.document_manager')
+        return $this->get('doctrine_mongodb')
             ->getRepository('BpiApiBundle:Aggregate\Agency');
     }
 
@@ -231,7 +230,15 @@ class AgencyController extends Controller
         );
     }
 
-    private function createAgencyForm($agency, $new = false)
+    /**
+     * Builds agency entity edit form.
+     *
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $agency Agency entity.
+     * @param bool $new Whether create a new entity.
+     *
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createAgencyForm(Agency $agency, $new = false)
     {
         $formBuilder = $this->createFormBuilder($agency)
             ->add('publicId', TextType::class, ['label' => 'Public ID'])
