@@ -4,7 +4,7 @@ imports:
     - { resource: services.yml }
 
 parameters:
-    api_version: 3.0
+    api_version: 3.x-beta
 
 framework:
     #esi:             ~
