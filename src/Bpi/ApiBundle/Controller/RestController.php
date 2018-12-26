@@ -289,9 +289,6 @@ class RestController extends FOSRestController
                             $router->generate('list', [], true)
                         )
                     );
-
-                // @todo: implementation
-                //$hypermedia->addLink($document->createLink('assets', $router->generate('put_node_asset', array('node_id' => $e->property('id')->getValue(), 'filename' => ''), true)));
             }
         );
         // Collection description
@@ -361,9 +358,9 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Get entity repository
+     * Gets entity repository.
      *
-     * @param string $name repository name
+     * @param string $name Repository name.
      *
      * @return \Doctrine\Common\Persistence\ObjectManager
      */
@@ -373,7 +370,7 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Shows statistics for a certain agency.
+     * Handles statistics fetch.
      *
      * @param \Symfony\Component\HttpFoundation\Request $request The request object.
      *
@@ -572,12 +569,12 @@ class RestController extends FOSRestController
         $params = new Params();
         $params->add(
             new Authorship(
-                $request->get('authorship')
+                $request->get('authorship', 0)
             )
         );
         $params->add(
             new Editable(
-                $request->get('editable')
+                $request->get('editable', 0)
             )
         );
 
@@ -632,11 +629,12 @@ class RestController extends FOSRestController
     }
 
     /**
+     * Prepares a general purpose view response.
      *
      * @param string $contents
      * @param int $code
      *
-     * @return View
+     * @return \FOS\RestBundle\View\View
      */
     protected function createErrorView($contents, $code)
     {
@@ -644,11 +642,11 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Create form to make validation
+     * Validates node payload.
      *
-     * @param array $data
+     * @param array $data Node payload.
      *
-     * @return \Symfony\Component\Validator\ConstraintViolationList
+     * @return \Symfony\Component\Validator\ConstraintViolationListInterface
      */
     protected function isValidForPushNode(array $data)
     {
@@ -694,13 +692,7 @@ class RestController extends FOSRestController
                     'audience' => [
                         new Constraints\Length(['min' => 2, 'max' => 100]),
                     ],
-                    // TODO: Enable this, but requires client changes as well.
-//                'editable' => array(
-//                    new Constraints\Type(array('type' => 'boolean')),
-//                ),
-//                'authorship' => array(
-//                    new Constraints\Type(array('type' => 'boolean')),
-//                ),
+                    // TODO: Validate params (editable/authorship).
                 ],
             ]
         );
@@ -762,7 +754,7 @@ class RestController extends FOSRestController
     }
 
     /**
-     * Get profile dictionary
+     * Handles dictionary listing.
      *
      * @Rest\Get("/profile/dictionary")
      * @Rest\View(statusCode="200")

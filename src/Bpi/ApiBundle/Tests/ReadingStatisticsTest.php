@@ -147,7 +147,8 @@ class ReadingStatisticsTest extends AbstractFixtureAwareBpiTest
         /** @var \SimpleXMLElement $xml */
         $xml = new \SimpleXMLElement($rawResponse);
 
-        $syndicatePropertyTags = $xml->xpath('//item[@type="entity" and @name="statistics"]/properties/property[@name="syndicate"]');
+        $syndicatePropertyTags = $xml
+            ->xpath('//item[@type="entity" and @name="statistics"]/properties/property[@name="syndicate"]');
         $this->assertCount(1, $syndicatePropertyTags);
 
         $syndicationCountUpdate = (int) $syndicatePropertyTags[0];

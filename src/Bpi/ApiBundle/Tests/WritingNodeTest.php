@@ -73,7 +73,7 @@ class WritingNodeTest extends AbstractFixtureAwareBpiTest
         $agency = $this->registry->getRepository(Agency::class)
             ->findOneBy(
                 [
-                    'public_id' => '999999'
+                    'public_id' => '999999',
                 ]
             );
         $this->assertNotEmpty($agency);

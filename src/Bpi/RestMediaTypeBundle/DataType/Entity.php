@@ -25,7 +25,9 @@ class Entity implements DataType
 
         foreach ($value as $item) {
             if (!($item instanceof EntityElement)) {
-                throw new \InvalidArgumentException('Given value is not instance of \Bpi\RestMediaTypeBundle\Element\Entity');
+                throw new \InvalidArgumentException(
+                    'Given value is not instance of \Bpi\RestMediaTypeBundle\Element\Entity.'
+                );
             }
         }
 

@@ -25,8 +25,7 @@ class Agency implements IPresentable
         $internal = true,
         $public_key = null,
         $secret = null
-    )
-    {
+    ) {
         $this->public_id = $public_id;
         $this->name = $name;
         $this->moderator = $moderator;

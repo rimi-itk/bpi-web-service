@@ -142,18 +142,22 @@ class PushService
 
         $tags = explode(',', $tags);
         $readyTags = [];
+
+        /** @var \Bpi\ApiBundle\Domain\Repository\TagRepository $tagRepository */
+        $tagRepository = $this
+            ->manager
+            ->getRepository('BpiApiBundle:Entity\Tag');
+
         foreach ($tags as $tag) {
             $tag = trim($tag);
-            $savedTag = $this->manager
-                ->getRepository('BpiApiBundle:Entity\Tag')
+            $savedTag = $tagRepository
                 ->findOneBy(['tag' => $tag]);
 
-            if (null === $savedTag) {
+            if (!$savedTag) {
                 $newTag = new Tag();
                 $newTag->setTag($tag);
 
                 $this->manager->persist($newTag);
-                $this->manager->flush();
 
                 $readyTags[] = $newTag;
                 continue;
@@ -161,6 +165,8 @@ class PushService
 
             $readyTags[] = $savedTag;
         }
+
+        $this->manager->flush();
 
         return $readyTags;
     }
@@ -189,15 +195,23 @@ class PushService
     }
 
     /**
+     * Creates a new node revision.
      *
-     * @param  \Bpi\ApiBundle\Domain\ValueObject\NodeId $node_id
-     * @param  \Bpi\ApiBundle\Domain\Entity\Author $author
-     * @param  ResourceBuilder $builder
-     * @param  \Bpi\ApiBundle\Domain\Aggregate\Params $params
+     * @param \Bpi\ApiBundle\Domain\ValueObject\NodeId $node_id
+     * @param \Bpi\ApiBundle\Domain\Entity\Author $author
+     * @param \Bpi\ApiBundle\Domain\Factory\ResourceBuilder $builder
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Params $params
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Assets $assets
      *
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
-    public function pushRevision(NodeId $node_id, Author $author, ResourceBuilder $builder, Params $params, Assets $assets)
+    public function pushRevision(
+        NodeId $node_id,
+        Author $author,
+        ResourceBuilder $builder,
+        Params $params,
+        Assets $assets
+    )
     {
         /** @var \Bpi\ApiBundle\Domain\Aggregate\Node $node */
         $node = $this
