@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Transform\IPresentable;
@@ -26,6 +27,7 @@ class Category implements IPresentable
 
     /**
      * Set category.
+     *
      * @param string $category
      */
     public function setCategory($category)

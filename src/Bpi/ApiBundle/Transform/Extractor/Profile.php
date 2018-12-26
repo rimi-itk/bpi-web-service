@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Transform\Extractor;
 
 use Bpi\RestMediaTypeBundle\Document;
@@ -39,18 +40,15 @@ class Profile implements IExtractor
         $builder = new Builder();
         $builder
             ->audience(new Audience($entity->property('audience')->getValue()))
-            ->category(new Category($entity->property('category')->getValue()))
-        ;
+            ->category(new Category($entity->property('category')->getValue()));
 
         // optional yearwheel property
-        if ($entity->hasProperty('yearwheel'))
-        {
+        if ($entity->hasProperty('yearwheel')) {
             $builder->yearwheel(new Yearwheel($entity->property('yearwheel')->getValue()));
         }
 
         // optional tags property
-        if ($entity->hasProperty('tags'))
-        {
+        if ($entity->hasProperty('tags')) {
             $builder->tags($entity->property('tags')->getValue());
         }
 

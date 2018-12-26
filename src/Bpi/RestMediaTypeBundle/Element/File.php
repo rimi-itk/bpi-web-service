@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Element;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -26,7 +27,7 @@ class File
      */
     protected $title;
 
-     /**
+    /**
      * @Serializer\Type("string")
      * @Serializer\XmlAttribute
      */

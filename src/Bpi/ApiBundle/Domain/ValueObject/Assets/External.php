@@ -2,8 +2,6 @@
 
 namespace Bpi\ApiBundle\Domain\ValueObject\Assets;
 
-
-
 /**
  * Bpi\ApiBundle\Domain\ValueObject\Assets\External
  */
@@ -19,11 +17,13 @@ class External
      * Set external
      *
      * @param string $external
+     *
      * @return self
      */
     public function setExternal($external)
     {
         $this->external = $external;
+
         return $this;
     }
 

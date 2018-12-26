@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle;
 
 use Bpi\ApiBundle\Domain\Entity\User;
@@ -14,7 +15,7 @@ class Users extends Collection
     /**
      * @Serializer\XmlList(inline=true, entry="user")
      */
-    public $items = array();
+    public $items = [];
 
     /**
      * Add a User to the collection

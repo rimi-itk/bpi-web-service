@@ -1,26 +1,28 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Property;
 
 class TypeEnum
 {
-    const string = 'string';
-    const number = 'number';
-    const dateTime = 'dateTime';
-    const entity = 'entity';
+    const STRING = 'string';
+    const NUMBER = 'number';
+    const DATETIME = 'dateTime';
+    const ENTITY = 'entity';
 
-    protected $enum = array(
-        self::string,
-        self::number,
-        self::dateTime,
-        self::entity,
-    );
+    protected $enum = [
+        self::STRING,
+        self::NUMBER,
+        self::DATETIME,
+        self::ENTITY,
+    ];
 
     protected $selected;
 
     public function __construct($type)
     {
-        if (!in_array($type, $this->enum))
-            throw new \InvalidArgumentException('Value '.$type.' not exists in Enumiration');
+        if (!in_array($type, $this->enum)) {
+            throw new \InvalidArgumentException('Value '.$type.' not exists in Enumeration.');
+        }
 
         $this->selected = $type;
     }

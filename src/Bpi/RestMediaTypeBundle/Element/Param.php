@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Element;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -21,7 +22,7 @@ class Param
     protected $type = 'single';
 
     /**
-     * 
+     *
      * @param string $name
      */
     public function __construct($name)

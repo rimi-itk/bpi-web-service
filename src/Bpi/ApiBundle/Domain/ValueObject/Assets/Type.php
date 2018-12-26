@@ -2,8 +2,6 @@
 
 namespace Bpi\ApiBundle\Domain\ValueObject\Assets;
 
-
-
 /**
  * Bpi\ApiBundle\Domain\ValueObject\Assets\Type
  */
@@ -19,11 +17,13 @@ class Type
      * Set type
      *
      * @param string $type
+     *
      * @return self
      */
     public function setType($type)
     {
         $this->type = $type;
+
         return $this;
     }
 

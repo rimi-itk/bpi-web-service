@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Factory;
 
 use Bpi\ApiBundle\Domain\Aggregate\Node;
@@ -29,89 +30,106 @@ class NodeBuilder
     {
         $this->tags = new ArrayCollection();
     }
+
     /**
      *
      * @param \Bpi\ApiBundle\Domain\Entity\Profile $profile
+     *
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
     public function profile(Profile $profile)
     {
         $this->profile = $profile;
+
         return $this;
     }
 
     /**
      *
      * @param Resource $resource
+     *
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
     public function resource(Resource $resource)
     {
         $this->resource = $resource;
+
         return $this;
     }
 
     /**
      *
      * @param Author $author
+     *
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
     public function author(Author $author)
     {
         $this->author = $author;
+
         return $this;
     }
 
     /**
      *
      * @param \Bpi\ApiBundle\Domain\Aggregate\Params $params
+     *
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
     public function params(Params $params)
     {
         $this->params = $params;
+
         return $this;
     }
 
     /**
      *
      * @param \Bpi\ApiBundle\Domain\Aggregate\Assets $Assets
+     *
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
     public function assets(Assets $assets)
     {
         $this->assets = $assets;
+
         return $this;
     }
 
 
     /**
      * @param  Category $category
+     *
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
     public function category(Category $category)
     {
         $this->category = $category;
+
         return $this;
     }
 
     /**
      * @param  Audience $audience
+     *
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
     public function audience(Audience $audience)
     {
         $this->audience = $audience;
+
         return $this;
     }
 
     /**
      * @param Tag $tag
+     *
      * @return \Bpi\ApiBundle\Domain\Factory\NodeBuilder
      */
     public function tag(Tag $tag)
     {
         $this->tags->add($tag);
+
         return $this;
     }
 
@@ -144,6 +162,16 @@ class NodeBuilder
         foreach ($inline as $asset) {
             $this->assets->addElem($asset);
         }
-        return new Node($this->author, $this->resource, $this->profile, $this->category, $this->audience, $this->tags, $this->params, $this->assets);
+
+        return new Node(
+            $this->author,
+            $this->resource,
+            $this->profile,
+            $this->category,
+            $this->audience,
+            $this->tags,
+            $this->params,
+            $this->assets
+        );
     }
 }

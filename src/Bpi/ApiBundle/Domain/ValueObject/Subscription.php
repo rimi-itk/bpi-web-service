@@ -26,11 +26,13 @@ class Subscription
      * Set title
      *
      * @param string $title
+     *
      * @return self
      */
     public function setTitle($title)
     {
         $this->title = $title;
+
         return $this;
     }
 
@@ -47,12 +49,14 @@ class Subscription
     /**
      * Set lastViewed
      *
-     * @param date $lastViewed
+     * @param \DateTime $lastViewed
+     *
      * @return self
      */
     public function setLastViewed($lastViewed)
     {
         $this->lastViewed = $lastViewed;
+
         return $this;
     }
 
@@ -70,11 +74,13 @@ class Subscription
      * Set filter
      *
      * @param string $filter
+     *
      * @return self
      */
     public function setFilter($filter)
     {
         $this->filter = $filter;
+
         return $this;
     }
 

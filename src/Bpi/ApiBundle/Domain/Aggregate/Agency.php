@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Aggregate;
 
 use Bpi\ApiBundle\Transform\IPresentable;
@@ -17,8 +18,14 @@ class Agency implements IPresentable
     protected $secret;
     protected $deleted = false;
 
-    public function __construct($public_id = null, $name = null, $moderator = null, $internal = true, $public_key = null, $secret = null)
-    {
+    public function __construct(
+        $public_id = null,
+        $name = null,
+        $moderator = null,
+        $internal = true,
+        $public_key = null,
+        $secret = null
+    ) {
         $this->public_id = $public_id;
         $this->name = $name;
         $this->moderator = $moderator;
@@ -66,19 +73,19 @@ class Agency implements IPresentable
      */
     public function checkToken($token)
     {
-        $localToken = crypt($this->public_id . $this->public_key . $this->secret, $token);
-        return $token === $localToken;
+        return password_verify($this->public_id.$this->public_key.$this->secret, $token);
     }
 
     public function __toString()
     {
-        return (string) $this->public_id;
+        return (string)$this->public_id;
     }
 
     public function setDeleted($value = true)
     {
         $this->deleted = $value;
     }
+
     public function getDeleted()
     {
         return $this->deleted;
@@ -88,34 +95,42 @@ class Agency implements IPresentable
     {
         return $this->id;
     }
+
     public function getPublicId()
     {
         return $this->public_id;
     }
+
     public function setPublicId($id)
     {
         $this->public_id = $id;
     }
+
     public function getName()
     {
         return $this->name;
     }
+
     public function setName($name)
     {
         $this->name = $name;
     }
+
     public function getModerator()
     {
         return $this->moderator;
     }
+
     public function setModerator($name)
     {
         $this->moderator = $name;
     }
+
     public function setPublicKey($key)
     {
-        $this->public_key = empty($key) ? md5(microtime(true) . rand()) : $key;
+        $this->public_key = empty($key) ? md5(microtime(true).rand()) : $key;
     }
+
     public function getPublicKey()
     {
         return $this->public_key;
@@ -123,8 +138,9 @@ class Agency implements IPresentable
 
     public function setSecret($secret)
     {
-        $this->secret = empty($secret) ? sha1(microtime(true) . rand()) : $secret;
+        $this->secret = empty($secret) ? sha1(microtime(true).rand()) : $secret;
     }
+
     public function getSecret()
     {
         return $this->secret;
@@ -133,6 +149,7 @@ class Agency implements IPresentable
     public function setInternal($internal)
     {
         $this->internal = $internal;
+
         return $this;
     }
 
@@ -140,5 +157,4 @@ class Agency implements IPresentable
     {
         return $this->internal;
     }
-
 }

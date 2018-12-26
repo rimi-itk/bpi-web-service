@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 /**
@@ -17,21 +18,14 @@ class UserFacet
     protected $userId;
 
     /**
-     * @var stdClass $facetData
+     * @var array $facetData
      */
     protected $facetData;
 
     /**
-     * Create a new UserFacet
-     */
-    public function __construct()
-    {
-    }
-
-    /**
      * Get id
      *
-     * @return id $id
+     * @return string $id
      */
     public function getId()
     {
@@ -42,6 +36,7 @@ class UserFacet
      * Set userId
      *
      * @param string $userId
+     *
      * @return self
      */
     public function setUserId($userId)
@@ -64,7 +59,8 @@ class UserFacet
     /**
      * Set facetData
      *
-     * @param stdClass $facetData
+     * @param array $facetData
+     *
      * @return self
      */
     public function setFacetData($facetData)
@@ -77,7 +73,7 @@ class UserFacet
     /**
      * Get facetData
      *
-     * @return collection $facetData
+     * @return array $facetData
      */
     public function getFacetData()
     {

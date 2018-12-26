@@ -1,5 +1,7 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity\Resource;
+
 use Bpi\ApiBundle\Domain\Entity\File;
 
 class Body
@@ -14,14 +16,15 @@ class Body
     protected $dom;
 
     protected $router;
-    protected $assets = array();
+    protected $assets = [];
 
     /**
      *
      * @param string $content
+     *
      * @throws \RuntimeException
      */
-    public function __construct($content, $router=null)
+    public function __construct($content, $router = null)
     {
         $this->dom = $content;
         /*
@@ -88,7 +91,7 @@ class Body
 
     public function rebuildInlineAssets()
     {
-        preg_match_all('/<img[^>]+>/im', $this->dom , $matches, PREG_SET_ORDER);
+        preg_match_all('/<img[^>]+>/im', $this->dom, $matches, PREG_SET_ORDER);
         foreach ($matches as $match) {
             preg_match('/src=\"([^"]+)\"/i', $match[0], $src);
             preg_match('/title=\"([^"]+)\"/i', $match[0], $title);
@@ -96,7 +99,7 @@ class Body
             preg_match('/width=\"([^"]+)\"/i', $match[0], $width);
             preg_match('/height=\"([^"]+)\"/i', $match[0], $height);
 
-            $file = array();
+            $file = [];
             $pathinfo = pathinfo(parse_url($src[1], PHP_URL_PATH));
 
             $file['path'] = $src[1];
@@ -109,7 +112,7 @@ class Body
             $file['type'] = 'body';
 
             $bpi_file = new \Bpi\ApiBundle\Domain\Entity\File($file);
-            if($bpi_file->createFile()) {
+            if ($bpi_file->createFile()) {
                 $this->assets[] = $bpi_file;
                 $tag = str_replace($bpi_file->getExternal(), $bpi_file->getPath(), $match[0]);
                 $this->dom = str_replace($match[0], $tag, $this->dom);
@@ -122,4 +125,3 @@ class Body
         return $this->assets;
     }
 }
-

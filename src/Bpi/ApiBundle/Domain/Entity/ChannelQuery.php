@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
@@ -11,17 +12,17 @@ class ChannelQuery extends Query
     /**
      * {@inheritdoc}
      */
-    protected $fieldMap = array(
-        'name'            => 'channelName',
-        'description'     => 'channelDescription',
+    protected $fieldMap = [
+        'name' => 'channelName',
+        'description' => 'channelDescription',
         'nodeLastAddedAt' => 'nodeLastAddedAt',
-        'agency_id'       => 'channelAdmin.userAgency.public_id',
-    );
+        'agency_id' => 'channelAdmin.userAgency.public_id',
+    ];
 
     /**
      * {@inheritdoc}
      */
-    protected $searchFields = array('name', 'description');
+    protected $searchFields = ['name', 'description'];
 
     /**
      * {@inheritdoc}

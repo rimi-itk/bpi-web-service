@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Element;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -27,13 +28,15 @@ class Query extends Link
     protected $title;
 
     /**
-     * 
+     *
      * @param \Bpi\RestMediaTypeBundle\Element\Param $param
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Query
      */
     public function addParam(Param $param)
     {
         $this->params[] = $param;
+
         return $this;
     }
 }

@@ -1,9 +1,10 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\ValueObject;
 
 class Copyleft implements IValueObject
 {
-    protected $copyrighters = array();
+    protected $copyrighters = [];
 
     /**
      * Name of copyleft owner
@@ -19,6 +20,7 @@ class Copyleft implements IValueObject
     /**
      *
      * @param  \Bpi\ApiBundle\Domain\ValueObject\Copyleft $copyleft
+     *
      * @return boolean
      */
     public function equals(IValueObject $copyleft)
@@ -29,18 +31,20 @@ class Copyleft implements IValueObject
     public function __toString()
     {
         //TODO: Temporary hardcoded translation.
-        return 'Udgivet af ' . implode(', ', $this->copyrighters) . '.';
+        return 'Udgivet af '.implode(', ', $this->copyrighters).'.';
     }
 
     /**
      * Set copyrighters
      *
      * @param hash $copyrighters
+     *
      * @return self
      */
     public function setCopyrighters($copyrighters)
     {
         $this->copyrighters = $copyrighters;
+
         return $this;
     }
 

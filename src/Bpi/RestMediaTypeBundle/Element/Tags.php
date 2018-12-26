@@ -12,6 +12,7 @@ use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Class Tags
+ *
  * @package Bpi\RestMediaTypeBundle\Element
  * @Serializer\XmlRoot("tags")
  */
@@ -25,16 +26,18 @@ class Tags
 
     public function __construct()
     {
-        $this->tags = array();
+        $this->tags = [];
     }
 
     /**
      * @param \Bpi\RestMediaTypeBundle\Element\Tag $tag
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Tags
      */
     public function addTag(Tag $tag)
     {
         $this->tags[] = $tag;
+
         return $this;
     }
 }

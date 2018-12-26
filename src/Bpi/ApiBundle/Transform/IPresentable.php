@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Transform;
 
 use Bpi\RestMediaTypeBundle\XmlResponse;

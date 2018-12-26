@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Element;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -29,7 +30,7 @@ class FacetTerm
 
     /**
      * @param string $name
-     * @param mixed  $value
+     * @param mixed $value
      * @param string $title
      */
     public function __construct($name, $value, $title = '')

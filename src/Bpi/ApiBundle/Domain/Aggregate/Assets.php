@@ -1,10 +1,10 @@
 <?php
 
 namespace Bpi\ApiBundle\Domain\Aggregate;
+
 use Bpi\ApiBundle\Domain\ValueObject\ValueObjectList;
 use Bpi\RestMediaTypeBundle\Document;
 use Bpi\RestMediaTypeBundle\XmlResponse;
-
 
 /**
  * Bpi\ApiBundle\Domain\Aggregate\Assets
@@ -14,9 +14,9 @@ class Assets
     /**
      * @var object
      */
-    protected $collection = array();
+    protected $collection = [];
 
-    public function __construct(array $collection = array())
+    public function __construct(array $collection = [])
     {
         $this->collection = new ValueObjectList($collection);
     }
@@ -51,7 +51,8 @@ class Assets
         return $this->collection;
     }
 
-    public function addElem($elem) {
+    public function addElem($elem)
+    {
         $this->collection->add($elem);
     }
 
@@ -61,7 +62,7 @@ class Assets
     public function transform(XmlResponse $document)
     {
         try {
-            $entity= $document->currentEntity();
+            $entity = $document->currentEntity();
         } catch (\RuntimeException $e) {
             $entity = $document->createEntity('entity', 'assets');
             $document->appendEntity($entity);
@@ -70,6 +71,5 @@ class Assets
         foreach ($this->collection as $asset) {
             $entity->addAsset($asset);
         }
-
     }
 }

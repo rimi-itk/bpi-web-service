@@ -28,10 +28,6 @@ security:
             pattern:  ^/.+\.html$
             security: false
 
-        schema:
-            pattern: ^/shema.*
-            security: false
-
         mainpage:
             pattern: ^/$
             security: false
@@ -54,6 +50,7 @@ security:
         api:
             pattern:   ^/
             pk:      true
+            provider: agencies
             stateless: true
 
     access_control:

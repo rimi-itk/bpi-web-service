@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
@@ -31,7 +32,7 @@ class Resource implements IPresentable
 
     protected $router;
 
-    protected $materials = array();
+    protected $materials = [];
 
     protected $category;
     protected $audience;
@@ -60,11 +61,10 @@ class Resource implements IPresentable
         $audience,
         array $files = null,
         $router,
-        array $materials = array(),
+        array $materials = [],
         $url,
         $data
-    )
-    {
+    ) {
         $this->type = $type;
         $this->title = $title;
         $this->body = new Resource\Body($body, $router);
@@ -86,11 +86,13 @@ class Resource implements IPresentable
      *
      * @param  AgencyID $owner
      * @param  AgencyID $syndicator
+     *
      * @return void
      */
-    public function defineAgencyContext(AgencyId $owner, AgencyId $syndicator) {
-        $syndication_materials = array();
-        foreach($this->materials as $material) {
+    public function defineAgencyContext(AgencyId $owner, AgencyId $syndicator)
+    {
+        $syndication_materials = [];
+        foreach ($this->materials as $material) {
             if ($material->isLibraryEquals($owner)) {
                 $syndication_materials[] = $material->reassignToAgency($syndicator);
             } else {
@@ -105,16 +107,19 @@ class Resource implements IPresentable
      * Calculate similarity of resources by checking body contents
      *
      * @param  Resource $resource
+     *
      * @return boolean
      */
     public function isSimilar(Resource $resource)
     {
-        if ($this->body == $resource->body)
+        if ($this->body == $resource->body) {
             return true;
+        }
 
         similar_text(strip_tags($this->body), strip_tags($resource->body), $similarity);
-        if ($similarity > 50)
+        if ($similarity > 50) {
             return true;
+        }
 
         return false;
     }
@@ -125,35 +130,31 @@ class Resource implements IPresentable
     public function transform(XmlResponse $document)
     {
         try {
-            $entity= $document->currentEntity();
+            $entity = $document->currentEntity();
         } catch (\RuntimeException $e) {
             $entity = $document->createEntity('entity', 'resource');
             $document->appendEntity($entity);
         }
 
-        // Do not assign copyleft info when fetching nodes.
-        // Left here for legacy purposes.
-//        $copyleft = '<p>' . $this->copyleft . '</p>';
-
         $entity->addProperty($document->createProperty('title', 'string', $this->title));
-        $entity->addProperty($document->createProperty('body', 'string', $this->body->getFlattenContent() . $copyleft));
+        $entity->addProperty($document->createProperty('body', 'string', $this->body->getFlattenContent()));
         $entity->addProperty($document->createProperty('teaser', 'string', $this->teaser));
         $entity->addProperty($document->createProperty('creation', 'dateTime', $this->ctime));
         $entity->addProperty($document->createProperty('type', 'string', $this->type));
         $entity->addProperty($document->createProperty('url', 'string', $this->url));
         $entity->addProperty($document->createProperty('data', 'string', $this->data));
 
-        foreach ($this->materials as $material)
-        {
-            $entity->addProperty($document->createProperty('material', 'string', (string) $material));
+        foreach ($this->materials as $material) {
+            $entity->addProperty($document->createProperty('material', 'string', (string)$material));
         }
     }
 
     /**
      *
      * @param  \Bpi\ApiBundle\Domain\Entity\Resource $resource
-     * @param  string                                $field
-     * @param  int                                   $order    1=asc, -1=desc
+     * @param  string $field
+     * @param  int $order 1=asc, -1=desc
+     *
      * @return int                                   see strcmp PHP function
      */
     public function compare(Resource $resource, $field, $order = 1)
@@ -184,33 +185,37 @@ class Resource implements IPresentable
      */
     protected function regenerateHash()
     {
-        $this->hash = md5(strip_tags($this->title . $this->teaser . $this->body));
+        $this->hash = md5(strip_tags($this->title.$this->teaser.$this->body));
     }
 
     /**
      * Try to find similar resources
      *
      * @param \Bpi\ApiBundle\Domain\Repository\ResourceRepository $repository
+     *
      * @return array
      */
     public function findSimilar(\Doctrine\ODM\MongoDB\DocumentRepository $repository)
     {
         // @todo replace with query
-        return $repository->findOneBy(array('resource.hash' => $this->hash, 'deleted' => false));
+        return $repository->findOneBy(['resource.hash' => $this->hash, 'deleted' => false]);
     }
 
     public function getTitle()
     {
         return $this->title;
     }
+
     public function setTitle($title)
     {
         $this->title = $title;
     }
+
     public function getTeaser()
     {
         return $this->teaser;
     }
+
     public function setTeaser($teaser)
     {
         $this->teaser = $teaser;
@@ -220,11 +225,13 @@ class Resource implements IPresentable
      * Set body
      *
      * @param string $body
+     *
      * @return self
      */
     public function setBody($body)
     {
         $this->body = $body;
+
         return $this;
     }
 
@@ -242,11 +249,13 @@ class Resource implements IPresentable
      * Set url
      *
      * @param string $url
+     *
      * @return self
      */
     public function setUrl($url)
     {
         $this->url = $url;
+
         return $this;
     }
 
@@ -269,6 +278,7 @@ class Resource implements IPresentable
     public function setData($data)
     {
         $this->data = $data;
+
         return $this;
     }
 
@@ -286,11 +296,13 @@ class Resource implements IPresentable
      * Set ctime
      *
      * @param date $ctime
+     *
      * @return self
      */
     public function setCtime($ctime)
     {
         $this->ctime = $ctime;
+
         return $this;
     }
 
@@ -308,11 +320,13 @@ class Resource implements IPresentable
      * Set type
      *
      * @param string $type
+     *
      * @return self
      */
     public function setType($type)
     {
         $this->type = $type;
+
         return $this;
     }
 
@@ -330,11 +344,13 @@ class Resource implements IPresentable
      * Set hash
      *
      * @param string $hash
+     *
      * @return self
      */
     public function setHash($hash)
     {
         $this->hash = $hash;
+
         return $this;
     }
 
@@ -352,11 +368,13 @@ class Resource implements IPresentable
      * Set copyleft
      *
      * @param Bpi\ApiBundle\Domain\ValueObject\Copyleft $copyleft
+     *
      * @return self
      */
     public function setCopyleft(\Bpi\ApiBundle\Domain\ValueObject\Copyleft $copyleft)
     {
         $this->copyleft = $copyleft;
+
         return $this;
     }
 

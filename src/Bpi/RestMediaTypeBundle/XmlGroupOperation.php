@@ -5,6 +5,7 @@
  * Date: 27.08.2015
  * Time: 11:18
  */
+
 namespace Bpi\RestMediaTypeBundle;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -12,7 +13,8 @@ use JMS\Serializer\Annotation as Serializer;
 /**
  * @Serializer\XmlRoot("result")
  */
-class XmlGroupOperation extends XmlResponse {
+class XmlGroupOperation extends XmlResponse
+{
     /**
      * @var
      */

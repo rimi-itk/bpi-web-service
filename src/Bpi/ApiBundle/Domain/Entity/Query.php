@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Doctrine\ODM\MongoDB\Query\Builder as QueryBuilder;
@@ -12,19 +13,19 @@ class Query
     public $offset = 0;
     public $amount = 20;
 
-    protected $filters = array();
-    protected $sorts = array();
+    protected $filters = [];
+    protected $sorts = [];
     protected $search;
 
     /**
      * @var array
      */
-    protected $fieldMap = array();
+    protected $fieldMap = [];
 
     /**
      * @var array
      */
-    protected $searchFields = array();
+    protected $searchFields = [];
 
     /**
      * Set filter.
@@ -47,7 +48,7 @@ class Query
      */
     public function offset($value)
     {
-        $this->offset = (int) $value;
+        $this->offset = (int)$value;
     }
 
     /**
@@ -57,7 +58,7 @@ class Query
      */
     public function amount($value)
     {
-        $this->amount = (int) $value;
+        $this->amount = (int)$value;
     }
 
     /**
@@ -125,8 +126,8 @@ class Query
 
         // Split search into words or keep as one term if quoted ("…")
         $terms = preg_match('/^".+"$/', $this->search)
-               ? array($this->search)
-               : preg_split('/\s+/', $this->search, null, PREG_SPLIT_NO_EMPTY);
+            ? [$this->search]
+            : preg_split('/\s+/', $this->search, null, PREG_SPLIT_NO_EMPTY);
 
         foreach ($this->searchFields as $field) {
             foreach ($terms as $term) {

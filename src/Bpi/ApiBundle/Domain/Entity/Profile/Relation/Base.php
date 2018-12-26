@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity\Profile\Relation;
 
 class Base implements IRelation

@@ -14,9 +14,9 @@ use Symfony\Component\Validator\Constraints;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Entity\User;
 
-
 /**
  * Class NotificationsController
+ *
  * @package Bpi\AdminBundle\Controller
  */
 class NotificationsController extends Controller
@@ -37,7 +37,7 @@ class NotificationsController extends Controller
     {
         $userRepository = $this->getRepository('BpiApiBundle:Entity\User');
         $allUsers = $userRepository->findAll();
-        $userNotifications = array();
+        $userNotifications = [];
         foreach ($allUsers as $user) {
             $userId = $user->getId();
             $userNotification = $userRepository->getUserNotifications($user);
@@ -52,10 +52,13 @@ class NotificationsController extends Controller
         }
 
         foreach ($userNotifications as $notif) {
-            $subject = 'Hello ' . $notif['user']->getUserFirstName() . ' ' . $notif['user']->getUserFirstName() . ', you have new updates in BPI system.';
-            $messageBody = $this->renderView('BpiAdminBundle:Notifications:runNotifications.html.twig', array(
-                'notification' => $notif
-            ));
+            $subject = 'Hello '.$notif['user']->getUserFirstName().' '.$notif['user']->getUserFirstName().', you have new updates in BPI system.';
+            $messageBody = $this->renderView(
+                'BpiAdminBundle:Notifications:runNotifications.html.twig',
+                [
+                    'notification' => $notif,
+                ]
+            );
 
             $message = new \Swift_Message();
             $message = $message::newInstance();

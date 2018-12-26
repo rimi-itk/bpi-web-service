@@ -31,19 +31,18 @@ class UserRepository extends DocumentRepository
      * Check if User with such internal name exitst
      *
      * @param string $internalName
+     *
      * @return bool
      */
     public function findSimilarUserByInternalName($internalName)
     {
         $query = $this->createQueryBuilder('Entity\User')
             ->field('internalUserName')
-            ->equals($internalName)
-        ;
+            ->equals($internalName);
 
         $result = $query
             ->getQuery()
-            ->getSingleResult()
-        ;
+            ->getSingleResult();
 
         return ($result) ? true : false;
     }
@@ -53,15 +52,16 @@ class UserRepository extends DocumentRepository
      *
      * @param string $externalId
      * @param string $agencyPublicId
+     *
      * @return array|null|object
      */
     public function findByExternalIdAgency($externalId, $agencyId)
     {
         $result = $this->findOneBy(
-            array(
+            [
                 'userAgency.id' => $agencyId,
-                'externalId' => $externalId
-            )
+                'externalId' => $externalId,
+            ]
         );
 
         return $result;
@@ -82,11 +82,11 @@ class UserRepository extends DocumentRepository
         $todayEnd->setTime(23, 59, 59);
 
         //Get user notification by subscription.
-        $notifications = array();
+        $notifications = [];
         if (!empty($userSubscriptions)) {
             foreach ($userSubscriptions as $subscription) {
                 $jsonString = html_entity_decode(trim($subscription->getFilter(), '&quot;'));
-                $filter = (array) json_decode($jsonString);
+                $filter = (array)json_decode($jsonString);
                 $facets = $facetRepository->getFacetsByRequest($filter);
                 $nodes = $facets->nodeIds;
                 $nodeUpdates = $nodeQuery
@@ -96,11 +96,10 @@ class UserRepository extends DocumentRepository
                     ->addAnd($nodeQuery->expr()->field('mtime')->lte($todayEnd))
                     ->field('_id')->in($nodes)
                     ->getQuery()
-                    ->toArray()
-                ;
+                    ->toArray();
 
                 if (!empty($nodeUpdates)) {
-                    $notifications['subscriptions'][$subscription->getTitle()] = array();
+                    $notifications['subscriptions'][$subscription->getTitle()] = [];
                     foreach ($nodeUpdates as $node) {
                         $notifications['subscriptions'][$subscription->getTitle()][] = $node;
                     }
@@ -123,7 +122,7 @@ class UserRepository extends DocumentRepository
 
                         if ($checkCtime && $checkMtime) {
                             if (!isset($notifications['channel'][$channel->getChannelName()])) {
-                                $notifications['channel'][$channel->getChannelName()] = array();
+                                $notifications['channel'][$channel->getChannelName()] = [];
                             }
                             $notifications['channel'][$channel->getChannelName()][] = $cNode;
                         }

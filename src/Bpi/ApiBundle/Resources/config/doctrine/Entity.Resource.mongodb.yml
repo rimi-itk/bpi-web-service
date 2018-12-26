@@ -16,7 +16,7 @@ Bpi\ApiBundle\Domain\Entity\Resource:
     copyleft:
       embedded: true
       type: one
-      strategy: pushAll
+      strategy: set
       targetDocument: Bpi\ApiBundle\Domain\ValueObject\Copyleft
     url:
       type: string

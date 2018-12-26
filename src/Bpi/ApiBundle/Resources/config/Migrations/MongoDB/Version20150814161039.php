@@ -31,17 +31,14 @@ class Version20150814161039 extends AbstractMigration implements ContainerAwareI
     {
         $nodesQb = $db
             ->selectCollection('Node')
-            ->createQueryBuilder()
-        ;
+            ->createQueryBuilder();
         $nodes = $nodesQb
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
 
         $historyQb = $db
             ->selectCollection('History')
-            ->createQueryBuilder()
-        ;
+            ->createQueryBuilder();
 
         foreach ($nodes as $node) {
             $countNodeSyndications = $historyQb
@@ -51,8 +48,7 @@ class Version20150814161039 extends AbstractMigration implements ContainerAwareI
                 ->equals('syndicate')
                 ->getQuery()
                 ->execute()
-                ->count()
-            ;
+                ->count();
 
             if (0 === $countNodeSyndications) {
                 continue;
@@ -63,8 +59,7 @@ class Version20150814161039 extends AbstractMigration implements ContainerAwareI
                 ->field('syndications')->set($countNodeSyndications)
                 ->field('_id')->equals($node['_id'])
                 ->getQuery()
-                ->execute()
-            ;
+                ->execute();
         }
     }
 
@@ -76,7 +71,6 @@ class Version20150814161039 extends AbstractMigration implements ContainerAwareI
             ->update()
             ->field('syndications')->unsetField()->exists(true)
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
     }
 }

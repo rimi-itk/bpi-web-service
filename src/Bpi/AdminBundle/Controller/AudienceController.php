@@ -2,9 +2,17 @@
 
 namespace Bpi\AdminBundle\Controller;
 
+use Bpi\ApiBundle\Domain\Entity\Audience;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route(path="/audience")
+ */
 class AudienceController extends Controller
 {
     /**
@@ -17,13 +25,14 @@ class AudienceController extends Controller
     }
 
     /**
-     * @Template
+     * @Route(path="/", name="bpi_admin_audience")
+     * @Template("BpiAdminBundle:Audience:index.html.twig")
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
 
-        $param = $this->getRequest()->query->get('sort');
-        $direction = $this->getRequest()->query->get('direction');
+        $param = $request->query->get('sort');
+        $direction = $request->query->get('direction');
 
         $query = $this->getRepository()->listAll($param, $direction);
 
@@ -31,73 +40,73 @@ class AudienceController extends Controller
 
         $pagination = $knpPaginator->paginate(
             $query,
-            $this->get('request')->query->get('page', 1),
+            $request->query->get('page', 1),
             50,
-            array(
+            [
                 'defaultSortFieldName' => 'audience',
                 'defaultSortDirection' => 'asc',
-            )
+            ]
         );
 
-
-        return array('pagination' => $pagination);
+        return ['pagination' => $pagination];
     }
 
     /**
+     * @Route(path="/new", name="bpi_admin_audience_new")
      * @Template("BpiAdminBundle:Audience:form.html.twig")
      */
-    public function newAction()
+    public function newAction(Request $request)
     {
-        $audience = new \Bpi\ApiBundle\Domain\Entity\Audience();
+        $audience = new Audience();
         $form = $this->createAudienceForm($audience, true);
-        $request = $this->getRequest();
 
         if ($request->isMethod('POST')) {
-            $form->bind($request);
+            $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($audience);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_audience')
                 );
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
             'id' => null,
-        );
+        ];
     }
 
     /**
+     * @Route(path="/edit/{id}", name="bpi_admin_audience_edit")
      * @Template("BpiAdminBundle:Audience:form.html.twig")
      */
-    public function editAction($id)
+    public function editAction(Request $request, Audience $audience)
     {
-        $audience = $this->getRepository()->find($id);
         $form = $this->createAudienceForm($audience);
-        $request = $this->getRequest();
 
         if ($request->isMethod('POST')) {
-            $form->bind($request);
+            $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($audience);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_audience')
                 );
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
-            'id' => $id,
-        );
+            'id' => $audience->getId(),
+        ];
     }
 
     private function createAudienceForm($audience)
     {
         $formBuilder = $this->createFormBuilder($audience)
-            ->add('audience', 'text')
-        ;
+            ->add('audience', TextType::class)
+            ->add('save', SubmitType::class, ['attr' => ['class' => 'btn']]);
 
         return $formBuilder->getForm();
     }

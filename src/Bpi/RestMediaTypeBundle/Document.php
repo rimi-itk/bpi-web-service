@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle;
 
 use Doctrine\ORM\Mapping\ElementCollection;
@@ -23,19 +24,16 @@ class Document extends XmlResponse
     protected $current_entity;
 
 
-
     /**
      * @Serializer\XmlList(inline=true, entry="item")
      * @Serializer\Type("array<Bpi\RestMediaTypeBundle\Element\Entity>")
      */
-    protected $entities = array();
+    protected $entities = [];
 
     /**
      * @Serializer\Type("Bpi\RestMediaTypeBundle\Element\Collection")
      */
     protected $collection;
-
-
 
 
     /**
@@ -60,14 +58,17 @@ class Document extends XmlResponse
     /**
      *
      * @param string $name
+     *
      * @return Entity
      * @throws \LogicException
      */
     public function getEntity($name)
     {
-        foreach($this->entities as $entity)
-            if ($entity->getName() == $name)
+        foreach ($this->entities as $entity) {
+            if ($entity->getName() == $name) {
                 return $entity;
+            }
+        }
 
         throw new \LogicException('No such entity name ['.$name.']');
     }
@@ -85,6 +86,7 @@ class Document extends XmlResponse
      *
      * @param string $type
      * @param string $name
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
     public function createRootEntity($type, $name = null)
@@ -93,6 +95,7 @@ class Document extends XmlResponse
         $entity->attach($this);
         $this->entities[] = $entity;
         $this->setCursorOnEntity($entity);
+
         return $entity;
     }
 
@@ -101,6 +104,7 @@ class Document extends XmlResponse
      *
      * @param string $type
      * @param string $name
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
      */
     public function createEntity($type, $name = null, $class = "Entity")
@@ -108,6 +112,7 @@ class Document extends XmlResponse
         $class = "\\Bpi\\RestMediaTypeBundle\\Element\\{$class}";
         $entity = new $class($type, $name);
         $entity->attach($this);
+
         return $entity;
     }
 
@@ -166,17 +171,18 @@ class Document extends XmlResponse
      * @param string $type
      * @param string $value
      * @param string $title
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Property
      */
     public function createProperty($name, $type, $value, $title = '')
     {
-        switch($type) {
+        switch ($type) {
             case 'dateTime':
                 return new Property\DateTime($type, $name, $value, $title);
-            break;
+                break;
             case 'number':
                 return new Property\Number($type, $name, $value, $title);
-            break;
+                break;
             default:
                 return new GenericProperty($type, $name, $value, $title);
         }
@@ -188,6 +194,7 @@ class Document extends XmlResponse
      * @param string $rel
      * @param string $href
      * @param string $title
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Link
      */
     public function createLink($rel, $href, $title = '')
@@ -200,15 +207,16 @@ class Document extends XmlResponse
      * @param string $rel
      * @param string $href
      * @param array $params
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Query
      */
     public function createQuery($rel, $href, array $params, $title = null)
     {
         $query = new Element\Query($rel, $href, $title);
-        foreach($params as $param)
-        {
+        foreach ($params as $param) {
             $query->addParam(is_object($param) ? $param : $this->createQueryParameter($param));
         }
+
         return $query;
     }
 
@@ -216,6 +224,7 @@ class Document extends XmlResponse
      *
      * @param string $name
      * @param array $attributes
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Param
      */
     public function createQueryParameter($name)
@@ -229,6 +238,7 @@ class Document extends XmlResponse
      * @param string $href
      * @param array $fields
      * @param string $title
+     *
      * @return \Bpi\RestMediaTypeBundle\Element\Template
      */
     public function createTemplate($rel, $href, $title = null)
@@ -236,7 +246,7 @@ class Document extends XmlResponse
         return new Element\Template($rel, $href, $title);
     }
 
-     /**
+    /**
      * Get last used entity
      *
      * @return \Bpi\RestMediaTypeBundle\Element\Entity
@@ -244,8 +254,9 @@ class Document extends XmlResponse
      */
     public function currentEntity()
     {
-        if (!is_object($this->current_entity))
+        if (!is_object($this->current_entity)) {
             throw new \RuntimeException('There is no current entities yet');
+        }
 
         return $this->current_entity;
     }
@@ -254,12 +265,14 @@ class Document extends XmlResponse
      * Set internal pointer to entity
      *
      * @see currentEntity()
+     *
      * @param \Bpi\RestMediaTypeBundle\Element\Entity $entity
      */
     public function setCursorOnEntity(Entity $entity)
     {
-        if ($entity->isOwner($this))
+        if ($entity->isOwner($this)) {
             $this->current_entity = $entity;
+        }
     }
 
     /**
@@ -269,16 +282,18 @@ class Document extends XmlResponse
      */
     public function dump()
     {
-        $dump = array();
-        foreach($this->getEntities() as $entity)
-        {
-            $entity_dump = array();
-            $entity->walk(function($property) use (&$entity_dump) {
-                // @todo in some cases entity can have many properties with the same name
-                $entity_dump[$property->getName()] = $property->getValue();
-            });
+        $dump = [];
+        foreach ($this->getEntities() as $entity) {
+            $entity_dump = [];
+            $entity->walk(
+                function ($property) use (&$entity_dump) {
+                    // @todo in some cases entity can have many properties with the same name
+                    $entity_dump[$property->getName()] = $property->getValue();
+                }
+            );
             $dump[$entity->getName()] = $entity_dump;
         }
+
         return $dump;
     }
 }

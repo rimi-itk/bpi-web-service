@@ -1,0 +1,78 @@
+services:
+  bpi.apibundle.rest.view_extension_handler:
+    class: Bpi\ApiBundle\View\BPIViewHandler
+
+  bpi.apibundle.rest.view_handler:
+    parent: fos_rest.view_handler.default
+    calls:
+      - ['registerHandler', [ 'bpi', ["@bpi.apibundle.rest.view_extension_handler", 'handleExtension'] ] ]
+
+  domain.push_service:
+    class: Bpi\ApiBundle\Domain\Service\PushService
+    arguments: ["@doctrine_mongodb.odm.document_manager"]
+    public: true
+
+  bpi.gridfs.conn:
+    class: Doctrine\MongoDB\Connection
+    factory: ['@doctrine_mongodb.odm.default_connection', 'selectDatabase']
+    arguments: ["bpi"]
+
+  bpi.gridfs.db:
+    class: Doctrine\MongoDB\Database
+    factory: ['@bpi.gridfs.conn', 'getGridFS']
+    arguments: ["Asset"]
+
+  bpi.gridfs:
+    class: Doctrine\MongoDB\GridFS
+    factory: ['@bpi.gridfs.db', 'getMongoCollection']
+
+  bpi.presentation.document:
+    class: Bpi\RestMediaTypeBundle\Document
+    arguments: ["%api_version%"]
+    public: true
+    calls:
+      - ['setRouter', [ "@router"] ]
+
+  bpi.presentation.users:
+    class: Bpi\RestMediaTypeBundle\Users
+    arguments: ["%api_version%"]
+
+  bpi.presentation.channels:
+    class: Bpi\RestMediaTypeBundle\Channels
+    arguments: ["%api_version%"]
+
+  bpi.presentation.xmlgroupoperation:
+    class: Bpi\RestMediaTypeBundle\XmlGroupOperation
+    arguments: ["%api_version%"]
+
+  bpi.presentation.xmlresponse:
+    class: Bpi\RestMediaTypeBundle\XmlResponse
+    arguments: ["%api_version%"]
+
+  bpi.presentation.transformer:
+    class: Bpi\ApiBundle\Transform\Presentation
+    public: true
+
+  bpi.pk.security.authentication.provider:
+    class:  Bpi\ApiBundle\Security\Authentication\Provider\PKProvider
+    arguments: ['']
+
+  bpi.pk.security.authentication.listener:
+    class:  Bpi\ApiBundle\Security\Firewall\PKListener
+    arguments: ["@security.token_storage", "@security.authentication.manager", "@service_container"]
+
+  bpi.pk.security.user_provider:
+    class: 'Bpi\ApiBundle\Domain\Repository\AgencyRepository'
+    factory: ['@doctrine.odm.mongodb.document_manager', 'getRepository']
+    arguments: [ 'BpiApiBundle:Aggregate\Agency' ]
+
+  bpi.domain.event_listener:
+    class: Bpi\ApiBundle\Domain\EventListener
+    tags:
+      - { name: doctrine_mongodb.odm.event_listener, event: postLoad }
+
+  bpi.converter.doctrine.mongodb:
+    class: Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\DoctrineParamConverter
+    arguments: [ "@doctrine_mongodb" ]
+    tags:
+      - { name: request.param_converter }

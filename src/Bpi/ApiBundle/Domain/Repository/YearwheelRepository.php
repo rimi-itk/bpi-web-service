@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Bpi\ApiBundle\Domain\ValueObject\ValueObjectList;
@@ -28,14 +29,18 @@ class YearwheelRepository implements ObjectRepository
      * Check if given yearwheel exists in repository
      *
      * @param \Bpi\ApiBundle\Domain\ValueObject\Yearwheel $yearwheel
+     *
      * @return boolean
      */
     public function contains(Yearwheel $yearwheel)
     {
-        return (bool)$this->list->filter(function($e) use($yearwheel) {
-          if ($e instanceof Yearwheel && $e->equals($yearwheel))
-              return true;
-        })->count();
+        return (bool)$this->list->filter(
+            function ($e) use ($yearwheel) {
+                if ($e instanceof Yearwheel && $e->equals($yearwheel)) {
+                    return true;
+                }
+            }
+        )->count();
     }
 
 

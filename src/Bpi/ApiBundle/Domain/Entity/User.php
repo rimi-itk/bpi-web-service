@@ -49,7 +49,7 @@ class User implements IPresentable
     /**
      * @var \Bpi\ApiBundle\Domain\ValueObject\Subscription
      */
-    protected $subscriptions = array();
+    protected $subscriptions = [];
 
     public function __construct()
     {
@@ -70,11 +70,13 @@ class User implements IPresentable
      * Set externalId
      *
      * @param string $externalId
+     *
      * @return self
      */
     public function setExternalId($externalId)
     {
         $this->externalId = $externalId;
+
         return $this;
     }
 
@@ -92,6 +94,7 @@ class User implements IPresentable
      * Set internalUserName
      *
      * @param bool $byEmail
+     *
      * @return self
      */
     public function setInternalUserName($byEmail = false)
@@ -99,13 +102,14 @@ class User implements IPresentable
         $nameFromEmail = explode('@', $this->email);
         $internalUserName = $nameFromEmail[0];
 
-        if((!empty($this->userFirstName) || !empty($this->userLastName)) && !$byEmail) {
-            $internalUserName = $this->userFirstName . $this->userLastName;
+        if ((!empty($this->userFirstName) || !empty($this->userLastName)) && !$byEmail) {
+            $internalUserName = $this->userFirstName.$this->userLastName;
         }
 
         $internalUserName = preg_replace('/[^a-zA-Z0-9]/', '', $internalUserName);
 
         $this->internalUserName = $internalUserName;
+
         return $this;
     }
 
@@ -123,11 +127,13 @@ class User implements IPresentable
      * Set email
      *
      * @param string $email
+     *
      * @return self
      */
     public function setEmail($email)
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -145,11 +151,13 @@ class User implements IPresentable
      * Set userFirstName
      *
      * @param string $userFirstName
+     *
      * @return self
      */
     public function setUserFirstName($userFirstName)
     {
         $this->userFirstName = $userFirstName;
+
         return $this;
     }
 
@@ -167,11 +175,13 @@ class User implements IPresentable
      * Set userLastName
      *
      * @param string $userLastName
+     *
      * @return self
      */
     public function setUserLastName($userLastName)
     {
         $this->userLastName = $userLastName;
+
         return $this;
     }
 
@@ -189,11 +199,13 @@ class User implements IPresentable
      * Set userAgency
      *
      * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $userAgency
+     *
      * @return self
      */
     public function setUserAgency(\Bpi\ApiBundle\Domain\Aggregate\Agency $userAgency)
     {
         $this->userAgency = $userAgency;
+
         return $this;
     }
 

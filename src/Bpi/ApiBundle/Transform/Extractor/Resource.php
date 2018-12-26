@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Transform\Extractor;
 
 use Bpi\RestMediaTypeBundle\Document;
@@ -37,13 +38,15 @@ class Resource implements IExtractor
         $builder = new ResourceBuilder();
         $fs = new Filesystem(new MemoryAdapter());
 
-        $entity->walk(function($e) use ($builder, $fs) {
-            if ($e->typeOf(Property::TYPE_ASSET)) {
-                $file = new File($e->getName(), $fs);
-                $file->setContent($e->getValue());
-                $builder->addFile($file);
+        $entity->walk(
+            function ($e) use ($builder, $fs) {
+                if ($e->typeOf(Property::TYPE_ASSET)) {
+                    $file = new File($e->getName(), $fs);
+                    $file->setContent($e->getValue());
+                    $builder->addFile($file);
+                }
             }
-        });
+        );
 
         return $builder
             ->type($entity->property('type')->getValue())
@@ -52,7 +55,6 @@ class Resource implements IExtractor
             ->teaser($entity->property('teaser')->getValue())
             ->url($entity->property('url')->getValue())
             ->data($entity->property('data')->getValue())
-            ->ctime(new \DateTime($entity->property('ctime')->getValue()))
-        ;
+            ->ctime(new \DateTime($entity->property('ctime')->getValue()));
     }
 }

@@ -1,6 +1,6 @@
 <?php
-namespace Bpi\ApiBundle\Domain\Service;
 
+namespace Bpi\ApiBundle\Domain\Service;
 
 use Bpi\ApiBundle\Domain\Entity\Tag;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -47,6 +47,7 @@ class PushService
      * @param  Resource $resource
      * @param  \Bpi\ApiBundle\Domain\Entity\Profile $profile
      * @param  \Bpi\ApiBundle\Domain\Aggregate\Params $params
+     *
      * @throws \LogicException
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
@@ -78,11 +79,11 @@ class PushService
         }
         $builder = new NodeBuilder();
         $builder
-          ->author($author)
-          ->profile($profile)
-          ->resource($resource)
-          ->params($params)
-          ->assets($assets);
+            ->author($author)
+            ->profile($profile)
+            ->resource($resource)
+            ->params($params)
+            ->assets($assets);
 
         // Set default category.
         if (empty($category)) {
@@ -90,7 +91,7 @@ class PushService
         }
         // Find category entity.
         $category = $this->manager->getRepository('BpiApiBundle:Entity\Category')->findOneBy(
-            array('category' => $category)
+            ['category' => $category]
         );
         $builder->category($category);
 
@@ -100,7 +101,7 @@ class PushService
         }
         // Find audience entity.
         $audience = $this->manager->getRepository('BpiApiBundle:Entity\Audience')->findOneBy(
-            array('audience' => $audience)
+            ['audience' => $audience]
         );
         $builder->audience($audience);
 
@@ -118,7 +119,10 @@ class PushService
         $this->manager->persist($log);
 
         $this->manager->flush();
-        $this->manager->getRepository('BpiApiBundle:Entity\Facet')->prepareFacet($node);
+
+        /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
+        $facetRepository = $this->manager->getRepository('BpiApiBundle:Entity\Facet');
+        $facetRepository->prepareFacet($node);
 
         return $node;
     }
@@ -127,28 +131,33 @@ class PushService
      * Prepare tags.
      *
      * @param $tags
+     *
      * @return array
      */
     private function prepareTags($tags)
     {
         if (empty($tags)) {
-            return array();
+            return [];
         }
 
         $tags = explode(',', $tags);
-        $readyTags = array();
+        $readyTags = [];
+
+        /** @var \Bpi\ApiBundle\Domain\Repository\TagRepository $tagRepository */
+        $tagRepository = $this
+            ->manager
+            ->getRepository('BpiApiBundle:Entity\Tag');
+
         foreach ($tags as $tag) {
             $tag = trim($tag);
-            $savedTag = $this->manager
-                ->getRepository('BpiApiBundle:Entity\Tag')
-                ->findOneBy(array('tag' => $tag));
+            $savedTag = $tagRepository
+                ->findOneBy(['tag' => $tag]);
 
-            if (null === $savedTag) {
+            if (!$savedTag) {
                 $newTag = new Tag();
                 $newTag->setTag($tag);
 
                 $this->manager->persist($newTag);
-                $this->manager->flush();
 
                 $readyTags[] = $newTag;
                 continue;
@@ -156,6 +165,8 @@ class PushService
 
             $readyTags[] = $savedTag;
         }
+
+        $this->manager->flush();
 
         return $readyTags;
     }
@@ -165,7 +176,7 @@ class PushService
      *
      * @param \Bpi\ApiBundle\Domain\Entity\Author $author
      * @param \Bpi\ApiBundle\Domain\Factory\ResourceBuilder $builder
-     * @param \Bpi\ApiBundle\Domain\ValueObject\Autorship $autorship
+     * @param \Bpi\ApiBundle\Domain\ValueObject\Authorship $autorship
      */
     public function assignCopyleft(Author $author, ResourceBuilder $builder, Authorship $autorship)
     {
@@ -173,8 +184,8 @@ class PushService
 
         // Set agency as default original copyrighter
         $this->manager->getRepository('BpiApiBundle:Aggregate\Agency')
-          ->findOneBy(array('public_id' => $author->getAgencyId()->id()))
-          ->setAuthorship($copyleft);
+            ->findOneBy(['public_id' => $author->getAgencyId()->id()])
+            ->setAuthorship($copyleft);
 
         if ($autorship->isPositive()) {
             $author->setAuthorship($copyleft);
@@ -184,16 +195,29 @@ class PushService
     }
 
     /**
+     * Creates a new node revision.
      *
-     * @param  \Bpi\ApiBundle\Domain\ValueObject\NodeId $node_id
-     * @param  \Bpi\ApiBundle\Domain\Entity\Author $author
-     * @param  ResourceBuilder $builder
-     * @param  \Bpi\ApiBundle\Domain\Aggregate\Params $params
+     * @param \Bpi\ApiBundle\Domain\ValueObject\NodeId $node_id
+     * @param \Bpi\ApiBundle\Domain\Entity\Author $author
+     * @param \Bpi\ApiBundle\Domain\Factory\ResourceBuilder $builder
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Params $params
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Assets $assets
+     *
      * @return \Bpi\ApiBundle\Domain\Aggregate\Node
      */
-    public function pushRevision(NodeId $node_id, Author $author, ResourceBuilder $builder, Params $params, Assets $assets)
+    public function pushRevision(
+        NodeId $node_id,
+        Author $author,
+        ResourceBuilder $builder,
+        Params $params,
+        Assets $assets
+    )
     {
-        $node = $this->manager->getRepository('BpiApiBundle:Aggregate\Node')->findOneById($node_id->id());
+        /** @var \Bpi\ApiBundle\Domain\Aggregate\Node $node */
+        $node = $this
+            ->manager
+            ->getRepository('BpiApiBundle:Aggregate\Node')
+            ->findOneById($node_id->id());
 
         $revision = $node->createRevision($author, $builder->build(), $params, $assets);
 

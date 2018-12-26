@@ -1,10 +1,11 @@
 <?php
+
 namespace Bpi\ApiBundle\View;
 
-use FOS\RestBundle\View\View,
-    FOS\RestBundle\View\ViewHandler,
-    Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response;
+use FOS\RestBundle\View\View;
+use FOS\RestBundle\View\ViewHandler;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Handle the .bpi file extension
@@ -21,10 +22,10 @@ class BPIViewHandler
      */
     public function handleExtension(ViewHandler $handler, View $view, Request $request, $format)
     {
-        if (in_array("application/vnd.bpi.api+xml", $request->getAcceptableContentTypes()))
+        if (in_array("application/vnd.bpi.api+xml", $request->getAcceptableContentTypes())) {
             $view->setHeader("Content-Type", "application/vnd.bpi.api+xml");
+        }
 
         return $handler->createResponse($view, $request, "xml");
     }
-
 }

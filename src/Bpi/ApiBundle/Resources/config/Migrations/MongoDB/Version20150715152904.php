@@ -28,8 +28,7 @@ class Version20150715152904 extends AbstractMigration
             ->field('deleted')->equals(false)
             ->field('internal')->exists(false)
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
         $this->analyze($agencies);
     }
 
@@ -41,8 +40,7 @@ class Version20150715152904 extends AbstractMigration
             ->multiple(true)
             ->field('internal')->unsetField()->exists(true)
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
         $this->analyze($agencies);
     }
 }

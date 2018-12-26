@@ -1,100 +1,34 @@
 imports:
     - { resource: parameters.yml }
     - { resource: security.yml }
+    - { resource: services.yml }
 
 parameters:
-    api_version: 2.0-rc2
-
-services:
-    #rest
-    bpi.apibundle.rest.view_extension_handler:
-        class: Bpi\ApiBundle\View\BPIViewHandler
-    bpi.apibundle.rest.view_handler:
-        parent: fos_rest.view_handler.default
-        calls:
-          - ['registerHandler', [ 'bpi', ["@bpi.apibundle.rest.view_extension_handler", 'handleExtension'] ] ]
-
-    #domain
-    domain.push_service:
-        class: Bpi\ApiBundle\Domain\Service\PushService
-        arguments: ["@doctrine_mongodb.odm.document_manager", "@knp_gaufrette.filesystem_map"]
-
-    #gridfs gaufrette
-    bpi.gridfs.conn:
-      class: Doctrine\MongoDB\Connection
-      factory_service: doctrine_mongodb.odm.default_connection
-      factory_method: selectDatabase
-      arguments: ["bpi"]
-    bpi.gridfs.db:
-        class: Doctrine\MongoDB\Database
-        factory_service: bpi.gridfs.conn
-        factory_method: getGridFS
-        arguments: ["Asset"]
-    bpi.gridfs:
-        class: Doctrine\MongoDB\GridFS
-        factory_service: bpi.gridfs.db
-        factory_method: getMongoCollection
-    #presentation
-    bpi.presentation.document:
-        class: Bpi\RestMediaTypeBundle\Document
-        arguments: ["%api_version%"]
-        calls:
-          - ['setRouter', [ "@router"] ]
-    bpi.presentation.users:
-        class: Bpi\RestMediaTypeBundle\Users
-        arguments: ["%api_version%"]
-    bpi.presentation.channels:
-            class: Bpi\RestMediaTypeBundle\Channels
-            arguments: ["%api_version%"]
-    bpi.presentation.xmlgroupoperation:
-            class: Bpi\RestMediaTypeBundle\XmlGroupOperation
-            arguments: ["%api_version%"]
-    bpi.presentation.xmlresponse:
-        class: Bpi\RestMediaTypeBundle\XmlResponse
-        arguments: ["%api_version%"]
-    bpi.presentation.transformer:
-        class: Bpi\ApiBundle\Transform\Presentation
-    # security
-    bpi.pk.security.authentication.provider:
-        class:  Bpi\ApiBundle\Security\Authentication\Provider\PKProvider
-        arguments: ['']
-    bpi.pk.security.authentication.listener:
-        class:  Bpi\ApiBundle\Security\Firewall\PKListener
-        arguments: ["@security.context", "@security.authentication.manager", "@service_container"]
-    bpi.pk.security.user_provider:
-      class: stdClass
-      factory_service: doctrine_mongodb
-      factory_method:  getRepository
-      arguments: [ 'BpiApiBundle:Aggregate\Agency' ]
-    bpi.domain.event_listener:
-        class: Bpi\ApiBundle\Domain\EventListener
-        tags:
-            -  { name: doctrine_mongodb.odm.event_listener, event: postLoad }
+    api_version: 3.x-beta
 
 framework:
     #esi:             ~
     #translator:      { fallback: %locale% }
-    secret:          %secret%
+    secret:          "%secret%"
     router:
         resource: "%kernel.root_dir%/config/routing.yml"
-        strict_requirements: %kernel.debug%
+        strict_requirements: "%kernel.debug%"
     form:            true
     csrf_protection: true
     validation:      { enable_annotations: true }
     templating:      { engines: ['twig'] } #assets_version: SomeVersionScheme
-    default_locale:  %locale%
-    trust_proxy_headers: false # Whether or not the Request object should trust proxy headers (X_FORWARDED_FOR/HTTP_CLIENT_IP)
+    default_locale:  "%locale%"
     session:         ~
 
 # Twig Configuration
 twig:
-    debug:            %kernel.debug%
-    strict_variables: %kernel.debug%
+    debug:            "%kernel.debug%"
+    strict_variables: "%kernel.debug%"
     exception_controller: 'FOS\RestBundle\Controller\ExceptionController::showAction'
 
 # Assetic Configuration
 assetic:
-    debug:          %kernel.debug%
+    debug:          "%kernel.debug%"
     use_controller: false
     bundles:        [ ]
     #java: /usr/bin/java
@@ -116,28 +50,29 @@ doctrine_mongodb:
     connections:
         default:
             server: mongodb://localhost:27017
-            #server: mongodb://rockmongo.bpi1.inlead.dk:27017
+            # server: mongodb://%mongodb_user%:%mongodb_pass%@localhost:27017/%mongodb_db%
             options: {}
-    default_database: %mongodb_db%
+    default_database: "%mongodb_db%"
     document_managers:
         default:
             mappings:
-                BpiApiBundle: { type: yml, prefix: Bpi\ApiBundle\Domain }
-                gedmo_tree:
+                BpiApiBundle:
                     type: yml
-                    prefix: Gedmo\Tree\Document
-                    dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Tree/Document"
-                    alias: GedmoTree # this one is optional and will default to the name set for the mapping
-                    is_bundle: false
+                    prefix: Bpi\ApiBundle\Domain
+#                gedmo_tree:
+#                    type: yml
+#                    prefix: Gedmo\Tree\Document
+#                    dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Tree/Document"
+#                    alias: GedmoTree # this one is optional and will default to the name set for the mapping
+#                    is_bundle: false
 
-# TODO
-#mongo_db_migrations:
-#    collection_name: "migration_versions"
-#    database_name: "bpi"
-#    dir_name: "%kernel.root_dir%/../src/Bpi/ApiBundle/Resources/config/Migrations/MongoDB"
-#    script_dir_name: "%kernel.root_dir%/scripts"
-#    name: "Bpi APIbundle MongoDB Migrations"
-#    namespace: "Bpi\ApiBundle\Migrations\MongoDB"
+mongo_db_migrations:
+    collection_name: "migration_versions"
+    database_name: "%mongodb_db%"
+    dir_name: "%kernel.root_dir%/../src/Bpi/ApiBundle/Resources/config/Migrations/MongoDB"
+    script_dir_name: "%kernel.root_dir%/scripts"
+    name: "Bpi API bundle MongoDB Migrations"
+    namespace: "Bpi\\ApiBundle\\Migrations\\MongoDB"
 
 stof_doctrine_extensions:
     default_locale: en_US
@@ -148,18 +83,16 @@ stof_doctrine_extensions:
 nelmio_api_doc: ~
 
 sensio_framework_extra:
-    view:    { annotations: false }
-    router:  { annotations: true }
+    view:    { annotations: true }
+    router:  { annotations: false }
 
 fos_rest:
+    exception:
+        enabled: true
     service:
       view_handler: bpi.apibundle.rest.view_handler
     routing_loader:
         default_format: bpi
-    format_listener:
-        default_priorities: ['bpi', 'xml', 'json', 'html', '*/*']
-        fallback_format: xml
-        prefer_extension: true
     view:
         view_response_listener: true
         formats:
@@ -195,7 +128,7 @@ knp_gaufrette:
         assets:
             adapter: attachment
 swiftmailer:
-    transport: %mailer_transport%
-    host: %mailer_host%
-    username: %mailer_user%
-    password: %mailer_password%
+    transport: "%mailer_transport%"
+    host: "%mailer_host%"
+    username: "%mailer_user%"
+    password: "%mailer_password%"

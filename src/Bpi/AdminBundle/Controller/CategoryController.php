@@ -2,9 +2,17 @@
 
 namespace Bpi\AdminBundle\Controller;
 
+use Bpi\ApiBundle\Domain\Entity\Category;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route(path="/category")
+ */
 class CategoryController extends Controller
 {
     /**
@@ -17,12 +25,13 @@ class CategoryController extends Controller
     }
 
     /**
-     * @Template
+     * @Route(path="/", name="bpi_admin_category")
+     * @Template("BpiAdminBundle:Category:index.html.twig")
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-        $param = $this->getRequest()->query->get('sort');
-        $direction = $this->getRequest()->query->get('direction');
+        $param = $request->query->get('sort');
+        $direction = $request->query->get('direction');
 
         $query = $this->getRepository()->listAll($param, $direction);
 
@@ -30,72 +39,73 @@ class CategoryController extends Controller
 
         $pagination = $knpPaginator->paginate(
             $query,
-            $this->get('request')->query->get('page', 1),
+            $request->query->get('page', 1),
             50,
-            array(
+            [
                 'defaultSortFieldName' => 'category',
                 'defaultSortDirection' => 'asc',
-            )
+            ]
         );
 
-        return array('pagination' => $pagination);
+        return ['pagination' => $pagination];
     }
 
     /**
+     * @Route(path="/new", name="bpi_admin_category_new")
      * @Template("BpiAdminBundle:Category:form.html.twig")
      */
-    public function newAction()
+    public function newAction(Request $request)
     {
         $category = new \Bpi\ApiBundle\Domain\Entity\Category();
         $form = $this->createCategoryForm($category, true);
-        $request = $this->getRequest();
 
         if ($request->isMethod('POST')) {
-            $form->bind($request);
+            $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($category);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_category')
                 );
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
             'id' => null,
-        );
+        ];
     }
 
     /**
+     * @Route(path="/edit/{id}", name="bpi_admin_category_edit")
      * @Template("BpiAdminBundle:Category:form.html.twig")
      */
-    public function editAction($id)
+    public function editAction(Request $request, Category $category)
     {
-        $category = $this->getRepository()->find($id);
         $form = $this->createCategoryForm($category);
-        $request = $this->getRequest();
 
         if ($request->isMethod('POST')) {
-            $form->bind($request);
+            $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($category);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_category')
                 );
             }
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
-            'id' => $id,
-        );
+            'id' => $category->getId(),
+        ];
     }
 
     private function createCategoryForm($category)
     {
         $formBuilder = $this->createFormBuilder($category)
-            ->add('category', 'text')
-        ;
+            ->add('category', TextType::class)
+            ->add('save', SubmitType::class, ['attr' => ['class' => 'btn']]);
 
         return $formBuilder->getForm();
     }

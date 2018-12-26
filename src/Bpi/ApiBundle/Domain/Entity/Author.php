@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
@@ -64,7 +65,7 @@ class Author implements \Bpi\ApiBundle\Transform\IPresentable
      */
     public function getFullName()
     {
-        return ($this->firstname ? $this->firstname.' ' : '') . $this->lastname;
+        return ($this->firstname ? $this->firstname.' ' : '').$this->lastname;
     }
 
     /**
@@ -84,35 +85,40 @@ class Author implements \Bpi\ApiBundle\Transform\IPresentable
     {
         try {
             $entity = $document->currentEntity();
-        } catch(\RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             $entity = $document->createEntity('entity', 'author');
             $document->appendEntity($entity);
         }
 
-        $entity->addProperty($document->createProperty(
-            'author',
-            'string',
-            $this->getFullName()
-        ));
+        $entity->addProperty(
+            $document->createProperty(
+                'author',
+                'string',
+                $this->getFullName()
+            )
+        );
 
         if ($this->agency instanceof \Bpi\ApiBundle\Domain\Aggregate\Agency) {
             $this->agency->transform($document);
         }
     }
 
-    public function loadAgency(\Bpi\ApiBundle\Domain\Repository\AgencyRepository $repository) {
-        $this->agency = $repository->findOneBy(array('public_id' => $this->agency_id));
+    public function loadAgency(\Bpi\ApiBundle\Domain\Repository\AgencyRepository $repository)
+    {
+        $this->agency = $repository->findOneBy(['public_id' => $this->agency_id]);
     }
 
     /**
      * Set agencyId
      *
      * @param string $agencyId
+     *
      * @return self
      */
     public function setAgencyId($agencyId)
     {
         $this->agency_id = $agencyId;
+
         return $this;
     }
 
@@ -120,11 +126,13 @@ class Author implements \Bpi\ApiBundle\Transform\IPresentable
      * Set firstname
      *
      * @param string $firstname
+     *
      * @return self
      */
     public function setFirstname($firstname)
     {
         $this->firstname = $firstname;
+
         return $this;
     }
 
@@ -142,11 +150,13 @@ class Author implements \Bpi\ApiBundle\Transform\IPresentable
      * Set lastname
      *
      * @param string $lastname
+     *
      * @return self
      */
     public function setLastname($lastname)
     {
         $this->lastname = $lastname;
+
         return $this;
     }
 

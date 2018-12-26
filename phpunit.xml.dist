@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/5.2/phpunit.xsd"
     backupGlobals               = "false"
     backupStaticAttributes      = "false"
     colors                      = "true"
@@ -9,13 +11,15 @@
     processIsolation            = "false"
     stopOnFailure               = "false"
     syntaxCheck                 = "false"
-    bootstrap                   = "bootstrap.php.cache" >
+    bootstrap                   = "vendor/autoload.php">
+
+    <php>
+        <server name="KERNEL_DIR" value="app/" />
+    </php>
 
     <testsuites>
-        <testsuite name="BpiTests">
-            <file>../src/Bpi/ApiBundle/Tests/Service/Agency/Agency.php</file>
-            <file>../src/Bpi/ApiBundle/Tests/Service/Node/Node.php</file>
-            <file>../src/Bpi/ApiBundle/Tests/Service/Node/Syndicated.php</file>
+        <testsuite name="BpiApiTests">
+            <directory>src/Bpi/ApiBundle/Tests</directory>
         </testsuite>
     </testsuites>
 </phpunit>

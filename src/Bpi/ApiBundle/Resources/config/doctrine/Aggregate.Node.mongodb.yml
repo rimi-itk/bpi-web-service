@@ -33,7 +33,7 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
       reference: true
       type: one
       targetDocument: Bpi\ApiBundle\Domain\Aggregate\Node
-      strategy: pushAll
+      strategy: set
       cascade: all
       gedmo:
         - treeParent
@@ -49,25 +49,25 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
     author:
       embedded: true
       type: one
-      strategy: pushAll
+      strategy: set
       targetDocument: Bpi\ApiBundle\Domain\Entity\Author
 
     profile:
       embedded: true
       type: one
-      strategy: pushAll
+      strategy: set
       targetDocument: Bpi\ApiBundle\Domain\Entity\Profile
 
     resource:
       embedded: true
       type: one
-      strategy: pushAll
+      strategy: set
       targetDocument: Bpi\ApiBundle\Domain\Entity\Resource
 
     params:
       embedded: true
       type: one
-      strategy: pushAll
+      strategy: set
       targetDocument: Bpi\ApiBundle\Domain\Aggregate\Params
 
     category:
@@ -89,5 +89,5 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
     assets:
       embedded: true
       type: one
-      strategy: pushAll
+      strategy: set
       targetDocument: Bpi\ApiBundle\Domain\Aggregate\Assets

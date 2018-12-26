@@ -36,13 +36,12 @@ class Version20150905142442 extends AbstractMigration implements ContainerAwareI
             ->createQueryBuilder()
             ->field('deleted')->equals(true)
             ->getQuery()
-            ->execute()
-        ;
+            ->execute();
 
         $facetRepo = $dm->getRepository('BpiApiBundle:Entity\Facet');
 
         foreach ($deleted as $node) {
-            if(isset($node['_id'])) {
+            if (isset($node['_id'])) {
                 $facet = $facetRepo->findOneByNodeId((string)$node['_id']);
                 if ($facet) {
                     $dm->remove($facet);

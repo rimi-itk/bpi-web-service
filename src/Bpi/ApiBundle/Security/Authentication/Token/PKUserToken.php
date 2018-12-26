@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Security\Authentication\Token;
 
 use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
@@ -10,7 +11,7 @@ class PKUserToken extends AbstractToken
 {
     public $token;
 
-    public function __construct(array $roles = array())
+    public function __construct(array $roles = [])
     {
         parent::__construct($roles);
 

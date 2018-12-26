@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\RestMediaTypeBundle\Element;
 
 use JMS\Serializer\Annotation as Serializer;
@@ -85,6 +86,7 @@ class Property
 
     /**
      * @param string $type
+     *
      * @return bool
      */
     public function typeOf($type)

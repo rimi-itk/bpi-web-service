@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Domain\ValueObject;
 
 use Bpi\ApiBundle\Transform\IPresentable;
@@ -34,12 +35,14 @@ class Tag implements IValueObject, IPresentable
 
     /**
      * @param \Bpi\ApiBundle\Domain\ValueObject\Tag $tag
+     *
      * @return boolean
      */
     public function equals(IValueObject $tag)
     {
-        if (get_class($this) != get_class($tag))
+        if (get_class($this) != get_class($tag)) {
             return false;
+        }
 
         return $this->name() == $tag->name();
     }
@@ -58,11 +61,13 @@ class Tag implements IValueObject, IPresentable
      * Set name
      *
      * @param string $name
+     *
      * @return self
      */
     public function setName($name)
     {
         $this->name = $name;
+
         return $this;
     }
 

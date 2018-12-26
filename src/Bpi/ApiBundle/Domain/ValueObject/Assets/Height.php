@@ -2,8 +2,6 @@
 
 namespace Bpi\ApiBundle\Domain\ValueObject\Assets;
 
-
-
 /**
  * Bpi\ApiBundle\Domain\ValueObject\Assets\Height
  */
@@ -19,11 +17,13 @@ class Height
      * Set height
      *
      * @param string $height
+     *
      * @return self
      */
     public function setHeight($height)
     {
         $this->height = $height;
+
         return $this;
     }
 

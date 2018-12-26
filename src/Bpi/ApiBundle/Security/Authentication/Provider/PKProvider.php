@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Security\Authentication\Provider;
 
 use Symfony\Component\Security\Core\Authentication\Provider\AuthenticationProviderInterface;
@@ -27,6 +28,7 @@ class PKProvider implements AuthenticationProviderInterface
 
         $token->setAuthenticated(true);
         $token->setUser($user);
+
         return $token;
     }
 

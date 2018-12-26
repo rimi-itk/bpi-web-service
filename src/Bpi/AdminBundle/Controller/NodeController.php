@@ -2,10 +2,22 @@
 
 namespace Bpi\AdminBundle\Controller;
 
+use Bpi\ApiBundle\Domain\Aggregate\Node;
 use Bpi\ApiBundle\Domain\Form\TagType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * @Route(path="/node")
+ */
 class NodeController extends Controller
 {
     /**
@@ -18,288 +30,275 @@ class NodeController extends Controller
     }
 
     /**
+     * @Route(path="/", name="bpi_admin_node")
      * @Template("BpiAdminBundle:Node:index.html.twig")
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-
-        $param = $this->getRequest()->query->get('sort');
-        $direction = $this->getRequest()->query->get('direction');
-        $search = $this->getRequest()->query->get('search');
+        $param = $request->query->get('sort');
+        $direction = $request->query->get('direction');
+        $search = $request->query->get('search');
         $query = $this->getRepository()->listAll($param, $direction, $search);
 
         $knpPaginator = $this->get('knp_paginator');
 
         $pagination = $knpPaginator->paginate(
             $query,
-            $this->get('request')->query->get('page', 1),
+            $request->query->get('page', 1),
             50,
-            array(
+            [
                 'defaultSortFieldName' => 'resource.title',
                 'defaultSortDirection' => 'desc',
-            )
+            ]
         );
 
-        return array('pagination' => $pagination);
+        return ['pagination' => $pagination];
     }
 
     /**
-     * Show deleted nodes
-     *
+     * @Route(path="/deleted", name="bpi_admin_node_deleted")
      * @Template("BpiAdminBundle:Node:index.html.twig")
      */
-    public function deletedAction()
+    public function deletedAction(Request $request)
     {
 
         $query = $this->getRepository()->listAll(null, null, null, true);
         $knpPaginator = $this->get('knp_paginator');
 
         $pagination = $knpPaginator->paginate(
-          $query,
-          $this->get('request')->query->get('page', 1),
-          50,
-          array(
-            'defaultSortFieldName' => 'resource.title',
-            'defaultSortDirection' => 'desc',
-          )
+            $query,
+            $request->query->get('page', 1),
+            50,
+            [
+                'defaultSortFieldName' => 'resource.title',
+                'defaultSortDirection' => 'desc',
+            ]
         );
 
-        return array(
+        return [
             'pagination' => $pagination,
             'delete_lable' => 'Undelete',
             'delete_url' => 'bpi_admin_node_restore',
-        );
+        ];
     }
 
     /**
+     * @Route(path="/edit/{id}", name="bpi_admin_node_edit")
      * @Template("BpiAdminBundle:Node:form.html.twig")
      */
-    public function newAction()
+    public function editAction(Request $request, Node $node)
     {
-        $node = new \Bpi\ApiBundle\Domain\Aggregate\Node();
-        $form = $this->createNodeForm($node, true);
-        $request = $this->getRequest();
-
-        if ($request->isMethod('POST')) {
-            $form->bind($request);
-            if ($form->isValid()) {
-                $this->getRepository()->save($node);
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_node')
-                );
-            }
-
-        }
-
-        return array(
-            'form' => $form->createView(),
-            'id' => null,
-        );
-    }
-
-    /**
-     * @Template("BpiAdminBundle:Node:form.html.twig")
-     */
-    public function editAction($id)
-    {
-        $node = $this->getRepository()->find($id);
         $form = $this->createNodeForm($node);
-        $request = $this->getRequest();
-        $dm = $this->get('doctrine_mongodb.odm.document_manager');
+//        $dm = $this->get('doctrine_mongodb.odm.document_manager');
 
         if ($request->isMethod('POST')) {
             $submittedNode = $request->get('form');
             $changeAuthorFirstName = $node->getAuthorFirstName() != $submittedNode['authorFirstName'];
             $changeAuthorLastName = $node->getAuthorLastName() != $submittedNode['authorLastName'];
             $changeAuthor = $changeAuthorFirstName || $changeAuthorLastName;
-            $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
-            $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
+//            $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
+//            $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
 
-            $submittedTags = array();
-            foreach ($submittedNode['tags'] as $tag) {
-                $submittedTags[] = $tag['tag'];
-            }
+            $submittedTags = [];
+//            if (!empty($submittedNode['tags']) && is_array($submittedNode['tags'])) {
+//                foreach ($submittedNode['tags'] as $tag) {
+//                    $submittedTags[] = $tag['tag'];
+//                }
+//            }
 
-            $checks = array(
-                'author' => array(
+
+            $checks = [
+                'author' => [
                     'check' => $changeAuthor,
                     'oldValue' => $node->getAuthor()->getFullName(),
-                    'newValue' => ($submittedNode['authorFirstName'] ? $submittedNode['authorFirstName'] . ' ' : '') . $submittedNode['authorLastName']
-                ),
-                'category' => array(
-                    'check' => $changeCategory,
-                    'oldValue' => $node->getCategory()->getCategory(),
-                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Category')->find($submittedNode['category'])->getCategory()
-                ),
-                'audience' => array(
-                    'check' => $changeAudience,
-                    'oldValue' => $node->getAudience()->getAudience(),
-                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Audience')->find($submittedNode['audience'])->getAudience()
-                ),
-            );
+                    'newValue' => ($submittedNode['authorFirstName'] ? $submittedNode['authorFirstName'].' ' : '').$submittedNode['authorLastName'],
+                ],
+//                'category' => array(
+//                    'check' => $changeCategory,
+//                    'oldValue' => $node->getCategory()->getCategory(),
+//                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Category')->find($submittedNode['category'])->getCategory()
+//                ),
+//                'audience' => array(
+//                    'check' => $changeAudience,
+//                    'oldValue' => $node->getAudience()->getAudience(),
+//                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Audience')->find($submittedNode['audience'])->getAudience()
+//                ),
+            ];
 
-            $changes = array();
+            $changes = [];
             foreach ($checks as $key => $check) {
                 if ($check['check']) {
-                    $changes[$key] = array(
+                    $changes[$key] = [
                         'oldValue' => $check['oldValue'],
-                        'newValue' => $check['newValue']
-                    );
+                        'newValue' => $check['newValue'],
+                    ];
                 }
             }
             $changes['nodeId'] = $node->getId();
             $changes['tags'] = $submittedTags;
 
-            $form->bind($request);
+            $form->handleRequest($request);
             if ($form->isValid()) {
                 $modifyTime = new \DateTime();
                 $node->setMtime($modifyTime);
-                $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
-                    ->getRepository('BpiApiBundle:Entity\Facet');
-                $facetRepository->updateFacet($changes);
+                /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
+//                $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
+//                    ->getRepository('BpiApiBundle:Entity\Facet');
+//                $facetRepository->updateFacet($changes);
 
                 $this->getRepository()->save($node);
+
                 return $this->redirect(
                     $this->generateUrl('bpi_admin_node')
                 );
             }
         }
 
-        $assets = array();
+        $assets = [];
         $nodeAssets = $node->getAssets();
-        if(!empty($nodeAssets)) {
+        if (!empty($nodeAssets)) {
             $assets = $this->prepareAssets($nodeAssets->getCollection());
         }
 
-        return array(
+        return [
             'form' => $form->createView(),
-            'id' => $id,
-            'assets' => $assets
+            'id' => $node->getId(),
+            'assets' => $assets,
+        ];
+    }
+
+    /**
+     * @Route(path="/details/{id}", name="bpi_admin_node_details")
+     * @Template("BpiAdminBundle:Node:details.html.twig")
+     */
+    public function detailsAction(Node $node)
+    {
+        return [
+            'node' => $node,
+        ];
+    }
+
+    /**
+     * @Route(path="/delete/{id}", name="bpi_admin_node_delete")
+     */
+    public function deleteAction(Node $node)
+    {
+        $this->getRepository()->delete($node->getId(), 'ADMIN');
+        $this->get('doctrine.odm.mongodb.document_manager')
+            ->getRepository('BpiApiBundle:Entity\Facet')
+            ->delete($node->getId());
+
+        return $this->redirect(
+            $this->generateUrl("bpi_admin_node", [])
         );
     }
 
     /**
-     * @Template("BpiAdminBundle:Node:details.html.twig")
+     * @Route(path="/restore/{id}", name="bpi_admin_node_restore")
      */
-    public function detailsAction($id)
+    public function restoreAction(Node $node)
     {
-        $node = $this->getRepository()->find($id);
-        return array(
-            'node' => $node,
-        );
-    }
+        $this->getRepository()->restore($node->getId(), 'ADMIN');
 
-    public function deleteAction($id)
-    {
-        $this->getRepository()->delete($id, 'ADMIN');
-        $this->get('doctrine.odm.mongodb.document_manager')
-            ->getRepository('BpiApiBundle:Entity\Facet')
-            ->delete($id)
-        ;
-        return $this->redirect(
-            $this->generateUrl("bpi_admin_node", array())
-        );
-    }
+        /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
+        $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
+            ->getRepository('BpiApiBundle:Entity\Facet');
+        $facetRepository->prepareFacet($node);
 
-    public function restoreAction($id)
-    {
-        $this->getRepository()->restore($id, 'ADMIN');
-        $node = $this->getRepository()->findOneById($id);
-        $this->get('doctrine.odm.mongodb.document_manager')
-          ->getRepository('BpiApiBundle:Entity\Facet')
-          ->prepareFacet($node)
-        ;
         return $this->redirect(
-            $this->generateUrl("bpi_admin_node", array())
+            $this->generateUrl("bpi_admin_node", [])
         );
     }
 
     private function createNodeForm($node, $new = false)
     {
-        $formBuilder = $this->createFormBuilder($node, array('csrf_protection' => false))
+        $formBuilder = $this->createFormBuilder($node, ['csrf_protection' => false])
             ->add(
                 'authorFirstName',
-                'text',
-                array(
+                TextType::class,
+                [
                     'label' => 'Author first name',
-                    'required' => true
-                )
+                    'required' => true,
+                ]
             )
             ->add(
                 'authorLastName',
-                'text',
-                array(
+                TextType::class,
+                [
                     'label' => 'Author last name',
-                    'required' => false
-                )
+                    'required' => false,
+                ]
             )
             ->add(
                 'authorAgencyId',
-                'text',
-                array(
+                TextType::class,
+                [
                     'label' => 'Author agency id',
                     'required' => true,
-                    'disabled' => true
-                )
+                    'disabled' => true,
+                ]
             )
             ->add(
                 'ctime',
-                'datetime',
-                array(
+                DateType::class,
+                [
                     'label' => 'Creation time',
                     'required' => true,
-                    'date_widget' => 'single_text',
-                    'time_widget' => 'single_text',
-                    'disabled' => true
-                )
+                    'widget' => 'single_text',
+                    'disabled' => true,
+                ]
             )
             ->add(
                 'mtime',
-                'datetime',
-                array(
+                DateType::class,
+                [
                     'label' => 'Modify time',
                     'required' => true,
-                    'date_widget' => 'single_text',
-                    'time_widget' => 'single_text',
-                    'disabled' => true
-                )
+                    'widget' => 'single_text',
+                    'disabled' => true,
+                ]
             )
-            ->add('title', 'text')
-            ->add('teaser', 'textarea')->setRequired(false)
-            ->add('body', 'textarea')->setRequired(false)
-            ->add(
-                'category',
-                'document',
-                array(
-                    'class' => 'BpiApiBundle:Entity\Category',
-                    'property' => 'category',
-                )
-            )
-            ->add(
-                'audience',
-                'document',
-                array(
-                    'class' => 'BpiApiBundle:Entity\Audience',
-                    'property' => 'audience'
-                )
-            )
+            ->add('title', TextType::class)
+            ->add('teaser', TextareaType::class)->setRequired(false)
+            ->add('body', TextareaType::class)->setRequired(false)
+//            ->add(
+//                'category',
+//                EntityType::class,
+//                array(
+//                    'class' => Category::class,
+//                    'choice_label' => 'category',
+//                )
+//            )
+//            ->add(
+//                'audience',
+//                EntityType::class,
+//                array(
+//                    'class' => 'BpiApiBundle:Entity\Audience',
+//                    'choice_label' => 'audience'
+//                )
+//            )
             ->add(
                 'tags',
-                'collection',
-                array(
-                    'type' => new TagType(),
+                CollectionType::class,
+                [
+                    'entry_type' => TagType::class,
                     'allow_add' => true,
                     'allow_delete' => true,
-                    'options' => array(
-                        'required' => false
-                    )
-                )
-            )
-        ;
+                    'required' => false,
+                ]
+            );
 
         if (!$new) {
-            $formBuilder->add('deleted', 'checkbox', array('required' => false));
+            $formBuilder->add(
+                'deleted',
+                CheckboxType::class,
+                [
+                    'required' => false,
+                ]
+            );
         }
+
+        $formBuilder->add('save', SubmitType::class, ['attr' => ['class' => 'btn']]);
 
         return $formBuilder->getForm();
     }
@@ -308,14 +307,15 @@ class NodeController extends Controller
      * Filter assets on images and documents
      *
      * @param $nodeAssets
+     *
      * @return array
      */
     protected function prepareAssets($nodeAssets)
     {
-        $imageExtensions = array('jpg', 'jpeg', 'png', 'gif');
-        $assets =array();
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        $assets = [];
         foreach ($nodeAssets as $asset) {
-            if (in_array($asset->getExtension(), $imageExtensions)){
+            if (in_array($asset->getExtension(), $imageExtensions)) {
                 $assets['images'][] = $asset;
             } else {
                 $assets['documents'][] = $asset;
@@ -323,6 +323,5 @@ class NodeController extends Controller
         }
 
         return $assets;
-
     }
 }

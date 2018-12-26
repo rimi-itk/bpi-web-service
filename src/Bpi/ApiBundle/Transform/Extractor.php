@@ -1,4 +1,5 @@
 <?php
+
 namespace Bpi\ApiBundle\Transform;
 
 use Bpi\RestMediaTypeBundle\Document;
@@ -23,6 +24,7 @@ class Extractor
      * Extract entity by its name
      *
      * @param string $entity_name
+     *
      * @return object extracted domain model
      * @throws \RuntimeException
      */
@@ -31,8 +33,9 @@ class Extractor
         $classname = $this->buildClassName($entity_name);
         $extractor = new $classname($this->doc);
 
-        if (!($extractor instanceof Extractor\IExtractor))
+        if (!($extractor instanceof Extractor\IExtractor)) {
             throw new \RuntimeException('Given entity name ['.$entity_name.'] has no mapped extractor');
+        }
 
         return $extractor->extract();
     }
@@ -40,8 +43,10 @@ class Extractor
     protected function buildClassName($name)
     {
         $classname = __NAMESPACE__.'\\Extractor\\';
-        foreach (explode('.', $name) as $part)
+        foreach (explode('.', $name) as $part) {
             $classname .= ucfirst($part).'\\';
+        }
+
         return rtrim($classname, '\\');
     }
 }
