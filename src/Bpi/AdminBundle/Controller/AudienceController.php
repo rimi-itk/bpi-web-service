@@ -58,17 +58,14 @@ class AudienceController extends Controller
     public function newAction(Request $request)
     {
         $audience = new Audience();
-        $form = $this->createAudienceForm($audience, true);
+        $form = $this->createAudienceForm($audience);
 
-        if ($request->isMethod('POST')) {
-            $form->handleRequest($request);
-            if ($form->isValid()) {
-                $this->getRepository()->save($audience);
+        $form->handleRequest($request);
 
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_audience')
-                );
-            }
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getRepository()->save($audience);
+
+            return $this->redirectToRoute('bpi_admin_audience');
         }
 
         return [
@@ -105,7 +102,7 @@ class AudienceController extends Controller
     private function createAudienceForm($audience)
     {
         $formBuilder = $this->createFormBuilder($audience)
-            ->add('audience', TextType::class)
+            ->add('audience', TextType::class, ['label' => 'Audience name'])
             ->add('save', SubmitType::class, ['attr' => ['class' => 'btn']]);
 
         return $formBuilder->getForm();
