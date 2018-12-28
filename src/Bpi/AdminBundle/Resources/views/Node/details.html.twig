@@ -21,6 +21,14 @@
         <td>{{ node.audience.audience }}</td>
     </tr>
     <tr>
+        <td>Materials</td>
+        <td>
+            {% for material in node.resource.materials %}
+                <span>{{ material }}</span><br />
+            {% endfor %}
+        </td>
+    </tr>
+    <tr>
         <td>Deleted</td>
         <td>{% if node.deleted %}TRUE{% else %}FALSE{% endif %}</td>
     </tr>

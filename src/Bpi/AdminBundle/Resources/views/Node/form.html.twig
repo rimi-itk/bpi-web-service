@@ -33,15 +33,20 @@
         </div>
         <div class="span6">
             <h3>Node vocabularies</h3>
-            {#{{ form_row(form.category) }}#}
-            {#{{ form_row(form.audience) }}#}
+            {{ form_row(form.category) }}
+            {{ form_row(form.audience) }}
 
             <p>Tags</p>
             <ul class="tags" data-prototype="{{ form_widget(form.tags.vars.prototype)|e }}">
                 {% for tag in form.tags %}
-                    <li>{{ form_widget(tag.tag) }}</li>
+                    <li>{{ form_row(tag.tag) }}</li>
                 {% endfor %}
             </ul>
+        </div>
+    </div>
+    <div class="row">
+        <div class="span12">
+            {{ form_row(form.deleted) }}
         </div>
     </div>
     <div class="row">
@@ -62,7 +67,5 @@
             {% endif %}
         </div>
     </div>
-
-    {{ form_widget(form) }}
 {{ form_end(form) }}
 {% endblock %}

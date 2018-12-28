@@ -6,6 +6,7 @@ use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -51,6 +52,18 @@ class StatisticsController extends Controller
                 'choices' => $agenciesChoice,
                 'multiple' => true,
             ])
+            ->add('excludeDeleted', CheckboxType::class, [
+                'required' => false,
+                'label_attr' => [
+                    'style' => 'display: inline; margin-right: 5px;'
+                ]
+            ])
+            ->add('excludeInternal', CheckboxType::class, [
+                'required' => false,
+                'label_attr' => [
+                    'style' => 'display: inline; margin-right: 5px;'
+                ]
+            ])
             ->add('show', SubmitType::class, [
                 'attr' => ['class' => 'btn'],
             ]);
@@ -64,17 +77,38 @@ class StatisticsController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
             $dm = $this->get('doctrine_mongodb');
-            /** @var \Bpi\ApiBundle\Domain\Repository\HistoryRepository $historyRepository */
-            $historyRepository = $dm->getRepository(History::class);
 
             $data = $form->getData();
+
+            /** @var \Bpi\ApiBundle\Domain\Repository\AgencyRepository $agencyRepository */
+            $agencyRepository = $dm->getRepository(Agency::class);
+            $qb = $agencyRepository->createQueryBuilder();
+
+            $qb->field('public_id')->in($data['agencies']);
+            if ($data['excludeDeleted']) {
+                $qb->addAnd($qb->expr()->field('deleted')->equals(false));
+            }
+
+            if ($data['excludeInternal']) {
+                $qb->addAnd($qb->expr()->field('internal')->equals(false));
+            }
+
+            $agencies = $qb->getQuery()->execute();
+
+            $agencyIds = [];
+            foreach ($agencies as $agency) {
+                $agencyIds[] = $agency->getPublicId();
+            }
+
             $data['dateTo']->modify('+23 hours 59 minutes');
 
+            /** @var \Bpi\ApiBundle\Domain\Repository\HistoryRepository $historyRepository */
+            $historyRepository = $dm->getRepository(History::class);
             $statistics = $historyRepository
                 ->getStatisticsByDateRangeForAgency(
                     $data['dateFrom'],
                     $data['dateTo'],
-                    $data['agency']
+                    $agencyIds
                 )->getStats();
         }
 

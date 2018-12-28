@@ -20,8 +20,8 @@ class CategoryController extends Controller
      */
     private function getRepository()
     {
-        return $this->get('doctrine.odm.mongodb.document_manager')
-            ->getRepository('BpiApiBundle:Entity\Category');
+        return $this->get('doctrine_mongodb')
+            ->getRepository(Category::class);
     }
 
     /**
@@ -56,17 +56,15 @@ class CategoryController extends Controller
      */
     public function newAction(Request $request)
     {
-        $category = new \Bpi\ApiBundle\Domain\Entity\Category();
-        $form = $this->createCategoryForm($category, true);
+        $category = new Category();
+        $form = $this->createCategoryForm($category);
 
         if ($request->isMethod('POST')) {
             $form->handleRequest($request);
             if ($form->isValid()) {
                 $this->getRepository()->save($category);
 
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_category')
-                );
+                return $this->redirectToRoute('bpi_admin_category');
             }
         }
 
@@ -89,9 +87,7 @@ class CategoryController extends Controller
             if ($form->isValid()) {
                 $this->getRepository()->save($category);
 
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_category')
-                );
+                return $this->redirectToRoute('bpi_admin_category');
             }
         }
 
@@ -99,6 +95,36 @@ class CategoryController extends Controller
             'form' => $form->createView(),
             'id' => $category->getId(),
         ];
+    }
+
+    /**
+     * @Route(path="/disable/{id}", name="bpi_admin_category_disable")
+     */
+    public function disableAction(Category $category)
+    {
+        /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
+        $dm = $this->get('doctrine_mongodb')->getManager();
+
+        $category->setDisabled(true);
+
+        $dm->flush();
+
+        return $this->redirectToRoute('bpi_admin_category');
+    }
+
+    /**
+     * @Route(path="/enable/{id}", name="bpi_admin_category_enable")
+     */
+    public function enableAction(Category $category)
+    {
+        /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
+        $dm = $this->get('doctrine_mongodb')->getManager();
+
+        $category->setDisabled(false);
+
+        $dm->flush();
+
+        return $this->redirectToRoute('bpi_admin_category');
     }
 
     private function createCategoryForm($category)

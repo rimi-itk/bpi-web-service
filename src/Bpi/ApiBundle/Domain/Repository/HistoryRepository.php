@@ -6,8 +6,7 @@ use Doctrine\ODM\MongoDB\DocumentRepository;
 use Bpi\ApiBundle\Domain\Entity\Statistics;
 
 /**
- * HistoryRepository
- *
+ * HistoryRepository.
  */
 class HistoryRepository extends DocumentRepository
 {

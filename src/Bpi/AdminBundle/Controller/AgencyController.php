@@ -23,8 +23,9 @@ class AgencyController extends Controller
      */
     private function getRepository()
     {
-        return $this->get('doctrine_mongodb')
-            ->getRepository('BpiApiBundle:Aggregate\Agency');
+        return $this
+            ->get('doctrine_mongodb')
+            ->getRepository(Agency::class);
     }
 
     /**
@@ -108,9 +109,7 @@ class AgencyController extends Controller
             if ($form->isValid()) {
                 $this->getRepository()->save($agency);
 
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_agency')
-                );
+                return $this->redirectToRoute('bpi_admin_agency');
             }
         }
 
@@ -164,16 +163,14 @@ class AgencyController extends Controller
             if ($form->isValid()) {
                 if ($changeInternal || $changePublicId) {
                     $facetRepository = $this
-                        ->get('doctrine.odm.mongodb.document_manager')
+                        ->get('doctrine_mongodb')
                         ->getRepository(Facet::class);
                     $facetRepository->updateFacet($changes);
                 }
 
                 $this->getRepository()->save($agency);
 
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_agency')
-                );
+                return $this->redirectToRoute('bpi_admin_agency');
             }
         }
 
@@ -201,9 +198,7 @@ class AgencyController extends Controller
     {
         $this->getRepository()->delete($agency->getId());
 
-        return $this->redirect(
-            $this->generateUrl("bpi_admin_agency", [])
-        );
+        return $this->redirectToRoute('bpi_admin_agency');
     }
 
     /**
@@ -213,9 +208,7 @@ class AgencyController extends Controller
     {
         $this->getRepository()->purge($agency->getId());
 
-        return $this->redirect(
-            $this->generateUrl("bpi_admin_agency", [])
-        );
+        return $this->redirectToRoute('bpi_admin_agency');
     }
 
     /**
@@ -225,9 +218,7 @@ class AgencyController extends Controller
     {
         $this->getRepository()->restore($agency->getId());
 
-        return $this->redirect(
-            $this->generateUrl("bpi_admin_agency", [])
-        );
+        return $this->redirectToRoute('bpi_admin_agency');
     }
 
     /**

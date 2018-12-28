@@ -30,7 +30,6 @@ class AudienceController extends Controller
      */
     public function indexAction(Request $request)
     {
-
         $param = $request->query->get('sort');
         $direction = $request->query->get('direction');
 
@@ -97,6 +96,34 @@ class AudienceController extends Controller
             'form' => $form->createView(),
             'id' => $audience->getId(),
         ];
+    }
+
+    /**
+     * @Route(path="/disable/{id}", name="bpi_admin_audience_disable")
+     */
+    public function disableAction(Audience $audience) {
+        /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
+        $dm = $this->get('doctrine_mongodb')->getManager();
+
+        $audience->setDisabled(true);
+
+        $dm->flush();
+
+        return $this->redirectToRoute('bpi_admin_audience');
+    }
+
+    /**
+     * @Route(path="/enable/{id}", name="bpi_admin_audience_enable")
+     */
+    public function enableAction(Audience $audience) {
+        /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
+        $dm = $this->get('doctrine_mongodb')->getManager();
+
+        $audience->setDisabled(false);
+
+        $dm->flush();
+
+        return $this->redirectToRoute('bpi_admin_audience');
     }
 
     private function createAudienceForm($audience)
