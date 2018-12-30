@@ -22,4 +22,12 @@
             <directory>src/Bpi/ApiBundle/Tests</directory>
         </testsuite>
     </testsuites>
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">src/Bpi/ApiBundle/Controller</directory>
+            <exclude>
+                <file>src/Bpi/ApiBundle/Controller/BpiRequestParamSanitizerTrait.php</file>
+            </exclude>
+        </whitelist>
+    </filter>
 </phpunit>

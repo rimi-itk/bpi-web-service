@@ -384,8 +384,8 @@ class RestController extends FOSRestController
         $agencyId = $this->getUser()->getAgencyId()->id();
 
         // @todo Add input validation
-        $dateFrom = new \DateTime($request->get('dateFrom'));
-        $dateTo = (new \DateTime($request->get('dateTo')))->modify('+23 hours 59 minutes');
+        $dateFrom = new \DateTime($request->get('dateFrom', date('Y-m-d')));
+        $dateTo = (new \DateTime($request->get('dateTo', date('Y-m-d'))))->modify('+23 hours 59 minutes');
 
         /** @var \Bpi\ApiBundle\Domain\Repository\HistoryRepository $repo */
         $repo = $this->getRepository('BpiApiBundle:Entity\History');
