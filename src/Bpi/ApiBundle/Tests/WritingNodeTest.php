@@ -7,6 +7,7 @@ use Bpi\ApiBundle\DataFixtures\MongoDB\AudienceFixtures;
 use Bpi\ApiBundle\DataFixtures\MongoDB\CategoryFixtures;
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Aggregate\Node;
+use Bpi\ApiBundle\Domain\Entity\Tag;
 use Faker\Factory;
 
 class WritingNodeTest extends AbstractFixtureAwareBpiTest
@@ -67,7 +68,7 @@ class WritingNodeTest extends AbstractFixtureAwareBpiTest
     /**
      *
      */
-    public function testPushBareMinimum()
+    public function testPush()
     {
         /** @var \Bpi\ApiBundle\Domain\Aggregate\Agency $agency */
         $agency = $this->registry->getRepository(Agency::class)
@@ -77,6 +78,8 @@ class WritingNodeTest extends AbstractFixtureAwareBpiTest
                 ]
             );
         $this->assertNotEmpty($agency);
+
+        $tags = ['alpha', 'beta', 'gamma', 'pi', 'rho'];
 
         $payload = [
             'agency_id' => $agency->getPublicId(),
@@ -90,6 +93,8 @@ class WritingNodeTest extends AbstractFixtureAwareBpiTest
             'type' => $this->faker->name,
             'category' => 'Litteratur',
             'audience' => 'Voksne',
+            'tags' => implode(',', $tags)
+            // TODO: Add images payload.
         ];
 
         $this->client->request(
@@ -129,6 +134,13 @@ class WritingNodeTest extends AbstractFixtureAwareBpiTest
         $this->assertEquals($payload['type'], $nodeEntity->getType());
         $this->assertEquals($payload['category'], $nodeEntity->getCategory()->getCategory());
         $this->assertEquals($payload['audience'], $nodeEntity->getAudience()->getAudience());
+
+        /** @var Tag[] $nodeEntityTags */
+        $nodeEntityTags = $nodeEntity->getTags();
+        foreach ($nodeEntityTags as $nodeEntityTag) {
+            $this->assertTrue(in_array($nodeEntityTag->getTag(), $tags));
+        }
+        $this->assertCount(count($tags), $nodeEntityTags);
     }
 
     /**

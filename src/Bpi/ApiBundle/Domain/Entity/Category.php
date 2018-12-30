@@ -28,6 +28,7 @@ class Category implements IPresentable
     public function __construct($category = null)
     {
         $this->setCategory($category);
+        $this->setDisabled(false);
     }
 
     /**

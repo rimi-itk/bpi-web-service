@@ -28,6 +28,7 @@ class Audience implements IPresentable
     public function __construct($audience = null)
     {
         $this->setAudience($audience);
+        $this->setDisabled(false);
     }
 
     /**
