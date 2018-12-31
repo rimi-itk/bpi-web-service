@@ -384,12 +384,12 @@ class RestController extends FOSRestController
         $agencyId = $this->getUser()->getAgencyId()->id();
 
         // @todo Add input validation
-        $dateFrom = $request->get('dateFrom');
-        $dateTo = $request->get('dateTo');
+        $dateFrom = new \DateTime($request->get('dateFrom', date('Y-m-d')));
+        $dateTo = (new \DateTime($request->get('dateTo', date('Y-m-d'))))->modify('+23 hours 59 minutes');
 
         /** @var \Bpi\ApiBundle\Domain\Repository\HistoryRepository $repo */
         $repo = $this->getRepository('BpiApiBundle:Entity\History');
-        $stats = $repo->getStatisticsByDateRangeForAgency($dateFrom, $dateTo, $agencyId);
+        $stats = $repo->getStatisticsByDateRangeForAgency($dateFrom, $dateTo, [$agencyId]);
 
         /** @var \Bpi\ApiBundle\Transform\Presentation $transform */
         $transform = $this->get('bpi.presentation.transformer');
@@ -763,8 +763,14 @@ class RestController extends FOSRestController
     {
         $document = $this->get('bpi.presentation.document');
 
-        $audiences = $this->getRepository('BpiApiBundle:Entity\Audience')->findAll();
-        $categories = $this->getRepository('BpiApiBundle:Entity\Category')->findAll();
+        /** @var Audience[] $audiences */
+        $audiences = $this->getRepository(Audience::class)->findBy([
+            'disabled' => false,
+        ]);
+        /** @var Category[] $categories */
+        $categories = $this->getRepository(Category::class)->findBy([
+            'disabled' => false,
+         ]);
 
         foreach ($audiences as $audience) {
             $audience->transform($document);

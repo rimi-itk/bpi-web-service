@@ -34,6 +34,7 @@ class CategoryFixtures extends Fixture implements RandomFixtureReferenceInterfac
         foreach ($categories as $reference => $category) {
             $categoryFixture = new Category();
             $categoryFixture->setCategory($category);
+            $categoryFixture->setDisabled(false);
 
             $manager->persist($categoryFixture);
 

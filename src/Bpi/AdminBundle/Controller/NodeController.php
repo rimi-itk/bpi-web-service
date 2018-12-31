@@ -3,7 +3,11 @@
 namespace Bpi\AdminBundle\Controller;
 
 use Bpi\ApiBundle\Domain\Aggregate\Node;
+use Bpi\ApiBundle\Domain\Entity\Category;
+use Bpi\ApiBundle\Domain\Entity\Facet;
 use Bpi\ApiBundle\Domain\Form\TagType;
+use Bpi\ApiBundle\Domain\Repository\AudienceRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -25,8 +29,8 @@ class NodeController extends Controller
      */
     private function getRepository()
     {
-        return $this->get('doctrine.odm.mongodb.document_manager')
-            ->getRepository('BpiApiBundle:Aggregate\Node');
+        return $this->get('doctrine_mongodb')
+            ->getRepository(Node::class);
     }
 
     /**
@@ -89,22 +93,23 @@ class NodeController extends Controller
     public function editAction(Request $request, Node $node)
     {
         $form = $this->createNodeForm($node);
-//        $dm = $this->get('doctrine_mongodb.odm.document_manager');
+        /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
+        $dm = $this->get('doctrine_mongodb')->getManager();
 
         if ($request->isMethod('POST')) {
             $submittedNode = $request->get('form');
             $changeAuthorFirstName = $node->getAuthorFirstName() != $submittedNode['authorFirstName'];
             $changeAuthorLastName = $node->getAuthorLastName() != $submittedNode['authorLastName'];
             $changeAuthor = $changeAuthorFirstName || $changeAuthorLastName;
-//            $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
-//            $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
+            $changeCategory = $node->getCategory()->getId() != $submittedNode['category'];
+            $changeAudience = $node->getAudience()->getId() != $submittedNode['audience'];
 
             $submittedTags = [];
-//            if (!empty($submittedNode['tags']) && is_array($submittedNode['tags'])) {
-//                foreach ($submittedNode['tags'] as $tag) {
-//                    $submittedTags[] = $tag['tag'];
-//                }
-//            }
+            if (!empty($submittedNode['tags']) && is_array($submittedNode['tags'])) {
+                foreach ($submittedNode['tags'] as $tag) {
+                    $submittedTags[] = $tag['tag'];
+                }
+            }
 
 
             $checks = [
@@ -113,16 +118,16 @@ class NodeController extends Controller
                     'oldValue' => $node->getAuthor()->getFullName(),
                     'newValue' => ($submittedNode['authorFirstName'] ? $submittedNode['authorFirstName'].' ' : '').$submittedNode['authorLastName'],
                 ],
-//                'category' => array(
-//                    'check' => $changeCategory,
-//                    'oldValue' => $node->getCategory()->getCategory(),
-//                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Category')->find($submittedNode['category'])->getCategory()
-//                ),
-//                'audience' => array(
-//                    'check' => $changeAudience,
-//                    'oldValue' => $node->getAudience()->getAudience(),
-//                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Audience')->find($submittedNode['audience'])->getAudience()
-//                ),
+                'category' => array(
+                    'check' => $changeCategory,
+                    'oldValue' => $node->getCategory()->getCategory(),
+                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Category')->find($submittedNode['category'])->getCategory()
+                ),
+                'audience' => array(
+                    'check' => $changeAudience,
+                    'oldValue' => $node->getAudience()->getAudience(),
+                    'newValue' => $dm->getRepository('BpiApiBundle:Entity\Audience')->find($submittedNode['audience'])->getAudience()
+                ),
             ];
 
             $changes = [];
@@ -142,15 +147,13 @@ class NodeController extends Controller
                 $modifyTime = new \DateTime();
                 $node->setMtime($modifyTime);
                 /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
-//                $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
-//                    ->getRepository('BpiApiBundle:Entity\Facet');
-//                $facetRepository->updateFacet($changes);
+                $facetRepository = $this->get('doctrine_mongodb')
+                    ->getRepository('BpiApiBundle:Entity\Facet');
+                $facetRepository->updateFacet($changes);
 
                 $this->getRepository()->save($node);
 
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_node')
-                );
+                return $this->redirectToRoute('bpi_admin_node');
             }
         }
 
@@ -184,13 +187,11 @@ class NodeController extends Controller
     public function deleteAction(Node $node)
     {
         $this->getRepository()->delete($node->getId(), 'ADMIN');
-        $this->get('doctrine.odm.mongodb.document_manager')
-            ->getRepository('BpiApiBundle:Entity\Facet')
+        $this->get('doctrine_mongodb')
+            ->getRepository(Facet::class)
             ->delete($node->getId());
 
-        return $this->redirect(
-            $this->generateUrl("bpi_admin_node", [])
-        );
+        return $this->redirectToRoute('bpi_admin_node');
     }
 
     /**
@@ -201,13 +202,11 @@ class NodeController extends Controller
         $this->getRepository()->restore($node->getId(), 'ADMIN');
 
         /** @var \Bpi\ApiBundle\Domain\Repository\FacetRepository $facetRepository */
-        $facetRepository = $this->get('doctrine.odm.mongodb.document_manager')
-            ->getRepository('BpiApiBundle:Entity\Facet');
+        $facetRepository = $this->get('doctrine_mongodb')
+            ->getRepository(Facet::class);
         $facetRepository->prepareFacet($node);
 
-        return $this->redirect(
-            $this->generateUrl("bpi_admin_node", [])
-        );
+        return $this->redirectToRoute('bpi_admin_node');
     }
 
     private function createNodeForm($node, $new = false)
@@ -261,22 +260,20 @@ class NodeController extends Controller
             ->add('title', TextType::class)
             ->add('teaser', TextareaType::class)->setRequired(false)
             ->add('body', TextareaType::class)->setRequired(false)
-//            ->add(
-//                'category',
-//                EntityType::class,
-//                array(
-//                    'class' => Category::class,
-//                    'choice_label' => 'category',
-//                )
-//            )
-//            ->add(
-//                'audience',
-//                EntityType::class,
-//                array(
-//                    'class' => 'BpiApiBundle:Entity\Audience',
-//                    'choice_label' => 'audience'
-//                )
-//            )
+            ->add(
+                'category',
+                null,
+                array(
+                    'choice_label' => 'category',
+                )
+            )
+            ->add(
+                'audience',
+                null,
+                array(
+                    'choice_label' => 'audience',
+                )
+            )
             ->add(
                 'tags',
                 CollectionType::class,

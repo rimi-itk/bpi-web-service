@@ -469,4 +469,9 @@ class Node implements IPresentable
     {
         $this->tags->removeElement($tag);
     }
+
+    public function getResource()
+    {
+        return $this->resource;
+    }
 }

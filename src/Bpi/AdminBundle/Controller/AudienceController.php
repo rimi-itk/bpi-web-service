@@ -30,7 +30,6 @@ class AudienceController extends Controller
      */
     public function indexAction(Request $request)
     {
-
         $param = $request->query->get('sort');
         $direction = $request->query->get('direction');
 
@@ -58,17 +57,14 @@ class AudienceController extends Controller
     public function newAction(Request $request)
     {
         $audience = new Audience();
-        $form = $this->createAudienceForm($audience, true);
+        $form = $this->createAudienceForm($audience);
 
-        if ($request->isMethod('POST')) {
-            $form->handleRequest($request);
-            if ($form->isValid()) {
-                $this->getRepository()->save($audience);
+        $form->handleRequest($request);
 
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_audience')
-                );
-            }
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->getRepository()->save($audience);
+
+            return $this->redirectToRoute('bpi_admin_audience');
         }
 
         return [
@@ -102,10 +98,38 @@ class AudienceController extends Controller
         ];
     }
 
+    /**
+     * @Route(path="/disable/{id}", name="bpi_admin_audience_disable")
+     */
+    public function disableAction(Audience $audience) {
+        /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
+        $dm = $this->get('doctrine_mongodb')->getManager();
+
+        $audience->setDisabled(true);
+
+        $dm->flush();
+
+        return $this->redirectToRoute('bpi_admin_audience');
+    }
+
+    /**
+     * @Route(path="/enable/{id}", name="bpi_admin_audience_enable")
+     */
+    public function enableAction(Audience $audience) {
+        /** @var \Doctrine\Common\Persistence\ObjectManager $dm */
+        $dm = $this->get('doctrine_mongodb')->getManager();
+
+        $audience->setDisabled(false);
+
+        $dm->flush();
+
+        return $this->redirectToRoute('bpi_admin_audience');
+    }
+
     private function createAudienceForm($audience)
     {
         $formBuilder = $this->createFormBuilder($audience)
-            ->add('audience', TextType::class)
+            ->add('audience', TextType::class, ['label' => 'Audience name'])
             ->add('save', SubmitType::class, ['attr' => ['class' => 'btn']]);
 
         return $formBuilder->getForm();

@@ -18,11 +18,17 @@ class Category implements IPresentable
     protected $category;
 
     /**
+     * @var boolean
+     */
+    protected $disabled;
+
+    /**
      * @param string $category
      */
     public function __construct($category = null)
     {
         $this->setCategory($category);
+        $this->setDisabled(false);
     }
 
     /**
@@ -53,6 +59,30 @@ class Category implements IPresentable
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Gets disabled value.
+     *
+     * @return bool
+     */
+    public function getDisabled()
+    {
+        return $this->disabled;
+    }
+
+    /**
+     * Sets disabled value.
+     *
+     * @param boolean $disabled Parameter value.
+     *
+     * @return self
+     */
+    public function setDisabled($disabled)
+    {
+        $this->disabled = (boolean) $disabled;
+
+        return $this;
     }
 
     /**

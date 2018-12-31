@@ -160,6 +160,7 @@ class File
         }
         $file = $this->filesystem->createFile("{$this->name}.{$this->extension}", $this->filesystem);
 
+        // TODO: Use guzzle.
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->external);
         curl_setopt($ch, CURLOPT_HEADER, 0);

@@ -13,3 +13,5 @@
 /.buildpath
 /.project
 /.idea
+# Tests coverage report
+web/test-coverage-results/

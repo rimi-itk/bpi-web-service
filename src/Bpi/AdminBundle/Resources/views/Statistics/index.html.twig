@@ -7,25 +7,38 @@
 
 {% block javascript %}
 {{ parent() }}
-<script src="{{ asset('bundles/bpiadmin/js/jquery-1.9.1.min.js') }}"></script>
-<script src="{{ asset('bundles/bpiadmin/js/bootstrap-datepicker.js') }}"></script>
 {% endblock %}
 
 {% block content %}
     {{ form_start(form) }}
+    <div class="row">
+        <div class="span3">
+            {{ form_row(form.dateFrom) }}
+        </div>
+        <div class="span3">
+            {{ form_row(form.dateTo) }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="span6">
+            {{ form_row(form.agencies, {'attr' : {'style':'height: 200px; width: 100%;'}}) }}
+                {{ form_row(form.excludeDeleted) }}
+                {{ form_row(form.excludeInternal) }}
+        </div>
+    </div>
     {{ form_widget(form) }}
     {{ form_end(form) }}
-{% for key, stat in statistics %}
+    {% for key, stat in statistics %}
     <span>{{key}}</span>: {{stat}}<br />
-{% else %}
-    No data
-{% endfor %}
+    {% else %}
+    No data.
+    {% endfor %}
 
-
-<script>
-$('#form_dateFrom, #form_dateTo').datepicker({format: 'yyyy-mm-dd'})
-    .on('changeDate', function(ev){
+    <script src="{{ asset('bundles/bpiadmin/js/jquery-1.9.1.min.js') }}"></script>
+    <script src="{{ asset('bundles/bpiadmin/js/bootstrap-datepicker.js') }}"></script>
+    <script>
+    $('#form_dateFrom, #form_dateTo').datepicker({format: 'yyyy-mm-dd'}).on('changeDate', function () {
         $(this).datepicker('hide');
     });
-</script>
+    </script>
 {% endblock %}

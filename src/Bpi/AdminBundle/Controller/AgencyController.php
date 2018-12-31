@@ -7,10 +7,10 @@ use Bpi\ApiBundle\Domain\Entity\Facet;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -23,8 +23,9 @@ class AgencyController extends Controller
      */
     private function getRepository()
     {
-        return $this->get('doctrine.odm.mongodb.document_manager')
-            ->getRepository('BpiApiBundle:Aggregate\Agency');
+        return $this
+            ->get('doctrine_mongodb')
+            ->getRepository(Agency::class);
     }
 
     /**
@@ -33,11 +34,48 @@ class AgencyController extends Controller
      */
     public function indexAction(Request $request)
     {
+        $formBuilder = $this->createFormBuilder();
+        $formBuilder->setMethod('get');
+        $formBuilder->add('deleted', ChoiceType::class, [
+            'choices' => [
+                'All' => -1,
+                'Yes' => 1,
+                'No' => 0,
+            ]
+        ]);
+        $formBuilder->add('internal', ChoiceType::class, [
+            'choices' => [
+                'All' => -1,
+                'Yes' => 1,
+                'No' => 0,
+            ]
+        ]);
+        $formBuilder->add('submit', SubmitType::class, [
+            'label' => 'Filter',
+        ]);
+
+        $form = $formBuilder->getForm();
+        $form->handleRequest($request);
+
+        $deletedFilter = null;
+        $internalFilter = null;
+        if ($form->isSubmitted() && $form->isValid()) {
+            $agencyFilter = $form->getData();
+
+            if (-1 !== $agencyFilter['deleted']) {
+                $deletedFilter = $agencyFilter['deleted'];
+            }
+
+            if (-1 !== $agencyFilter['internal']) {
+                $internalFilter = $agencyFilter['internal'];
+            }
+        }
+
         $param = $request->query->get('sort');
         $direction = $request->query->get('direction');
         $query = $this
             ->getRepository()
-            ->listAll($param, $direction);
+            ->listAll($param, $direction, $deletedFilter, $internalFilter);
 
         $knpPaginator = $this->get('knp_paginator');
 
@@ -51,33 +89,9 @@ class AgencyController extends Controller
             ]
         );
 
-        return ['pagination' => $pagination];
-    }
-
-    /**
-     * @Route(path="/deleted", name="bpi_admin_agency_deleted")
-     * @Template("BpiAdminBundle:Agency:index.html.twig")
-     */
-    public function deletedAction(Request $request)
-    {
-        $query = $this->getRepository()->findBy(
-            [
-                'deleted' => true,
-            ]
-        );
-
-        $paginator = $this->get('knp_paginator');
-        $pagination = $paginator->paginate(
-            $query,
-            $request->query->get('page', 1),
-            5
-        );
-
         return [
             'pagination' => $pagination,
-            'delete_lable' => 'Undelete',
-            'delete_url' => 'bpi_admin_agency_restore',
-            'purge' => 1,
+            'form' => $form->createView()
         ];
     }
 
@@ -95,9 +109,7 @@ class AgencyController extends Controller
             if ($form->isValid()) {
                 $this->getRepository()->save($agency);
 
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_agency')
-                );
+                return $this->redirectToRoute('bpi_admin_agency');
             }
         }
 
@@ -151,16 +163,14 @@ class AgencyController extends Controller
             if ($form->isValid()) {
                 if ($changeInternal || $changePublicId) {
                     $facetRepository = $this
-                        ->get('doctrine.odm.mongodb.document_manager')
+                        ->get('doctrine_mongodb')
                         ->getRepository(Facet::class);
                     $facetRepository->updateFacet($changes);
                 }
 
                 $this->getRepository()->save($agency);
 
-                return $this->redirect(
-                    $this->generateUrl('bpi_admin_agency')
-                );
+                return $this->redirectToRoute('bpi_admin_agency');
             }
         }
 
@@ -188,9 +198,7 @@ class AgencyController extends Controller
     {
         $this->getRepository()->delete($agency->getId());
 
-        return $this->redirect(
-            $this->generateUrl("bpi_admin_agency", [])
-        );
+        return $this->redirectToRoute('bpi_admin_agency');
     }
 
     /**
@@ -200,9 +208,7 @@ class AgencyController extends Controller
     {
         $this->getRepository()->purge($agency->getId());
 
-        return $this->redirect(
-            $this->generateUrl("bpi_admin_agency_deleted", [])
-        );
+        return $this->redirectToRoute('bpi_admin_agency');
     }
 
     /**
@@ -212,12 +218,18 @@ class AgencyController extends Controller
     {
         $this->getRepository()->restore($agency->getId());
 
-        return $this->redirect(
-            $this->generateUrl("bpi_admin_agency", [])
-        );
+        return $this->redirectToRoute('bpi_admin_agency');
     }
 
-    private function createAgencyForm($agency, $new = false)
+    /**
+     * Builds agency entity edit form.
+     *
+     * @param \Bpi\ApiBundle\Domain\Aggregate\Agency $agency Agency entity.
+     * @param bool $new Whether create a new entity.
+     *
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createAgencyForm(Agency $agency, $new = false)
     {
         $formBuilder = $this->createFormBuilder($agency)
             ->add('publicId', TextType::class, ['label' => 'Public ID'])
