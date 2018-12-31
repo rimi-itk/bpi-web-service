@@ -1,6 +1,7 @@
 parameters:
     secret: ~
     locale: en
+    mongodb_server: mongodb://localhost:27017
     mongodb_db: bpi
     mongodb_user: ~
     mongodb_pass: ~

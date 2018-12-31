@@ -34,6 +34,7 @@ class AudienceFixtures extends Fixture implements RandomFixtureReferenceInterfac
         foreach ($audiences as $reference => $audience) {
             $audienceFixture = new Audience();
             $audienceFixture->setAudience($audience);
+            $audienceFixture->setDisabled(false);
 
             $manager->persist($audienceFixture);
 

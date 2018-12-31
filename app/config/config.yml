@@ -49,7 +49,7 @@ doctrine:
 doctrine_mongodb:
     connections:
         default:
-            server: mongodb://localhost:27017
+            server: "%mongodb_server%"
             # server: mongodb://%mongodb_user%:%mongodb_pass%@localhost:27017/%mongodb_db%
             options: {}
     default_database: "%mongodb_db%"
@@ -59,12 +59,6 @@ doctrine_mongodb:
                 BpiApiBundle:
                     type: yml
                     prefix: Bpi\ApiBundle\Domain
-#                gedmo_tree:
-#                    type: yml
-#                    prefix: Gedmo\Tree\Document
-#                    dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Tree/Document"
-#                    alias: GedmoTree # this one is optional and will default to the name set for the mapping
-#                    is_bundle: false
 
 mongo_db_migrations:
     collection_name: "migration_versions"
@@ -119,14 +113,6 @@ jms_serializer:
         debug: "%kernel.debug%"
         auto_detection: true
 
-knp_gaufrette:
-    adapters:
-        attachment:
-            gridfs:
-                mongogridfs_id: bpi.gridfs
-    filesystems:
-        assets:
-            adapter: attachment
 swiftmailer:
     transport: "%mailer_transport%"
     host: "%mailer_host%"

@@ -12,20 +12,6 @@ services:
     arguments: ["@doctrine_mongodb.odm.document_manager"]
     public: true
 
-  bpi.gridfs.conn:
-    class: Doctrine\MongoDB\Connection
-    factory: ['@doctrine_mongodb.odm.default_connection', 'selectDatabase']
-    arguments: ["bpi"]
-
-  bpi.gridfs.db:
-    class: Doctrine\MongoDB\Database
-    factory: ['@bpi.gridfs.conn', 'getGridFS']
-    arguments: ["Asset"]
-
-  bpi.gridfs:
-    class: Doctrine\MongoDB\GridFS
-    factory: ['@bpi.gridfs.db', 'getMongoCollection']
-
   bpi.presentation.document:
     class: Bpi\RestMediaTypeBundle\Document
     arguments: ["%api_version%"]

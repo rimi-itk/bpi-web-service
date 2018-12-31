@@ -18,11 +18,17 @@ class Audience implements IPresentable
     protected $audience;
 
     /**
+     * @var boolean
+     */
+    protected $disabled;
+
+    /**
      * @param string $audience
      */
     public function __construct($audience = null)
     {
         $this->setAudience($audience);
+        $this->setDisabled(false);
     }
 
     /**
@@ -53,6 +59,30 @@ class Audience implements IPresentable
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Gets disabled value.
+     *
+     * @return bool
+     */
+    public function getDisabled()
+    {
+        return $this->disabled;
+    }
+
+    /**
+     * Sets disabled value.
+     *
+     * @param boolean $disabled Parameter value.
+     *
+     * @return self
+     */
+    public function setDisabled($disabled)
+    {
+        $this->disabled = (boolean) $disabled;
+
+        return $this;
     }
 
     /**
