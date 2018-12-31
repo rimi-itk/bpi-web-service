@@ -4,12 +4,13 @@ namespace Bpi\ApiBundle\Tests;
 
 use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 /**
  * Class BaseBpiTest.
  */
-abstract class AbstractBaseBpiTest extends WebTestCase
+abstract class AbstractBaseBpiTest extends WebTestCase implements ContainerAwareInterface
 {
     use ContainerAwareTrait;
 

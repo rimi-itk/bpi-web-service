@@ -17,6 +17,8 @@ class WritingNodeTest extends AbstractFixtureAwareBpiTest
      */
     private $faker;
 
+    private $cleanupAssets = [];
+
     /**
      * {@inheritdoc}
      */
@@ -93,8 +95,19 @@ class WritingNodeTest extends AbstractFixtureAwareBpiTest
             'type' => $this->faker->name,
             'category' => 'Litteratur',
             'audience' => 'Voksne',
-            'tags' => implode(',', $tags)
-            // TODO: Add images payload.
+            'tags' => implode(',', $tags),
+            'assets' => [
+                [
+                    'path' => 'https://picsum.photos/200',
+                    'name' => $this->faker->sentence,
+                    'title' => $this->faker->sentence,
+                    'alt' => $this->faker->sentence,
+                    'extension' => 'jpeg',
+                    'type' => $this->faker->sentence,
+                    'width' => 200,
+                    'height' => 200,
+                ],
+            ],
         ];
 
         $this->client->request(
@@ -141,6 +154,29 @@ class WritingNodeTest extends AbstractFixtureAwareBpiTest
             $this->assertTrue(in_array($nodeEntityTag->getTag(), $tags));
         }
         $this->assertCount(count($tags), $nodeEntityTags);
+
+        // Check asset upload.
+        $this->assertCount(1, $nodeEntity->getAssets()->getCollection());
+        // TODO: Take path from config.
+        $uploadsPath = $this->container->getParameter('kernel.project_dir').'/web/uploads/assets';
+        /** @var \Bpi\ApiBundle\Domain\Entity\File $asset */
+        foreach ($nodeEntity->getAssets()->getCollection() as $asset) {
+            $fileName = $uploadsPath.'/'.$asset->getName().'.'.$asset->getExtension();
+            $this->cleanupAssets[] = $fileName;
+            $this->assertFileExists($fileName);
+        }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function tearDown()
+    {
+        parent::tearDown();
+
+        foreach ($this->cleanupAssets as $fileName) {
+            @unlink($fileName);
+        }
     }
 
     /**
