@@ -175,7 +175,9 @@ class WritingNodeTest extends AbstractFixtureAwareBpiTest
         parent::tearDown();
 
         foreach ($this->cleanupAssets as $fileName) {
-            @unlink($fileName);
+            if (file_exists($fileName)) {
+                unlink($fileName);
+            }
         }
     }
 

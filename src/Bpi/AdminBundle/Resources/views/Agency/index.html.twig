@@ -20,8 +20,8 @@
         <tr>
             <td>{{ item.publicId }}</td>
             <td>{{ item.name }}</td>
-            <td>{% if item.internal %}Yes{% else %}No{% endif %}</td>
-            <td>{% if item.deleted %}Yes{% else %}No{% endif %}</td>
+            <td>{{ item.internal ? 'Yes' : 'No' }}</td>
+            <td>{{ item.deleted ? 'Yes' : 'No' }}</td>
             <td>
                 <a href="{{ url('bpi_admin_agency_details',{'id':item.id}) }}">Details</a>
                 <a href="{{ url('bpi_admin_agency_edit',{'id':item.id}) }}">Edit</a>
