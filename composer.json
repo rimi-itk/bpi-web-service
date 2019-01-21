@@ -32,7 +32,6 @@
         "twig/twig": "1.35.*",
         "doctrine/doctrine-bundle": "~1.9.0",
         "twig/extensions": "~1.5.3",
-        "symfony/assetic-bundle": "~2.8.2",
         "symfony/monolog-bundle": "~3.3.1",
         "sensio/distribution-bundle": "^5.0.23",
         "sensio/framework-extra-bundle": "^5.2.2",
@@ -46,7 +45,6 @@
         "knplabs/knp-gaufrette-bundle": "^0.5.3",
         "knplabs/knp-markdown-bundle": "^1.7.0",
         "knplabs/knp-paginator-bundle": "^2.8.0",
-        "symfony/swiftmailer-bridge": "^2.8.48",
         "symfony/swiftmailer-bundle": "^2.6.7",
         "doctrine/orm": "2.5.*",
         "doctrine/mongodb-odm": "~1.1.7",
@@ -55,14 +53,11 @@
         "doctrine/mongodb-odm-bundle": "^3.4.4",
         "doesntmattr/mongodb-migrations-bundle": "^1.2.0",
         "symfony/phpunit-bridge": "^4.2",
-        "fzaninotto/faker": "^1.8",
         "incenteev/composer-parameter-handler": "~2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "5.7.*",
-        "phpunit/phpunit-story": "*",
-        "fabpot/goutte": "3.2.1",
-        "bpi-dk/bpi-client": "1.0"
+        "fzaninotto/faker": "^1.8"
     },
     "scripts": {
         "post-install-cmd": [

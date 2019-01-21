@@ -9,7 +9,7 @@ use Bpi\ApiBundle\Domain\Repository\FacetRepository;
 use Bpi\RestMediaTypeBundle\XmlResponse;
 use FOS\RestBundle\Controller\FOSRestController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -478,7 +478,7 @@ class ChannelController extends FOSRestController
             }
         }
         if ($admin->getId() != $params['editorId'] && !$is_editor) {
-            throw new HttpException(403, "User with id  = '{$params['editorId']}' can't push to this channel.");
+            throw new AccessDeniedHttpException("User with id  = '{$params['editorId']}' can't push to this channel.");
         }
 
         $skipped = [];
