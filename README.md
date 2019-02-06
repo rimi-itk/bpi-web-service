@@ -1,80 +1,81 @@
-##### The following is prior to change and does NOT fully reflect current state.
-
 BPI Web-service
 ========
-This is a web-service, with numerous methods, which makes it possible to use BPI.
-The web-service is queried and returns lists, nodes, etc. as it is the user interface’s task to present the content and other data in the database.
-
-The following functionality is included:
-* Create, edit and delete nodes
-* Provide a list of nodes and it’s content (based on the parameters sent / search criteria)
 
 Overview
 --------
-The REST architecture style provides ability to build easy to use, organic to internet ecosystem and scalable web services.
-~~BPI REST API is based on usage of up to level 3 of Richardson Maturity Model and custom Hypermedia types.~~
+BPI service is a storage of content provided by libraries. That is BPI is an
+danish acronym for `Biblioteks Produceret Indhold` - Library Produced Content.
 
-~~The key advantages of REST:~~
-* REST emphasizes clarity which leads to more understandable systems that are easier to maintain
-* REST focusses on document messages with broad applicability instead of service-specific interfaces.
-* Systems integration activity is spent where it is of most value: on business domain level documents.
-* The Web (over 230 Million Web sites and over 1.7 Billion users) provides excellent protection of any investment in Web Architecture. These technologies won't go out of fashion anytime soon.
+As the name states this service can be used across libraries to share content
+between each other using an unified API.
 
-### Entry points
-~~The API has two main entry points:~~
-*   `GET /node/list.json`
-*   `GET /node/scheme.json`
+The service itself follows REST architecture with token based authorisation.
 
-All other URIs will be discovered while processing "links" section of media types.
-This will decouple client code from exact URIs, and gives possibility to change URIs without compatibility breaks.
-
-### Content negotiation
-Client SHOULD negotiate the type of content by sending preferred HTTP content type header.
-Server SHOULD provide the content type of response.
-
-Available BPI media types:
-*    `application/vnd.bpi.api+xml`
-
-Version section in media type gives graceful ability to evolve web service in the future.
-
-### Documentation
-~~The Symfony2 NelmioApiDocBundle bundle provides API auto documentation, located in annotations within the actual code.~~
-~~It is very useful to keep documentation in actual state.~~
-
-### Handling media files
-~~Before pushing the data client side SHOULD encode images into base64 format and replace HTTP URLs to Data URI.~~
-~~Images attached to content should be also converted and defined in `attachments` field in `application/vnd.bpi.node-scheme+json`.~~
-
-The BPI’s response goes with HTTP URLs of media relative to BPI, so client MAY cache them, or replace with local URLs.
-
-### Authorization
-Authorization is based on Public Key concept.
-Both sides has Private key, Public key and Hash function.
-Client generates Token using Hashing function of Public key and Private key.
-Then each request MUST contain Public key and Token.
-Server generates own Token based on incoming Public key and local Private key.
-Client considered as authorised If tokens match.
-
-### Status codes
-BPI API status codes are based on [RFC2616 part 10][RFC2616] of Hypertext Transfer Protocol HTTP/1.1 specification. 
-
-Error handling
-
-Errors are returned using standard HTTP error code syntax.
-Any additional info is included in the body of the return call. 
-
-Standard API errors
-*   400    Bad input parameter. Error message should indicate which one and why.
-*   401    Bad or expired access token. 
-*   404    File or folder not found at the specified path.
-*   405    Request method not expected (generally should be GET or POST).
-*   5xx    Server error. Contact system administrator.
-
-
-Versioning policy
+Pre-requisites
 --------
 
-See [semver.org][semver.org].
+1. Web-server with `PHP` version `5.6` with `mongo` extension. Only this
+version and it's minor versions are supported with plans to add support
+for latest PHP in near future;
 
-[RFC2616]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-[semver.org]: http://semver.org/
+2. Mongo database engine version `2.x`. Latest version (at the moment of
+writing this text) of mongo `3.x` was not tested. As soon as the service
+sources will be updated to `PHP 7.x`, support for mongo `3.x` will
+be default and most likely support for mongo versions `2.x` will be abandoned;
+
+3. `composer`;
+
+Installation
+--------
+
+The installation procedure assumes that `develop` branch of this repository
+is used.
+
+Clone this repository and switch to `develop` branch;
+```bash
+git clone git@github.com:inleadmedia/rest-api.git bpi-service && cd bpi-service && git checkout develop
+```
+Install dependencies via `composer` and fill in the prompted values;  
+Do **NOT** leave `secret` value `null`, otherwise the process would fail.  
+If this happened, remove the `./vendor` and `app/config/parameters.yml` file
+and repeat this step again;
+```bash
+composer install
+```
+
+Current configuration is pre-configured for mongo database that is **NOT**
+using any authorisation. If mongo setup uses authentication, edit
+`app/config/config.yml` file and use the database connection URI string
+instead:
+```
+doctrine_mongodb:
+    connections:
+        default:
+            #server: "%mongodb_server%"
+            server: mongodb://%mongodb_user%:%mongodb_pass%@localhost:27017/%mongodb_db%
+```
+
+Make sure directory `./web/uploads/assets` exists and is write-able by the
+web-server user. This directory holds all the images that get pushed
+along the content.
+
+Optionally, run the bundled tests to check the installation:
+```bash
+./run-tests.sh
+```
+
+Note that this file expects a `php5.6` executable to be available in your path.
+Feel free to edit this script accordingly. `php5.6` was left due to
+compatibility issues when several php versions are installed in the system.
+
+An similar output should follow:
+```bash
+PHPUnit 5.7.27 by Sebastian Bergmann and contributors.
+
+Testing BpiApiTests
+......................                                            22 / 22 (100%)
+
+Time: 1.63 minutes, Memory: 88.25MB
+
+OK (22 tests, 1555 assertions)
+```
