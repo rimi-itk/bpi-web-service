@@ -173,13 +173,19 @@ be Drupal taxonomy system.
 
 For example implementation see: https://github.com/inleadmedia/bpi-client/blob/master/Bpi/Sdk/Bpi.php
 
+All responses are `XML` strings with the respective HTTP codes.
+
+A more detailed documentation about the endpoints, payloads and response codes
+would follow in near future using auto-generated documentation processed by
+https://github.com/nelmio/NelmioApiDocBundle bundle.
+
 Administration
 --------
 Administrative interface is available at `/admin` route. Authorisation is
 required to access this route. Credentials used are set in the respective
 configuration file, see `Configuration` section.
 
-One authorized, the administrative interface allows management of most
+Once authorized, the administrative interface allows management of most
 entities that BPI service implements.
 
 To create a new agency (client):  
@@ -193,4 +199,4 @@ random values. Edit them manually for specific values, if needed.
 
 Contributing
 --------
-See https://github.com/inleadmedia/rest-api/blob/develop/CONTRIBUTING
+See https://github.com/inleadmedia/rest-api/blob/develop/CONTRIBUTING.md
