@@ -378,6 +378,8 @@ class RestController extends FOSRestController
      * @Rest\View(statusCode="200")
      *
      * @return \Bpi\RestMediaTypeBundle\XmlResponse
+     *
+     * @deprecated
      */
     public function statisticsAction(Request $request)
     {
@@ -397,6 +399,30 @@ class RestController extends FOSRestController
         $document = $transform->transform($stats);
 
         return $document;
+    }
+
+    /**
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @Rest\Get("/statisticsExtended")
+     * @Rest\View(statusCode="200")
+     *
+     * @return \Bpi\RestMediaTypeBundle\XmlResponse
+     */
+    public function statisticsExtendedAction(Request $request) {
+        $dateFrom = new \DateTime($request->get('dateFrom', date('Y-m-d')));
+        $dateTo = (new \DateTime($request->get('dateTo', date('Y-m-d'))))->modify('+23 hours 59 minutes');
+        $agencies = explode(',', $request->get('agencies', ''));
+
+        /** @var \Bpi\ApiBundle\Domain\Repository\HistoryRepository $repository */
+        $repository = $this->getRepository('BpiApiBundle:Entity\History');
+        $stats = $repository->getActivity(
+            $dateFrom,
+            $dateTo,
+            'push',
+            'agency'
+        );
     }
 
     /**

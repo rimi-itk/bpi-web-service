@@ -10,6 +10,16 @@ use Bpi\ApiBundle\Domain\Entity\Statistics;
  */
 class HistoryRepository extends DocumentRepository
 {
+    /**
+     * @param \DateTime $dateFrom
+     * @param \DateTime $dateTo
+     * @param array $agencyId
+     *
+     * @return \Bpi\ApiBundle\Domain\Entity\Statistics
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
+     *
+     * @deprecated
+     */
     public function getStatisticsByDateRangeForAgency(\DateTime $dateFrom, \DateTime $dateTo, array $agencyId = [])
     {
         $qb = $this->createQueryBuilder()
@@ -39,5 +49,40 @@ class HistoryRepository extends DocumentRepository
         }
 
         return new Statistics($res);
+    }
+
+    /**
+     * @param \DateTime $dateFrom
+     * @param \DateTime $dateTo
+     * @param $action
+     * @param string $aggregateField
+     * @param array $agencies
+     *
+     * @return \Doctrine\MongoDB\Iterator|\Doctrine\ODM\MongoDB\CommandCursor
+     */
+    public function getActivity(\DateTime $dateFrom, \DateTime $dateTo, $action, $aggregateField = 'agency', $agencies = []) {
+        $ab = $this->createAggregationBuilder();
+        $ab
+            ->match()
+                ->field('datetime')
+                ->gte($dateFrom)
+                ->lte($dateTo)
+                ->field('action')
+                ->equals($action)
+            ->group()
+                ->field('_id')
+                ->expression('$'.$aggregateField)
+                ->field('total')
+                ->sum(1)
+            ->sort(['total' => -1]);
+
+        if (!empty($agencies)) {
+            $ab
+                ->match()
+                ->field('agency')
+                ->in($agencies);
+        }
+
+        return $ab->execute();
     }
 }
