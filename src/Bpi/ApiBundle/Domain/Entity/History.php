@@ -4,16 +4,38 @@ namespace Bpi\ApiBundle\Domain\Entity;
 
 use Bpi\ApiBundle\Domain\Aggregate\Node;
 
+/**
+ * Class History.
+ */
 class History
 {
-    private $id;
+    const ACTION_PUSH = 'push';
+
+    const ACTION_SYNDICATE = 'syndicate';
+
     /**
-     *
-     * @var \Bpi\ApiBundle\Domain\Agregate\Node
+     * @var string
+     */
+    private $id;
+
+    /**
+     * @var \Bpi\ApiBundle\Domain\Aggregate\Node
      */
     private $node;
+
+    /**
+     * @var string
+     */
     private $agency;
+
+    /**
+     * @var \Datetime
+     */
     private $datetime;
+
+    /**
+     * @var string
+     */
     private $action;
 
     /**

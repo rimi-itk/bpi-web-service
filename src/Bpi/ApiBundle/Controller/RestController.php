@@ -412,7 +412,13 @@ class RestController extends FOSRestController
      * @return \Bpi\RestMediaTypeBundle\XmlResponse
      */
     public function statisticsExtendedAction(Request $request) {
-        $dateTo = new \DateTime();
+        $toIsValid = strtotime($request->get('to'));
+        $dateTo = new \DateTime($toIsValid ? $request->get('to') : date(DATE_ISO8601));
+
+        $fromIsValid = strtotime($request->get('from'));
+        $dateFrom = new \DateTime($fromIsValid ? $request->get('from') : date(DATE_ISO8601));
+
+        $numEntries = $request->get('amount', 10);
 
         /** @var \Bpi\ApiBundle\Domain\Repository\HistoryRepository $repository */
         $repository = $this->getRepository('BpiApiBundle:Entity\History');
@@ -420,63 +426,16 @@ class RestController extends FOSRestController
         $transform = $this->get('bpi.presentation.transformer');
         $transform->setDoc($this->get('bpi.presentation.document'));
 
-        // Stats for syndicated articles last month.
-        $dateFrom = clone $dateTo;
-//        $dateFrom->modify('-1 month');
-        $dateFrom->modify('-10 years');
-        $stats = $repository->getActivity(
+        $statExtended = $repository->getActivity(
             $dateFrom,
             $dateTo,
             'syndicate',
-            'node'
+            'node',
+            ['999999'],
+            $numEntries
         );
 
-        /** @var \Bpi\ApiBundle\Domain\Entity\StatisticsExtended $statisticsExtended */
-        $statisticsExtended = new StatisticsExtended($stats);
-        $statsItem = $transform->transform($statisticsExtended);
-
-        // Stats for syndicated articles last three months.
-        $dateFrom = clone $dateTo;
-//        $dateFrom->modify('-3 months');
-        $dateFrom->modify('-10 years');
-        $stats = $repository->getActivity(
-            $dateFrom,
-            $dateTo,
-            'syndicate',
-            'node'
-        );
-
-        // Stats for agencies that syndicated most during last three months.
-        $dateFrom = clone $dateTo;
-//        $dateFrom->modify('-3 months');
-        $dateFrom->modify('-10 years');
-        $stats = $repository->getActivity(
-            $dateFrom,
-            $dateTo,
-            'syndicate',
-            'agency'
-        );
-
-        // Stats for agencies that pushed most during last three months.
-        $dateFrom = clone $dateTo;
-//        $dateFrom->modify('-3 months');
-        $dateFrom->modify('-10 years');
-        $stats = $repository->getActivity(
-            $dateFrom,
-            $dateTo,
-            'push',
-            'node'
-        );
-
-        $dateFrom = clone $dateTo;
-//        $dateFrom->modify('-3 months');
-        $dateFrom->modify('-10 years');
-        $stats = $repository->getMyActivity(
-            $dateFrom,
-            $dateTo,
-            'syndicate',
-            $this->getUser()->getAgencyId()->id()
-        );
+        return $transform->transform($statExtended);
     }
 
     /**

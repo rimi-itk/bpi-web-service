@@ -3,6 +3,8 @@
 namespace Bpi\ApiBundle\Domain\Repository;
 
 use Bpi\ApiBundle\Domain\Aggregate\Node;
+use Bpi\ApiBundle\Domain\Entity\History;
+use Bpi\ApiBundle\Domain\Entity\StatisticsExtended;
 use Doctrine\ODM\MongoDB\DocumentRepository;
 use Bpi\ApiBundle\Domain\Entity\Statistics;
 
@@ -55,21 +57,47 @@ class HistoryRepository extends DocumentRepository
     /**
      * @param \DateTime $dateFrom
      * @param \DateTime $dateTo
-     * @param $action
-     * @param string $aggregateField
+     * @param $actionFilter
+     * @param $aggregateField
+     * @param array $agencyFilter
      * @param int $limit
      *
-     * @return array
+     * @return \Bpi\ApiBundle\Domain\Entity\StatisticsExtended
+     * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
-    public function getActivity(\DateTime $dateFrom, \DateTime $dateTo, $action, $aggregateField = 'agency', $limit = 10) {
-        $ab = $this->createAggregationBuilder();
+    public function getActivity(\DateTime $dateFrom, \DateTime $dateTo, $actionFilter, $aggregateField, $agencyFilter = [], $limit = 10) {
+        $dm = $this->getDocumentManager();
+
+        $ab = $dm->createAggregationBuilder(History::class);
         $ab
             ->match()
                 ->field('datetime')
                 ->gte($dateFrom)
                 ->lte($dateTo)
                 ->field('action')
-                ->equals($action)
+                ->equals($actionFilter);
+
+        if ('node' == $aggregateField && !empty($agencyFilter)) {
+            $qb = $dm
+                ->createQueryBuilder(Node::class)
+                ->select('_id')
+                ->field('author.agency_id')
+                ->in($agencyFilter);
+            $results = $qb->getQuery()->execute();
+
+            $filterIds = [];
+            /** @var \Bpi\ApiBundle\Domain\Aggregate\Node $result */
+            foreach ($results as $result) {
+                $filterIds[] = new \MongoId($result->getId());
+            }
+
+            $ab
+                ->match()
+                ->field('node.$id')
+                ->in($filterIds);
+        }
+
+        $ab
             ->group()
                 ->field('_id')
                 ->expression('$'.$aggregateField)
@@ -80,59 +108,20 @@ class HistoryRepository extends DocumentRepository
 
         $results = $ab->execute();
 
-        $items = [];
+        $activity = [];
         foreach ($results as $result) {
-            $items[] = [
+            $activity[] = [
                 'id' => is_string($result['_id']) ? $result['_id'] : (string) $result['_id']['$id'],
                 'total' => $result['total'],
             ];
         }
 
-        return $items;
-    }
-
-    public function getMyActivity(\DateTime $dateFrom, \DateTime $dateTo, $action, $agency) {
-        $dm = $this->getDocumentManager();
-        $qb = $dm
-            ->createQueryBuilder(Node::class)
-            ->select('_id')
-            ->field('author.agency_id')
-            ->equals($agency);
-        $results = $qb->getQuery()->execute();
-
-        $filterIds = [];
-        /** @var \Bpi\ApiBundle\Domain\Aggregate\Node $result */
-        foreach ($results as $result) {
-            $filterIds[] = new \MongoId($result->getId());
-        }
-
-        $ab = $dm
-            ->createAggregationBuilder('BpiApiBundle:Entity\History')
-            ->match()
-                ->field('datetime')
-                ->gte($dateFrom)
-                ->lte($dateTo)
-                ->field('action')
-                ->equals($action)
-                ->field('node.$id')
-                ->in($filterIds)
-            ->group()
-                ->field('_id')
-                ->expression('$node')
-                ->field('total')
-                ->sum(1)
-            ->sort(['total' => -1]);
-
-        $results = $ab->execute();
-
-        $items = [];
-        foreach ($results as $result) {
-            $items[] = [
-                'id' => (string) $result['_id']['$id'],
-                'total' => $result['total'],
-            ];
-        }
-
-        return $items;
+        return new StatisticsExtended(
+            $dateFrom,
+            $dateTo,
+            $actionFilter,
+            $aggregateField,
+            $activity
+        );
     }
 }
