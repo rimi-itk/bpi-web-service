@@ -59,7 +59,7 @@ class StatisticsExtended implements IPresentable {
 
         foreach ($this->items as $item) {
             $entity->addProperty(
-                $document->createProperty($item['id'], 'string', $item['total'])
+                $document->createProperty($item['id'], 'string', $item['total'], $item['title'])
             );
         }
 

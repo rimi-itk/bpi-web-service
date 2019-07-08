@@ -403,6 +403,7 @@ class RestController extends FOSRestController
     }
 
     /**
+     * Fetches extended statistics.
      *
      * @param \Symfony\Component\HttpFoundation\Request $request
      *
@@ -410,6 +411,7 @@ class RestController extends FOSRestController
      * @Rest\View(statusCode="200")
      *
      * @return \Bpi\RestMediaTypeBundle\XmlResponse
+     *   Response object.
      */
     public function statisticsExtendedAction(Request $request) {
         $toIsValid = strtotime($request->get('to'));
@@ -419,6 +421,9 @@ class RestController extends FOSRestController
         $dateFrom = new \DateTime($fromIsValid ? $request->get('from') : date(DATE_ISO8601));
 
         $numEntries = $request->get('amount', 10);
+        $action = $request->get('action', 'syndicate');
+        $aggregate = $request->get('aggregateField', 'agency');
+        $ownerAgency = $request->get('contentOwnerAgency', '');
 
         /** @var \Bpi\ApiBundle\Domain\Repository\HistoryRepository $repository */
         $repository = $this->getRepository('BpiApiBundle:Entity\History');
@@ -429,9 +434,9 @@ class RestController extends FOSRestController
         $statExtended = $repository->getActivity(
             $dateFrom,
             $dateTo,
-            'syndicate',
-            'node',
-            ['999999'],
+            $action,
+            $aggregate,
+            !empty($ownerAgency) ? explode(',', $ownerAgency) : [],
             $numEntries
         );
 

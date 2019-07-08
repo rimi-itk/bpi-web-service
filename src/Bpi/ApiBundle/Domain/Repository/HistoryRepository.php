@@ -2,7 +2,9 @@
 
 namespace Bpi\ApiBundle\Domain\Repository;
 
+use Bpi\ApiBundle\Domain\Aggregate\Agency;
 use Bpi\ApiBundle\Domain\Aggregate\Node;
+use Bpi\ApiBundle\Domain\Aggregate\TitleWrapperInterface;
 use Bpi\ApiBundle\Domain\Entity\History;
 use Bpi\ApiBundle\Domain\Entity\StatisticsExtended;
 use Doctrine\ODM\MongoDB\DocumentRepository;
@@ -66,7 +68,7 @@ class HistoryRepository extends DocumentRepository
      * @throws \Doctrine\ODM\MongoDB\MongoDBException
      */
     public function getActivity(\DateTime $dateFrom, \DateTime $dateTo, $actionFilter, $aggregateField, $agencyFilter = [], $limit = 10) {
-        $dm = $this->getDocumentManager();
+        $dm = $this->dm;
 
         $ab = $dm->createAggregationBuilder(History::class);
         $ab
@@ -80,7 +82,6 @@ class HistoryRepository extends DocumentRepository
         if ('node' == $aggregateField && !empty($agencyFilter)) {
             $qb = $dm
                 ->createQueryBuilder(Node::class)
-                ->select('_id')
                 ->field('author.agency_id')
                 ->in($agencyFilter);
             $results = $qb->getQuery()->execute();
@@ -110,8 +111,10 @@ class HistoryRepository extends DocumentRepository
 
         $activity = [];
         foreach ($results as $result) {
+            $id = is_string($result['_id']) ? $result['_id'] : (string) $result['_id']['$id'];
             $activity[] = [
-                'id' => is_string($result['_id']) ? $result['_id'] : (string) $result['_id']['$id'],
+                'id' => $id,
+                'title' => 'node' == $aggregateField ? $this->getNodeTitle($id) : $this->getAgencyTitle($id),
                 'total' => $result['total'],
             ];
         }
@@ -123,5 +126,51 @@ class HistoryRepository extends DocumentRepository
             $aggregateField,
             $activity
         );
+    }
+
+    /**
+     * Gets node title.
+     *
+     * @param string $id
+     *   Node internal id.
+     *
+     * @return string
+     *   Node title.
+     */
+    private function getNodeTitle($id) {
+        $dm = $this->dm;
+
+        $entity = $dm
+            ->getRepository(Node::class)
+            ->find($id);
+
+        if ($entity instanceof TitleWrapperInterface) {
+            return $entity->getTitle();
+        }
+
+        return (string) $entity;
+    }
+
+    /**
+     * Gets agency title.
+     *
+     * @param string $id
+     *   Agency public id.
+     *
+     * @return string
+     *   Agency name.
+     */
+    private function getAgencyTitle($id) {
+        $dm = $this->dm;
+
+        $entity = $dm
+            ->getRepository(Agency::class)
+            ->findByPublicId($id);
+
+        if ($entity instanceof TitleWrapperInterface) {
+            return $entity->getTitle();
+        }
+
+        return (string) $entity;
     }
 }
