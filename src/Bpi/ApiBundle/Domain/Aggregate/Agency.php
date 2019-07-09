@@ -7,7 +7,7 @@ use Bpi\ApiBundle\Domain\ValueObject\Copyleft;
 use Bpi\ApiBundle\Domain\ValueObject\AgencyId;
 use Bpi\RestMediaTypeBundle\XmlResponse;
 
-class Agency implements IPresentable
+class Agency implements IPresentable, TitleWrapperInterface
 {
     protected $id;
     protected $public_id;
@@ -32,6 +32,14 @@ class Agency implements IPresentable
         $this->internal = $internal;
         $this->setPublicKey($public_key);
         $this->setSecret($secret);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getTitle()
+    {
+        return $this->name;
     }
 
     /**

@@ -18,7 +18,7 @@ use Bpi\RestMediaTypeBundle\XmlResponse;
 use Doctrine\Common\Collections\ArrayCollection;
 use Gaufrette\File;
 
-class Node implements IPresentable
+class Node implements IPresentable, TitleWrapperInterface
 {
     protected $id;
     protected $ctime;

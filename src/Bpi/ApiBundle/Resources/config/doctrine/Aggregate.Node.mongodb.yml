@@ -1,20 +1,16 @@
 Bpi\ApiBundle\Domain\Aggregate\Node:
-#  db: documents
-  repositoryClass: Bpi\ApiBundle\Domain\Repository\NodeRepository
   collection: Node
-  gedmo:
-    tree:
-      type: materializedPath
-      activateLocking: true
+  repositoryClass: Bpi\ApiBundle\Domain\Repository\NodeRepository
+
   fields:
     id:
       id: true
-      gedmo:
-        - treePathSource
+
     ctime:
       type: date
       index: true
       order: desc
+
     mtime:
       type: date
 
@@ -23,25 +19,19 @@ Bpi\ApiBundle\Domain\Aggregate\Node:
 
     path:
       type: string
-      gedmo:
-        - treePath
+
     level:
       type: int
-      gedmo:
-        - treeLevel
+
     parent:
       reference: true
       type: one
       targetDocument: Bpi\ApiBundle\Domain\Aggregate\Node
       strategy: set
       cascade: all
-      gedmo:
-        - treeParent
 
     lock_time:
       type: date
-      gedmo:
-        - treeLockTime
 
     deleted:
        type: boolean

@@ -2,8 +2,8 @@
 
 namespace Bpi\ApiBundle\Domain\Repository;
 
-use Gedmo\Tree\Document\MongoDB\Repository\MaterializedPathRepository as DocumentRepository;
 use Bpi\ApiBundle\Domain\Entity\NodeQuery;
+use Doctrine\ODM\MongoDB\DocumentRepository;
 
 class NodeRepository extends DocumentRepository
 {

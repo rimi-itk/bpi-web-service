@@ -12,6 +12,7 @@ use Bpi\ApiBundle\Domain\Entity\Facet;
 use Bpi\ApiBundle\Domain\Entity\File;
 use Bpi\ApiBundle\Domain\Entity\NodeQuery;
 use Bpi\ApiBundle\Domain\Entity\Profile;
+use Bpi\ApiBundle\Domain\Entity\StatisticsExtended;
 use Bpi\ApiBundle\Domain\Factory\ResourceBuilder;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Authorship;
 use Bpi\ApiBundle\Domain\ValueObject\Param\Editable;
@@ -378,6 +379,8 @@ class RestController extends FOSRestController
      * @Rest\View(statusCode="200")
      *
      * @return \Bpi\RestMediaTypeBundle\XmlResponse
+     *
+     * @deprecated
      */
     public function statisticsAction(Request $request)
     {
@@ -397,6 +400,47 @@ class RestController extends FOSRestController
         $document = $transform->transform($stats);
 
         return $document;
+    }
+
+    /**
+     * Fetches extended statistics.
+     *
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     *
+     * @Rest\Get("/statisticsExtended")
+     * @Rest\View(statusCode="200")
+     *
+     * @return \Bpi\RestMediaTypeBundle\XmlResponse
+     *   Response object.
+     */
+    public function statisticsExtendedAction(Request $request) {
+        $toIsValid = strtotime($request->get('to'));
+        $dateTo = new \DateTime($toIsValid ? $request->get('to') : date(DATE_ISO8601));
+
+        $fromIsValid = strtotime($request->get('from'));
+        $dateFrom = new \DateTime($fromIsValid ? $request->get('from') : date(DATE_ISO8601));
+
+        $numEntries = $request->get('amount', 10);
+        $action = $request->get('action', 'syndicate');
+        $aggregate = $request->get('aggregateField', 'agency');
+        $ownerAgency = $request->get('contentOwnerAgency', '');
+
+        /** @var \Bpi\ApiBundle\Domain\Repository\HistoryRepository $repository */
+        $repository = $this->getRepository('BpiApiBundle:Entity\History');
+        /** @var \Bpi\ApiBundle\Transform\Presentation $transform */
+        $transform = $this->get('bpi.presentation.transformer');
+        $transform->setDoc($this->get('bpi.presentation.document'));
+
+        $statExtended = $repository->getActivity(
+            $dateFrom,
+            $dateTo,
+            $action,
+            $aggregate,
+            !empty($ownerAgency) ? explode(',', $ownerAgency) : [],
+            $numEntries
+        );
+
+        return $transform->transform($statExtended);
     }
 
     /**

@@ -12,7 +12,7 @@ use Bpi\RestMediaTypeBundle\XmlResponse;
  */
 class Statistics implements IPresentable
 {
-    private $stats;
+    protected $stats;
 
     public function __construct(array $stats = [])
     {
