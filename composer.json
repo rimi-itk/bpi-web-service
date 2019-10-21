@@ -1,5 +1,5 @@
 {
-    "name": "BPI Rest service",
+    "name": "inleadmedia/rest-api",
     "description": "",
     "autoload": {
         "psr-4": {
@@ -19,7 +19,7 @@
                 "version": "1.0",
                 "source": {
                     "type": "git",
-                    "url": "git@github.com:easyting/bpi-client.git",
+                    "url": "https://github.com/easyting/bpi-client",
                     "reference": "origin/develop"
                 }
             }

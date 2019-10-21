@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo:2.8
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+
+  phpfpm:
+    build: .docker/php5.6-fpm
+    environment:
+      - PHP_XDEBUG=${PHP_XDEBUG:-0}
+      - PHP_XDEBUG_REMOTE_AUTOSTART=${PHP_XDEBUG_REMOTE_AUTOSTART:-0}
+      - PHP_XDEBUG_REMOTE_HOST=${PHP_XDEBUG_REMOTE_HOST:-0.0.0.0}
+      - PHP_XDEBUG_REMOTE_CONNECT_BACK=${PHP_XDEBUG_REMOTE_CONNECT_BACK:-0}
+      - PHP_MAX_EXECUTION_TIME=30
+      - PHP_MEMORY_LIMIT=256M
+      # - PHP_MAIL=1 # Uncomment to enable mailhog.
+      - DOCKER_HOST_DOMAIN=${COMPOSE_PROJECT_NAME}.local.computer
+    depends_on:
+      - mongo
+    volumes:
+      - .:/app:delegated
+
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - phpfpm
+    ports:
+      - '8880:80'
+    volumes:
+      - ${PWD}/.docker/vhost.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./:/app:delegated
+    labels:
+      - 'traefik.http.routers.frontend.rule=Host(`${COMPOSE_PROJECT_NAME}.local.computer`)'
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - '1025'
+      - '8885:8025'

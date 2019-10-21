@@ -1,0 +1,7 @@
+[template]
+src = "30-sendmail.ini.tmpl"
+dest = "/etc/php/5.6/cli/conf.d/30-sendmail.ini"
+mode = "0644"
+keys = [
+    "/sendmail"
+]

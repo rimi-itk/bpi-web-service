@@ -1,6 +1,21 @@
 BPI Web-service
 ========
 
+```sh
+docker-compose up --detach
+docker-compose exec phpfpm composer install
+docker-compose exec phpfpm bin/console mongodb:migrations:migrate --no-interaction
+
+echo http://$(docker-compose port nginx 80)
+```
+
+Access the api:
+
+```sh
+BPI_TOKEN=$(docker-compose exec phpfpm php -r "echo password_hash('dev'.'dev'.'dev', PASSWORD_BCRYPT);")
+curl --header 'Auth: BPI agency="dev", token="'$BPI_TOKEN'"' http://$(docker-compose port nginx 80)/node/collection
+```
+
 Overview
 --------
 BPI service is a storage of content provided by libraries. That is BPI is an
