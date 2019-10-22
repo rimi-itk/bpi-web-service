@@ -2,8 +2,18 @@ BPI Web-service
 ========
 
 ```sh
+docker build --tag=bpi-web-service .
+```
+
+```sh
+docker run --interactive --tty --publish 8888:80 bpi-web-service
+```
+
+```sh
 docker-compose up --detach
 docker-compose exec phpfpm composer install
+
+docker-compose exec phpfpm bin/console doctrine:mongodb:schema:update
 docker-compose exec phpfpm bin/console mongodb:migrations:migrate --no-interaction
 
 echo http://$(docker-compose port nginx 80)
