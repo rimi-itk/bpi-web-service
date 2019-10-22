@@ -1,5 +1,5 @@
 parameters:
-    secret: ~
+    secret: ThisIsNotReallyASecret
     locale: en
     mongodb_server: mongodb://mongo:27017
     mongodb_db: bpi
