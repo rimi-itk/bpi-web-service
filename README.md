@@ -1,20 +1,17 @@
 BPI Web-service
 ========
 
-```sh
-docker build --tag=bpi-web-service .
-```
+Run with docker-compose
+-----------------------
 
 ```sh
-docker run --interactive --tty --publish 8888:80 bpi-web-service
-```
-
-```sh
+docker-compose build
 docker-compose up --detach
-docker-compose exec phpfpm composer install
 
+docker-compose exec phpfpm composer install --no-interaction
 docker-compose exec phpfpm bin/console doctrine:mongodb:schema:update
 docker-compose exec phpfpm bin/console mongodb:migrations:migrate --no-interaction
+docker-compose exec phpfpm bin/console doctrine:mongodb:fixtures:load --no-interaction
 
 echo http://$(docker-compose port nginx 80)
 ```
@@ -22,9 +19,29 @@ echo http://$(docker-compose port nginx 80)
 Access the api:
 
 ```sh
-BPI_TOKEN=$(docker-compose exec phpfpm php -r "echo password_hash('dev'.'dev'.'dev', PASSWORD_BCRYPT);")
-curl --header 'Auth: BPI agency="dev", token="'$BPI_TOKEN'"' http://$(docker-compose port nginx 80)/node/collection
+BPI_TOKEN=$(docker-compose exec phpfpm php -r "echo password_hash('999999' . '3fa' . 'abc', PASSWORD_BCRYPT);")
+curl --header 'Auth: BPI agency="999999", token="'$BPI_TOKEN'"' http://$(docker-compose port nginx 80)/node/collection
 ```
+
+Docker images
+-------------
+
+```sh
+make docker-build
+```
+
+```sh
+docker run --interactive --tty --publish 8888:80 bpi-web-service/standalone:latest --name=bpi-web-service
+make docker-run
+docker rm $(docker ps --all --filter 'name=bpi-web-service' --format '{{.ID}}') --force
+
+Access the api:
+
+```sh
+BPI_TOKEN=$(php -r "echo password_hash('999999' . '3fa' . 'abc', PASSWORD_BCRYPT);")
+curl --header 'Auth: BPI agency="999999", token="'$BPI_TOKEN'"' http://0.0.0.0:8888/node/collection
+```
+
 
 Overview
 --------
@@ -58,8 +75,8 @@ Clone this repository and switch to `develop` branch;
 ```bash
 git clone git@github.com:inleadmedia/rest-api.git bpi-service && cd bpi-service && git checkout develop
 ```
-Install dependencies via `composer` and fill in the prompted values;  
-Do **NOT** leave `secret` value `null`, otherwise the process would fail.  
+Install dependencies via `composer` and fill in the prompted values;
+Do **NOT** leave `secret` value `null`, otherwise the process would fail.
 If this happened, remove the `./vendor` and `app/config/parameters.yml` file
 and repeat this step again;
 ```bash
@@ -114,7 +131,7 @@ environment was tested with these sources.
 Configuration
 --------
 The installation is already pre-configured to be ready for usage, only
-relevant part might be the security of the administrative interface.  
+relevant part might be the security of the administrative interface.
 The username and password for above is located in `app/config/security.yml`
 file.
 Edit this section accordingly and pick a secure password:
@@ -181,19 +198,19 @@ Auth: BPI agency="999999", token="$2y$10$XwhtwKK9Sau8F/H2Xg0yfuwpsEu.GNv/cJwdrov
 Exposed endpoints:
 --------
 `GET /` - Main entry point, returns a generic service schema outlining available
-endpoints and their request parameters.  
+endpoints and their request parameters.
 `GET /node/collection` - Fetched a list of content that is available in the
-storage.  
-`GET /node/item/{id}` - Fetch data for a single content, identified by it's id.  
-`GET /node/syndicate/{id}` - Mark a node as syndicated.  
-`GET /node/delete` - Mark a node as deleted.  
-`POST /node` - Store a content entry.  
+storage.
+`GET /node/item/{id}` - Fetch data for a single content, identified by it's id.
+`GET /node/syndicate/{id}` - Mark a node as syndicated.
+`GET /node/delete` - Mark a node as deleted.
+`POST /node` - Store a content entry.
 `GET /statistics` - Fetch current service statistic data, i.e. number of pushed
-and/or syndicated nodes.  
+and/or syndicated nodes.
 `GET /profile/dictionary` - Fetch dictionaries known by the service.
 Dictionaries are a set of tags that categorize content. Best analogy would
-be Drupal taxonomy system.  
-`GET|POST /user/*` - TBD.  
+be Drupal taxonomy system.
+`GET|POST /user/*` - TBD.
 `GET|POST /channel/*` - TBD.
 
 For example implementation see: https://github.com/inleadmedia/bpi-client/blob/master/Bpi/Sdk/Bpi.php
@@ -213,14 +230,14 @@ configuration file, see `Configuration` section.
 Once authorized, the administrative interface allows management of most
 entities that BPI service implements.
 
-To create a new agency (client):  
+To create a new agency (client):
 Authenticate in the administrative interface at `http(s)://BPI_DOMAIN/admin` and
-access the `Agencies` link. Create a new agency by clicking the `Add new` link.  
+access the `Agencies` link. Create a new agency by clicking the `Add new` link.
 Fill in the `Public id` with a six-digit value, follow with the `Name` and
-`Moderator` fields.  
-Leave `Internal` checkbox checked.  
+`Moderator` fields.
+Leave `Internal` checkbox checked.
 `Public key` and `Secret` key fields will be filled automatically by some
-random values. Edit them manually for specific values, if needed.  
+random values. Edit them manually for specific values, if needed.
 
 Contributing
 --------

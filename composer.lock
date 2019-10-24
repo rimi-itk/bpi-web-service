@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "87ea935e82a3566033b1c4d8ab7003e6",
+    "content-hash": "36045666aebe07ca3d4514553ad6add0",
     "packages": [
         {
             "name": "behat/transliterator",
@@ -4365,16 +4365,6 @@
         }
     ],
     "packages-dev": [
-        {
-            "name": "bpi-dk/bpi-client",
-            "version": "1.0",
-            "source": {
-                "type": "git",
-                "url": "git@github.com:easyting/bpi-client.git",
-                "reference": "origin/develop"
-            },
-            "type": "library"
-        },
         {
             "name": "fabpot/goutte",
             "version": "v3.2.1",

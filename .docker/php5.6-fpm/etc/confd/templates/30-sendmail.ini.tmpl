@@ -1,3 +1,0 @@
-{{ if getenv "PHP_MAIL" }}
-sendmail_path = '/usr/local/bin/mhsendmail --smtp-addr="{{ getenv "PHP_MAIL_SERVER" "mailhog" }}:{{ getenv "PHP_MAIL_PORT" "1025" }}"'
-{{ end }}

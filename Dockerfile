@@ -1,81 +1,37 @@
-FROM ubuntu:16.04
+FROM itkdev/php5.6-fpm
 
-ENV PHP_VERSION 5.6
-
-# Ensure packages are avaiable.
-RUN apt-get update
-
-RUN apt-get install -y language-pack-en-base \
-    software-properties-common \
-    apt-utils \
-&& locale-gen en_US.UTF-8 en_DK.UTF-8 en_GB.UTF-8
-
-# Add php repositories
-RUN LC_ALL=en_US.UTF-8 add-apt-repository ppa:ondrej/php
-RUN apt-get update
-
-# Clean up
-RUN apt-get remove -y software-properties-common language-pack-en-base \
-	&& apt-get autoremove -y
-
-RUN DEBIAN_FRONTEND=noninteractive \
-	apt-get install -y \
-	php${PHP_VERSION} \
-	php${PHP_VERSION}-cli \
-	php${PHP_VERSION}-common \
-	php${PHP_VERSION}-curl \
-	php${PHP_VERSION}-fpm \
-	php${PHP_VERSION}-gd \
-	php${PHP_VERSION}-json \
-	php${PHP_VERSION}-mbstring \
-	php${PHP_VERSION}-mcrypt \
-	php${PHP_VERSION}-opcache \
-	php${PHP_VERSION}-readline \
-	php${PHP_VERSION}-soap \
-	php${PHP_VERSION}-xml \
-	php${PHP_VERSION}-xsl \
-	php${PHP_VERSION}-zip \
-	php${PHP_VERSION}-xdebug \
-	php${PHP_VERSION}-intl \
-	php-memcached \
-	php-redis \
-	php${PHP_VERSION}-dev \
-	php-pear \
-	unzip \
-	git \
-	imagemagick \
-  nginx \
-	&& rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-RUN mkdir /var/run/php/
-# COPY .docker/etc/ /etc/
-
-# COPY .docker/nginx.conf /etc/nginx/nginx.conf
-
-# Configure php
-RUN sed -i '/memory_limit = 128M/c memory_limit = 256M' /etc/php/${PHP_VERSION}/fpm/php.ini \
-	&& sed -i '/;date.timezone =/c date.timezone = Europe\/Copenhagen' /etc/php/${PHP_VERSION}/fpm/php.ini \
-	&& sed -i '/upload_max_filesize = 2M/c upload_max_filesize = 16M' /etc/php/${PHP_VERSION}/fpm/php.ini \
-	&& sed -i '/post_max_size = 8M/c post_max_size = 20M' /etc/php/${PHP_VERSION}/fpm/php.ini
-
-# Install Mongo 1.5.6
-RUN DEBIAN_FRONTEND=noninteractive \
-	pecl install mongo-1.6.7
-RUN echo extension=mongo.so > /etc/php/5.6/mods-available/mongo.ini
-RUN phpenmod mongo
-
+COPY . /app
 WORKDIR /app
 
-# Install composer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
-	&& php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
-	&& php -r "unlink('composer-setup.php');"
+RUN apt-get update --yes \
+	&& DEBIAN_FRONTEND=noninteractive \
+	apt-get install --yes \
+	php-pear \
+	php5.6-dev \
+	libssl-dev \
+	mongodb \
+	nginx \
+	&& printf "\n" | pecl install mongo-1.6.7 \
+	&& echo extension=mongo.so > /etc/php/5.6/mods-available/mongo.ini \
+	&& phpenmod mongo \
+# Clone source and build with composer
+	&& composer install --no-interaction \
+# Use local mongodb
+	&& sed -i 's@mongo:27017@127.0.0.1:27017@' app/config/parameters.yml \
+# Start mongodb, create database and load fixtures
+	&& service mongodb start \
+	&& bin/console doctrine:mongodb:schema:update \
+	&& bin/console mongodb:migrations:migrate --no-interaction \
+	&& bin/console doctrine:mongodb:fixtures:load --no-interaction \
+# Clean up installed composer packages
+	&& SYMFONY_ENV=prod composer install --no-dev --classmap-authoritative --no-interaction \
+	&& chown -R www-data:www-data /app
 
-RUN git clone --branch feature/docker https://github.com/rimi-itk/bpi-web-service /app
+ENV SYMFONY_ENV=prod
 
-RUN APP_ENV=prod composer install --no-dev --classmap-authoritative
-
-# COPY 
+COPY .docker/standalone/nginx-site.conf /etc/nginx/sites-enabled/default
+COPY .docker/standalone/entrypoint.sh /etc/entrypoint.sh
 
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+ENTRYPOINT ["sh", "/etc/entrypoint.sh"]
